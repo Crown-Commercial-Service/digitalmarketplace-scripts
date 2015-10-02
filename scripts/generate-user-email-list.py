@@ -7,7 +7,8 @@ import sys
 sys.path.insert(0, '.')
 
 from docopt import docopt
-from dmscripts.generate_user_email_list import list_users, list_users_with_status
+from dmutils.apiclient import DataAPIClient
+from dmscripts.generate_user_email_list import list_users
 
 
 if __name__ == '__main__':
