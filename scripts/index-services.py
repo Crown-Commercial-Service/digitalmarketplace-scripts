@@ -72,8 +72,15 @@ class ServiceIndexer(object):
     def create_index(self):
         client = apiclient.SearchAPIClient(self.endpoint, self.access_token)
         logger.info("Creating {index} index", extra={'index': self.index})
-        result = client.create_index(self.index)
-        logger.info("Index creation response: {response}", extra={'response': result})
+
+        try:
+            result = client.create_index(self.index)
+            logger.info("Index creation response: {response}", extra={'response': result})
+        except apiclient.HTTPError as e:
+            if 'already exists as alias' in e.message:
+                logger.info("Skipping index creation for alias {index}", extra={'index': self.index})
+            else:
+                raise
 
 
 def do_index(search_api_url, search_api_access_token, data_api_url, data_api_access_token, serial, index):
