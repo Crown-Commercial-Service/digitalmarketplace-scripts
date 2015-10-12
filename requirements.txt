@@ -1,2 +1,2 @@
 git+https://github.com/madzak/python-json-logger.git@v0.1.3#egg=python-json-logger==v0.1.3
-git+https://github.com/alphagov/digitalmarketplace-utils.git@8.3.0#egg=digitalmarketplace-utils==8.3.0
+git+https://github.com/alphagov/digitalmarketplace-utils.git@8.5.0#egg=digitalmarketplace-utils==8.5.0
