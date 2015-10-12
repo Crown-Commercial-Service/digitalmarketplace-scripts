@@ -1,0 +1,12 @@
+language: python
+sudo: false
+python:
+  - "2.7"
+  - "3.4"
+install:
+  - pip install -r requirements_for_test.txt
+script:
+  - pep8 .
+  - py.test
+notifications:
+  email: false
