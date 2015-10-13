@@ -1,7 +1,7 @@
 """
 
 Usage:
-    scripts/generate_framework_agreements.py <lots_file> <declaration_file> <output_dir> <framework_form>
+    scripts/generate_framework_agreements.py <lots_file> <declaration_file> <output_dir>
 
 Example:
     ./generate_framework_agreements.py lots.csv declarations.csv pdf-outputs ../empty-framework.pdf
@@ -37,6 +37,5 @@ if __name__ == '__main__':
 
     build_framework_agreements(supplier_declarations,
                                supplier_lots,
-                               arguments['<output_dir>'],
-                               arguments['<framework_form>'])
+                               arguments['<output_dir>'])
     sys.exit("Success")
