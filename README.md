@@ -12,7 +12,7 @@ This repository contains scripts that interact with the Digital Marketplace APIs
   Reads services from the API endpoint and writes to search-api for indexing.
 
 * `scripts/generate-framework-agreements.py`
-  Generates populated PDF files of G-CLoud framework agreements using exported 
+  Generates populated PDF files of G-Cloud framework agreements using exported 
   declaration and lot csv files.
 
 ## Requirements
