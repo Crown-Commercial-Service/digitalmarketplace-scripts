@@ -1,18 +1,19 @@
 import csv
-import sys
-import multiprocessing
 from multiprocessing.pool import ThreadPool
 
-from dmutils.apiclient import DataAPIClient
 from dmutils.apiclient.errors import HTTPError
-from dmutils.audit import AuditTypes
 
 
-def selection_status(client, framework_id):
+def selection_status(client, framework_slug):
     def inner_function(user):
         try:
-            answer = client.get_selection_answers(user['supplier']['supplierId'], framework_id)
-            status = answer['selectionAnswers']['questionAnswers']['status']
+            declaration = client.get_supplier_declaration(
+                user['supplier']['supplierId'], framework_slug
+            )['declaration']
+            if declaration:
+                status = declaration['status']
+            else:
+                status = 'unstarted'
         except HTTPError as e:
             if e.status_code == 404:
                 status = 'unstarted'
@@ -25,31 +26,17 @@ def selection_status(client, framework_id):
     return inner_function
 
 
-def add_selection_status(client, framework_id, users):
+def add_selection_status(client, framework_slug, users):
     pool = ThreadPool(10)
-    callback = selection_status(client, framework_id)
+    callback = selection_status(client, framework_slug)
     return pool.imap_unordered(callback, users)
 
 
-def is_registered_with_framework(client, framework_id):
-    def is_of_framework(audit):
-        return audit['data'].get('frameworkSlug') == framework_id
-
-    def is_registered(user):
-        audits = client.find_audit_events(
-            audit_type=AuditTypes.register_framework_interest,
-            object_type='suppliers',
-            object_id=user['supplier']['supplierId'])
-        return any(map(is_of_framework, audits['auditEvents'])), user
-    return is_registered
-
-
-def filter_is_registered_with_framework(client, framework_id, users):
-    pool = ThreadPool(10)
-    is_registered = is_registered_with_framework(client, framework_id)
-    return (user
-            for good, user in pool.imap_unordered(is_registered, users)
-            if good)
+def filter_is_registered_with_framework(client, framework_slug, users):
+    registered_suppliers = client.get_interested_suppliers(framework_slug).get('interestedSuppliers', None)
+    interested_users = (user for user in users
+                        if user['supplier']['supplierId'] in registered_suppliers)
+    return interested_users
 
 
 def find_supplier_users(client):
