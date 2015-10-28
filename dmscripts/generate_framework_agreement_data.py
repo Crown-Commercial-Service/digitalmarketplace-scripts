@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 import os
 import unicodecsv
+from dmutils.apiclient.errors import HTTPError
 
-from fdfgen import forge_fdf
-from subprocess import call
+#  List of bad characters taken from: http://www.mtu.edu/umc/services/web/cms/characters-avoid/
+BAD_FILENAME_CHARACTERS = ['#', '%', '&', '{', '}', '\\', '<', '>', '*', '?', '/',
+                           '$', '!', "'", '"', ':', '@', '+', '`', '|', '=']
 
 
 class Supplier:
@@ -41,13 +43,35 @@ def read_csv(filepath):
     return all_rows
 
 
-def build_framework_agreements(declarations, lots, output_dir):
+def make_filename_key(supplier_name, supplier_id):
+    sanitised_supplier_name = supplier_name.strip().replace(' ', '_').replace('&', 'and')
+    for bad_char in BAD_FILENAME_CHARACTERS:
+        sanitised_supplier_name = sanitised_supplier_name.replace(bad_char, '')
+    while '__' in sanitised_supplier_name:
+        sanitised_supplier_name = sanitised_supplier_name.replace('__', '_')
+    return "{}-{}".format(supplier_id, sanitised_supplier_name)
+
+
+def supplier_is_on_framework(client, supplier_id):
+    try:
+        framework_interest = client.get_supplier_framework_info(supplier_id, 'g-cloud-7')
+        if framework_interest['frameworkInterest']['onFramework']:
+            return True
+        else:
+            return False
+    except HTTPError as e:
+        print("ERROR checking if supplier {} is on framework: {}".format(supplier_id, str(e)))
+        return False
+
+
+def build_framework_agreements(client, declarations, lots, output_dir):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
     with open('{}/g7-framework-data.tsv'.format(output_dir), 'w') as csvfile:
         # This defines the order of the fields - fields can be in any order in
         # the dictionary for each row and will be mapped to the order defined here.
         fieldnames = [
+            'Key',
             'Supplier ID',
             'Registered Company Name',
             'Country of Registration',
@@ -68,37 +92,39 @@ def build_framework_agreements(declarations, lots, output_dir):
         writer.writeheader()
 
         for declaration in declarations:
-            if declaration[3] != 'complete':
-                print("Skipping supplier with incomplete declaration: {}".format(declaration[0]))
-                continue
             supplier_id = declaration[0]
-            lot = lot_for_supplier_id(lots, supplier_id)
-            if lot:
-                supplier = Supplier(declaration, lot)
-                row = {
-                    'Supplier ID': supplier.supplier_id,
-                    'Registered Company Name': supplier.registered_company_name,
-                    'Country of Registration': supplier.country_of_registration,
-                    'Registered Company Number': supplier.company_number,
-                    'Registered Address': supplier.registered_office_address,
-                    'Framework Contact Name': supplier.contact_name,
-                    'Framework Contact Email address': supplier.contact_email,
-                    'Lot1': supplier.lot1,
-                    'Lot2': supplier.lot2,
-                    'Lot3': supplier.lot3,
-                    'Lot4': supplier.lot4,
-                    'Lot1Letter': "Pass" if supplier.lot1 else "No bid",
-                    'Lot2Letter': "Pass" if supplier.lot2 else "No bid",
-                    'Lot3Letter': "Pass" if supplier.lot3 else "No bid",
-                    'Lot4Letter': "Pass" if supplier.lot4 else "No bid",
-                }
-                writer.writerow(row)
+            if supplier_is_on_framework(client, supplier_id):
+                lot_count = lot_counts_for_supplier_id(lots, supplier_id)
+                if lot_count:
+                    supplier = Supplier(declaration, lot_count)
+                    row = {
+                        'Key': make_filename_key(supplier.registered_company_name, supplier.supplier_id),
+                        'Supplier ID': supplier.supplier_id,
+                        'Registered Company Name': supplier.registered_company_name,
+                        'Country of Registration': supplier.country_of_registration,
+                        'Registered Company Number': supplier.company_number,
+                        'Registered Address': supplier.registered_office_address,
+                        'Framework Contact Name': supplier.contact_name,
+                        'Framework Contact Email address': supplier.contact_email,
+                        'Lot1': supplier.lot1,
+                        'Lot2': supplier.lot2,
+                        'Lot3': supplier.lot3,
+                        'Lot4': supplier.lot4,
+                        'Lot1Letter': "Pass" if supplier.lot1 else "No bid",
+                        'Lot2Letter': "Pass" if supplier.lot2 else "No bid",
+                        'Lot3Letter': "Pass" if supplier.lot3 else "No bid",
+                        'Lot4Letter': "Pass" if supplier.lot4 else "No bid",
+                    }
+                    writer.writerow(row)
+            else:
+                print("Skipping supplier not on framework: {}".format(supplier_id))
+                continue
 
 
-def lot_for_supplier_id(lots, supplier_id):
-    for lot in lots:
-        if lot[0] == supplier_id:
-            return lot
+def lot_counts_for_supplier_id(lot_counts, supplier_id):
+    for lot_count in lot_counts:
+        if lot_count[0] == supplier_id:
+            return lot_count
     print("No lot counts for supplier: {}".format(supplier_id))
     return None
 
