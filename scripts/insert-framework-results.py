@@ -6,7 +6,7 @@ e.g:
 234567, pass
 
 Usage:
-    scripts/record-pass-fail-results-for-framework.py <framework_slug> <data_api_url> <data_api_token> <filename>
+    scripts/insert-framework-results.py <framework_slug> <data_api_url> <data_api_token> <filename>
 """
 
 import getpass
