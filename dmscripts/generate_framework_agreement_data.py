@@ -1,7 +1,12 @@
 # -*- coding: utf-8 -*-
 import os
-import unicodecsv
 from dmutils.apiclient.errors import HTTPError
+
+import sys
+if sys.version_info > (3, 0):
+    import csv
+else:
+    import unicodecsv as csv
 
 #  List of bad characters taken from: http://www.mtu.edu/umc/services/web/cms/characters-avoid/
 BAD_FILENAME_CHARACTERS = ['#', '%', '&', '{', '}', '\\', '<', '>', '*', '?', '/',
@@ -37,7 +42,7 @@ class Supplier:
 def read_csv(filepath):
     all_rows = []
     with open(filepath, 'r') as csvfile:
-        csv_file = unicodecsv.reader(csvfile, delimiter=',', quotechar='"')
+        csv_file = csv.reader(csvfile, delimiter=',', quotechar='"')
         for row in csv_file:
             all_rows.append(row)
     return all_rows
@@ -88,7 +93,7 @@ def build_framework_agreements(client, declarations, lots, output_dir):
             'Lot3Letter',
             'Lot4Letter',
         ]
-        writer = unicodecsv.DictWriter(csvfile, fieldnames=fieldnames, dialect='excel-tab')
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames, dialect='excel-tab')
         writer.writeheader()
 
         for declaration in declarations:
