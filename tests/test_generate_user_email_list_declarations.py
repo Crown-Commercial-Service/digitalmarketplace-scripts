@@ -7,7 +7,7 @@ import mock
 
 from dmutils.apiclient import HTTPError
 
-from dmscripts.generate_user_email_list import (
+from dmscripts.generate_user_email_list_declarations import (
     selection_status, find_supplier_users, list_users
 )
 
