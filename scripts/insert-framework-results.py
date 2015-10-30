@@ -1,9 +1,9 @@
 """
-Takes a CSV file with rows in the format: Supplier ID, Result
+Takes a CSV file with rows in the format: Supplier ID, Supplier Name, Result
 e.g:
-123456, pass
-123212, fail
-234567, pass
+123456, Supplier name 1, pass
+123212, Supplier name 2, fail
+234567, Supplier name 3, pass
 
 Usage:
     scripts/insert-framework-results.py <framework_slug> <data_api_url> <data_api_token> <filename>
