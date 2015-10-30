@@ -1,7 +1,7 @@
-123,pass
-234,fail
-345, PASS
-456, FAIL
-567, Yes
-Company Name,pass
-678,PasS
+123,Supplier Name,pass
+234,Supplier Name,fail
+345,Supplier Name, PASS
+456,Supplier Name, FAIL
+567,Supplier Name, Yes
+Company Name,Supplier Name,pass
+678,Supplier Name,PasS
