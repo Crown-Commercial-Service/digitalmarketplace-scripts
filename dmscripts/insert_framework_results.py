@@ -4,10 +4,18 @@ import unicodecsv as csv
 from dmutils.apiclient.errors import HTTPError
 
 
-def insert_result(client, supplier_id, framework_slug, result, user):
+def insert_result(client, supplier_id, supplier_name, framework_slug, result, user):
     try:
-        client.set_framework_result(supplier_id, framework_slug, result, user)
-        return "OK: {}\n".format(supplier_id)
+        dm_supplier_name = client.get_supplier(supplier_id)['suppliers']['name']
+        if supplier_name == dm_supplier_name:
+            client.set_framework_result(supplier_id, framework_slug, result, user)
+            return "OK: {}\n".format(supplier_id)
+        else:
+            return "Error: Supplier name '{}' does not match '{}' for supplier ID {}\n".format(
+                supplier_name,
+                dm_supplier_name,
+                supplier_id
+            )
     except HTTPError as e:
         return "Error inserting result for {} ({}): {}\n".format(supplier_id, result, str(e))
 
@@ -18,7 +26,8 @@ def insert_results(client, output, framework_slug, filename, user):
         for index, row in enumerate(reader, start=1):
             try:
                 supplier_id = int(row[0])
-                result = row[1].strip().lower()
+                supplier_name = row[1].strip()
+                result = row[2].strip().lower()
                 if result == 'pass':
                     result = True
                 elif result == 'fail':
@@ -29,4 +38,4 @@ def insert_results(client, output, framework_slug, filename, user):
                 output.write("Error: {}; Bad line: {}\n".format(str(e), index))
                 continue
 
-            output.write(insert_result(client, supplier_id, framework_slug, result, user))
+            output.write(insert_result(client, supplier_id, supplier_name, framework_slug, result, user))
