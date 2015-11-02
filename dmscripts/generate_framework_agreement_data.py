@@ -29,8 +29,8 @@ class Supplier:
         self.contact_email = declaration[19]
 
         self.lot1 = "Lot 1: Infrastructure as a Service (IaaS)" if int(lots[3]) > 0 else ""
-        self.lot2 = "Lot 2: Software as a Service (SaaS)" if int(lots[7]) > 0 else ""
-        self.lot3 = "Lot 3: Platform as a Service (PaaS)" if int(lots[5]) > 0 else ""
+        self.lot2 = "Lot 2: Platform as a Service (PaaS)" if int(lots[5]) > 0 else ""
+        self.lot3 = "Lot 3: Software as a Service (SaaS)" if int(lots[7]) > 0 else ""
         self.lot4 = "Lot 4: Specialist Cloud Services (SCS)" if int(lots[9]) > 0 else ""
 
     def __str__(self):
