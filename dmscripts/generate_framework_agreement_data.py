@@ -10,7 +10,7 @@ else:
 
 #  List of bad characters taken from: http://www.mtu.edu/umc/services/web/cms/characters-avoid/
 BAD_FILENAME_CHARACTERS = ['#', '%', '&', '{', '}', '\\', '<', '>', '*', '?', '/',
-                           '$', '!', "'", '"', ':', '@', '+', '`', '|', '=']
+                           '$', '!', "'", '"', ':', '@', '+', '`', '|', '=', ',', '.']
 
 
 class Supplier:
@@ -61,7 +61,7 @@ def make_filename_key(supplier_name, supplier_id):
         sanitised_supplier_name = sanitised_supplier_name.replace(bad_char, '')
     while '__' in sanitised_supplier_name:
         sanitised_supplier_name = sanitised_supplier_name.replace('__', '_')
-    return "{}-{}".format(supplier_id, sanitised_supplier_name)
+    return "{}-{}".format(sanitised_supplier_name, supplier_id)
 
 
 def supplier_is_on_framework(client, supplier_id):

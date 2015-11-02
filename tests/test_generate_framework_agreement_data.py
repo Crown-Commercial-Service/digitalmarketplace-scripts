@@ -26,11 +26,11 @@ def test_read_csv():
 
 
 def test_make_filename_key():
-    assert make_filename_key('Kev\'s Butties', 1234) == '1234-Kevs_Butties'
-    assert make_filename_key('   Supplier A   ', 1234) == '1234-Supplier_A'
-    assert make_filename_key('Kev & Sons. | Ltd', 1234) == '1234-Kev_and_Sons._Ltd'
-    assert make_filename_key('\ / : * ? \' " < > |', 1234) == '1234-_'
-    assert make_filename_key('kev@the*agency', 1234) == '1234-kevtheagency'
+    assert make_filename_key('Kev\'s Butties', 1234) == 'Kevs_Butties-1234'
+    assert make_filename_key('   Supplier A   ', 1234) == 'Supplier_A-1234'
+    assert make_filename_key('Kev & Sons. | Ltd', 1234) == 'Kev_and_Sons_Ltd-1234'
+    assert make_filename_key('\ / : * ? \' " < > |', 1234) == '_-1234'
+    assert make_filename_key('kev@the*agency', 1234) == 'kevtheagency-1234'
 
 
 def test_supplier_is_on_framework(mock_data_client):
@@ -41,7 +41,7 @@ def test_supplier_is_on_framework(mock_data_client):
     assert supplier_is_on_framework(mock_data_client, 123) is False
 
     mock_data_client.get_supplier_framework_info.return_value = {'frameworkInterest': {'onFramework': None}}
-    assert supplier_is_on_framework(mock_data_client, 123) is False
+    assert supplier_is_on_framework(mock_data_client, 123) is None
 
     mock_data_client.get_supplier_framework_info.side_effect = HTTPError()
     assert supplier_is_on_framework(mock_data_client, 123) is False
