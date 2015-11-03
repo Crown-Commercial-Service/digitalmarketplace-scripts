@@ -1,16 +1,13 @@
 # -*- coding: utf-8 -*-
 import os
 from dmutils.apiclient.errors import HTTPError
+from dmutils.documents import sanitise_supplier_name
 
 import sys
 if sys.version_info > (3, 0):
     import csv
 else:
     import unicodecsv as csv
-
-#  List of bad characters taken from: http://www.mtu.edu/umc/services/web/cms/characters-avoid/
-BAD_FILENAME_CHARACTERS = ['#', '%', '&', '{', '}', '\\', '<', '>', '*', '?', '/',
-                           '$', '!', "'", '"', ':', '@', '+', '`', '|', '=', ',', '.']
 
 
 class Supplier:
@@ -56,12 +53,7 @@ def read_csv(filepath):
 
 
 def make_filename_key(supplier_name, supplier_id):
-    sanitised_supplier_name = supplier_name.strip().replace(' ', '_').replace('&', 'and')
-    for bad_char in BAD_FILENAME_CHARACTERS:
-        sanitised_supplier_name = sanitised_supplier_name.replace(bad_char, '')
-    while '__' in sanitised_supplier_name:
-        sanitised_supplier_name = sanitised_supplier_name.replace('__', '_')
-    return "{}-{}".format(sanitised_supplier_name, supplier_id)
+    return "{}-{}".format(sanitise_supplier_name(supplier_name), supplier_id)
 
 
 def supplier_is_on_framework(client, supplier_id):
