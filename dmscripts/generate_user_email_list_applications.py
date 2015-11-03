@@ -100,11 +100,11 @@ def list_users(data_api_client, output, framework_slug, on_framework=None, agree
 
     for user in users:
         row = [
+            'pass' if user['supplier']['onFramework'] else 'fail',
+            'returned' if user['supplier']['agreementReturned'] else 'not returned',
             user['emailAddress'],
             user['name'],
             user['supplier']['supplierId'],
-            user['supplier']['name'],
-            'true' if user['supplier']['onFramework'] else 'false',
-            'true' if user['supplier']['agreementReturned'] else 'false'
+            user['supplier']['name']
         ]
         writer.writerow(row)
