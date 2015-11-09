@@ -1,7 +1,10 @@
-import csv
 from multiprocessing.pool import ThreadPool
-
 from dmutils.apiclient.errors import HTTPError
+import sys
+if sys.version_info > (3, 0):
+    import csv
+else:
+    import unicodecsv as csv
 
 
 def selection_status(client, framework_slug):

@@ -1,9 +1,14 @@
-import csv
 from functools import partial
 import time
 from multiprocessing.pool import ThreadPool
 
 from dmutils.apiclient.errors import HTTPError
+
+import sys
+if sys.version_info > (3, 0):
+    import csv
+else:
+    import unicodecsv as csv
 
 
 def find_suppliers(data_api_client):

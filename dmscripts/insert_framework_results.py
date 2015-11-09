@@ -1,7 +1,12 @@
 from __future__ import unicode_literals
-import unicodecsv as csv
 
 from dmutils.apiclient.errors import HTTPError
+
+import sys
+if sys.version_info > (3, 0):
+    import csv
+else:
+    import unicodecsv as csv
 
 
 def insert_result(client, supplier_id, supplier_name, framework_slug, result, user):
