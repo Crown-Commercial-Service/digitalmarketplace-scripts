@@ -26,7 +26,7 @@ def insert_result(client, supplier_id, supplier_name, framework_slug, result, us
 
 
 def insert_results(client, output, framework_slug, filename, user):
-    with open(filename, 'rb') as csvfile:
+    with open(filename, 'r') as csvfile:
         reader = csv.reader(csvfile)
         for index, row in enumerate(reader, start=1):
             try:
