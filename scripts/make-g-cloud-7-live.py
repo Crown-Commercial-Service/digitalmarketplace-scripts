@@ -1,7 +1,7 @@
 """
 
 Usage:
-    scripts/make-g-cloud-7-live.py <data_api_url> <data_api_token> <draft_bucket> <documents_bucket>
+    scripts/make-g-cloud-7-live.py <data_api_url> <data_api_token> <draft_bucket> <documents_bucket> [--dry-run]
 """
 import sys
 sys.path.insert(0, '.')
@@ -37,7 +37,7 @@ def find_submitted_draft_services(client, supplier, framework_slug):
     return (
         draft_service for draft_service in
         client.find_draft_services(supplier['supplierId'], framework=framework_slug)['services']
-        if draft_service['status'] == 'submitted' and not supplier.get('serviceId')
+        if draft_service['status'] == 'submitted' and not draft_service.get('serviceId')
     )
 
 
@@ -68,8 +68,14 @@ def get_live_document_path(parsed_document, framework_slug, service_id):
 
 def make_draft_service_live(client, supplier, draft_service, framework_slug):
     print("  > Migrating draft {} - {}".format(draft_service['id'], draft_service['serviceName']))
-    service_id = random.randint(1000, 10000)
-    print("    > Publish draft - new service ID {}".format(service_id))
+    if DRY_RUN:
+        service_id = random.randint(1000, 10000)
+        print("    > generating random test service ID".format(service_id))
+    else:
+        services = client.publish_draft_service(draft_service['id'], 'make-g-cloud-7-live script')
+        service_id = services['services']['id']
+        print("    > draft service published - new service ID {}".format(service_id))
+
     for document_key in DOCUMENT_KEYS:
         if document_key not in draft_service:
             print("    > Skipping {}".format(document_key))
@@ -80,21 +86,29 @@ def make_draft_service_live(client, supplier, draft_service, framework_slug):
 
             draft_document_path = get_draft_document_path(parsed_document, framework_slug)
             live_document_path = get_live_document_path(parsed_document, framework_slug, service_id)
-            if not draft_bucket.path_exists(draft_document_path):
+            if not DRAFT_BUCKET.path_exists(draft_document_path):
                 raise ValueError(
                     "Draft document {} does not exist in bucket {}".format(
-                        draft_document_path, draft_bucket.bucket_name))
-            print("    > Copying {}:{} to {}:{}".format(
-                  draft_bucket.bucket_name, draft_document_path,
-                  documents_bucket.bucket_name, live_document_path))
+                        draft_document_path, DRAFT_BUCKET.bucket_name))
+            message_suffix = '{}:{} to {}:{}'.format(
+                DRAFT_BUCKET.bucket_name, draft_document_path,
+                DOCUMENTS_BUCKET.bucket_name, live_document_path
+            )
+
+            if DRY_RUN:
+                print("    > not copying {}".format(message_suffix))
+            else:
+                DOCUMENTS_BUCKET.bucket.copy_key(live_document_path, DRAFT_BUCKET.bucket_name, draft_document_path)
+                print("    > copied {}".format(message_suffix))
 
 
 if __name__ == '__main__':
     arguments = docopt(__doc__)
 
     client = DataAPIClient(arguments['<data_api_url>'], arguments['<data_api_token>'])
-    draft_bucket = S3(arguments['<draft_bucket>'])
-    documents_bucket = S3(arguments['<documents_bucket>'])
+    DRAFT_BUCKET = S3(arguments['<draft_bucket>'])
+    DOCUMENTS_BUCKET = S3(arguments['<documents_bucket>'])
+    DRY_RUN = arguments['--dry-run']
 
     suppliers = find_suppliers_on_framework(client, FRAMEWORK_SLUG)
 
