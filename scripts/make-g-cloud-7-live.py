@@ -37,7 +37,7 @@ def find_submitted_draft_services(client, supplier, framework_slug):
     return (
         draft_service for draft_service in
         client.find_draft_services(supplier['supplierId'], framework=framework_slug)['services']
-        if draft_service['status'] == 'submitted'
+        if draft_service['status'] == 'submitted' and not supplier.get('serviceId')
     )
 
 
@@ -103,4 +103,4 @@ if __name__ == '__main__':
         draft_services = find_submitted_draft_services(client, supplier, FRAMEWORK_SLUG)
 
         for draft_service in draft_services:
-            make_draft_service_live(client, supplier, draft_service, framework_slug)
+            make_draft_service_live(client, supplier, draft_service, FRAMEWORK_SLUG)
