@@ -6,10 +6,12 @@ Usage:
 
     --serial        Do not run in parallel (useful for debugging)
     --index=<index>  Search API index name [default: g-cloud]
+    --frameworks=<frameworks> Optional list of framework slugs that should be indexed
 
 Example:
-    ./index-services.py dev --api-token=myToken --search-api-token=myToken
+    ./index-services.py dev --api-token=myToken --search-api-token=myToken --frameworks="['g-cloud-6','g-cloud-7']"
 """
+import ast
 
 import sys
 import multiprocessing
@@ -47,10 +49,11 @@ def print_progress(counter, start_time):
 
 
 class ServiceIndexer(object):
-    def __init__(self, endpoint, access_token, index):
+    def __init__(self, endpoint, access_token, index, frameworks):
         self.endpoint = endpoint
         self.access_token = access_token
         self.index = index
+        self.frameworks = frameworks
 
     def __call__(self, service):
         client = apiclient.SearchAPIClient(self.endpoint, self.access_token)
@@ -64,7 +67,8 @@ class ServiceIndexer(object):
 
     @backoff.on_exception(backoff.expo, apiclient.HTTPError, max_tries=5)
     def index_service(self, client, service):
-        if service['status'] == 'published':
+        if service['status'] == 'published' and \
+                (self.frameworks is None or service['frameworkSlug'] in self.frameworks):
             client.index(service['id'], service, index=self.index)
         else:
             client.delete(service['id'], index=self.index)
@@ -83,7 +87,7 @@ class ServiceIndexer(object):
                 raise
 
 
-def do_index(search_api_url, search_api_access_token, data_api_url, data_api_access_token, serial, index):
+def do_index(search_api_url, search_api_access_token, data_api_url, data_api_access_token, serial, index, frameworks):
     logger.info("Search API URL: {search_api_url}", extra={'search_api_url': search_api_url})
     logger.info("Data API URL: {data_api_url}", extra={'data_api_url': data_api_url})
 
@@ -94,7 +98,7 @@ def do_index(search_api_url, search_api_access_token, data_api_url, data_api_acc
         pool = multiprocessing.Pool(10)
         mapper = pool.imap
 
-    indexer = ServiceIndexer(search_api_url, search_api_access_token, index)
+    indexer = ServiceIndexer(search_api_url, search_api_access_token, index, frameworks)
     indexer.create_index()
 
     counter = 0
@@ -111,6 +115,11 @@ def do_index(search_api_url, search_api_access_token, data_api_url, data_api_acc
 
 if __name__ == "__main__":
     arguments = docopt(__doc__)
+    chosen_frameworks = arguments['--frameworks']
+    if isinstance(chosen_frameworks, basestring):
+        chosen_frameworks = ast.literal_eval(chosen_frameworks)
+    else:
+        chosen_frameworks = None
     ok = do_index(
         data_api_url=get_api_endpoint_from_stage(arguments['<stage>'], 'api'),
         data_api_access_token=arguments['--api-token'],
@@ -118,6 +127,7 @@ if __name__ == "__main__":
         search_api_access_token=arguments['--search-api-token'],
         serial=arguments['--serial'],
         index=arguments['--index'],
+        frameworks=chosen_frameworks
     )
 
     if not ok:
