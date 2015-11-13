@@ -24,3 +24,7 @@ def get_api_endpoint_from_stage(stage, app='api'):
     return "https://{}.digitalmarketplace.service.gov.uk".format(
         stage_prefixes[stage]
     )
+
+
+def get_assets_endpoint_from_stage(stage):
+    return get_api_endpoint_from_stage(stage, 'assets')
