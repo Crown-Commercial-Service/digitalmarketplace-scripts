@@ -6,6 +6,11 @@ Usage:
 import sys
 sys.path.insert(0, '.')
 
+try:
+    import urlparse
+except ImportError:
+    import urllib.parse as urlparse
+
 from itertools import islice
 import random
 import re
@@ -47,6 +52,7 @@ def parse_document_url(url, framework_slug):
     if not match:
         raise ValueError("Could not parse document URL {}".format(url))
     return {
+        'domain': urlparse.urlparse(url).netloc,
         'supplier_id': match.group(1),
         'draft_id': match.group(2),
         'document_name': match.group(3),
@@ -66,6 +72,20 @@ def get_live_document_path(parsed_document, framework_slug, service_id):
         **parsed_document)
 
 
+def get_live_asset_domain(domain):
+    if domain.startswith('preview'):
+        return 'preview-assets.development.digitalmarketplace.service.gov.uk'
+    elif domain.startswith('staging'):
+        return 'staging-assets.digitalmarketplace.service.gov.uk'
+    elif domain.startswith('www'):
+        return 'assets.digitalmarketplace.service.gov.uk'
+
+
+def get_live_asset_url(parsed_document, live_document_path):
+    domain = get_live_asset_domain(parsed_document['domain'])
+    return 'https://{}/{}'.format(domain, live_document_path)
+
+
 def make_draft_service_live(client, supplier, draft_service, framework_slug):
     print("  > Migrating draft {} - {}".format(draft_service['id'], draft_service['serviceName']))
     if DRY_RUN:
@@ -76,6 +96,7 @@ def make_draft_service_live(client, supplier, draft_service, framework_slug):
         service_id = services['services']['id']
         print("    > draft service published - new service ID {}".format(service_id))
 
+    document_updates = {}
     for document_key in DOCUMENT_KEYS:
         if document_key not in draft_service:
             print("    > Skipping {}".format(document_key))
@@ -94,12 +115,19 @@ def make_draft_service_live(client, supplier, draft_service, framework_slug):
                 DRAFT_BUCKET.bucket_name, draft_document_path,
                 DOCUMENTS_BUCKET.bucket_name, live_document_path
             )
+            document_updates[document_key] = get_live_asset_url(parsed_document, live_document_path)
 
             if DRY_RUN:
                 print("    > not copying {}".format(message_suffix))
             else:
                 DOCUMENTS_BUCKET.bucket.copy_key(live_document_path, DRAFT_BUCKET.bucket_name, draft_document_path)
                 print("    > copied {}".format(message_suffix))
+
+    if DRY_RUN:
+        print("    > not updating document URLs {}".format(document_updates))
+    else:
+        client.update_service(service_id, document_updates, 'make-g-cloud-7-live script')
+        print("    > document URLs updated")
 
 
 if __name__ == '__main__':
