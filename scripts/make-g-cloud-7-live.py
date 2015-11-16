@@ -86,9 +86,10 @@ def document_copier(draft_bucket, documents_bucket, dry_run):
         if dry_run:
             print("    > not copying {}".format(message_suffix))
         else:
-            documents_bucket.bucket.copy_key(live_document_path,
-                                             src_bucket_name=draft_bucket.bucket_name,
-                                             src_key_name=draft_document_path)
+            key = documents_bucket.bucket.copy_key(live_document_path,
+                                                   src_bucket_name=draft_bucket.bucket_name,
+                                                   src_key_name=draft_document_path)
+            key.set_acl('public-read')
             print("    > copied {}".format(message_suffix))
 
     return copy_document
