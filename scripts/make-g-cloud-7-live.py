@@ -99,7 +99,7 @@ def make_draft_service_live(client, copy_document, draft_service, framework_slug
     print("  > Migrating draft {} - {}".format(draft_service['id'], draft_service['serviceName']))
     if dry_run:
         service_id = random.randint(1000, 10000)
-        print("    > generating random test service ID".format(service_id))
+        print("    > generating random test service ID: {}".format(service_id))
     else:
         services = client.publish_draft_service(draft_service['id'], 'make-g-cloud-7-live script')
         service_id = services['services']['id']
