@@ -112,6 +112,9 @@ def do_index(search_api_url, search_api_access_token, data_api_url, data_api_acc
 
 if __name__ == "__main__":
     arguments = docopt(__doc__)
+    chosen_frameworks = arguments['--frameworks']
+    if not isinstance(chosen_frameworks, basestring):
+        chosen_frameworks = None
     ok = do_index(
         data_api_url=get_api_endpoint_from_stage(arguments['<stage>'], 'api'),
         data_api_access_token=arguments['--api-token'],
@@ -119,7 +122,7 @@ if __name__ == "__main__":
         search_api_access_token=arguments['--search-api-token'],
         serial=arguments['--serial'],
         index=arguments['--index'],
-        frameworks=arguments['--frameworks']
+        frameworks=chosen_frameworks
     )
 
     if not ok:
