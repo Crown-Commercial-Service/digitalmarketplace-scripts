@@ -35,8 +35,7 @@ def request_services(api_url, api_access_token, frameworks):
         api_access_token
     )
 
-    for service in data_client.find_services_iter(framework=frameworks):
-        yield service
+    return data_client.find_services_iter(framework=frameworks)
 
 
 def print_progress(counter, start_time):
