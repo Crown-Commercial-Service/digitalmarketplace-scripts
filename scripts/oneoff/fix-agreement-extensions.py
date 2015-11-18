@@ -55,9 +55,12 @@ def show_contact_details(client, dry_run, path):
         print("Empty file for {} - {}".format(supplier_id, os.path.basename(path)))
     else:
         supplier = client.get_supplier(supplier_id)['suppliers']
+        declaration = client.get_supplier_declaration(supplier_id, 'g-cloud-7')
         print(
-            "Empty file for {} {}".format(
+            "Empty file for {}, {}, {}, {}".format(
                 supplier_id,
+                supplier['name'],
+                declaration['declaration'].get('SQ1-2b', "none"),
                 supplier['contactInformation'][0]['email']))
 
 
