@@ -59,7 +59,7 @@ def return_rows_for_sections(sections):
                 if 'label' in option:
                     options.append(option['label'])
                     if 'description' in option:
-                        options[-1] = "{} - {}".format(options[-1], option['label'])
+                        options[-1] = "{} - {}".format(options[-1], option['description'])
 
             if question.get('type') == 'boolean':
                 options.append('Yes')
