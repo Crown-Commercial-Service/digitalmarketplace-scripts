@@ -18,10 +18,34 @@ LOTS = {
 }
 
 
-def return_rows_for_content(content):
+def get_questions(questions):
+
+    def augment_question_data(question, name, hint):
+        question.multiquestion_name = name
+        if hint:
+            question.multiquestion_hint = hint
+        return question
+
+    def get_question(question):
+        if question.questions:
+            return [
+                augment_question_data(nested_question, question.get('name'), question.get('hint'))
+                for nested_question in question.questions
+            ]
+
+        return [question]
+
+    questions_list = []
+    for question in questions:
+        questions_list += get_question(question)
+
+    return questions_list
+
+
+def return_rows_for_sections(sections):
     local_rows = []
 
-    for section in content.sections:
+    for section in sections:
         for question in get_questions(section.questions):
             row = [
                 question.get('multiquestion_name', section.name),
@@ -49,30 +73,6 @@ def return_rows_for_content(content):
     return local_rows
 
 
-def get_questions(questions):
-
-    def augment_question_data(question, name, hint):
-        question.multiquestion_name = name
-        if hint:
-            question.multiquestion_hint = hint
-        return question
-
-    def get_question(question):
-        if question.questions:
-            return [
-                augment_question_data(nested_question, question.get('name'), question.get('hint'))
-                for nested_question in question.questions
-            ]
-
-        return [question]
-
-    questions_list = []
-    for question in questions:
-        questions_list += get_question(question)
-
-    return questions_list
-
-
 def generate_csv(output_directory, framework_slug, content_loader):
 
     if not os.path.exists(output_directory):
@@ -88,10 +88,10 @@ def generate_csv(output_directory, framework_slug, content_loader):
                 for lot in LOTS[framework_slug]:
                     content = content_loader.get_manifest(
                         framework_slug, manifest['manifest']).filter({'lot': lot})
-                    rows.extend(return_rows_for_content(content))
+                    rows.extend(return_rows_for_sections(content.sections))
         else:
             content = content_loader.get_manifest(framework_slug, manifest['manifest'])
-            rows.extend(return_rows_for_content(content))
+            rows.extend(return_rows_for_sections(content.sections))
 
     # find the longest array
     max_length = max(len(row) for row in rows)
