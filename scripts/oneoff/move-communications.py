@@ -9,8 +9,10 @@ sys.path.insert(0, '.')
 
 import re
 from docopt import docopt
+from dateutil.parser import parse as parse_time
 
 from dmutils.s3 import S3
+from dmutils.formats import DATETIME_FORMAT
 
 
 def make_copier(src_bucket, target_bucket):
@@ -22,7 +24,7 @@ def make_copier(src_bucket, target_bucket):
             src_key_name=src_path,
             preserve_acl=True,
             metadata={
-                "timestamp": src_key.last_modified
+                "timestamp": parse_time(src_key.last_modified).strftime(DATETIME_FORMAT)
             }
         )
 
