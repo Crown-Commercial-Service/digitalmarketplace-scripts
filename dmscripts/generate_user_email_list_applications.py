@@ -49,7 +49,7 @@ def get_all_supplier_framework_info(data_api_client, framework_slug, suppliers):
     return [
         supplier_framework for supplier_framework
         in execute_concurrently(get_supplier_framework_info, enumerate(suppliers))
-        if (supplier_framework is not None) and (supplier_framework.get('onFramework') is not None)
+        if (supplier_framework is not None)
     ]
 
 
