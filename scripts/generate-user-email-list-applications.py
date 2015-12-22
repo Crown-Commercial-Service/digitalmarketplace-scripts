@@ -1,4 +1,6 @@
 """
+Generate a list of users that have applied to a given framework.
+This is to be run after a framework has been closed.
 
 Usage:
     scripts/generate-user-email-list-applications.py

@@ -1,4 +1,5 @@
 """
+Generate a list of users that have registered interest in a framework.
 
 Usage:
     scripts/generate-user-email-list-declarations.py <data_api_url> <data_api_token> [--framework=<slug>] [--status]
