@@ -10,7 +10,7 @@ from docopt import docopt
 
 sys.path.insert(0, '.')
 from dmscripts.env import get_api_endpoint_from_stage
-from dmutils.apiclient import SearchAPIClient
+from dmapiclient import SearchAPIClient
 
 
 if __name__ == '__main__':

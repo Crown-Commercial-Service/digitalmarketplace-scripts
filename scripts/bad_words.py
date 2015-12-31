@@ -14,7 +14,7 @@ else:
 import six
 import re
 from docopt import docopt
-from dmutils.apiclient import DataAPIClient
+from dmapiclient import DataAPIClient
 
 
 def main(data_api_url, data_api_token, bad_words_path, framework_slug, output_dir):

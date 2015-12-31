@@ -12,7 +12,7 @@ sys.path.insert(0, '.')
 from docopt import docopt
 from dmscripts.generate_framework_agreement_data import check_lots_csv, read_csv, \
     check_declarations_csv, build_framework_agreements
-from dmutils.apiclient import DataAPIClient
+from dmapiclient import DataAPIClient
 
 if __name__ == '__main__':
 

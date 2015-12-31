@@ -5,7 +5,7 @@ except ImportError:
 import pytest
 import mock
 
-from dmutils.apiclient import HTTPError
+from dmapiclient import HTTPError
 
 from dmscripts.generate_user_email_list_declarations import (
     selection_status, find_supplier_users, list_users

@@ -2,7 +2,7 @@ import pytest
 
 from dmscripts.insert_framework_results import insert_result, insert_results
 from mock import mock, call
-from dmutils.apiclient.errors import HTTPError
+from dmapiclient import HTTPError
 
 
 @pytest.fixture

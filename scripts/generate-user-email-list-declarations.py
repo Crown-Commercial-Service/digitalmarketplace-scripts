@@ -8,7 +8,7 @@ import sys
 sys.path.insert(0, '.')
 
 from docopt import docopt
-from dmutils.apiclient import DataAPIClient
+from dmapiclient import DataAPIClient
 from dmscripts.generate_user_email_list_declarations import list_users
 
 

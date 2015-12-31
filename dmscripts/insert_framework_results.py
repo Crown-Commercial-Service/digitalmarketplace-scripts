@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 
-from dmutils.apiclient.errors import HTTPError
+from dmapiclient import HTTPError
 
 import sys
 if sys.version_info > (3, 0):

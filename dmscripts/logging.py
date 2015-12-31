@@ -35,6 +35,7 @@ def configure_logger(log_levels=None):
 def merge_log_levels(added_log_levels):
     log_levels = {
         'dmutils': INFO,
+        'dmapiclient': INFO,
         'script': INFO,
     }
 

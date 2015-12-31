@@ -1,5 +1,5 @@
 from multiprocessing.pool import ThreadPool
-from dmutils.apiclient.errors import HTTPError
+from dmapiclient import HTTPError
 import sys
 if sys.version_info > (3, 0):
     import csv
