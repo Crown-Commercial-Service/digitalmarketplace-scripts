@@ -16,7 +16,7 @@ import re
 
 from docopt import docopt
 from dmscripts.env import get_api_endpoint_from_stage, get_assets_endpoint_from_stage
-from dmutils.apiclient import DataAPIClient
+from dmapiclient import DataAPIClient
 from dmutils.s3 import S3
 
 DOCUMENT_KEYS = [

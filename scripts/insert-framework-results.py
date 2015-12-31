@@ -14,7 +14,7 @@ import sys
 sys.path.insert(0, '.')
 
 from docopt import docopt
-from dmutils.apiclient import DataAPIClient
+from dmapiclient import DataAPIClient
 from dmscripts.insert_framework_results import insert_results
 
 

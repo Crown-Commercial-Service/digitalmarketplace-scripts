@@ -19,18 +19,19 @@ from datetime import datetime
 
 import backoff
 from docopt import docopt
-from dmutils import apiclient
+
+import dmapiclient
 
 sys.path.insert(0, '.')
 from dmscripts.env import get_api_endpoint_from_stage
 from dmscripts import logging
 
-logger = logging.configure_logger({'dmutils': logging.WARNING})
+logger = logging.configure_logger({'dmapiclient': logging.WARNING})
 
 
 def request_services(api_url, api_access_token, frameworks):
 
-    data_client = apiclient.DataAPIClient(
+    data_client = dmapiclient.DataAPIClient(
         api_url,
         api_access_token
     )
@@ -53,16 +54,16 @@ class ServiceIndexer(object):
         self.index = index
 
     def __call__(self, service):
-        client = apiclient.SearchAPIClient(self.endpoint, self.access_token)
+        client = dmapiclient.SearchAPIClient(self.endpoint, self.access_token)
 
         try:
             self.index_service(client, service)
             return True
-        except apiclient.APIError:
+        except dmapiclient.APIError:
             logger.exception("{service_id} not indexed", extra={'service_id': service.get('id')})
             return False
 
-    @backoff.on_exception(backoff.expo, apiclient.HTTPError, max_tries=5)
+    @backoff.on_exception(backoff.expo, dmapiclient.HTTPError, max_tries=5)
     def index_service(self, client, service):
         if service['status'] == 'published':
             client.index(service['id'], service, index=self.index)
@@ -70,13 +71,13 @@ class ServiceIndexer(object):
             client.delete(service['id'], index=self.index)
 
     def create_index(self):
-        client = apiclient.SearchAPIClient(self.endpoint, self.access_token)
+        client = dmapiclient.SearchAPIClient(self.endpoint, self.access_token)
         logger.info("Creating {index} index", extra={'index': self.index})
 
         try:
             result = client.create_index(self.index)
             logger.info("Index creation response: {response}", extra={'response': result})
-        except apiclient.HTTPError as e:
+        except dmapiclient.HTTPError as e:
             if 'already exists as alias' in e.message:
                 logger.info("Skipping index creation for alias {index}", extra={'index': self.index})
             else:

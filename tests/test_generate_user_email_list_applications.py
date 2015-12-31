@@ -4,7 +4,7 @@ except ImportError:
     from io import StringIO
 import pytest
 import mock
-from dmutils.apiclient import HTTPError
+from dmapiclient import HTTPError
 
 from dmscripts.generate_user_email_list_applications import (
     filter_list_of_dicts_by_value,

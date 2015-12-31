@@ -12,7 +12,7 @@ import re
 import magic
 from docopt import docopt
 
-from dmutils.apiclient import DataAPIClient
+from dmapiclient import DataAPIClient
 from dmutils.s3 import S3
 from dmscripts.env import get_api_endpoint_from_stage
 

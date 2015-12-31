@@ -18,7 +18,7 @@ from multiprocessing.pool import ThreadPool
 from docopt import docopt
 from dmscripts.env import get_api_endpoint_from_stage, get_assets_endpoint_from_stage
 from dmscripts.logging import configure_logger
-from dmutils.apiclient import DataAPIClient
+from dmapiclient import DataAPIClient
 from dmutils.s3 import S3
 import requests
 

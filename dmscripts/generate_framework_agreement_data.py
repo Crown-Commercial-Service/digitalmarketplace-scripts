@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-from dmutils.apiclient.errors import HTTPError
+from dmapiclient import HTTPError
 from dmutils.documents import sanitise_supplier_name
 
 import sys

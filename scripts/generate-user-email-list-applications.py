@@ -12,7 +12,7 @@ sys.path.insert(0, '.')
 
 import six
 from docopt import docopt
-from dmutils.apiclient import DataAPIClient
+from dmapiclient import DataAPIClient
 from dmscripts.generate_user_email_list_applications import list_users
 
 
