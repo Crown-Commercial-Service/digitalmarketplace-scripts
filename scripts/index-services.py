@@ -13,7 +13,7 @@ Example:
 """
 
 import sys
-import multiprocessing
+from multiprocessing.pool import ThreadPool
 from six.moves import map
 from datetime import datetime
 
@@ -92,8 +92,8 @@ def do_index(search_api_url, search_api_access_token, data_api_url, data_api_acc
         pool = None
         mapper = map
     else:
-        pool = multiprocessing.Pool(10)
-        mapper = pool.imap
+        pool = ThreadPool(10)
+        mapper = pool.imap_unordered
 
     indexer = ServiceIndexer(search_api_url, search_api_access_token, index)
     indexer.create_index()
