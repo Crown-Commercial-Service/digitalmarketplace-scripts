@@ -30,10 +30,12 @@ def get_all_pdfs(local_directory):
 def upload_agreement(bucket, dry_run, file_path):
     supplier_id = get_supplier_id_from_framework_file_path(path)
     upload_path = get_countersigned_agreement_document_path("g-cloud-7", supplier_id)
-    print("UPLOADING: '{}' to '{}'".format(file_path, upload_path))
     if not dry_run:
         with open(file_path) as file_contents:
             bucket.save(upload_path, file_contents, acl='public-read', move_prefix=None)
+        print(supplier_id)
+    else:
+        print("[Dry-run] UPLOAD: '{}' to '{}'".format(file_path, upload_path))
 
 
 def get_bucket_name(stage):
@@ -43,9 +45,11 @@ def get_bucket_name(stage):
 
 
 def get_supplier_id_from_framework_file_path(path):
-    # Filenames from CCS are in the format:
+    # Actual filenames from CCS are in the format:
     # Sanitised_Supplier_Name-123456-signed-framework-agreement.pdf
-    match = re.search(r'-(\d{5,6})-signed-framework-agreement', path)
+    # OR SOMETIMES
+    # Sanitised_Supplier_Name-123456_signed_framework_agreement.pdf
+    match = re.search(r'-(\d{5,6})[-_]signed[-_]framework[-_]agreement', path)
     if not match:
         raise ValueError("Could not find supplier ID in path {}".format(path))
     return match.group(1)
