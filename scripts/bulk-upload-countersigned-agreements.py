@@ -43,9 +43,9 @@ def get_bucket_name(stage):
 
 
 def get_supplier_id_from_framework_file_path(path):
-    # We have been told by CCS that filenames will be exactly the same as the unsigned agreement files
-    # e.g. Sanitised_Supplier_Name-123456_Framework_Agreement.pdf
-    match = re.search(r'-(\d{5,6})_Framework_Agreement', path)
+    # Filenames from CCS are in the format:
+    # Sanitised_Supplier_Name-123456-signed-framework-agreement.pdf
+    match = re.search(r'-(\d{5,6})-signed-framework-agreement', path)
     if not match:
         raise ValueError("Could not find supplier ID in path {}".format(path))
     return match.group(1)
