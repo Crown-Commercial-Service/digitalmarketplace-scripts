@@ -14,6 +14,7 @@ Example:
 
 import sys
 from multiprocessing.pool import ThreadPool
+import six
 from six.moves import map
 from datetime import datetime
 
@@ -113,7 +114,7 @@ def do_index(search_api_url, search_api_access_token, data_api_url, data_api_acc
 if __name__ == "__main__":
     arguments = docopt(__doc__)
     chosen_frameworks = arguments['--frameworks']
-    if not isinstance(chosen_frameworks, basestring):
+    if not isinstance(chosen_frameworks, six.string_types):
         chosen_frameworks = None
     ok = do_index(
         data_api_url=get_api_endpoint_from_stage(arguments['<stage>'], 'api'),
