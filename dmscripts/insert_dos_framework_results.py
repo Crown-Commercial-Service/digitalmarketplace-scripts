@@ -100,7 +100,8 @@ def process_dos_results(client, content_loader, user):
     for supplier_id in dos_registered_suppliers:
         print("SUPPLIER: {}".format(supplier_id))
         declaration = client.get_supplier_declaration(supplier_id, 'digital-outcomes-and-specialists')['declaration']
-        declaration_result = check_declaration_answers(declaration_content, declaration)
+
+        declaration_result = check_declaration_answers(declaration_content, declaration) if declaration else FAIL
         supplier_has_submitted_services = process_submitted_drafts(client, supplier_id, user)
 
         if declaration_result == PASS and supplier_has_submitted_services:
