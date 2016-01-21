@@ -84,8 +84,9 @@ def process_submitted_drafts(client, supplier_id, user):
             supplier_has_submitted_services = True
         else:
             # Update the draft to be 'failed'
+            print("  Service essentials failed for draft {} in lot '{}'".format(draft['id'], draft['lot']))
             client.update_draft_service(draft['id'], {"status": "failed"}, user)
-
+    print("  Supplier has valid service: {}".format("YES" if supplier_has_submitted_services else "NO"))
     return supplier_has_submitted_services
 
 
@@ -100,7 +101,8 @@ def process_dos_results(client, content_loader, user):
     for supplier_id in dos_registered_suppliers:
         print("SUPPLIER: {}".format(supplier_id))
         declaration = client.get_supplier_declaration(supplier_id, 'digital-outcomes-and-specialists')['declaration']
-        declaration_result = check_declaration_answers(declaration_content, declaration)
+
+        declaration_result = check_declaration_answers(declaration_content, declaration) if declaration else FAIL
         supplier_has_submitted_services = process_submitted_drafts(client, supplier_id, user)
 
         if declaration_result == PASS and supplier_has_submitted_services:
