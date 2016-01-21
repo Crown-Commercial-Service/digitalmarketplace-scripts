@@ -263,7 +263,7 @@ def export_suppliers(client, content_loader, output_dir):
     with MultiCSVWriter(output_dir, handlers) as writer:
         for i, record in enumerate(records):
             writer.write_row(record)
-            if i % 100 == 0:
+            if (i + 1) % 100 == 0:
                 writer.print_counts()
 
         writer.print_counts()
