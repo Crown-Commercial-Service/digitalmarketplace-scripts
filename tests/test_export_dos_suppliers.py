@@ -240,7 +240,7 @@ SUCCESSFUL_RECORD = {
                  'name': 'Bluedice Ideas Limited'},
     'declaration': {'nameOfOrganisation': 'Young Money Franchise LTD',
                     'primaryContact': 'Yolo Swaggins',
-                    'primaryContactEmail': 'yolo.swagins@example.com'},
+                    'primaryContactEmail': 'yolo.swaggins@example.com'},
     'counts': {
         'completed': {
             'digital-outcomes': 2, 'digital-specialists': 1,
@@ -262,7 +262,7 @@ FAILED_RECORD = {
                  'name': 'Bluedice Ideas Limited'},
     'declaration': {'nameOfOrganisation': 'Young Money Franchise LTD',
                     'primaryContact': 'Yolo Swaggins',
-                    'primaryContactEmail': 'yolo.swagins@example.com'},
+                    'primaryContactEmail': 'yolo.swaggins@example.com'},
     'failed_mandatory': ['Q1', 'Q3', 'Q5'],
     'discretionary': [],
     'counts': {
@@ -286,7 +286,7 @@ DISCRETIONARY_RECORD = {
                  'name': 'Bluedice Ideas Limited'},
     'declaration': {'nameOfOrganisation': 'Young Money Franchise LTD',
                     'primaryContact': 'Yolo Swaggins',
-                    'primaryContactEmail': 'yolo.swagins@example.com'},
+                    'primaryContactEmail': 'yolo.swaggins@example.com'},
     'failed_mandatory': [],
     'discretionary': [
         ('Q21', 'val1'),
@@ -338,13 +338,13 @@ def test_write_to_csv():
 
             successful_file.write.assert_has_calls([
                 call('supplier_name,supplier_declaration_name,supplier_id,contact_name,contact_email,completed_digital-outcomes,completed_digital-specialists,completed_user-research-studios,completed_user-research-participants,failed_digital-outcomes,failed_digital-specialists,failed_user-research-studios,failed_user-research-participants,draft_digital-outcomes,draft_digital-specialists,draft_user-research-studios,draft_user-research-participants\r\n'),  # noqa
-                call('Bluedice Ideas Limited,Young Money Franchise LTD,1,Yolo Swaggins,yolo.swagins@example.com,2,1,0,0,2,0,0,0,0,3,0,0\r\n'),  # noqa
+                call('Bluedice Ideas Limited,Young Money Franchise LTD,1,Yolo Swaggins,yolo.swaggins@example.com,2,1,0,0,2,0,0,0,0,3,0,0\r\n'),  # noqa
             ])
             failed_file.write.assert_has_calls([
                 call('supplier_name,supplier_declaration_name,supplier_id,failed_mandatory,contact_name,contact_email,completed_digital-outcomes,completed_digital-specialists,completed_user-research-studios,completed_user-research-participants,failed_digital-outcomes,failed_digital-specialists,failed_user-research-studios,failed_user-research-participants,draft_digital-outcomes,draft_digital-specialists,draft_user-research-studios,draft_user-research-participants\r\n'),  # noqa
-                call('Bluedice Ideas Limited,Young Money Franchise LTD,1,"Q1,Q3,Q5",Yolo Swaggins,yolo.swagins@example.com,2,1,0,0,2,0,0,0,0,3,0,0\r\n'),  # noqa
+                call('Bluedice Ideas Limited,Young Money Franchise LTD,1,"Q1,Q3,Q5",Yolo Swaggins,yolo.swaggins@example.com,2,1,0,0,2,0,0,0,0,3,0,0\r\n'),  # noqa
             ])
             discretionary_file.write.assert_has_calls([
                 call('supplier_name,supplier_declaration_name,supplier_id,Q21,Q22,Q23,contact_name,contact_email,completed_digital-outcomes,completed_digital-specialists,completed_user-research-studios,completed_user-research-participants,failed_digital-outcomes,failed_digital-specialists,failed_user-research-studios,failed_user-research-participants,draft_digital-outcomes,draft_digital-specialists,draft_user-research-studios,draft_user-research-participants\r\n'),  # noqa
-                call('Bluedice Ideas Limited,Young Money Franchise LTD,1,val1,val2,val3,Yolo Swaggins,yolo.swagins@example.com,2,1,0,0,2,0,0,0,0,3,0,0\r\n'),  # noqa
+                call('Bluedice Ideas Limited,Young Money Franchise LTD,1,val1,val2,val3,Yolo Swaggins,yolo.swaggins@example.com,2,1,0,0,2,0,0,0,0,3,0,0\r\n'),  # noqa
             ])
