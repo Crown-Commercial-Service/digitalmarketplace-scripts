@@ -43,21 +43,17 @@ def add_supplier_info(client):
 
 def add_framework_info(client, framework_slug):
     def inner(record):
-        try:
-            supplier_framework = client.get_supplier_framework_info(record['supplier']['id'], framework_slug)
-            supplier_framework = supplier_framework['frameworkInterest']
-            supplier_framework['declaration'] = supplier_framework['declaration'] or {}
+        supplier_framework = client.get_supplier_framework_info(record['supplier']['id'], framework_slug)
+        supplier_framework = supplier_framework['frameworkInterest']
+        supplier_framework['declaration'] = supplier_framework['declaration'] or {}
 
-            if supplier_framework['declaration'].get('status') != 'complete':
-                assert supplier_framework['onFramework'] is False, \
-                    "Incomplete declaration but not failed, have you inserted the framework result?"
+        if supplier_framework['declaration'].get('status') != 'complete':
+            assert supplier_framework['onFramework'] is False, \
+                "Incomplete declaration but not failed, have you inserted the framework result?"
 
-            return dict(record,
-                        declaration=supplier_framework['declaration'],
-                        onFramework=supplier_framework['onFramework'])
-        except HTTPError as e:
-            if e.status_code != 404:
-                raise
+        return dict(record,
+                    declaration=supplier_framework['declaration'],
+                    onFramework=supplier_framework['onFramework'])
 
     return inner
 
@@ -132,7 +128,6 @@ def find_suppliers_with_details(client, content_loader, framework_slug):
     declaration_content = content_loader.get_manifest(framework_slug, 'declaration')
 
     records = find_suppliers(client, framework_slug)
-    records = filter(None, records)
     records = pool.imap(add_supplier_info(client), records)
     records = pool.imap(add_framework_info(client, framework_slug), records)
     records = pool.imap(add_draft_counts(client, framework_slug), records)

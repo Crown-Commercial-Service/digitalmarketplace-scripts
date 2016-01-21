@@ -66,14 +66,6 @@ def test_add_framework_info(mock_data_client):
     ]
 
 
-def test_add_framework_info_skips_404_error(mock_data_client):
-    mock_data_client.get_supplier_framework_info.side_effect = HTTPError(Mock(status_code=404))
-
-    framework_info_adder = export_dos_suppliers.add_framework_info(mock_data_client, 'framework-slug')
-
-    assert framework_info_adder({'supplier': {'id': 1}}) is None
-
-
 def test_add_framework_info_fails_on_non_404_error(mock_data_client):
     mock_data_client.get_supplier_framework_info.side_effect = HTTPError(Mock(status_code=400))
 
