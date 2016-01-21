@@ -9,12 +9,6 @@ from dmscripts.insert_dos_framework_results import CORRECT_DECLARATION_RESPONSES
 from dmapiclient import HTTPError
 
 
-# TODO: move to conftest
-@pytest.fixture
-def mock_data_client():
-    return Mock()
-
-
 def test_find_suppliers_produces_results_with_supplier_ids(mock_data_client):
     mock_data_client.get_interested_suppliers.return_value = {
         'interestedSuppliers': [4, 3, 2]
