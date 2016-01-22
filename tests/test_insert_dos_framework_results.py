@@ -225,11 +225,6 @@ COMPLETE_RESEARCH_PARTICIPANTS_DRAFT = {
 }
 
 
-@pytest.fixture
-def mock_data_client():
-    return mock.Mock()
-
-
 def test_insert_result_calls_with_correct_arguments(mock_data_client):
     assert insert_result(mock_data_client, 123456, True, 'user') == '  Result set OK: 123456'
     mock_data_client.set_framework_result.assert_called_with(123456, 'digital-outcomes-and-specialists', True, 'user')
