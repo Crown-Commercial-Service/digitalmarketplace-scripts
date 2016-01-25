@@ -85,7 +85,7 @@ def process_submitted_drafts(client, supplier_id, user):
         else:
             # Update the draft to be 'failed'
             print("  Service essentials failed for draft {} in lot '{}'".format(draft['id'], draft['lot']))
-            client.update_draft_service(draft['id'], {"status": "failed"}, user)
+            client.update_draft_service_status(draft['id'], "failed", user)
     print("  Supplier has valid service: {}".format("YES" if supplier_has_submitted_services else "NO"))
     return supplier_has_submitted_services
 
