@@ -347,7 +347,7 @@ def test_process_submitted_drafts_for_good_services(mock_data_client):
         "services": [COMPLETE_OUTCOMES_DRAFT, COMPLETE_RESEARCH_PARTICIPANTS_DRAFT]
     }
     assert process_submitted_drafts(mock_data_client, 12345, 'user') is True
-    mock_data_client.update_draft_service.assert_not_called()
+    mock_data_client.update_draft_service_status.assert_not_called()
 
 
 def test_process_submitted_drafts_with_bad_service(mock_data_client):
@@ -358,7 +358,7 @@ def test_process_submitted_drafts_with_bad_service(mock_data_client):
         "services": [bad_service]
     }
     assert process_submitted_drafts(mock_data_client, 12345, 'user') is False
-    mock_data_client.update_draft_service.assert_called_with(42, {'status': 'failed'}, 'user')
+    mock_data_client.update_draft_service_status.assert_called_with(42, 'failed', 'user')
 
 
 def test_process_submitted_drafts_with_bad_and_good_service(mock_data_client):
@@ -369,7 +369,7 @@ def test_process_submitted_drafts_with_bad_and_good_service(mock_data_client):
         "services": [bad_service, COMPLETE_STUDIOS_DRAFT]
     }
     assert process_submitted_drafts(mock_data_client, 12345, 'user') is True
-    mock_data_client.update_draft_service.assert_called_with(24, {'status': 'failed'}, 'user')
+    mock_data_client.update_draft_service_status.assert_called_with(24, 'failed', 'user')
 
 
 def test_process_dos_results_for_successful(mock_data_client):
