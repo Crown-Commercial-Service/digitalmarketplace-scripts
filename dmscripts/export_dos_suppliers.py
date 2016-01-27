@@ -139,8 +139,12 @@ def find_suppliers_with_details(client, content_loader, framework_slug):
 def supplier_info(record):
     return [
         ('supplier_name', record['supplier']['name']),
-        ('supplier_declaration_name', record['declaration'].get('nameOfOrganisation', 'ERROR')),
+        ('supplier_declaration_name', record['declaration'].get('nameOfOrganisation', '')),
         ('supplier_id', record['supplier']['id']),
+        ('trading_name', record['declaration'].get('tradingNames', '')),
+        ('registered_address', record['declaration'].get('registeredAddress', '')),
+        ('company_number', record['declaration'].get('companyRegistrationNumber', '')),
+        ('country_of_registration', record['declaration'].get('currentRegisteredCountry', '')),
     ]
 
 
@@ -158,8 +162,8 @@ def discretionary_questions(record):
 
 def contact_details(record):
     return [
-        ('contact_name', record['declaration'].get('primaryContact', 'ERROR')),
-        ('contact_email', record['declaration'].get('primaryContactEmail', 'ERROR')),
+        ('contact_name', record['declaration'].get('primaryContact', '')),
+        ('contact_email', record['declaration'].get('primaryContactEmail', '')),
     ]
 
 
