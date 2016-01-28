@@ -11,7 +11,7 @@ Produces three files;
    incorrectly.
 
 Usage:
-    scripts/export-suppliers.py <stage> <api_token> <content_path> <output_dir>
+    scripts/export-dos-suppliers.py <stage> <api_token> <content_path> <output_dir>
 """
 import sys
 sys.path.insert(0, '.')
