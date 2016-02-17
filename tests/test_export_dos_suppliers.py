@@ -24,6 +24,18 @@ def test_find_suppliers_produces_results_with_supplier_ids(mock_data_client):
     ]
 
 
+def test_find_suppliers_filtered_by_supplier_ids(mock_data_client):
+    mock_data_client.get_interested_suppliers.return_value = {
+        'interestedSuppliers': [4, 3, 2]
+    }
+
+    records = list(export_dos_suppliers.find_suppliers(mock_data_client, 'framework-slug', supplier_ids=[2, 4]))
+
+    assert records == [
+        {'supplier_id': 4}, {'supplier_id': 2},
+    ]
+
+
 def test_add_supplier_info(mock_data_client):
     mock_data_client.get_supplier.side_effect = [
         {'suppliers': 'supplier 1'},
