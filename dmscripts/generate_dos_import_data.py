@@ -25,8 +25,8 @@ IMPORT_DATA_CONFIG = {
         },
         'result_letter': {
             'required_columns': [
-                'supplier_declaration_name',
                 'supplier_id',
+                'supplier_declaration_name'
             ]
         }
     },
@@ -35,9 +35,10 @@ IMPORT_DATA_CONFIG = {
 
 def reduce_row_to_list(row, selected_indices):
     result = []
-    for idx, item in enumerate(row):
-        if idx in selected_indices:
-            result.append(item)
+    lastIdx = len(row) - 1
+    for idx in selected_indices:
+        if idx <= lastIdx:
+            result.append(row[idx])
     return result
 
 
@@ -117,6 +118,7 @@ def create_import_data_file_for_documents(import_data, target_dir, document_type
 
 
 def generate_import_data(suppliers_file_path, import_data_dir_path, framework_slug, document_type):
-    suppliers_csv_data = get_list_from_csv_file(open(suppliers_file_path))
+    with open(suppliers_file_path) as suppliers_file:
+        suppliers_csv_data = get_list_from_csv_file(suppliers_file)
     suppliers_data = reformat_csv_data(suppliers_csv_data, framework_slug, document_type)
     create_import_data_file_for_documents(suppliers_data, import_data_dir_path, document_type)

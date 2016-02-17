@@ -1,4 +1,4 @@
-supplier_declaration_name	supplier_id	completed_lots_1	completed_lots_2	completed_lots_3	completed_lots_4
-CloudTech limited	12345	Digital outcomes	Digital specialists		
-Human Research Systems limited	67890	User research studios	User research participants		
-Total Web limited	66789	Digital outcomes	Digital specialists		
+supplier_id	supplier_declaration_name	completed_lots_1	completed_lots_2	completed_lots_3	completed_lots_4
+12345	CloudTech limited	Digital outcomes	Digital specialists		
+67890	Human Research Systems limited	User research studios	User research participants		
+66789	Total Web limited	Digital outcomes	Digital specialists		

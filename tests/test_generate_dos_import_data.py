@@ -24,10 +24,10 @@ FRAMEWORK_AGREEMENT_IMPORT_DATA_LIST = [
 ]
 
 RESULT_LETTER_IMPORT_DATA_LIST = [
-    ["supplier_declaration_name", "supplier_id", "completed_lots_1", "completed_lots_2", "completed_lots_3", "completed_lots_4"],  # noqa
-    ["CloudTech limited", "12345", "Digital outcomes", "Digital specialists", "", ""],  # noqa
-    ["Human Research Systems limited", "67890", "User research studios", "User research participants", "", ""],  # noqa
-    ["Total Web limited", "66789", "Digital outcomes", "Digital specialists", "", ""]  # noqa
+    ["supplier_id", "supplier_declaration_name", "completed_lots_1", "completed_lots_2", "completed_lots_3", "completed_lots_4"],  # noqa
+    ["12345", "CloudTech limited",  "Digital outcomes", "Digital specialists", "", ""],  # noqa
+    ["67890", "Human Research Systems limited", "User research studios", "User research participants", "", ""],  # noqa
+    ["66789", "Total Web limited", "Digital outcomes", "Digital specialists", "", ""]  # noqa
 ]
 
 
