@@ -26,9 +26,10 @@ LOTS = [
 ]
 
 
-def find_suppliers(client, framework_slug):
+def find_suppliers(client, framework_slug, supplier_ids=None):
     suppliers = client.get_interested_suppliers(framework_slug)['interestedSuppliers']
-    return ({'supplier_id': supplier_id} for supplier_id in suppliers)
+    return ({'supplier_id': supplier_id} for supplier_id in suppliers
+            if (supplier_ids is None) or (supplier_id in supplier_ids))
 
 
 def add_supplier_info(client):
@@ -121,13 +122,13 @@ def add_failed_questions(declaration_content):
     return inner
 
 
-def find_suppliers_with_details(client, content_loader, framework_slug):
+def find_suppliers_with_details(client, content_loader, framework_slug, supplier_ids=None):
     pool = ThreadPool(30)
 
     content_loader.load_manifest(framework_slug, 'declaration', 'declaration')
     declaration_content = content_loader.get_manifest(framework_slug, 'declaration')
 
-    records = find_suppliers(client, framework_slug)
+    records = find_suppliers(client, framework_slug, supplier_ids)
     records = pool.imap(add_supplier_info(client), records)
     records = pool.imap(add_framework_info(client, framework_slug), records)
     records = pool.imap(add_draft_counts(client, framework_slug), records)
@@ -259,8 +260,8 @@ class MultiCSVWriter(object):
         print(" ".join("{}={}".format(handler.NAME, self._counters[handler.NAME]) for handler in self.handlers))
 
 
-def export_suppliers(client, content_loader, output_dir):
-    records = find_suppliers_with_details(client, content_loader, FRAMEWORK_SLUG)
+def export_suppliers(client, content_loader, output_dir, supplier_ids=None):
+    records = find_suppliers_with_details(client, content_loader, FRAMEWORK_SLUG, supplier_ids)
 
     handlers = [SuccessfulHandler(), FailedHandler(), DiscretionaryHandler()]
 

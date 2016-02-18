@@ -11,7 +11,7 @@ Produces three files;
    incorrectly.
 
 Usage:
-    scripts/export-dos-suppliers.py <stage> <api_token> <content_path> <output_dir>
+    scripts/export-dos-suppliers.py <stage> <api_token> <content_path> <output_dir> [<supplier_id_file>]
 """
 import sys
 sys.path.insert(0, '.')
@@ -34,4 +34,11 @@ if __name__ == '__main__':
     client = DataAPIClient(get_api_endpoint_from_stage(STAGE), API_TOKEN)
     content_loader = ContentLoader(CONTENT_PATH)
 
-    export_suppliers(client, content_loader, OUTPUT_DIR)
+    supplier_id_file = arguments['<supplier_id_file>']
+    if supplier_id_file:
+        with open(arguments['<supplier_id_file>'], 'r') as f:
+            supplier_ids = map(int, filter(None, [l.strip() for l in f.readlines()]))
+    else:
+        supplier_ids = None
+
+    export_suppliers(client, content_loader, OUTPUT_DIR, supplier_ids)
