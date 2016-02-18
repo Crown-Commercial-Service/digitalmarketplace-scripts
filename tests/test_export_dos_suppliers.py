@@ -57,6 +57,29 @@ def test_add_supplier_info(mock_data_client):
     ]
 
 
+def test_add_services(mock_data_client):
+    mock_data_client.find_draft_services.side_effect = [
+        {"services": ["service1", "service2"]},
+        {"services": ["service3", "service4"]},
+    ]
+
+    service_adder = export_dos_suppliers.add_services(mock_data_client, 'framework-slug')
+    in_records = [
+        {"supplier_id": 1},
+        {"supplier_id": 2},
+    ]
+    out_records = list(map(service_adder, in_records))
+
+    mock_data_client.find_draft_services.assert_has_calls([
+        call(1, framework='framework-slug'),
+        call(2, framework='framework-slug'),
+    ])
+    assert out_records == [
+        {"supplier_id": 1, "services": ["service1", "service2"]},
+        {"supplier_id": 2, "services": ["service3", "service4"]},
+    ]
+
+
 def test_add_framework_info(mock_data_client):
     mock_data_client.get_supplier_framework_info.side_effect = [
         {'frameworkInterest': {'declaration': {'status': 'complete'}, 'onFramework': True}},
@@ -65,16 +88,16 @@ def test_add_framework_info(mock_data_client):
 
     framework_info_adder = export_dos_suppliers.add_framework_info(mock_data_client, 'framework-slug')
     records = [
-        framework_info_adder({'supplier': {'id': 1}}),
-        framework_info_adder({'supplier': {'id': 2}}),
+        framework_info_adder({'supplier_id': 1}),
+        framework_info_adder({'supplier_id': 2}),
     ]
 
     mock_data_client.get_supplier_framework_info.assert_has_calls([
         call(1, 'framework-slug'), call(2, 'framework-slug')
     ])
     assert records == [
-        {'supplier': {'id': 1}, 'declaration': {'status': 'complete'}, 'onFramework': True},
-        {'supplier': {'id': 2}, 'declaration': {'status': 'complete'}, 'onFramework': False},
+        {'supplier_id': 1, 'declaration': {'status': 'complete'}, 'onFramework': True},
+        {'supplier_id': 2, 'declaration': {'status': 'complete'}, 'onFramework': False},
     ]
 
 
@@ -84,7 +107,7 @@ def test_add_framework_info_fails_on_non_404_error(mock_data_client):
     framework_info_adder = export_dos_suppliers.add_framework_info(mock_data_client, 'framework-slug')
 
     with pytest.raises(HTTPError):
-        framework_info_adder({'supplier': {'id': 1}})
+        framework_info_adder({'supplier_id': 1})
 
 
 def test_add_framework_info_fails_if_incomplete_declaration_is_not_failed(mock_data_client):
@@ -95,7 +118,7 @@ def test_add_framework_info_fails_if_incomplete_declaration_is_not_failed(mock_d
     framework_info_adder = export_dos_suppliers.add_framework_info(mock_data_client, 'framework-slug')
 
     with pytest.raises(AssertionError):
-        framework_info_adder({'supplier': {'id': 1}})
+        framework_info_adder({'supplier_id': 1})
 
 
 def test_add_draft_counts(mock_data_client):
@@ -361,14 +384,14 @@ def test_write_to_csv():
             writer.write_row(DISCRETIONARY_RECORD)
 
             successful_file.write.assert_has_calls([
-                call('supplier_name,supplier_declaration_name,supplier_id,trading_name,registered_address,company_number,country_of_registration,contact_name,contact_email,completed_digital-outcomes,completed_digital-specialists,completed_user-research-studios,completed_user-research-participants,failed_digital-outcomes,failed_digital-specialists,failed_user-research-studios,failed_user-research-participants,draft_digital-outcomes,draft_digital-specialists,draft_user-research-studios,draft_user-research-participants\r\n'),  # noqa
-                call('Bluedice Ideas Limited,Young Money Franchise LTD,1,Old Money Franchise,The house on the street,,France,Yolo Swaggins,yolo.swaggins@example.com,2,1,0,0,2,0,0,0,0,3,0,0\r\n'),  # noqa
+                call('supplier_name,supplier_declaration_name,supplier_id,trading_name,trading_status,registered_address,duns_number,company_number,country_of_registration,vat_number,size,contact_name,contact_email,completed_digital-outcomes,completed_digital-specialists,completed_user-research-studios,completed_user-research-participants,failed_digital-outcomes,failed_digital-specialists,failed_user-research-studios,failed_user-research-participants,draft_digital-outcomes,draft_digital-specialists,draft_user-research-studios,draft_user-research-participants\r\n'),  # noqa
+                call('Bluedice Ideas Limited,Young Money Franchise LTD,1,Old Money Franchise,,The house on the street,,,France,,,Yolo Swaggins,yolo.swaggins@example.com,2,1,0,0,2,0,0,0,0,3,0,0\r\n'),  # noqa
             ])
             failed_file.write.assert_has_calls([
-                call('supplier_name,supplier_declaration_name,supplier_id,trading_name,registered_address,company_number,country_of_registration,failed_mandatory,contact_name,contact_email,completed_digital-outcomes,completed_digital-specialists,completed_user-research-studios,completed_user-research-participants,failed_digital-outcomes,failed_digital-specialists,failed_user-research-studios,failed_user-research-participants,draft_digital-outcomes,draft_digital-specialists,draft_user-research-studios,draft_user-research-participants\r\n'),  # noqa
-                call('Bluedice Ideas Limited,Young Money Franchise LTD,1,Old Money Franchise,The house on the street,,France,"Q1,Q3,Q5",Yolo Swaggins,yolo.swaggins@example.com,2,1,0,0,2,0,0,0,0,3,0,0\r\n'),  # noqa
+                call('supplier_name,supplier_declaration_name,supplier_id,trading_name,trading_status,registered_address,duns_number,company_number,country_of_registration,vat_number,size,failed_mandatory,contact_name,contact_email,completed_digital-outcomes,completed_digital-specialists,completed_user-research-studios,completed_user-research-participants,failed_digital-outcomes,failed_digital-specialists,failed_user-research-studios,failed_user-research-participants,draft_digital-outcomes,draft_digital-specialists,draft_user-research-studios,draft_user-research-participants\r\n'),  # noqa
+                call('Bluedice Ideas Limited,Young Money Franchise LTD,1,Old Money Franchise,,The house on the street,,,France,,,"Q1,Q3,Q5",Yolo Swaggins,yolo.swaggins@example.com,2,1,0,0,2,0,0,0,0,3,0,0\r\n'),  # noqa
             ])
             discretionary_file.write.assert_has_calls([
-                call('supplier_name,supplier_declaration_name,supplier_id,trading_name,registered_address,company_number,country_of_registration,Q21,Q22,Q23,contact_name,contact_email,completed_digital-outcomes,completed_digital-specialists,completed_user-research-studios,completed_user-research-participants,failed_digital-outcomes,failed_digital-specialists,failed_user-research-studios,failed_user-research-participants,draft_digital-outcomes,draft_digital-specialists,draft_user-research-studios,draft_user-research-participants\r\n'),  # noqa
-                call('Bluedice Ideas Limited,Young Money Franchise LTD,1,Old Money Franchise,The house on the street,,France,val1,val2,val3,Yolo Swaggins,yolo.swaggins@example.com,2,1,0,0,2,0,0,0,0,3,0,0\r\n'),  # noqa
+                call('supplier_name,supplier_declaration_name,supplier_id,trading_name,trading_status,registered_address,duns_number,company_number,country_of_registration,vat_number,size,Q21,Q22,Q23,contact_name,contact_email,completed_digital-outcomes,completed_digital-specialists,completed_user-research-studios,completed_user-research-participants,failed_digital-outcomes,failed_digital-specialists,failed_user-research-studios,failed_user-research-participants,draft_digital-outcomes,draft_digital-specialists,draft_user-research-studios,draft_user-research-participants\r\n'),  # noqa
+                call('Bluedice Ideas Limited,Young Money Franchise LTD,1,Old Money Franchise,,The house on the street,,,France,,,val1,val2,val3,Yolo Swaggins,yolo.swaggins@example.com,2,1,0,0,2,0,0,0,0,3,0,0\r\n'),  # noqa
             ])

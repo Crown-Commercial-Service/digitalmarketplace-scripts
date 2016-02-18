@@ -42,9 +42,19 @@ def add_supplier_info(client):
     return inner
 
 
+def add_services(client, framework_slug):
+    def inner(record):
+        drafts = client.find_draft_services(record['supplier_id'], framework=framework_slug)
+
+        return dict(record,
+                    services=drafts['services'])
+
+    return inner
+
+
 def add_framework_info(client, framework_slug):
     def inner(record):
-        supplier_framework = client.get_supplier_framework_info(record['supplier']['id'], framework_slug)
+        supplier_framework = client.get_supplier_framework_info(record['supplier_id'], framework_slug)
         supplier_framework = supplier_framework['frameworkInterest']
         supplier_framework['declaration'] = supplier_framework['declaration'] or {}
 
@@ -143,9 +153,14 @@ def supplier_info(record):
         ('supplier_declaration_name', record['declaration'].get('nameOfOrganisation', '')),
         ('supplier_id', record['supplier']['id']),
         ('trading_name', record['declaration'].get('tradingNames', '')),
+        ('trading_status', record['declaration'].get('tradingStatus', '')),
         ('registered_address', record['declaration'].get('registeredAddress', '')),
+        ('duns_number', record['supplier'].get('dunsNumber', '')),
         ('company_number', record['declaration'].get('companyRegistrationNumber', '')),
         ('country_of_registration', record['declaration'].get('currentRegisteredCountry', '')),
+        ('vat_number', record['declaration'].get('registeredVATNumber', '')),
+        ('size', record['declaration'].get('organisationSize', '')),
+
     ]
 
 
