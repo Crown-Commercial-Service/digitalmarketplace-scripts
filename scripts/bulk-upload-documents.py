@@ -1,11 +1,24 @@
 #!/usr/bin/env python
 """
-This will scan a directory for files with a filename matching -<supplier_id>_Framework_Agreement.<document_type>
-and upload them to the S3 documents bucket for <stage> with the file path:
+This script requires a tab-separated file matching supplier ids to supplier names; the first column must be the
+supplier ID and the second column is the supplier name, e.g.:
 
-<framework_slug>/<bucket_category>/<supplier_id>/<supplier_id>-<document_category>.<document_type>
-e.g.
-g-cloud-7/agreements/1234/1234-countersigned-framework-agreement.pdf
+  12345    Supplier Name 1
+  123456   Supplier Name 2
+  ...
+
+This will:
+ * scan a directory for files with a filename matching <supplier_id>-document-name.<document_type>
+   NOTE: all filenames in the folder and subdirectories MUST begin with a supplier ID or the script will fail
+
+ * upload them to the S3 documents bucket for <stage> with the file path:
+   <framework_slug>/<bucket_category>/<supplier_id>/<supplier_id>-document-name.<document_type>
+   e.g.
+   g-cloud-7/agreements/1234/1234-countersigned-framework-agreement.pdf
+
+ * set a "download filename" that the file will be downloaded as, which is:
+   <supplier-name>-<supplier-id>-<document-name>.<document-type>
+   Where the <supplier-name> is determined by looking up the supplier ID from the tab-separated file
 
 Usage:
     scripts/bulk-upload-documents.py <stage> <local_documents_directory> <framework_slug> <tsv_path> [options]
