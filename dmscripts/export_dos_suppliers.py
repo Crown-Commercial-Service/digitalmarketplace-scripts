@@ -42,14 +42,37 @@ def add_supplier_info(client):
     return inner
 
 
-def add_services(client, framework_slug):
+def add_services(client, framework_slug, lot=None, status=None):
     def inner(record):
-        drafts = client.find_draft_services(record['supplier_id'], framework=framework_slug)
+        drafts = client.find_draft_services(record["supplier_id"], framework=framework_slug)
+        drafts = drafts["services"]
+
+        drafts = [
+            draft for draft in drafts
+            if (not lot or draft["lotSlug"] == lot) and (not status or draft["status"] == status)
+        ]
 
         return dict(record,
-                    services=drafts['services'])
+                    services=drafts)
 
     return inner
+
+
+def count_field_in_record(field, record):
+    return sum(1
+               for service in record["services"]
+               if field["label"] in service.get(field["id"], []))
+
+
+def make_field_title(field):
+    return "{} {}".format(field["id"], field["label"])
+
+
+def make_field_label_counts(fields, record):
+    return [
+        (make_field_title(field), count_field_in_record(field, record))
+        for field in fields
+    ]
 
 
 def add_framework_info(client, framework_slug):

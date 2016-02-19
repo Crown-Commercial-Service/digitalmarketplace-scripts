@@ -14,7 +14,6 @@ from docopt import docopt
 from dmscripts.env import get_api_endpoint_from_stage
 from dmscripts.export_dos_suppliers import find_suppliers, FRAMEWORK_SLUG, add_framework_info, add_services
 from dmapiclient import DataAPIClient
-from dmutils.content_loader import ContentLoader
 
 if sys.version_info[0] < 3:
     import unicodecsv as csv
@@ -33,10 +32,14 @@ def find_all_labs(client):
         lambda record: record['lot'] == 'user-research-studios' and record['status'] == 'submitted',
         services)
 
+    return services
+
+
+def write_csv(services, filename):
     writer = None
     bad_fields = ['links']
 
-    with open("dos-labs.csv", "w+") as f:
+    with open(filename, "w+") as f:
         for service in services:
             service = {key: value for key, value in service.items() if key not in bad_fields}
             if writer is None:
@@ -52,4 +55,4 @@ if __name__ == '__main__':
     API_TOKEN = arguments['<api_token>']
 
     client = DataAPIClient(get_api_endpoint_from_stage(STAGE), API_TOKEN)
-    find_all_labs(client)
+    write_csv(find_all_labs(client), "output/dos-labs.csv")

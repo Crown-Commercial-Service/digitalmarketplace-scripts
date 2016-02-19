@@ -80,6 +80,79 @@ def test_add_services(mock_data_client):
     ]
 
 
+def test_add_services_filtered_by_lot(mock_data_client):
+    mock_data_client.find_draft_services.return_value = {
+        "services": [
+            {"lotSlug": "good"},
+            {"lotSlug": "bad"}
+        ]
+    }
+    service_adder = export_dos_suppliers.add_services(
+        mock_data_client, "framework-slug",
+        lot="good")
+    assert service_adder({"supplier_id": 1}) == {
+        "supplier_id": 1,
+        "services": [
+            {"lotSlug": "good"},
+        ]
+    }
+    mock_data_client.find_draft_services.assert_has_calls([
+        call(1, framework='framework-slug'),
+    ])
+
+
+def test_add_services_filtered_by_status(mock_data_client):
+    mock_data_client.find_draft_services.return_value = {
+        "services": [
+            {"status": "submitted"},
+            {"status": "failed"}
+        ]
+    }
+    service_adder = export_dos_suppliers.add_services(
+        mock_data_client, "framework-slug",
+        status="submitted")
+    assert service_adder({"supplier_id": 1}) == {
+        "supplier_id": 1,
+        "services": [
+            {"status": "submitted"},
+        ]
+    }
+    mock_data_client.find_draft_services.assert_has_calls([
+        call(1, framework='framework-slug'),
+    ])
+
+
+@pytest.mark.parametrize('record,count', [
+    ({"services": [
+        {"theId": ["Label", "other"]},
+        {"theId": ["other"]},
+        {"theId": ["Label"]},
+    ]}, 2),
+    ({"services": []}, 0),
+    ({"services": [{}]}, 0),
+])
+def test_count_field_in_record(record, count):
+    field = {"label": "Label", "id": "theId"}
+    assert export_dos_suppliers.count_field_in_record(field, record) == count
+
+
+def test_make_field_label_counts():
+    fields = [
+        {"label": "Label1", "id": "ID1"},
+        {"label": "Label2", "id": "ID1"},
+    ]
+    record = {
+        "services": [
+            {"ID1": ["Label1", "other"]},
+            {"ID1": ["Label1", "Label2"]}
+        ]
+    }
+
+    assert export_dos_suppliers.make_field_label_counts(fields, record) == [
+        ("ID1 Label1", 2), ("ID1 Label2", 1)
+    ]
+
+
 def test_add_framework_info(mock_data_client):
     mock_data_client.get_supplier_framework_info.side_effect = [
         {'frameworkInterest': {'declaration': {'status': 'complete'}, 'onFramework': True}},
