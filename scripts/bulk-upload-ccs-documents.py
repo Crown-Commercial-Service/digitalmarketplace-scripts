@@ -1,14 +1,14 @@
 """
-This will scan a directory for files with a filename matching -<supplier_id>_Framework_Agreement.<document_type>
-and upload them to the S3 documents bucket for <stage> with the file path:
+This will:
+ * scan a directory for files with filenames matching ignored-stuff-<supplier_id>-ignored-stuff.<document_type>
 
-<framework_slug>/<bucket_category>/<supplier_id>/<supplier_id>-<document_category>.<document_type>
-e.g.
-g-cloud-7/agreements/1234/1234-countersigned-framework-agreement.pdf
+ * upload them to the S3 documents bucket for <stage> with the file path:
+   <framework_slug>/<bucket_category>/<supplier_id>/<supplier_id>-<document_category>.<document_type>
+   e.g.
+   g-cloud-7/agreements/1234/1234-countersigned-framework-agreement.pdf
 
 Usage:
-    scripts/bulk-upload-documents.py <stage> <local_documents_directory> <framework_slug>
-    <document_category> [options]
+scripts/bulk-upload-ccs-documents.py <stage> <local_documents_directory> <framework_slug> <document_category> [options]
 
 Options:
     --bucket_category=<bucket_category>  [default: agreements]
