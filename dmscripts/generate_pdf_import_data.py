@@ -59,7 +59,7 @@ def get_new_field_names(required_fields):
     return field_names
 
 
-def reformat_csv_data(csv_data, framework_slug, document_type):
+def filter_csv_data(csv_data, framework_slug, document_type):
     config = IMPORT_DATA_CONFIG[framework_slug]
     required_fields = config[document_type]['required_fields']
     import_data = []
@@ -95,5 +95,5 @@ def create_import_data_file_for_documents(import_data, target_dir, framework_slu
 def generate_import_data(suppliers_file_path, import_data_dir_path, framework_slug, document_type):
     with open(suppliers_file_path) as suppliers_file:
         suppliers_csv_data = get_list_from_csv_file(suppliers_file)
-    suppliers_data = reformat_csv_data(suppliers_csv_data, framework_slug, document_type)
+    suppliers_data = filter_csv_data(suppliers_csv_data, framework_slug, document_type)
     create_import_data_file_for_documents(suppliers_data, import_data_dir_path, framework_slug, document_type)

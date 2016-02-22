@@ -5,13 +5,13 @@ Produces the successful.txt file containing all the successful suppliers, in a T
 to fit the fields in the framework agreeement PDFs.
 
 Usage:
-    scripts/generate-dos-import-data.py <framework_slug> <document_type> <input_file> <output_dir>
+    scripts/generate-pdf-import-data.py <framework_slug> <document_type> <input_file> <output_dir>
 """
 import sys
 sys.path.insert(0, '.')
 
 from docopt import docopt
-from dmscripts.generate_dos_import_data import generate_import_data
+from dmscripts.generate_pdf_import_data import generate_import_data
 
 if __name__ == '__main__':
     arguments = docopt(__doc__)
