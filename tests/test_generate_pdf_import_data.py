@@ -3,8 +3,8 @@ import os
 import tempfile
 import shutil
 
-from dmscripts.generate_dos_import_data import (
-    get_list_from_csv_file, fill_list_based_on_flags, reformat_csv_data,
+from dmscripts.generate_pdf_import_data import (
+    get_list_from_csv_file, fill_list_based_on_flags, filter_csv_data,
     create_import_data_file_for_documents, get_new_field_names)
 
 
@@ -66,14 +66,14 @@ def test_get_new_field_names():
     ]
 
 
-def test_reformat_csv_data_for_framework_agreement():
-    assert reformat_csv_data(
+def test_filter_csv_data_for_framework_agreement():
+    assert filter_csv_data(
         CSV_FILE_LIST, 'digital-outcomes-and-specialists', 'framework_agreement'
     ) == FRAMEWORK_AGREEMENT_IMPORT_DATA_LIST
 
 
-def test_reformat_csv_data_for_framework_agreement():
-    assert reformat_csv_data(
+def test_filter_csv_data_for_framework_agreement():
+    assert filter_csv_data(
         CSV_FILE_LIST, 'digital-outcomes-and-specialists', 'result_letter'
     ) == RESULT_LETTER_IMPORT_DATA_LIST
 

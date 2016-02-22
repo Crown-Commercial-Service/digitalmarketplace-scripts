@@ -5,7 +5,7 @@ Produces the successful.txt file containing all the successful suppliers, in a T
 to fit the fields in the framework agreeement PDFs.
 
 Usage:
-    scripts/generate-dos-import-data.py <framework_slug> <document_type> <input_file> <output_dir>
+    scripts/generate-pdf-import-data.py <framework_slug> <document_type> <input_file> <output_dir>
 """
 import sys
 sys.path.insert(0, '.')
