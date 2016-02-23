@@ -143,7 +143,7 @@ def test_make_fields_from_content_question():
                          "options": [
                              {"label": "Option 1"},
                              {"label": "Option 2"},
-                          ]}),
+                         ]}),
         ContentQuestion({"id": "custom",
                          "type": "custom",
                          "fields": {

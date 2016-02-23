@@ -1,4 +1,4 @@
-#/usr/bin/env python
+#!/usr/bin/env python
 """Export DOS specialists
 
 Export DOS specialists as a CSV for manual review.
