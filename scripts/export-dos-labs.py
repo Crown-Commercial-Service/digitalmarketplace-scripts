@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-"""Export DOS labs
+"""Export DOS user research labs
 
 Usage:
     scripts/export-dos-labs.py <stage> <api_token>
