@@ -58,20 +58,43 @@ def add_services(client, framework_slug, lot=None, status=None):
     return inner
 
 
-def count_field_in_record(field, record):
+def count_field_in_record(field_id, field_label, record):
     return sum(1
                for service in record["services"]
-               if field["label"] in service.get(field["id"], []))
+               if field_label in service.get(field_id, []))
 
 
-def make_field_title(field):
-    return "{} {}".format(field["id"], field["label"])
+def make_field_title(field_id, field_label):
+    return "{} {}".format(field_id, field_label)
 
 
-def make_field_label_counts(fields, record):
+def make_fields_from_content_question(question, record):
+    if question["type"] == "checkboxes":
+        for option in question.options:
+            # Make a CSV column for each label
+            yield (
+                make_field_title(question.id, option["label"]),
+                count_field_in_record(question.id, option["label"], record)
+            )
+    elif question.fields:
+        for field_id in sorted(question.fields.values()):
+            # Make a CSV column containing all values
+            yield (
+                field_id,
+                "|".join(service.get(field_id, "") for service in record["services"])
+            )
+    else:
+        yield (
+            question["id"],
+            "|".join(str(service.get(question["id"], "")) for service in record["services"])
+        )
+
+
+def make_fields_from_content_questions(questions, record):
     return [
-        (make_field_title(field), count_field_in_record(field, record))
-        for field in fields
+        field
+        for question in questions
+        for field in make_fields_from_content_question(question, record)
     ]
 
 
@@ -155,6 +178,21 @@ def add_failed_questions(declaration_content):
     return inner
 
 
+def find_services_by_lot(client, framework_slug, lot_slug):
+    pool = ThreadPool(30)
+    service_adder = add_services(client, framework_slug,
+                                 lot=lot_slug,
+                                 status="submitted")
+
+    records = find_suppliers(client, framework_slug)
+    records = pool.imap(add_supplier_info(client), records)
+    records = pool.imap(add_framework_info(client, framework_slug), records)
+    records = pool.imap(service_adder, records)
+    records = filter(lambda record: len(record["services"]) > 0, records)
+
+    return records
+
+
 def find_suppliers_with_details(client, content_loader, framework_slug, supplier_ids=None):
     pool = ThreadPool(30)
 
@@ -212,6 +250,24 @@ def service_counts(record):
         for status in DRAFT_STATUSES
         for lot in LOTS
     ]
+
+
+def write_csv(records, make_row, filename):
+    """Write a list of records out to CSV"""
+    def fieldnames(row):
+        return [field[0] for field in row]
+
+    writer = None
+
+    with open(filename, "w+") as f:
+        for record in records:
+            sys.stdout.write(".")
+            sys.stdout.flush()
+            row = make_row(record)
+            if writer is None:
+                writer = csv.DictWriter(f, fieldnames=fieldnames(row))
+                writer.writeheader()
+            writer.writerow(dict(row))
 
 
 class SuccessfulHandler(object):

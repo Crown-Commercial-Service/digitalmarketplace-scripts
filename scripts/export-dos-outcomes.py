@@ -15,80 +15,42 @@ import csv
 from docopt import docopt
 from dmscripts.env import get_api_endpoint_from_stage
 from dmscripts.export_dos_suppliers import (
-    find_suppliers, add_supplier_info, FRAMEWORK_SLUG, add_framework_info,
-    add_services, make_field_label_counts
+    find_services_by_lot, FRAMEWORK_SLUG, make_fields_from_content_questions, write_csv
 )
 from dmapiclient import DataAPIClient
 from dmutils.content_loader import ContentLoader
 
 
 def find_all_outcomes(client):
-    pool = ThreadPool(20)
-    records = find_suppliers(client, FRAMEWORK_SLUG)
-    records = pool.imap(add_supplier_info(client), records)
-    records = pool.imap(add_framework_info(client, FRAMEWORK_SLUG), records)
-    # records = filter(lambda record: record['onFramework'], records)
-    records = pool.imap(
-        add_services(client, FRAMEWORK_SLUG,
-                     lot="digital-outcomes",
-                     status="submitted"),
-        records)
-    records = filter(lambda record: len(record["services"]) > 0, records)
-
-    return records
+    return find_services_by_lot(client, FRAMEWORK_SLUG, "digital-outcomes")
 
 
-def make_row(record, capabilities, locations):
-    row = [
-        ("supplier_id", record["supplier_id"]),
-        ("supplier_name", record['supplier']['name']),
-        ("supplier_declaration_name", record['declaration'].get('nameOfOrganisation', '')),
-        ("status", "PASSED" if record["onFramework"] else "FAILED"),
-    ]
-    return row + \
-        make_field_label_counts(capabilities, record) + \
-        make_field_label_counts(locations, record)
+def make_row(capabilities, locations):
+    def inner(record):
+        row = [
+            ("supplier_id", record["supplier_id"]),
+            ("supplier_name", record['supplier']['name']),
+            ("supplier_declaration_name", record['declaration'].get('nameOfOrganisation', '')),
+            ("status", "PASSED" if record["onFramework"] else "FAILED"),
+        ]
+        return row + \
+            make_fields_from_content_questions(capabilities + locations, record)
 
-
-def fieldnames(row):
-    return [f[0] for f in row]
-
-
-def write_csv(records, capabilities, locations, filename):
-    writer = None
-
-    with open(filename, "w+") as f:
-        for record in records:
-            sys.stdout.write(".")
-            sys.stdout.flush()
-            row = make_row(record, capabilities, locations)
-            if writer is None:
-                writer = csv.DictWriter(f, fieldnames=fieldnames(row))
-                writer.writeheader()
-            writer.writerow(dict(row))
+    return inner
 
 
 def get_team_capabilities(content_manifest):
     section = content_manifest.get_section("team-capabilities")
 
     return [
-        {
-            "label": option["label"],
-            "id": question.questions[0]["id"],
-        }
+        question.questions[0]
         for question in section.questions
-        for option in question.questions[0].options
     ]
 
 
 def get_outcomes_locations(content_manifest):
-    question = content_manifest.get_question("outcomesLocations")
     return [
-        {
-            "label": option["label"],
-            "id": question["id"],
-        }
-        for option in question.options
+        content_manifest.get_question("outcomesLocations")
     ]
 
 
@@ -109,5 +71,6 @@ if __name__ == '__main__':
     locations = get_outcomes_locations(content_manifest)
     suppliers = find_all_outcomes(client)
 
-    write_csv(suppliers, capabilities, locations,
+    write_csv(suppliers,
+              make_row(capabilities, locations),
               "output/dos-outcomes.csv")

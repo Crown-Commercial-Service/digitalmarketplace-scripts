@@ -7,6 +7,7 @@ from mock import Mock, call, patch, ANY, mock_open
 from dmscripts import export_dos_suppliers
 from dmscripts.insert_dos_framework_results import CORRECT_DECLARATION_RESPONSES
 from dmapiclient import HTTPError
+from dmutils.content_loader import ContentQuestion
 
 
 def test_find_suppliers_produces_results_with_supplier_ids(mock_data_client):
@@ -132,24 +133,43 @@ def test_add_services_filtered_by_status(mock_data_client):
     ({"services": [{}]}, 0),
 ])
 def test_count_field_in_record(record, count):
-    field = {"label": "Label", "id": "theId"}
-    assert export_dos_suppliers.count_field_in_record(field, record) == count
+    assert export_dos_suppliers.count_field_in_record("theId", "Label", record) == count
 
 
-def test_make_field_label_counts():
-    fields = [
-        {"label": "Label1", "id": "ID1"},
-        {"label": "Label2", "id": "ID1"},
+def test_make_fields_from_content_question():
+    questions = [
+        ContentQuestion({"id": "check1",
+                         "type": "checkboxes",
+                         "options": [
+                             {"label": "Option 1"},
+                             {"label": "Option 2"},
+                          ]}),
+        ContentQuestion({"id": "custom",
+                         "type": "custom",
+                         "fields": {
+                             "field1": "field1",
+                             "field2": "field2",
+                         }}),
+        ContentQuestion({"id": "basic",
+                         "type": "boolean"}),
     ]
     record = {
         "services": [
-            {"ID1": ["Label1", "other"]},
-            {"ID1": ["Label1", "Label2"]}
+            {"check1": ["Option 1"],
+             "field1": "Blah",
+             "field2": "Foo",
+             "basic": False},
+            {"check1": ["Option 1", "Option 2"],
+             "field1": "Foo",
+             "basic": True},
         ]
     }
-
-    assert export_dos_suppliers.make_field_label_counts(fields, record) == [
-        ("ID1 Label1", 2), ("ID1 Label2", 1)
+    assert export_dos_suppliers.make_fields_from_content_questions(questions, record) == [
+        ("check1 Option 1", 2),
+        ("check1 Option 2", 1),
+        ("field1", "Blah|Foo"),
+        ("field2", "Foo|"),
+        ("basic", "False|True"),
     ]
 
 
