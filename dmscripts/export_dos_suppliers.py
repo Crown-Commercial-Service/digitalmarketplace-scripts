@@ -42,7 +42,7 @@ def add_supplier_info(client):
     return inner
 
 
-def add_services(client, framework_slug, lot=None, status=None):
+def add_draft_services(client, framework_slug, lot=None, status=None):
     def inner(record):
         drafts = client.find_draft_services(record["supplier_id"], framework=framework_slug)
         drafts = drafts["services"]
@@ -180,9 +180,9 @@ def add_failed_questions(declaration_content):
 
 def find_services_by_lot(client, framework_slug, lot_slug):
     pool = ThreadPool(30)
-    service_adder = add_services(client, framework_slug,
-                                 lot=lot_slug,
-                                 status="submitted")
+    service_adder = add_draft_services(client, framework_slug,
+                                       lot=lot_slug,
+                                       status="submitted")
 
     records = find_suppliers(client, framework_slug)
     records = pool.imap(add_supplier_info(client), records)

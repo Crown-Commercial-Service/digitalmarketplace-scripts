@@ -12,7 +12,7 @@ import itertools
 
 from docopt import docopt
 from dmscripts.env import get_api_endpoint_from_stage
-from dmscripts.export_dos_suppliers import find_suppliers, FRAMEWORK_SLUG, add_framework_info, add_services
+from dmscripts.export_dos_suppliers import find_suppliers, FRAMEWORK_SLUG, add_framework_info, add_draft_services
 from dmapiclient import DataAPIClient
 
 if sys.version_info[0] < 3:
@@ -26,7 +26,7 @@ def find_all_labs(client):
     records = find_suppliers(client, FRAMEWORK_SLUG)
     records = pool.imap(add_framework_info(client, FRAMEWORK_SLUG), records)
     records = filter(lambda record: record['onFramework'], records)
-    records = pool.imap(add_services(client, FRAMEWORK_SLUG), records)
+    records = pool.imap(add_draft_services(client, FRAMEWORK_SLUG), records)
     services = itertools.chain.from_iterable(record['services'] for record in records)
     services = filter(
         lambda record: record['lot'] == 'user-research-studios' and record['status'] == 'submitted',

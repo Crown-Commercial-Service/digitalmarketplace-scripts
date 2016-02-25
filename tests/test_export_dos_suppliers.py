@@ -58,13 +58,13 @@ def test_add_supplier_info(mock_data_client):
     ]
 
 
-def test_add_services(mock_data_client):
+def test_add_draft_services(mock_data_client):
     mock_data_client.find_draft_services.side_effect = [
         {"services": ["service1", "service2"]},
         {"services": ["service3", "service4"]},
     ]
 
-    service_adder = export_dos_suppliers.add_services(mock_data_client, 'framework-slug')
+    service_adder = export_dos_suppliers.add_draft_services(mock_data_client, 'framework-slug')
     in_records = [
         {"supplier_id": 1},
         {"supplier_id": 2},
@@ -81,14 +81,14 @@ def test_add_services(mock_data_client):
     ]
 
 
-def test_add_services_filtered_by_lot(mock_data_client):
+def test_add_draft_services_filtered_by_lot(mock_data_client):
     mock_data_client.find_draft_services.return_value = {
         "services": [
             {"lotSlug": "good"},
             {"lotSlug": "bad"}
         ]
     }
-    service_adder = export_dos_suppliers.add_services(
+    service_adder = export_dos_suppliers.add_draft_services(
         mock_data_client, "framework-slug",
         lot="good")
     assert service_adder({"supplier_id": 1}) == {
@@ -102,14 +102,14 @@ def test_add_services_filtered_by_lot(mock_data_client):
     ])
 
 
-def test_add_services_filtered_by_status(mock_data_client):
+def test_add_draft_services_filtered_by_status(mock_data_client):
     mock_data_client.find_draft_services.return_value = {
         "services": [
             {"status": "submitted"},
             {"status": "failed"}
         ]
     }
-    service_adder = export_dos_suppliers.add_services(
+    service_adder = export_dos_suppliers.add_draft_services(
         mock_data_client, "framework-slug",
         status="submitted")
     assert service_adder({"supplier_id": 1}) == {
