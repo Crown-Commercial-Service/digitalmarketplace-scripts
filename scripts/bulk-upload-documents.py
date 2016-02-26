@@ -23,6 +23,8 @@ This will:
 Usage:
     scripts/bulk-upload-documents.py <stage> <local_documents_directory> <framework_slug> <tsv_path> [options]
 
+Options:
+    -h --help   Show this screen.
     --file_type=<file_type>  This is the type of file [default: pdf]
     --bucket_category=<bucket_category>  This is the type  of bucket [default: agreements]
     --dry-run
