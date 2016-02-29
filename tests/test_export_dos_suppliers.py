@@ -7,6 +7,7 @@ from mock import Mock, call, patch, ANY, mock_open
 from dmscripts import export_dos_suppliers
 from dmscripts.insert_dos_framework_results import CORRECT_DECLARATION_RESPONSES
 from dmapiclient import HTTPError
+from dmutils.content_loader import ContentQuestion
 
 
 def test_find_suppliers_produces_results_with_supplier_ids(mock_data_client):
@@ -57,13 +58,13 @@ def test_add_supplier_info(mock_data_client):
     ]
 
 
-def test_add_services(mock_data_client):
+def test_add_draft_services(mock_data_client):
     mock_data_client.find_draft_services.side_effect = [
         {"services": ["service1", "service2"]},
         {"services": ["service3", "service4"]},
     ]
 
-    service_adder = export_dos_suppliers.add_services(mock_data_client, 'framework-slug')
+    service_adder = export_dos_suppliers.add_draft_services(mock_data_client, 'framework-slug')
     in_records = [
         {"supplier_id": 1},
         {"supplier_id": 2},
@@ -77,6 +78,98 @@ def test_add_services(mock_data_client):
     assert out_records == [
         {"supplier_id": 1, "services": ["service1", "service2"]},
         {"supplier_id": 2, "services": ["service3", "service4"]},
+    ]
+
+
+def test_add_draft_services_filtered_by_lot(mock_data_client):
+    mock_data_client.find_draft_services.return_value = {
+        "services": [
+            {"lotSlug": "good"},
+            {"lotSlug": "bad"}
+        ]
+    }
+    service_adder = export_dos_suppliers.add_draft_services(
+        mock_data_client, "framework-slug",
+        lot="good")
+    assert service_adder({"supplier_id": 1}) == {
+        "supplier_id": 1,
+        "services": [
+            {"lotSlug": "good"},
+        ]
+    }
+    mock_data_client.find_draft_services.assert_has_calls([
+        call(1, framework='framework-slug'),
+    ])
+
+
+def test_add_draft_services_filtered_by_status(mock_data_client):
+    mock_data_client.find_draft_services.return_value = {
+        "services": [
+            {"status": "submitted"},
+            {"status": "failed"}
+        ]
+    }
+    service_adder = export_dos_suppliers.add_draft_services(
+        mock_data_client, "framework-slug",
+        status="submitted")
+    assert service_adder({"supplier_id": 1}) == {
+        "supplier_id": 1,
+        "services": [
+            {"status": "submitted"},
+        ]
+    }
+    mock_data_client.find_draft_services.assert_has_calls([
+        call(1, framework='framework-slug'),
+    ])
+
+
+@pytest.mark.parametrize('record,count', [
+    ({"services": [
+        {"theId": ["Label", "other"]},
+        {"theId": ["other"]},
+        {"theId": ["Label"]},
+    ]}, 2),
+    ({"services": []}, 0),
+    ({"services": [{}]}, 0),
+])
+def test_count_field_in_record(record, count):
+    assert export_dos_suppliers.count_field_in_record("theId", "Label", record) == count
+
+
+def test_make_fields_from_content_question():
+    questions = [
+        ContentQuestion({"id": "check1",
+                         "type": "checkboxes",
+                         "options": [
+                             {"label": "Option 1"},
+                             {"label": "Option 2"},
+                         ]}),
+        ContentQuestion({"id": "custom",
+                         "type": "custom",
+                         "fields": {
+                             "field1": "field1",
+                             "field2": "field2",
+                         }}),
+        ContentQuestion({"id": "basic",
+                         "type": "boolean"}),
+    ]
+    record = {
+        "services": [
+            {"check1": ["Option 1"],
+             "field1": "Blah",
+             "field2": "Foo",
+             "basic": False},
+            {"check1": ["Option 1", "Option 2"],
+             "field1": "Foo",
+             "basic": True},
+        ]
+    }
+    assert export_dos_suppliers.make_fields_from_content_questions(questions, record) == [
+        ("check1 Option 1", 2),
+        ("check1 Option 2", 1),
+        ("field1", "Blah|Foo"),
+        ("field2", "Foo|"),
+        ("basic", "False|True"),
     ]
 
 
