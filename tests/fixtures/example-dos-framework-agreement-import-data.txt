@@ -1,0 +1,4 @@
+supplier_id	trading_name	registered_address	company_number	completed_lots_1	completed_lots_2	completed_lots_3	completed_lots_4
+12345	CloudTech Limited	21 Fenchurch Street, London, EC3M 3BY	123456789	Digital outcomes	Digital specialists		
+67890	Human Research Systems Limited	45 Clerkenwell Road, London, EC1R 5BL	987654321	User research studios	User research participants		
+66789	Total Web Limited	33 Fore Street, London, EC2Y 5EJ	678901234	Digital outcomes	Digital specialists		

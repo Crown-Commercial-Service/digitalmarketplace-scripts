@@ -32,9 +32,8 @@ def test_get_all_files_of_type_for_flat_folder():
 
 def test_get_all_files_of_type_for_nested_folder():
     temp_folder_path = tempfile.mkdtemp()
-    tempfile.tempdir = temp_folder_path
     pdf1 = open(os.path.join(temp_folder_path, 'test1.pdf'), 'w+')
-    nested_temp_folder_path = tempfile.mkdtemp()
+    nested_temp_folder_path = tempfile.mkdtemp(dir=temp_folder_path)
     pdf2 = open(os.path.join(nested_temp_folder_path, 'test2.pdf'), 'w+')
     assert len(list(get_all_files_of_type(temp_folder_path, 'pdf'))) == 2
     pdf1.close()
