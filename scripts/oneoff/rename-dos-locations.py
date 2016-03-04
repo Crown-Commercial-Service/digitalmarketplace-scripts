@@ -8,6 +8,8 @@ Usage:
 import sys
 sys.path.insert(0, '.')
 
+from multiprocessing.pool import ThreadPool
+import itertools
 from docopt import docopt
 from dmapiclient import DataAPIClient
 from dmscripts.env import get_api_endpoint_from_stage
@@ -15,13 +17,8 @@ from dmscripts.env import get_api_endpoint_from_stage
 
 def create_draft_getter(client):
     def get_drafts(supplier):
-        drafts = []
         for draft in client.find_draft_services_iter(supplier['id'], framework='digital-outcomes-and-specialists'):
-            location_keys = get_location_keys(draft)
-            if any(OLD_LOCATION in draft[key] for key in location_keys):
-                drafts.append(draft)
-        return drafts
-
+            yield draft
     return get_drafts
 
 
@@ -37,7 +34,7 @@ if __name__ == "__main__":
     arguments = docopt(__doc__)
 
     stage = arguments['<stage>']
-    api_token = arguments['<api_token>']
+    api_token = arguments['<token>']
     dry_run = arguments['--dry-run']
 
     api_url = get_api_endpoint_from_stage(stage)
@@ -56,7 +53,7 @@ if __name__ == "__main__":
             update["recruitLocations"] = None
 
         if update:
-            coutner += 1
+            counter += 1
 
             update_reason = "rename locations: https://www.pivotaltracker.com/story/show/113271913"
             if dry_run:
@@ -67,4 +64,4 @@ if __name__ == "__main__":
             if counter % 10 == 0:
                 print("Updated {}".format(counter))
 
-        print("DONE: {}".format(counter))
+    print("DONE: {}".format(counter))
