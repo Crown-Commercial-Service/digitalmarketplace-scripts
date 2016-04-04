@@ -25,7 +25,7 @@ def find_all_participants(client):
 
 
 def make_row(content_manifest):
-    question_ids = ["recruitMethods", "recruitFromList", "recruitLocations"]
+    question_ids = ["recruitMethods", "recruitFromList", "locations"]
     questions = [content_manifest.get_question(question_id) for question_id in question_ids]
     for question in questions:
         print(question["id"], question.fields, question.id)

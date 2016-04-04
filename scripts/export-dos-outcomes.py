@@ -50,7 +50,7 @@ def get_team_capabilities(content_manifest):
 
 def get_outcomes_locations(content_manifest):
     return [
-        content_manifest.get_question("outcomesLocations")
+        content_manifest.get_question("locations")
     ]
 
 
