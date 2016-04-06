@@ -221,7 +221,7 @@ def supplier_info(record):
         ('country_of_registration', record['declaration'].get('currentRegisteredCountry', '')),
         ('vat_number', record['declaration'].get('registeredVATNumber', '')),
         ('size', record['declaration'].get('organisationSize', '')),
-
+        ('subcontracting', record['declaration'].get('subcontracting', '')),
     ]
 
 

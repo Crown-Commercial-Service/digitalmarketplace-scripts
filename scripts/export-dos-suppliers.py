@@ -11,7 +11,10 @@ Produces three files;
    incorrectly.
 
 Usage:
-    scripts/export-dos-suppliers.py <stage> <api_token> <content_path> <output_dir> [<supplier_id_file>]
+    scripts/export-dos-suppliers.py [-h] <stage> <api_token> <content_path> <output_dir> [<supplier_id_file>]
+
+Options:
+    -h --help
 """
 import sys
 sys.path.insert(0, '.')
