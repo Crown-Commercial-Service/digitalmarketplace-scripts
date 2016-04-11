@@ -1,0 +1,58 @@
+"""
+
+Usage:
+    scripts/make-dos-live.py <stage> <api_token> [--dry-run]
+"""
+import sys
+sys.path.insert(0, '.')
+
+import re
+
+from docopt import docopt
+from dmscripts.env import get_api_endpoint_from_stage, get_assets_endpoint_from_stage
+from dmapiclient import DataAPIClient
+
+
+def find_suppliers_on_framework(client, framework_slug):
+    return (
+        supplier for supplier in client.find_framework_suppliers(framework_slug)['supplierFrameworks']
+        if supplier['onFramework']
+    )
+
+
+def find_submitted_draft_services(client, supplier_id, framework_slug):
+    return (
+        draft for draft in
+        client.find_draft_services(supplier_id, framework=framework_slug)['services']
+        if draft['status'] == "submitted" and not draft.get("service_id")
+    )
+
+
+def make_draft_service_live(client, draft, framework_slug, dry_run):
+    print("  > Migrating draft {} - {}".format(draft['id'], draft['lot']))
+    if dry_run:
+        print("    > no-op")
+    else:
+        services = client.publish_draft_service(draft['id'], "make dos live script")
+        service_id = services['services']['id']
+        print("    > draft service publisehd - new service ID {}".format(service_id))
+
+
+if __name__ == "__main__":
+    arguments = docopt(__doc__)
+
+    STAGE = arguments['<stage>']
+    DRY_RUN = arguments['--dry-run']
+    FRAMEWORK_SLUG = "digital-outcomes-and-specialists"
+
+    api_url = get_api_endpoint_from_stage(STAGE)
+    client = DataAPIClient(api_url, arguments['<api_token>'])
+
+    suppliers = find_suppliers_on_framework(client, FRAMEWORK_SLUG)
+
+    for supplier in suppliers:
+        print("Migrating drafts for supplier {} - {}".format(supplier['supplierId'], supplier['supplierName']))
+        drafts = find_submitted_draft_services(client, supplier['supplierId'], FRAMEWORK_SLUG)
+
+        for draft in drafts:
+            make_draft_service_live(client, draft, FRAMEWORK_SLUG, DRY_RUN)
