@@ -6,10 +6,8 @@ Usage:
 import sys
 sys.path.insert(0, '.')
 
-import re
-
 from docopt import docopt
-from dmscripts.env import get_api_endpoint_from_stage, get_assets_endpoint_from_stage
+from dmscripts.env import get_api_endpoint_from_stage
 from dmapiclient import DataAPIClient
 
 
@@ -28,15 +26,20 @@ def find_submitted_draft_services(client, supplier_id, framework_slug):
     )
 
 
-def make_draft_service_live(client, draft, framework_slug, dry_run):
-    print("  > Migrating draft {} - {}".format(draft['id'], draft['lot']))
+def make_draft_service_live(client, draft, dry_run):
+    print(u"  > Migrating draft {} - {}".format(draft['id'], draft['lot']))
     if dry_run:
         print("    > no-op")
     else:
-        services = client.publish_draft_service(draft['id'], "make dos live script")
-        service_id = services['services']['id']
-        print("    > draft service publisehd - new service ID {}".format(service_id))
-
+        try:
+            services = client.publish_draft_service(draft['id'], "make dos live script")
+            service_id = services['services']['id']
+            print(u"    > draft service published - new service ID {}".format(service_id))
+        except Exception as e:
+            if e.message == "Cannot re-publish a submitted service":
+                print(u"    > Draft {} already published".format(draft['id']))
+            else:
+                print(u"    > ERROR MIGRATING DRAFT {} - {}".format(draft['id'], e.message))
 
 if __name__ == "__main__":
     arguments = docopt(__doc__)
@@ -51,8 +54,8 @@ if __name__ == "__main__":
     suppliers = find_suppliers_on_framework(client, FRAMEWORK_SLUG)
 
     for supplier in suppliers:
-        print("Migrating drafts for supplier {} - {}".format(supplier['supplierId'], supplier['supplierName']))
+        print(u"Migrating drafts for supplier {} - {}".format(supplier['supplierId'], supplier['supplierName']))
         drafts = find_submitted_draft_services(client, supplier['supplierId'], FRAMEWORK_SLUG)
 
         for draft in drafts:
-            make_draft_service_live(client, draft, FRAMEWORK_SLUG, DRY_RUN)
+            make_draft_service_live(client, draft, DRY_RUN)
