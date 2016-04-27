@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
+from __future__ import unicode_literals
 import os
-import unicodecsv
-
+import sys
+if sys.version_info > (3, 0):
+    import csv
+else:
+    import unicodecsv as csv
 
 MANIFESTS = [{
     'question_set': 'declaration',
@@ -13,6 +17,7 @@ MANIFESTS = [{
 
 LOTS = {
     'g-cloud-7': ['IaaS', 'PaaS', 'SaaS', 'SCS'],
+    'g-cloud-8': ['IaaS', 'PaaS', 'SaaS', 'SCS'],
     'digital-outcomes-and-specialists':
         ['digital-specialists', 'digital-outcomes', 'user-research-participants', 'user-research-studios']
 }
@@ -102,7 +107,7 @@ def generate_csv(output_directory, framework_slug, content_loader):
         row.extend([''] * (max_length - len(row)))
 
     with open('{}/{}-questions.csv'.format(output_directory, framework_slug), 'wb') as csvfile:
-        writer = unicodecsv.writer(csvfile, delimiter=',', quotechar='"')
+        writer = csv.writer(csvfile, delimiter=b',', quotechar=b'"')
         header = ["Page title", "Page title hint", "Question", "Hint"]
         header.extend(
             ["Answer {}".format(i) for i in range(1, max_length_options+1)]

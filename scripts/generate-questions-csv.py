@@ -1,14 +1,14 @@
 """
-This script generates a CSV file for the questions in each lot.
+This script generates a CSV file for the supplier declaration and questions in each lot for a specified framework.
 
-The order of fields in the generated file is the same as we had for G-Cloud-6:
+The order of fields in the generated file is:
 "Page title", "Question", "Hint", "Answer 1", "Answer 2", ...
 
 Before running this you will need to:
-pip install -r requirements_for_script.txt
+pip install -r requirements.txt
 
 Usage:
-    scripts/generate-csv.py <path_to_manifest> <output_directory> --framework=<slug>
+    scripts/generate-questions-csv.py <path_to_manifest> <output_directory> --framework=<slug>
 """
 import sys
 sys.path.insert(0, '.')
