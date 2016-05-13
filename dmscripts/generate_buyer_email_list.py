@@ -13,15 +13,15 @@ def buyer_requirements(client):
         try:
             briefs = client.find_briefs(user_id=user['id'])['briefs']
             if briefs:
-                title_statuses = ["; ".join(["{} - {}".format(brief['title'], brief['status']) for brief in briefs])]
+                title_statuses = [u"; ".join([u"{} - {}".format(brief['title'], brief['status']) for brief in briefs])]
             else:
                 title_statuses = []
         except HTTPError as e:
-            if e.status_code == 404:
-                title_statuses = []
-            else:
+            title_statuses = []
+            if e.status_code != 404:
                 print("HTTP ERROR: {}".format(e))
         except Exception as e:
+            title_statuses = []
             print("EXCEPTION: {}".format(e))
 
         return user, title_statuses
@@ -54,6 +54,7 @@ def list_buyers(client, output, include_briefs):
         row = [
             user['name'],
             user['emailAddress'],
+            user['createdAt'],
         ]
         row += briefs if briefs else []
         writer.writerow(row)
