@@ -13,7 +13,11 @@ new agreements signed by the suppliers.
 
 Usage:
     scripts/oneoff/clear-signed-agreements.py <stage> <framework_slug> --api-token=<api_access_token>
-        [--csv_path=<csv_path>]
+        [--supplier_ids=<supplier_ids>]
+
+Options:
+    --api-token=<api_access_token>  API token
+    --supplier_ids=<supplier_ids>   Suppliers to target (comma-separated)
 
 """
 import sys
@@ -34,6 +38,9 @@ logger = logging.configure_logger()
 
 
 def main(stage, framework_slug, api_token, user, supplier_ids=None):
+    if supplier_ids:
+        supplier_ids = supplier_ids.split(',')
+
     agreements_bucket_name = 'digitalmarketplace-agreements-{0}-{0}'.format(stage)
     agreements_bucket = S3(agreements_bucket_name)
 
@@ -48,7 +55,7 @@ def main(stage, framework_slug, api_token, user, supplier_ids=None):
                     extra={'supplier_id': supplier['supplierId']})
         api_client.unset_framework_agreement_returned(supplier['supplierId'], framework_slug, user)
 
-    signed_agreements = filter_agreements(supplier_ids)
+    signed_agreements = filter_agreements()
 
     for document in signed_agreements:
         logger.info("Deleting {path}", extra={'path': document['path']})
@@ -67,22 +74,13 @@ def filter_agreements(supplier_ids=None):
     )
 
 
-def get_supplier_ids_from_csv(csv_path):
-    with open(csv_path, 'r') as csvfile:
-        for row in csv.reader(csvfile):
-            # csv should only have one row
-            return row
-
-
 if __name__ == '__main__':
     arguments = docopt(__doc__)
     stage = arguments['<stage>']
     framework_slug = arguments['<framework_slug>']
     data_api_access_token = arguments['--api-token']
-    supplier_ids = None
+    supplier_ids = arguments['--supplier_ids']
 
     user = getpass.getuser()
-    if arguments['--csv_path']:
-        supplier_ids = get_supplier_ids_from_csv(arguments['--csv_path'])
 
     main(stage, framework_slug, data_api_access_token, user, supplier_ids)
