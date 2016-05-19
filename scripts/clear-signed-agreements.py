@@ -13,6 +13,7 @@ new agreements signed by the suppliers.
 
 Usage:
     scripts/oneoff/clear-signed-agreements.py <stage> <framework_slug> --api-token=<api_access_token>
+        [--csv_path=<csv_path>]
 
 """
 import sys
@@ -20,6 +21,7 @@ sys.path.insert(0, '.')
 
 import re
 import getpass
+import csv
 
 from docopt import docopt
 
@@ -31,7 +33,7 @@ from dmscripts.env import get_api_endpoint_from_stage
 logger = logging.configure_logger()
 
 
-def main(stage, framework_slug, api_token, user):
+def main(stage, framework_slug, api_token, user, supplier_ids=None):
     agreements_bucket_name = 'digitalmarketplace-agreements-{0}-{0}'.format(stage)
     agreements_bucket = S3(agreements_bucket_name)
 
@@ -46,14 +48,30 @@ def main(stage, framework_slug, api_token, user):
                     extra={'supplier_id': supplier['supplierId']})
         api_client.unset_framework_agreement_returned(supplier['supplierId'], framework_slug, user)
 
-    signed_agreements = filter(
-        lambda x: re.search(r'/(\d+)-signed-framework-agreement.pdf', x['path']),
-        agreements_bucket.list('{}/agreements/'.format(framework_slug))
-    )
+    signed_agreements = filter_agreements(supplier_ids)
 
     for document in signed_agreements:
         logger.info("Deleting {path}", extra={'path': document['path']})
         agreements_bucket.delete_key(document['path'])
+
+
+def filter_agreements(supplier_ids=None):
+    if supplier_ids:
+        matcher = lambda x: x['path'] in ['{}-signed-framework-agreement.pdf'.format(id) for id in supplier_ids]
+    else:
+        lambda x: re.search(r'/(\d+)-signed-framework-agreement.pdf', x['path'])
+
+    return filter(
+        matcher,
+        agreements_bucket.list('{}/agreements/'.format(framework_slug))
+    )
+
+
+def get_supplier_ids_from_csv(csv_path):
+    with open(csv_path, 'r') as csvfile:
+        for row in csv.reader(csvfile):
+            # csv should only have one row
+            return row
 
 
 if __name__ == '__main__':
@@ -61,7 +79,10 @@ if __name__ == '__main__':
     stage = arguments['<stage>']
     framework_slug = arguments['<framework_slug>']
     data_api_access_token = arguments['--api-token']
+    supplier_ids = None
 
     user = getpass.getuser()
+    if arguments['--csv_path']:
+        supplier_ids = get_supplier_ids_from_csv(arguments['--csv_path'])
 
-    main(stage, framework_slug, data_api_access_token, user)
+    main(stage, framework_slug, data_api_access_token, user, supplier_ids)
