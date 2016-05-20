@@ -38,9 +38,6 @@ logger = logging.configure_logger()
 
 
 def main(stage, framework_slug, api_token, user, supplier_ids=None):
-    if supplier_ids:
-        supplier_ids = supplier_ids.split(',')
-
     agreements_bucket_name = 'digitalmarketplace-agreements-{0}-{0}'.format(stage)
     agreements_bucket = S3(agreements_bucket_name)
 
@@ -50,28 +47,28 @@ def main(stage, framework_slug, api_token, user, supplier_ids=None):
     )
 
     suppliers = api_client.find_framework_suppliers(framework_slug, agreement_returned=True)['supplierFrameworks']
-    for supplier in suppliers:
-        logger.info("Resetting agreement returned flag for supplier {supplier_id}",
-                    extra={'supplier_id': supplier['supplierId']})
-        api_client.unset_framework_agreement_returned(supplier['supplierId'], framework_slug, user)
 
-    signed_agreements = filter_agreements()
+    if supplier_ids is not None:
+        supplier_ids = [
+            str(supplier['supplierId']) for supplier in suppliers
+            if str(supplier['supplierId']) in supplier_ids.split(',')
+        ]
+    else:
+        supplier_ids = [str(supplier['supplierId']) for supplier in suppliers]
+
+    for supplier_id in supplier_ids:
+        logger.info("Resetting agreement returned flag for supplier {supplier_id}",
+                    extra={'supplier_id': supplier_id})
+        api_client.unset_framework_agreement_returned(supplier_id, framework_slug, user)
+
+    signed_agreements = filter(
+        lambda x: x['path'] in ['{}-signed-framework-agreement.pdf'.format(id) for id in supplier_ids],
+        agreements_bucket.list('{}/agreements/'.format(framework_slug))
+    )
 
     for document in signed_agreements:
         logger.info("Deleting {path}", extra={'path': document['path']})
         agreements_bucket.delete_key(document['path'])
-
-
-def filter_agreements(supplier_ids=None):
-    if supplier_ids:
-        matcher = lambda x: x['path'] in ['{}-signed-framework-agreement.pdf'.format(id) for id in supplier_ids]
-    else:
-        lambda x: re.search(r'/(\d+)-signed-framework-agreement.pdf', x['path'])
-
-    return filter(
-        matcher,
-        agreements_bucket.list('{}/agreements/'.format(framework_slug))
-    )
 
 
 if __name__ == '__main__':
