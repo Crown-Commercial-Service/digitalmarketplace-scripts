@@ -62,13 +62,18 @@ def main(stage, framework_slug, api_token, user, supplier_ids=None):
         api_client.unset_framework_agreement_returned(supplier_id, framework_slug, user)
 
     signed_agreements = filter(
-        lambda x: x['path'] in ['{}-signed-framework-agreement.pdf'.format(id) for id in supplier_ids],
+        lambda x: match_signed_agreements(supplier_ids, x['path']),
         agreements_bucket.list('{}/agreements/'.format(framework_slug))
     )
 
     for document in signed_agreements:
         logger.info("Deleting {path}", extra={'path': document['path']})
         agreements_bucket.delete_key(document['path'])
+
+
+def match_signed_agreements(supplier_ids, path):
+    match = re.search(r'/(\d+)-signed-framework-agreement', path)
+    return match and match.group(1) in supplier_ids
 
 
 if __name__ == '__main__':
