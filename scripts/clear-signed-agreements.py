@@ -46,12 +46,17 @@ def main(stage, framework_slug, api_token, user, supplier_ids=None):
         api_token
     )
 
+    if supplier_ids is not None:
+        supplier_ids = [int(supplier_id.strip()) for supplier_id in supplier_ids.split(',')]
+
     suppliers = api_client.find_framework_suppliers(framework_slug, agreement_returned=True)['supplierFrameworks']
 
     if supplier_ids is not None:
-        supplier_ids = validate_entered_ids(supplier_ids, suppliers)
+        missing_supplier_ids = set(supplier_ids) - set(supplier['supplierId'] for supplier in suppliers)
+        if missing_supplier_ids:
+            raise Exception("Invalid supplier IDs: {}".format(', '.join(str(x) for x in missing_supplier_ids)))
     else:
-        supplier_ids = [supplier['supplierId'] for supplier in suppliers]
+        supplier_ids = set(supplier['supplierId'] for supplier in suppliers)
 
     for supplier_id in supplier_ids:
         logger.info("Resetting agreement returned flag for supplier {supplier_id}",
@@ -66,28 +71,6 @@ def main(stage, framework_slug, api_token, user, supplier_ids=None):
     for document in signed_agreements:
         logger.info("Deleting {path}", extra={'path': document['path']})
         agreements_bucket.delete_key(document['path'])
-
-
-def validate_entered_ids(entered_ids, suppliers):
-    def match_format(id):
-        match = re.match('^\d+$', id)
-        if match:
-            return True
-        else:
-            sys.exit("{} is the wrong format for a supplier id".format(id))
-
-    def match_supplier(id):
-        supplier = filter(
-            lambda x: x['supplierId'] == int(id),
-            suppliers
-        )
-        if supplier:
-            return True
-        else:
-            sys.exit("{} is not a valid supplier who has signed the agreement".format(id))
-            return False
-
-    return [int(id) for id in entered_ids.split(',') if match_format(id) and match_supplier(id)]
 
 
 def match_signed_agreements(supplier_ids, path):
