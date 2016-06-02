@@ -13,6 +13,11 @@ new agreements signed by the suppliers.
 
 Usage:
     scripts/oneoff/clear-signed-agreements.py <stage> <framework_slug> --api-token=<api_access_token>
+        [--supplier_ids=<supplier_ids>]
+
+Options:
+    --api-token=<api_access_token>  API token
+    --supplier_ids=<supplier_ids>   Suppliers to target (comma-separated)
 
 """
 import sys
@@ -20,6 +25,7 @@ sys.path.insert(0, '.')
 
 import re
 import getpass
+import csv
 
 from docopt import docopt
 
@@ -31,7 +37,7 @@ from dmscripts.env import get_api_endpoint_from_stage
 logger = logging.configure_logger()
 
 
-def main(stage, framework_slug, api_token, user):
+def main(stage, framework_slug, api_token, user, supplier_ids=None):
     agreements_bucket_name = 'digitalmarketplace-agreements-{0}-{0}'.format(stage)
     agreements_bucket = S3(agreements_bucket_name)
 
@@ -40,14 +46,25 @@ def main(stage, framework_slug, api_token, user):
         api_token
     )
 
+    if supplier_ids is not None:
+        supplier_ids = [int(supplier_id.strip()) for supplier_id in supplier_ids.split(',')]
+
     suppliers = api_client.find_framework_suppliers(framework_slug, agreement_returned=True)['supplierFrameworks']
-    for supplier in suppliers:
+
+    if supplier_ids is not None:
+        missing_supplier_ids = set(supplier_ids) - set(supplier['supplierId'] for supplier in suppliers)
+        if missing_supplier_ids:
+            raise Exception("Invalid supplier IDs: {}".format(', '.join(str(x) for x in missing_supplier_ids)))
+    else:
+        supplier_ids = set(supplier['supplierId'] for supplier in suppliers)
+
+    for supplier_id in supplier_ids:
         logger.info("Resetting agreement returned flag for supplier {supplier_id}",
-                    extra={'supplier_id': supplier['supplierId']})
-        api_client.unset_framework_agreement_returned(supplier['supplierId'], framework_slug, user)
+                    extra={'supplier_id': supplier_id})
+        api_client.unset_framework_agreement_returned(supplier_id, framework_slug, user)
 
     signed_agreements = filter(
-        lambda x: re.search(r'/(\d+)-signed-framework-agreement.pdf', x['path']),
+        lambda x: match_signed_agreements(supplier_ids, x['path']),
         agreements_bucket.list('{}/agreements/'.format(framework_slug))
     )
 
@@ -56,12 +73,18 @@ def main(stage, framework_slug, api_token, user):
         agreements_bucket.delete_key(document['path'])
 
 
+def match_signed_agreements(supplier_ids, path):
+    match = re.search(r'/(\d+)-signed-framework-agreement', path)
+    return match and int(match.group(1)) in supplier_ids
+
+
 if __name__ == '__main__':
     arguments = docopt(__doc__)
     stage = arguments['<stage>']
     framework_slug = arguments['<framework_slug>']
     data_api_access_token = arguments['--api-token']
+    supplier_ids = arguments['--supplier_ids']
 
     user = getpass.getuser()
 
-    main(stage, framework_slug, data_api_access_token, user)
+    main(stage, framework_slug, data_api_access_token, user, supplier_ids)
