@@ -11,7 +11,7 @@ Usage:
     scripts/insert-g8-framework-results.py <stage> --api-token=<data_api_token>
 
 Example:
-    python scripts/insert-dos-framework-results.py dev --api-token=myToken
+    python scripts/insert-g8-framework-results.py dev --api-token=myToken
 """
 import sys
 sys.path.insert(0, '.')
