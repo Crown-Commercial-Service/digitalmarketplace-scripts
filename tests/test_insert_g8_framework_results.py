@@ -103,9 +103,6 @@ def test_check_declaration_answers_passes_good_declaration():
 
 
 def test_check_declaration_answers_fails_bad_declaration_true_is_false():
-    declaration_content = mock.Mock()
-    question_numbers = mock.PropertyMock(side_effect=[1, 17, 21, -1])
-    type(declaration_content.get_question.return_value).number = question_numbers
     # Question canProvideCloudServices is incorrectly False so should Fail
     declaration = VALID_COMPLETE_G8_DECLARATION.copy()
     declaration['canProvideCloudServices'] = False
