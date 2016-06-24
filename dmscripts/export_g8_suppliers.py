@@ -134,7 +134,6 @@ def get_declaration_questions(declaration_content, record):
 
 
 def is_incorrect_mandatory_question(question, answer):
-    print("CGECKING QUESTION ID: {}".format(question.id))
     if question.id in CORRECT_DECLARATION_RESPONSE_MUST_BE_TRUE and answer is not True:
         return True
     if question.id in CORRECT_DECLARATION_RESPONSE_MUST_BE_FALSE and answer is not False:
@@ -153,7 +152,6 @@ def add_failed_questions(declaration_content):
                         discretionary=[])
 
         declaration_questions = list(get_declaration_questions(declaration_content, record))
-        print("GOT QUESTIONS: {}".format(declaration_questions))
         failed_mandatory = [
             "Q{} - {}".format(question.number, question.id)
             for question, answer in declaration_questions
