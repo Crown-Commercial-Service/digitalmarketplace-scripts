@@ -1,6 +1,8 @@
 import os
 import io
 import shutil
+import re
+import subprocess
 from jinja2 import Template
 
 
@@ -25,3 +27,14 @@ def render_html_for_all_suppliers(rows, framework, template_dir, output_dir):
         html = render_html(data, template_path)
         save_page(html, data['supplier_id'], output_dir)
     shutil.copyfile(template_css_path, os.path.join(output_dir, '{}-signature-page.css'.format(framework)))
+
+def render_pdf_for_each_html_page(html_pages, html_dir, pdf_dir):
+    if not os.path.exists(pdf_dir):
+        os.mkdir(pdf_dir)
+    for index, html_page in enumerate(html_pages):
+        html_path = os.path.join(html_dir, html_page)
+        pdf_path = '{}'.format(re.sub(r'\.html$', '.pdf', html_path))
+        pdf_path = '{}'.format(re.sub(html_dir, pdf_dir, pdf_path))
+        exit_code = subprocess.call(['wkhtmltopdf', 'file://{}'.format(html_path), pdf_path])
+        if index > 9:
+            break
