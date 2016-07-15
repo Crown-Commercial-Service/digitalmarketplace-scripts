@@ -36,5 +36,5 @@ def render_pdf_for_each_html_page(html_pages, html_dir, pdf_dir):
         pdf_path = '{}'.format(re.sub(r'\.html$', '.pdf', html_path))
         pdf_path = '{}'.format(re.sub(html_dir, pdf_dir, pdf_path))
         exit_code = subprocess.call(['wkhtmltopdf', 'file://{}'.format(html_path), pdf_path])
-        if index > 9:
-            break
+        if exit_code > 0:
+            print("ERROR: {} on {}".format(exit_code, html_page))
