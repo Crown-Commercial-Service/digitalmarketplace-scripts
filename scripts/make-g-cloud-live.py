@@ -1,7 +1,7 @@
 """
 
 Usage:
-    scripts/make-g-cloud-7-live.py <stage> <api_token> <draft_bucket> <documents_bucket> [--dry-run]
+    scripts/make-g-cloud-live.py <framework_slug> <stage> <api_token> <draft_bucket> <documents_bucket> [--dry-run]
 """
 import sys
 sys.path.insert(0, '.')
@@ -23,7 +23,6 @@ DOCUMENT_KEYS = [
     'pricingDocumentURL', 'serviceDefinitionDocumentURL',
     'sfiaRateDocumentURL', 'termsAndConditionsDocumentURL',
 ]
-FRAMEWORK_SLUG = 'g-cloud-7'
 
 
 def assert_equal(one, two):
@@ -32,7 +31,7 @@ def assert_equal(one, two):
 
 def find_suppliers_on_framework(client, framework_slug):
     return (
-        supplier for supplier in client.find_framework_suppliers(FRAMEWORK_SLUG)['supplierFrameworks']
+        supplier for supplier in client.find_framework_suppliers(framework_slug)['supplierFrameworks']
         if supplier['onFramework']
     )
 
@@ -137,6 +136,7 @@ if __name__ == '__main__':
     DRAFT_BUCKET = S3(arguments['<draft_bucket>'])
     DOCUMENTS_BUCKET = S3(arguments['<documents_bucket>'])
     DRY_RUN = arguments['--dry-run']
+    FRAMEWORK_SLUG = arguments['<framework_slug>']
     copy_document = document_copier(DRAFT_BUCKET, DOCUMENTS_BUCKET, DRY_RUN)
 
     suppliers = find_suppliers_on_framework(client, FRAMEWORK_SLUG)
