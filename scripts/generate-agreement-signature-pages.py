@@ -8,10 +8,10 @@ To add support for future frameworks we will will need to add to the LOTS and DE
 dmscripts/export_framework_applicant_details.py
 
 Usage:
-    scripts/generate-g8-signature-pages.py <stage> <api_token> <framework_slug> <template_folder>
+    scripts/generate-agreement-signature-pages.py <stage> <api_token> <framework_slug> <template_folder>
 
 Example:
-    scripts/generate-g8-signature-pages.py dev myToken g-cloud-8 ../digitalmarketplace-agreements/documents/g-cloud
+    generate-agreement-signature-pages.py dev myToken g-cloud-8 ../digitalmarketplace-agreements/documents/g-cloud
 
 """
 import sys
