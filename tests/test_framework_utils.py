@@ -8,7 +8,7 @@ def test_get_submitted_drafts_calls_with_correct_arguments(mock_data_client):
     mock_data_client.find_draft_services.assert_called_with(12345, framework='digital-biscuits-and-cakes')
 
 
-def test_get_submitted_drafts_returns_submitted_services_only(mock_data_client):
+def test_get_submitted_drafts_returns_submitted_draft_services_only(mock_data_client):
     mock_data_client.find_draft_services.return_value = {'services': [
         {"id": 1, "status": "not-submitted"},
         {"id": 2, "status": "submitted"}
@@ -16,6 +16,17 @@ def test_get_submitted_drafts_returns_submitted_services_only(mock_data_client):
     }
     result = get_submitted_drafts(mock_data_client, 12345, 'digital-biscuits-and-cakes')
     assert (result == [{"id": 2, "status": "submitted"}])
+
+
+def test_get_submitted_drafts_returns_submitted_draft_services_without_service_ids_only(mock_data_client):
+    mock_data_client.find_draft_services.return_value = {'services': [
+        {"id": 1, "status": "not-submitted"},
+        {"id": 2, "status": "submitted", "serviceId": "ALREADY_A_LIVE_SERVICE"},
+        {"id": 3, "status": "submitted"},
+    ]
+    }
+    result = get_submitted_drafts(mock_data_client, 12345, 'digital-biscuits-and-cakes')
+    assert (result == [{"id": 3, "status": "submitted"}])
 
 
 def test_set_framework_result_calls_with_correct_arguments(mock_data_client):

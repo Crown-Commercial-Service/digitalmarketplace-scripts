@@ -2,9 +2,9 @@ from dmapiclient import HTTPError
 
 
 def get_submitted_drafts(client, framework_slug, supplier_id):
-    services = client.find_draft_services(supplier_id, framework=framework_slug)
-    services = services["services"]
-    submitted_services = [service for service in services if service["status"] == "submitted"]
+    draft_services = client.find_draft_services(supplier_id, framework=framework_slug)["services"]
+    submitted_services = [service for service in draft_services if service["status"] == "submitted"
+                          and not service.get('serviceId')]
     return submitted_services
 
 
@@ -29,4 +29,3 @@ def find_suppliers_on_framework(client, framework_slug):
         supplier for supplier in client.find_framework_suppliers(framework_slug)['supplierFrameworks']
         if supplier['onFramework']
     )
-
