@@ -16,7 +16,7 @@ import re
 
 from docopt import docopt
 from dmscripts.env import get_api_endpoint_from_stage, get_assets_endpoint_from_stage
-from dmscripts.framework_utils import find_suppliers_on_framework
+from dmscripts.framework_utils import find_suppliers_on_framework, get_submitted_drafts
 from dmapiclient import DataAPIClient
 from dmutils.s3 import S3
 
@@ -30,16 +30,8 @@ def assert_equal(one, two):
     assert one == two, "{} != {}".format(one, two)
 
 
-def find_submitted_draft_services(client, supplier, framework_slug):
-    return (
-        draft_service for draft_service in
-        client.find_draft_services(supplier['supplierId'], framework=framework_slug)['services']
-        if draft_service['status'] == 'submitted' and not draft_service.get('serviceId')
-    )
-
-
 def parse_document_url(url, framework_slug):
-    pattern = r'/{}/(\d+)/(\d+)-(.*)$'.format(re.escape(framework_slug))
+    pattern = r'/{}/submissions/(\d+)/(\d+)-(.*)$'.format(re.escape(framework_slug))
     match = re.search(pattern, url)
     if not match:
         raise ValueError("Could not parse document URL {}".format(url))
@@ -51,7 +43,7 @@ def parse_document_url(url, framework_slug):
 
 
 def get_draft_document_path(parsed_document, framework_slug):
-    return '{framework_slug}/{supplier_id}/{draft_id}-{document_name}'.format(
+    return '{framework_slug}/submissions/{supplier_id}/{draft_id}-{document_name}'.format(
         framework_slug=framework_slug,
         **parsed_document)
 
@@ -94,7 +86,7 @@ def make_draft_service_live(client, copy_document, draft_service, framework_slug
         service_id = random.randint(1000, 10000)
         print("    > generating random test service ID: {}".format(service_id))
     else:
-        services = client.publish_draft_service(draft_service['id'], 'make-g-cloud-7-live script')
+        services = client.publish_draft_service(draft_service['id'], 'make-g-cloud-live script')
         service_id = services['services']['id']
         print("    > draft service published - new service ID {}".format(service_id))
 
@@ -137,7 +129,7 @@ if __name__ == '__main__':
 
     for supplier in suppliers:
         print("Migrating drafts for supplier {} - {}".format(supplier['supplierId'], supplier['supplierName']))
-        draft_services = find_submitted_draft_services(client, supplier, FRAMEWORK_SLUG)
+        draft_services = get_submitted_drafts(client, FRAMEWORK_SLUG, supplier['supplierId'])
 
         for draft_service in draft_services:
             make_draft_service_live(client, copy_document, draft_service, FRAMEWORK_SLUG, DRY_RUN)
