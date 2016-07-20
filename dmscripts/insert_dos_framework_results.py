@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from dmapiclient import HTTPError
+from dmscripts.framework_utils import get_submitted_drafts, set_framework_result
 
+FRAMEWORK_SLUG = 'digital-outcomes-and-specialists'
 
 SERVICE_ESSENTIALS_MUST_BE_TRUE = ['helpGovernmentImproveServices', 'bespokeSystemInformation', 'dataProtocols',
                                    'openStandardsPrinciples', 'anonymousRecruitment', 'manageIncentives']
@@ -19,21 +20,6 @@ CORRECT_DECLARATION_RESPONSES = {14: ["Yes – your organisation has, or will ha
 FAIL = "Fail"
 PASS = "Pass"
 DISCRETIONARY = "Discretionary"
-
-
-def insert_result(client, supplier_id, result, user):
-    try:
-        client.set_framework_result(supplier_id, 'digital-outcomes-and-specialists', result, user)
-        return"  Result set OK: {}".format(supplier_id)
-    except HTTPError as e:
-        return"  Error inserting result for {} ({}): {}".format(supplier_id, result, str(e))
-
-
-def get_submitted_drafts(client, supplier_id):
-    services = client.find_draft_services(supplier_id, framework='digital-outcomes-and-specialists')
-    services = services["services"]
-    submitted_services = [service for service in services if service["status"] == "submitted"]
-    return submitted_services
 
 
 def check_service_essentials(draft):
@@ -76,7 +62,7 @@ def check_declaration_answers(declaration_content, declaration):
 
 
 def process_submitted_drafts(client, supplier_id, user):
-    submitted_drafts = get_submitted_drafts(client, supplier_id)
+    submitted_drafts = get_submitted_drafts(client, FRAMEWORK_SLUG, supplier_id)
     supplier_has_submitted_services = False
 
     for draft in submitted_drafts:
@@ -92,23 +78,23 @@ def process_submitted_drafts(client, supplier_id, user):
 
 
 def process_dos_results(client, content_loader, user):
-    content_loader.load_manifest('digital-outcomes-and-specialists', 'declaration', 'declaration')
-    declaration_content = content_loader.get_manifest('digital-outcomes-and-specialists', 'declaration')
+    content_loader.load_manifest(FRAMEWORK_SLUG, 'declaration', 'declaration')
+    declaration_content = content_loader.get_manifest(FRAMEWORK_SLUG, 'declaration')
 
     dos_registered_suppliers = client\
-        .get_interested_suppliers('digital-outcomes-and-specialists')\
+        .get_interested_suppliers(FRAMEWORK_SLUG)\
         .get('interestedSuppliers', None)
 
     for supplier_id in dos_registered_suppliers:
         print("SUPPLIER: {}".format(supplier_id))
-        declaration = client.get_supplier_declaration(supplier_id, 'digital-outcomes-and-specialists')['declaration']
+        declaration = client.get_supplier_declaration(supplier_id, FRAMEWORK_SLUG)['declaration']
 
         declaration_result = check_declaration_answers(declaration_content, declaration) if declaration else FAIL
         supplier_has_submitted_services = process_submitted_drafts(client, supplier_id, user)
 
         if declaration_result == PASS and supplier_has_submitted_services:
             print("  PASSED")
-            res = insert_result(client, supplier_id, True, user)
+            res = set_framework_result(client, FRAMEWORK_SLUG, supplier_id, True, user)
             print(res)
 
         elif declaration_result == DISCRETIONARY and supplier_has_submitted_services:
@@ -116,5 +102,5 @@ def process_dos_results(client, content_loader, user):
             # No-op here: leave result as NULL in the database
         else:
             print("  FAILED")
-            res = insert_result(client, supplier_id, False, user)
+            res = set_framework_result(client, FRAMEWORK_SLUG, supplier_id, False, user)
             print(res)
