@@ -8,7 +8,7 @@ To add support for future frameworks we will will need to add to the LOTS and DE
 dmscripts/export_framework_applicant_details.py
 
 Usage:
-    scripts/generate-agreement-signature-pages.py <stage> <api_token> <framework_slug> <template_folder>
+    scripts/generate-agreement-signature-pages.py <stage> <api_token> <framework_slug> <template_folder> <output_folder>
 
 Example:
     generate-agreement-signature-pages.py dev myToken g-cloud-8 ../digitalmarketplace-agreements/documents/g-cloud
@@ -16,6 +16,7 @@ Example:
 """
 import sys
 import os
+import shutil
 
 sys.path.insert(0, '.')
 
@@ -35,11 +36,13 @@ if __name__ == '__main__':
     API_TOKEN = arguments['<api_token>']
     FRAMEWORK = arguments['<framework_slug>']
     TEMPLATE_FOLDER = arguments['<template_folder>']
+    OUTPUT_FOLDER = arguments['<output_folder>']
 
     repo_root = os.path.abspath(
         os.path.join(os.path.dirname(__file__), '..'))
-    html_dir = os.path.join(repo_root, 'html')
-    pdf_dir = os.path.join(repo_root, 'pdfs')
+    html_dir = os.path.join(OUTPUT_FOLDER, 'html')
+
+    os.makedirs(html_dir)
 
     logger = logging.configure_logger()
 
@@ -50,4 +53,5 @@ if __name__ == '__main__':
     render_html_for_successful_suppliers(rows, FRAMEWORK, TEMPLATE_FOLDER, html_dir)
     html_pages = os.listdir(html_dir)
     html_pages.remove('{}-signature-page.css'.format(FRAMEWORK))
-    render_pdf_for_each_html_page(html_pages, html_dir, pdf_dir)
+    render_pdf_for_each_html_page(html_pages, html_dir, OUTPUT_FOLDER)
+    shutil.rmtree(html_dir)

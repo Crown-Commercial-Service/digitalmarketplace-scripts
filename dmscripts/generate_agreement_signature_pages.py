@@ -34,6 +34,8 @@ def render_html_for_successful_suppliers(rows, framework, template_dir, output_d
 
 
 def render_pdf_for_each_html_page(html_pages, html_dir, pdf_dir):
+    html_dir = os.path.abspath(html_dir)
+    pdf_dir = os.path.abspath(pdf_dir)
     if not os.path.exists(pdf_dir):
         os.mkdir(pdf_dir)
     for index, html_page in enumerate(html_pages):
