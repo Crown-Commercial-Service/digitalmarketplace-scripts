@@ -2,6 +2,9 @@
 from __future__ import unicode_literals
 from dmapiclient import HTTPError
 
+
+SERVICE_ESSENTIALS_MUST_BE_TRUE = ['helpGovernmentImproveServices', 'bespokeSystemInformation', 'dataProtocols',
+                                   'openStandardsPrinciples', 'anonymousRecruitment', 'manageIncentives']
 CORRECT_DECLARATION_RESPONSE_MUST_BE_TRUE = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 16, 38, 39, 40, 41, 42,
                                              43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54]
 CORRECT_DECLARATION_RESPONSE_MUST_BE_FALSE = [17, 18, 19, 20]
@@ -13,8 +16,6 @@ CORRECT_DECLARATION_RESPONSES = {14: ["Yes – your organisation has, or will ha
                                       "Not applicable - your organisation does not need employer’s liability "
                                       "insurance because your organisation employs only the owner or close family "
                                       "members."]}
-SERVICE_ESSENTIALS_MUST_BE_TRUE = ['helpGovernmentImproveServices', 'bespokeSystemInformation', 'dataProtocols',
-                                   'openStandardsPrinciples', 'anonymousRecruitment', 'manageIncentives']
 FAIL = "Fail"
 PASS = "Pass"
 DISCRETIONARY = "Discretionary"
