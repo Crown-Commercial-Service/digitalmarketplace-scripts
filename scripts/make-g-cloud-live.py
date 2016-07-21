@@ -81,35 +81,38 @@ def document_copier(draft_bucket, documents_bucket, dry_run):
 
 
 def make_draft_service_live(client, copy_document, draft_service, framework_slug, dry_run):
-    print(u"  > Migrating draft {} - {}".format(draft_service['id'], draft_service['serviceName']))
-    if dry_run:
-        service_id = random.randint(1000, 10000)
-        print(u"    > generating random test service ID: {}".format(service_id))
-    else:
-        services = client.publish_draft_service(draft_service['id'], 'make-g-cloud-live script')
-        service_id = services['services']['id']
-        print(u"    > draft service published - new service ID {}".format(service_id))
-
-    document_updates = {}
-    for document_key in DOCUMENT_KEYS:
-        if document_key not in draft_service:
-            print(u"    > Skipping {}".format(document_key))
+    try:
+        print(u"  > Migrating draft {} - {}".format(draft_service['id'], draft_service['serviceName']))
+        if dry_run:
+            service_id = random.randint(1000, 10000)
+            print(u"    > generating random test service ID: {}".format(service_id))
         else:
-            parsed_document = parse_document_url(draft_service[document_key], framework_slug)
-            assert_equal(str(parsed_document['supplier_id']), str(draft_service['supplierId']))
-            assert_equal(str(parsed_document['draft_id']), str(draft_service['id']))
+            services = client.publish_draft_service(draft_service['id'], 'make-g-cloud-live script')
+            service_id = services['services']['id']
+            print(u"    > draft service published - new service ID {}".format(service_id))
 
-            draft_document_path = get_draft_document_path(parsed_document, framework_slug)
-            live_document_path = get_live_document_path(parsed_document, framework_slug, service_id)
+        document_updates = {}
+        for document_key in DOCUMENT_KEYS:
+            if document_key not in draft_service:
+                print(u"    > Skipping {}".format(document_key))
+            else:
+                parsed_document = parse_document_url(draft_service[document_key], framework_slug)
+                assert_equal(str(parsed_document['supplier_id']), str(draft_service['supplierId']))
+                assert_equal(str(parsed_document['draft_id']), str(draft_service['id']))
 
-            copy_document(draft_document_path, live_document_path)
-            document_updates[document_key] = get_live_asset_url(live_document_path)
+                draft_document_path = get_draft_document_path(parsed_document, framework_slug)
+                live_document_path = get_live_document_path(parsed_document, framework_slug, service_id)
 
-    if dry_run:
-        print(u"    > not updating document URLs {}".format(document_updates))
-    else:
-        client.update_service(service_id, document_updates, 'Moving documents to live bucket')
-        print("    > document URLs updated")
+                copy_document(draft_document_path, live_document_path)
+                document_updates[document_key] = get_live_asset_url(live_document_path)
+
+        if dry_run:
+            print(u"    > not updating document URLs {}".format(document_updates))
+        else:
+            client.update_service(service_id, document_updates, 'Moving documents to live bucket')
+            print("    > document URLs updated")
+    except Exception as e:
+        print("ERROR MAKING DRAFT '{}' LIVE: {}".format(draft_service['id'], e.message))
 
 
 if __name__ == '__main__':
