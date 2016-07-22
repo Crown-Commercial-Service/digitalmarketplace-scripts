@@ -19,7 +19,7 @@ from dmapiclient import DataAPIClient
 
 
 # These are all the free-text boxes in G-Cloud service submissions
-KEYS_TO_CHECK = ['apiType', 'deprovisioningTime', 'provisioningTime', 'serviceBenefits', 'serviceFeatures', 'serviceTypes',
+KEYS_TO_CHECK = ['apiType', 'deprovisioningTime', 'provisioningTime', 'serviceBenefits', 'serviceFeatures',
                  'serviceName', 'serviceSummary', 'supportAvailability', 'supportResponseTime', 'vendorCertifications']
 
 
@@ -78,17 +78,18 @@ def check_services_with_bad_words(output_dir, framework_slug, client, suppliers,
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames, dialect='excel')
         writer.writeheader()
         for supplier in suppliers:
-            if supplier["frameworkSlug"] == "g-cloud-6":
-                services = get_services(client, supplier["supplierId"], supplier["frameworkSlug"])
-            else:
-                services = get_draft_services(client, supplier["supplierId"], supplier["frameworkSlug"])
+            try:
+                services = get_services(client, supplier["supplierId"], framework_slug)
+            except Exception as e:
+                # Retry once; will fail the script if retry fails.
+                services = get_services(client, supplier["supplierId"], framework_slug)
             for service in services:
                 for key in KEYS_TO_CHECK:
                     if isinstance(service.get(key), six.string_types):
                         for word in bad_words:
                             if get_bad_words_in_value(word, service.get(key)):
                                 output_bad_words(
-                                    supplier["supplierId"], supplier["frameworkSlug"], service["id"],
+                                    supplier["supplierId"], framework_slug, service["id"],
                                     service["serviceName"], service["serviceSummary"], key,
                                     service.get(key), word, writer)
                     elif isinstance(service.get(key), list):
@@ -96,7 +97,7 @@ def check_services_with_bad_words(output_dir, framework_slug, client, suppliers,
                             for word in bad_words:
                                 if get_bad_words_in_value(word, contents):
                                     output_bad_words(
-                                        supplier["supplierId"], supplier["frameworkSlug"], service["id"],
+                                        supplier["supplierId"], framework_slug, service["id"],
                                         service["serviceName"], service["serviceSummary"], key,
                                         contents, word, writer)
 
