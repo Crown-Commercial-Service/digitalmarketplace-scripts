@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-import pytest
 
 from collections import OrderedDict
-from dmscripts.insert_dos_framework_results import insert_result, check_service_essentials, get_submitted_drafts, \
-    check_declaration_answers, process_submitted_drafts, process_dos_results
+from dmscripts.insert_dos_framework_results import check_service_essentials, check_declaration_answers, \
+    process_submitted_drafts, process_dos_results
 from mock import mock
-from dmapiclient import HTTPError
 
 
 VALID_COMPLETE_DOS_DECLARATION = {
@@ -223,33 +221,6 @@ COMPLETE_RESEARCH_PARTICIPANTS_DRAFT = {
     "createdAt": "2016-01-19T09:25:27.006661Z",
     "anonymousRecruitment": True
 }
-
-
-def test_insert_result_calls_with_correct_arguments(mock_data_client):
-    assert insert_result(mock_data_client, 123456, True, 'user') == '  Result set OK: 123456'
-    mock_data_client.set_framework_result.assert_called_with(123456, 'digital-outcomes-and-specialists', True, 'user')
-
-
-def test_insert_result_returns_error_message_if_update_fails(mock_data_client):
-    mock_data_client.set_framework_result.side_effect = HTTPError()
-    assert insert_result(mock_data_client, 123456, True, 'user') == \
-        '  Error inserting result for 123456 (True): Request failed (status: 503)'
-
-
-def test_get_submitted_drafts_calls_with_correct_arguments(mock_data_client):
-    mock_data_client.find_draft_services.return_value = {'services': []}
-    get_submitted_drafts(mock_data_client, 12345)
-    mock_data_client.find_draft_services.assert_called_with(12345, framework='digital-outcomes-and-specialists')
-
-
-def test_get_submitted_drafts_returns_submitted_services_only(mock_data_client):
-    mock_data_client.find_draft_services.return_value = {'services': [
-                                                        {"id": 1, "status": "not-submitted"},
-                                                        {"id": 2, "status": "submitted"}
-        ]
-    }
-    result = get_submitted_drafts(mock_data_client, 12345)
-    assert (result == [{"id": 2, "status": "submitted"}])
 
 
 def test_check_service_essentials_passes_good_drafts():

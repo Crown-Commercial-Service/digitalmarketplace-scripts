@@ -16,7 +16,8 @@ import itertools
 import functools
 from multiprocessing.pool import ThreadPool
 from docopt import docopt
-from dmscripts.env import get_api_endpoint_from_stage, get_assets_endpoint_from_stage
+from dmscripts.env import get_api_endpoint_from_stage
+from dmscripts.framework_utils import find_suppliers_on_framework
 from dmscripts.logging import configure_logger
 from dmapiclient import DataAPIClient
 from dmutils.s3 import S3
@@ -28,15 +29,6 @@ DOCUMENT_KEYS = [
 ]
 FRAMEWORK_SLUG = 'g-cloud-7'
 logger = configure_logger()
-
-
-def find_suppliers_on_framework(client, framework_slug):
-    return (
-        supplier
-        for supplier
-        in client.find_framework_suppliers(framework_slug)['supplierFrameworks']
-        if supplier['onFramework']
-    )
 
 
 def find_drafts_for_supplier(client, supplier_id, framework_slug):

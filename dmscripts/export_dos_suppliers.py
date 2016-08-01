@@ -1,8 +1,8 @@
+# -*- coding: utf-8 -*-
 import os
 import sys
 from multiprocessing.pool import ThreadPool
 
-from dmapiclient import HTTPError
 from dmscripts.insert_dos_framework_results import (
     CORRECT_DECLARATION_RESPONSE_MUST_BE_TRUE, CORRECT_DECLARATION_RESPONSE_MUST_BE_FALSE,
     CORRECT_DECLARATION_RESPONSE_SHOULD_BE_FALSE, MITIGATING_FACTORS,

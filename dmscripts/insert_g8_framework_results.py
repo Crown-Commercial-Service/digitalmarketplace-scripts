@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from dmapiclient import HTTPError
+from dmscripts.framework_utils import has_supplier_submitted_services, set_framework_result
+
+FRAMEWORK_SLUG = 'g-cloud-8'
 
 CORRECT_DECLARATION_RESPONSE_MUST_BE_TRUE = ["termsOfParticipation",
                                              "termsAndConditions",
@@ -46,21 +48,6 @@ PASS = "Pass"
 DISCRETIONARY = "Discretionary"
 
 
-def insert_result(client, supplier_id, result, user):
-    try:
-        client.set_framework_result(supplier_id, 'g-cloud-8', result, user)
-        return"  Result set OK: {}".format(supplier_id)
-    except HTTPError as e:
-        return"  Error inserting result for {} ({}): {}".format(supplier_id, result, str(e))
-
-
-def get_submitted_drafts(client, supplier_id):
-    services = client.find_draft_services(supplier_id, framework='g-cloud-8')
-    services = services["services"]
-    submitted_services = [service for service in services if service["status"] == "submitted"]
-    return submitted_services
-
-
 def check_declaration_answers(declaration):
     if declaration['status'] != 'complete':
         return FAIL
@@ -91,28 +78,18 @@ def check_declaration_answers(declaration):
     return result
 
 
-def has_supplier_submitted_services(client, supplier_id):
-    submitted_drafts = get_submitted_drafts(client, supplier_id)
-    if len(submitted_drafts) > 0:
-        return True
-    else:
-        return False
-
-
 def process_g8_results(client, user):
 
-    g8_registered_suppliers = client\
-        .get_interested_suppliers('g-cloud-8')\
-        .get('interestedSuppliers', None)
+    g8_registered_suppliers = client.get_interested_suppliers(FRAMEWORK_SLUG).get('interestedSuppliers', None)
 
     for supplier_id in g8_registered_suppliers:
         print("SUPPLIER: {}".format(supplier_id))
-        declaration = client.get_supplier_declaration(supplier_id, 'g-cloud-8')['declaration']
+        declaration = client.get_supplier_declaration(supplier_id, FRAMEWORK_SLUG)['declaration']
         declaration_result = check_declaration_answers(declaration) if declaration else FAIL
-        supplier_has_submitted_services = has_supplier_submitted_services(client, supplier_id)
+        supplier_has_submitted_services = has_supplier_submitted_services(client, FRAMEWORK_SLUG, supplier_id)
         if declaration_result == PASS and supplier_has_submitted_services:
             print("  PASSED")
-            res = insert_result(client, supplier_id, True, user)
+            res = set_framework_result(client, FRAMEWORK_SLUG, supplier_id, True, user)
             print(res)
 
         elif declaration_result == DISCRETIONARY and supplier_has_submitted_services:
@@ -120,5 +97,5 @@ def process_g8_results(client, user):
             # No-op here: leave result as NULL in the database
         else:
             print("  FAILED")
-            res = insert_result(client, supplier_id, False, user)
+            res = set_framework_result(client, FRAMEWORK_SLUG, supplier_id, False, user)
             print(res)

@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-from dmscripts.insert_g8_framework_results import insert_result, get_submitted_drafts, check_declaration_answers, \
-    has_supplier_submitted_services, process_g8_results
-from mock import mock
-from dmapiclient import HTTPError
+from dmscripts.insert_g8_framework_results import check_declaration_answers, process_g8_results
 
 
 VALID_COMPLETE_G8_DECLARATION = {
@@ -66,33 +63,6 @@ VALID_COMPLETE_G8_DECLARATION = {
 }
 
 
-def test_insert_result_calls_with_correct_arguments(mock_data_client):
-    assert insert_result(mock_data_client, 123456, True, 'user') == '  Result set OK: 123456'
-    mock_data_client.set_framework_result.assert_called_with(123456, 'g-cloud-8', True, 'user')
-
-
-def test_insert_result_returns_error_message_if_update_fails(mock_data_client):
-    mock_data_client.set_framework_result.side_effect = HTTPError()
-    assert insert_result(mock_data_client, 123456, True, 'user') == \
-        '  Error inserting result for 123456 (True): Request failed (status: 503)'
-
-
-def test_get_submitted_drafts_calls_with_correct_arguments(mock_data_client):
-    mock_data_client.find_draft_services.return_value = {'services': []}
-    get_submitted_drafts(mock_data_client, 12345)
-    mock_data_client.find_draft_services.assert_called_with(12345, framework='g-cloud-8')
-
-
-def test_get_submitted_drafts_returns_submitted_services_only(mock_data_client):
-    mock_data_client.find_draft_services.return_value = {'services': [
-                                                        {"id": 1, "status": "not-submitted"},
-                                                        {"id": 2, "status": "submitted"}
-        ]
-    }
-    result = get_submitted_drafts(mock_data_client, 12345)
-    assert (result == [{"id": 2, "status": "submitted"}])
-
-
 def test_check_declaration_fails_incomplete_declaration():
     declaration = {"status": "started"}
     assert check_declaration_answers(declaration) == 'Fail'
@@ -135,20 +105,6 @@ def test_check_declaration_answers_fails_for_bad_yes_or_na():
     declaration = VALID_COMPLETE_G8_DECLARATION.copy()
     declaration['employersInsurance'] = "No"
     assert check_declaration_answers(declaration) == 'Fail'
-
-
-def test_has_supplier_submitted_services_for_some_services(mock_data_client):
-    mock_data_client.find_draft_services.return_value = {
-        "services": [{"status": "submitted"}, {"status": "submitted"}]
-    }
-    assert has_supplier_submitted_services(mock_data_client, 12345) is True
-
-
-def test_has_supplier_submitted_services_for_no_services(mock_data_client):
-    mock_data_client.find_draft_services.return_value = {
-        "services": [{"status": "not-submitted"}]
-    }
-    assert has_supplier_submitted_services(mock_data_client, 12345) is False
 
 
 def test_process_g8_results_for_successful(mock_data_client):
