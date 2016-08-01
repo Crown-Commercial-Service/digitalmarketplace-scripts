@@ -1,11 +1,11 @@
 """
 
 Usage:
-    scripts/bad_words.py <data_api_url> <data_api_token> <bad_words_path> <framework_slug>
-    <output_dir>
+    scripts/bad_words.py <stage> <api_token> <bad_words_path> <framework_slug> <output_dir>
 """
 
 import sys
+sys.path.insert(0, '.')
 import os
 if sys.version_info > (3, 0):
     import csv
@@ -14,11 +14,18 @@ else:
 import six
 import re
 from docopt import docopt
+from dmscripts.env import get_api_endpoint_from_stage
 from dmapiclient import DataAPIClient
 
 
-def main(data_api_url, data_api_token, bad_words_path, framework_slug, output_dir):
-    client = DataAPIClient(data_api_url, data_api_token)
+# These are all the free-text boxes in G-Cloud service submissions
+KEYS_TO_CHECK = ['apiType', 'deprovisioningTime', 'provisioningTime', 'serviceBenefits', 'serviceFeatures',
+                 'serviceName', 'serviceSummary', 'supportAvailability', 'supportResponseTime', 'vendorCertifications']
+
+
+def main(stage, data_api_token, bad_words_path, framework_slug, output_dir):
+    api_url = get_api_endpoint_from_stage(stage)
+    client = DataAPIClient(api_url, data_api_token)
     bad_words = get_bad_words(bad_words_path)
     suppliers = get_suppliers(client, framework_slug)
     check_services_with_bad_words(output_dir, framework_slug, client, suppliers, bad_words)
@@ -62,7 +69,7 @@ def check_services_with_bad_words(output_dir, framework_slug, client, suppliers,
             'Supplier ID',
             'Framework',
             'Service ID',
-            'Service Title',
+            'Service Name',
             'Service Description',
             'Blacklisted Word Location',
             'Blacklisted Word Context',
@@ -71,25 +78,26 @@ def check_services_with_bad_words(output_dir, framework_slug, client, suppliers,
         writer = csv.DictWriter(csvfile, fieldnames=fieldnames, dialect='excel')
         writer.writeheader()
         for supplier in suppliers:
-            if supplier["frameworkSlug"] == "g-cloud-6":
-                services = get_services(client, supplier["supplierId"], supplier["frameworkSlug"])
-            else:
-                services = get_draft_services(client, supplier["supplierId"], supplier["frameworkSlug"])
+            try:
+                services = get_services(client, supplier["supplierId"], framework_slug)
+            except Exception as e:
+                # Retry once; will fail the script if retry fails.
+                services = get_services(client, supplier["supplierId"], framework_slug)
             for service in services:
-                for key in service:
-                    if isinstance(service[key], six.string_types):
+                for key in KEYS_TO_CHECK:
+                    if isinstance(service.get(key), six.string_types):
                         for word in bad_words:
-                            if get_bad_words_in_value(word, service[key]):
+                            if get_bad_words_in_value(word, service.get(key)):
                                 output_bad_words(
-                                    supplier["supplierId"], supplier["frameworkSlug"], service["id"],
+                                    supplier["supplierId"], framework_slug, service["id"],
                                     service["serviceName"], service["serviceSummary"], key,
-                                    service[key], word, writer)
-                    elif isinstance(service[key], list):
-                        for contents in service[key]:
+                                    service.get(key), word, writer)
+                    elif isinstance(service.get(key), list):
+                        for contents in service.get(key):
                             for word in bad_words:
                                 if get_bad_words_in_value(word, contents):
                                     output_bad_words(
-                                        supplier["supplierId"], supplier["frameworkSlug"], service["id"],
+                                        supplier["supplierId"], framework_slug, service["id"],
                                         service["serviceName"], service["serviceSummary"], key,
                                         contents, word, writer)
 
@@ -100,14 +108,14 @@ def get_bad_words_in_value(bad_word, value):
 
 
 def output_bad_words(
-        supplier_id, framework, service_id, service_title,
+        supplier_id, framework, service_id, service_name,
         service_description, blacklisted_word_location,
         blacklisted_word_context, blacklisted_word, writer):
     row = {
         'Supplier ID': supplier_id,
         'Framework': framework,
         'Service ID': service_id,
-        'Service Title': service_title,
+        'Service Name': service_name,
         'Service Description': service_description,
         'Blacklisted Word Location': blacklisted_word_location,
         'Blacklisted Word Context': blacklisted_word_context,
@@ -118,5 +126,5 @@ def output_bad_words(
 if __name__ == '__main__':
     arguments = docopt(__doc__)
     main(
-        arguments['<data_api_url>'], arguments['<data_api_token>'], arguments['<bad_words_path>'],
+        arguments['<stage>'], arguments['<api_token>'], arguments['<bad_words_path>'],
         arguments['<framework_slug>'], arguments['<output_dir>'])
