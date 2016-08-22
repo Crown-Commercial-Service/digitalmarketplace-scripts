@@ -94,7 +94,7 @@ if __name__ == '__main__':
 
     if arguments.get('<supplier_id_file>'):
         with open(arguments['<supplier_id_file>'], 'r') as f:
-            supplier_ids = filter(None, [int(l.strip()) for l in f.readlines()])
+            supplier_ids = list(filter(None, [int(l.strip()) for l in f.readlines()]))
     else:
         supplier_ids = None
 
