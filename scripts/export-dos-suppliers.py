@@ -23,7 +23,7 @@ from docopt import docopt
 from dmscripts.env import get_api_endpoint_from_stage
 from dmscripts.export_dos_suppliers import export_suppliers
 from dmapiclient import DataAPIClient
-from dmutils.content_loader import ContentLoader
+from dmcontent.content_loader import ContentLoader
 
 
 if __name__ == '__main__':

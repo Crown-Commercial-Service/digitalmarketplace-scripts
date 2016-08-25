@@ -4,7 +4,7 @@ from mock import Mock, call, patch, ANY, mock_open
 
 from dmscripts import export_g8_suppliers
 from dmapiclient import HTTPError
-from dmutils.content_loader import ContentQuestion
+from dmcontent.content_loader import ContentQuestion
 
 
 def test_find_suppliers_produces_results_with_supplier_ids(mock_data_client):
