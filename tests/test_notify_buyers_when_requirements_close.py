@@ -6,7 +6,7 @@ import datetime
 
 from dmscripts.notify_buyers_when_requirements_close import (
     get_closed_briefs,
-    get_closed_at,
+    get_date_closed,
     get_notified_briefs,
     notify_users,
     MandrillException,
@@ -16,7 +16,7 @@ from dmscripts.notify_buyers_when_requirements_close import (
 from .helpers import FakeMail
 
 
-def test_get_closed_briefs_filters_by_closed_at():
+def test_get_closed_briefs_filters_by_date_closed():
     api_client = mock.Mock()
     api_client.find_briefs_iter.return_value = iter([
         {"applicationsClosedAt": "2016-09-03T23:59:59.000000Z", "status": "closed"},
@@ -37,16 +37,16 @@ def test_get_closed_briefs_filters_by_closed_at():
     ]
 
 
-def test_get_closed_at():
-    def check_closed_at(value, expected):
+def test_get_date_closed():
+    def check_date_closed(value, expected):
         with freeze_time('2015-01-02 03:04:05'):
-            assert get_closed_at(value) == expected
+            assert get_date_closed(value) == expected
 
     for value, expected in [
         (None, datetime.date(2015, 1, 1)),
         ('2016-01-02', datetime.date(2016, 1, 2))
     ]:
-        yield check_closed_at, value, expected
+        yield check_date_closed, value, expected
 
 
 @mock.patch('dmscripts.notify_buyers_when_requirements_close.get_sent_emails')
@@ -160,7 +160,7 @@ def test_main_with_no_briefs(get_closed_briefs, get_notified_briefs, notify_user
 @mock.patch('dmscripts.notify_buyers_when_requirements_close.notify_users')
 @mock.patch('dmscripts.notify_buyers_when_requirements_close.get_notified_briefs')
 @mock.patch('dmscripts.notify_buyers_when_requirements_close.get_closed_briefs')
-def test_main_doesnt_allow_old_closed_at(get_closed_briefs, get_notified_briefs, notify_users):
+def test_main_doesnt_allow_old_date_closed(get_closed_briefs, get_notified_briefs, notify_users):
     get_closed_briefs.return_value = [
         {'id': 100},
         {'id': 200},

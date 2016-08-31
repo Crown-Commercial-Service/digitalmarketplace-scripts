@@ -14,10 +14,10 @@ from . import logging
 logger = logging.configure_logger({'dmapiclient': logging.INFO})
 
 
-def get_closed_briefs(data_api_client, closed_at):
+def get_closed_briefs(data_api_client, date_closed):
     return [
         brief for brief in data_api_client.find_briefs_iter(status='closed', with_users=True)
-        if datetime.strptime(brief['applicationsClosedAt'], DATETIME_FORMAT).date() == closed_at
+        if datetime.strptime(brief['applicationsClosedAt'], DATETIME_FORMAT).date() == date_closed
     ]
 
 
@@ -54,42 +54,42 @@ def notify_users(email_api_key, brief):
             return False
 
 
-def get_closed_at(closed_at):
-    if closed_at is None:
+def get_date_closed(date_closed):
+    if date_closed is None:
         return (datetime.utcnow() - timedelta(days=1)).date()
     else:
-        return datetime.strptime(closed_at, DATE_FORMAT).date()
+        return datetime.strptime(date_closed, DATE_FORMAT).date()
 
 
-def get_notified_briefs(email_api_key, closed_at):
+def get_notified_briefs(email_api_key, date_closed):
     return set(
         email['metadata']['brief_id']
-        for email in get_sent_emails(email_api_key, ['requirements-closed'], date_from=closed_at.isoformat())
+        for email in get_sent_emails(email_api_key, ['requirements-closed'], date_from=date_closed.isoformat())
         if 'brief_id' in (email.get('metadata') or {})
     )
 
 
-def main(data_api_url, data_api_access_token, email_api_key, closed_at, dry_run):
+def main(data_api_url, data_api_access_token, email_api_key, date_closed, dry_run):
     logger.info("Data API URL: {data_api_url}", extra={'data_api_url': data_api_url})
 
-    closed_at = get_closed_at(closed_at)
-    if closed_at < (datetime.utcnow() - timedelta(days=8)).date():
+    date_closed = get_date_closed(date_closed)
+    if date_closed < (datetime.utcnow() - timedelta(days=8)).date():
         logger.error('Not allowed to notify about briefs that closed more than a week ago')
         return False
 
     data_api_client = dmapiclient.DataAPIClient(data_api_url, data_api_access_token)
 
-    closed_briefs = get_closed_briefs(data_api_client, closed_at)
+    closed_briefs = get_closed_briefs(data_api_client, date_closed)
     if not closed_briefs:
-        logger.info("No briefs closed on {closed_at}", extra={"closed_at": closed_at})
+        logger.info("No briefs closed on {date_closed}", extra={"date_closed": date_closed})
         return True
 
     logger.info("Notifying users about {briefs_count} closed briefs", extra={'briefs_count': len(closed_briefs)})
 
-    notified_briefs = get_notified_briefs(email_api_key, closed_at)
+    notified_briefs = get_notified_briefs(email_api_key, date_closed)
 
-    logger.info('Brief notifications sent since {closed_at}: {notified_briefs_count}',
-                extra={'closed_at': closed_at, 'notified_briefs_count': len(notified_briefs)})
+    logger.info('Brief notifications sent since {date_closed}: {notified_briefs_count}',
+                extra={'date_closed': date_closed, 'notified_briefs_count': len(notified_briefs)})
 
     for brief in closed_briefs:
         if brief['id'] in notified_briefs:
