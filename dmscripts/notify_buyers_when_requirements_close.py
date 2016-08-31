@@ -6,7 +6,8 @@ import dmapiclient
 from dmutils.formats import DATE_FORMAT, DATETIME_FORMAT
 from dmutils.email import send_email, MandrillException
 
-from .email import render_html, get_sent_emails
+from .email import get_sent_emails
+from .html import render_html
 
 from . import logging
 

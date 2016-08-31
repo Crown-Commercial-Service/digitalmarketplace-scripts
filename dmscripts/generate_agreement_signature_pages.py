@@ -4,7 +4,7 @@ import shutil
 import re
 import subprocess
 
-from .email import render_html
+from .html import render_html
 
 
 def save_page(html, supplier_id, output_dir):
