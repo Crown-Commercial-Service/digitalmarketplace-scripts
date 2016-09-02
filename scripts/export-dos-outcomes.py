@@ -18,7 +18,7 @@ from dmscripts.export_dos_suppliers import (
     find_services_by_lot, FRAMEWORK_SLUG, make_fields_from_content_questions, write_csv
 )
 from dmapiclient import DataAPIClient
-from dmutils.content_loader import ContentLoader
+from dmcontent.content_loader import ContentLoader
 
 
 def find_all_outcomes(client):

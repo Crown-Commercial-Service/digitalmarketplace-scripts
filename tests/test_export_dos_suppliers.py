@@ -7,7 +7,7 @@ from mock import Mock, call, patch, ANY, mock_open
 from dmscripts import export_dos_suppliers
 from dmscripts.insert_dos_framework_results import CORRECT_DECLARATION_RESPONSES
 from dmapiclient import HTTPError
-from dmutils.content_loader import ContentQuestion
+from dmcontent.content_loader import ContentQuestion
 
 
 def test_find_suppliers_produces_results_with_supplier_ids(mock_data_client):

@@ -3,14 +3,8 @@ import io
 import shutil
 import re
 import subprocess
-from jinja2 import Template
 
-
-def render_html(data, template_path):
-    with io.open(template_path, encoding='UTF-8') as htmlfile:
-        html = htmlfile.read()
-        template = Template(html)
-        return template.render(data)
+from .html import render_html
 
 
 def save_page(html, supplier_id, output_dir):
@@ -28,7 +22,7 @@ def render_html_for_successful_suppliers(rows, framework, template_dir, output_d
         if data['on_framework'] is False:
             continue
         data['appliedLots'] = filter(lambda lot: int(data[lot]) > 0, ['saas', 'paas', 'iaas', 'scs'])
-        html = render_html(data, template_path)
+        html = render_html(template_path, data)
         save_page(html, data['supplier_id'], output_dir)
     shutil.copyfile(template_css_path, os.path.join(output_dir, '{}-signature-page.css'.format(framework)))
 

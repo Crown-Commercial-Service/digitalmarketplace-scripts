@@ -1,4 +1,4 @@
-from dmutils.content_loader import ContentSection
+from dmcontent.content_loader import ContentSection
 from dmscripts.generate_questions_csv import get_questions, return_rows_for_sections
 
 

@@ -14,7 +14,7 @@ import sys
 sys.path.insert(0, '.')
 
 from docopt import docopt
-from dmutils.content_loader import ContentLoader
+from dmcontent.content_loader import ContentLoader
 from dmscripts.generate_questions_csv import generate_csv
 
 if __name__ == '__main__':
