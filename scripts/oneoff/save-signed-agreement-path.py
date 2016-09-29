@@ -10,6 +10,7 @@ Usage:
 """
 import sys
 sys.path.insert(0, '.')
+import time
 import getpass
 
 from docopt import docopt
@@ -43,7 +44,7 @@ if __name__ == '__main__':
     FRAMEWORKS = ['g-cloud-7', 'g-cloud-8', 'digital-outcomes-and-specialists']
     BUCKET_NAME = get_bucket_name(arguments['<stage>'])
     BUCKET = s3.S3(BUCKET_NAME)
-
+    print("STARTED AT {}".format(time.strftime('%X %x %Z')))
     for framework_slug in FRAMEWORKS:
         # Get all supplier frameworks who have returned their agreement
         supplier_frameworks = client.find_framework_suppliers(
@@ -85,3 +86,4 @@ if __name__ == '__main__':
                     {"signedAgreementPath": file["path"]},
                     'save-signed-agreement-path script run by {}'.format(getpass.getuser())
                 )
+    print("ENDED AT {}".format(time.strftime('%X %x %Z')))
