@@ -77,7 +77,14 @@ if __name__ == '__main__':
 
             # Check file path is found
             if not file or not file.get("path"):
-                print "FILE NOT FOUND FOR SUPPLIER ID: {}".format(supplier_framework['supplierId'])
+                print "NO {} COUNTERSIGNED FILE FOR SUPPLIER {} (agreement date: {})".format(
+                    framework_slug,
+                    supplier_framework['supplierId'],
+                    time.strftime(
+                        '%x',
+                        (time.strptime(framework_agreement.get('signedAgreementReturnedAt'), '%Y-%m-%dT%H:%M:%S.%fZ'))
+                    )
+                )
                 continue
 
             # Get meta timestamp for when file was created
