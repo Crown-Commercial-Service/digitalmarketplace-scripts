@@ -85,6 +85,10 @@ def match_signed_agreements(supplier_ids, path):
 
 
 if __name__ == '__main__':
+    print('Signed and countersigned agreement paths are now stored in the database so can no longer be cleared '
+          'using this script.')
+    sys.exit(1)
+
     arguments = docopt(__doc__)
     stage = arguments['<stage>']
     framework_slug = arguments['<framework_slug>']

@@ -97,13 +97,13 @@ def test_upload_file_dry_run_doesnt_upload():
 
 
 def test_upload_file_without_document_category():
-    file_path = '/92877-signed-framework-agreement.pdf'
+    file_path = '/92877-framework-agreement.pdf'
     bucket = mock.Mock()
     with mock.patch.object(builtins, 'open', mock.mock_open(read_data='foo')):
         upload_file(bucket, False, file_path, 'g-cloud-7', 'agreements')
         assert bucket.save.call_count == 1
         bucket.save.assert_called_with(
-            'g-cloud-7/agreements/92877/92877-signed-framework-agreement.pdf',
+            'g-cloud-7/agreements/92877/92877-framework-agreement.pdf',
             mock.ANY,
             acl='private',
             move_prefix=None,
@@ -111,15 +111,15 @@ def test_upload_file_without_document_category():
 
 
 def test_upload_file_with_supplier_name_dictionary():
-    file_path = '/35435-signed-framework-agreement.pdf'
+    file_path = '/35435-framework-agreement.pdf'
     supplier_name_dictionary = {'35435': 'Something', '584425': 'ICNT_Consulting_Ltd'}
     bucket = mock.Mock()
     with mock.patch.object(builtins, 'open', mock.mock_open(read_data='foo')):
         upload_file(bucket, False, file_path, 'g-cloud-7', 'agreements', supplier_name_dict=supplier_name_dictionary)  # noqa
         assert bucket.save.call_count == 1
         bucket.save.assert_called_with(
-            'g-cloud-7/agreements/35435/35435-signed-framework-agreement.pdf',
+            'g-cloud-7/agreements/35435/35435-framework-agreement.pdf',
             mock.ANY,
             acl='private',
-            download_filename='Something-35435-signed-framework-agreement.pdf',
+            download_filename='Something-35435-framework-agreement.pdf',
             move_prefix=None)
