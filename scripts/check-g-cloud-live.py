@@ -2,7 +2,7 @@
 """
 
 Usage:
-    scripts/check-g-cloud-7-live.py <stage> <api_token> <draft_bucket> <documents_bucket>
+    scripts/check-g-cloud-live.py <stage> <api_token> <draft_bucket> <documents_bucket>
 """
 import sys
 sys.path.insert(0, '.')
