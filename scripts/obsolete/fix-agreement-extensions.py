@@ -112,6 +112,10 @@ def get_bucket_name(stage):
     return 'digitalmarketplace-agreements-{0}-{0}'.format(stage)
 
 if __name__ == '__main__':
+    print('Signed and countersigned agreement paths are now stored in the database so can no longer be updated '
+          'using this script {}'.format(document_categories))
+    sys.exit(1)
+
     arguments = docopt(__doc__)
 
     stage = arguments['<stage>']
