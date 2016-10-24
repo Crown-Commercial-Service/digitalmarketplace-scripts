@@ -18,8 +18,7 @@ Options:
 import sys
 sys.path.insert(0, '.')
 
-from dmscripts.bulk_upload_documents import get_bucket_name, get_all_files_of_type, \
-    upload_file
+from dmscripts.bulk_upload_documents import get_bucket_name, get_all_files_of_type, upload_file
 
 from docopt import docopt
 
@@ -37,13 +36,13 @@ if __name__ == '__main__':
     document_type = arguments['--document_type']
     dry_run = arguments['--dry-run']
 
-    document_categories = ['result-letter',
-                           'framework-agreement',
-                           'signed-framework-agreement',
-                           'countersigned-framework-agreement']
+    document_categories = ['result-letter', 'framework-agreement']
 
     if document_category not in document_categories:
         print('Document needs to be one of {}'.format(document_categories))
+        if document_category in ('signed-framework-agreement', 'countersigned-framework-agreement'):
+            print('Signed and countersigned agreement paths now need to be stored in database so cannot be uploaded '
+                  'using this script.')
         sys.exit(1)
 
     if dry_run:

@@ -16,6 +16,10 @@ def upload_file(bucket, dry_run, file_path, framework_slug, bucket_category,
         document_name = get_document_name_from_file_path(file_path)
     else:
         document_name = '{0}.{1}'.format(document_category, document_type)
+    if 'signed-framework-agreement' in document_name:
+        print('Signed and countersigned agreement paths now need to be stored in database so can no longer be uploaded '
+              'using this script.')
+        return
     upload_path = get_document_path(framework_slug, supplier_id, bucket_category,
                                     document_name)
     if supplier_name_dict is None:
