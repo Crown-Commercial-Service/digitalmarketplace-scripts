@@ -32,10 +32,11 @@ from dmscripts import logging
 CONFIGS = {
     'buyers': {
         'base_model': 'users',
-        'keys': ('id', 'createdAt', 'role'),
+        'keys': ('id', 'emailAddress', 'createdAt', 'role'),
         'get_data_kwargs': {},
         'process_rules': {
-            'createdAt': format_datetime_string_as_date
+            'emailAddress': remove_username_from_email_address,
+            'createdAt': format_datetime_string_as_date,
         },
         'filter_rules': [
             ('role', '==', 'buyer'),
