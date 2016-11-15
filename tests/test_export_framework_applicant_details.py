@@ -43,8 +43,22 @@ def test_add_supplier_info(mock_data_client):
 
 def test_add_framework_info(mock_data_client):
     mock_data_client.get_supplier_framework_info.side_effect = [
-        {'frameworkInterest': {'declaration': {'status': 'complete'}, 'onFramework': True}},
-        {'frameworkInterest': {'declaration': {'status': 'complete'}, 'onFramework': False}},
+        {
+            'frameworkInterest': {
+                'declaration': {'status': 'complete'},
+                'onFramework': True,
+                'countersignedPath': None,
+                'countersignedAt': None
+            }
+        },
+        {
+            'frameworkInterest': {
+                'declaration': {'status': 'complete'},
+                'onFramework': False,
+                'countersignedPath': None,
+                'countersignedAt': None
+            }
+        },
     ]
 
     framework_info_adder = export_framework_applicant_details.add_framework_info(mock_data_client, 'g-cloud-8')
@@ -57,8 +71,10 @@ def test_add_framework_info(mock_data_client):
         call(1, 'g-cloud-8'), call(2, 'g-cloud-8')
     ])
     assert records == [
-        {'supplier_id': 1, 'declaration': {'status': 'complete'}, 'onFramework': True},
-        {'supplier_id': 2, 'declaration': {'status': 'complete'}, 'onFramework': False},
+        {'supplier_id': 1, 'onFramework': True, 'declaration': {'status': 'complete'},
+         'countersignedPath': '', 'countersignedAt': ''},
+        {'supplier_id': 2, 'onFramework': False, 'declaration': {'status': 'complete'},
+         'countersignedPath': '', 'countersignedAt': ''}
     ]
 
 
