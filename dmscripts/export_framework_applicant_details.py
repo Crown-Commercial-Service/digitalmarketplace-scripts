@@ -5,6 +5,7 @@ else:
     import csv
 
 from multiprocessing.pool import ThreadPool
+from dmutils.formats import dateformat
 
 
 LOTS = {
@@ -62,10 +63,15 @@ def add_framework_info(client, framework_slug):
         supplier_framework = client.get_supplier_framework_info(record['supplier_id'], framework_slug)
         supplier_framework = supplier_framework['frameworkInterest']
         supplier_framework['declaration'] = supplier_framework['declaration'] or {}
+        supplier_framework['countersignedPath'] = supplier_framework['countersignedPath'] or ''
+        supplier_framework['countersignedAt'] = dateformat(supplier_framework['countersignedAt']) or ''
 
         return dict(record,
                     declaration=supplier_framework['declaration'],
-                    onFramework=supplier_framework['onFramework'])
+                    onFramework=supplier_framework['onFramework'],
+                    countersignedPath=supplier_framework['countersignedPath'],
+                    countersignedAt=supplier_framework['countersignedAt'],
+                    )
 
     return inner
 
@@ -93,6 +99,8 @@ def get_csv_rows(records, framework_slug):
         "supplier_id",
         "supplier_name",
         "on_framework",
+        "countersigned_at",
+        "countersigned_path",
         ] + LOTS[framework_slug] + DECLARATION_FIELDS[framework_slug]
 
     return headers, rows
@@ -103,6 +111,8 @@ def create_row(record, framework_slug):
         'supplier_id': record['supplier']['id'],
         'supplier_name': record['supplier']['name'],
         'on_framework': record['onFramework'],
+        'countersigned_at': record['countersignedAt'],
+        'countersigned_path': record['countersignedPath'],
     }
     row.update({(lot, record['counts'][lot]) for lot in LOTS[framework_slug]})
     row.update(((field, record['declaration'].get(field, "")) for field in DECLARATION_FIELDS[framework_slug]))
