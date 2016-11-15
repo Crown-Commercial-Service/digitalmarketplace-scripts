@@ -11,7 +11,7 @@ Usage:
     scripts/generate-agreement-signature-pages.py <stage> <api_token> <framework_slug> <template_folder> <output_folder>
 
 Example:
-    generate-agreement-signature-pages.py dev myToken g-cloud-8 ../digitalmarketplace-agreements/documents/g-cloud
+    generate-agreement-signature-pages.py dev myToken g-cloud-8 ../digitalmarketplace-agreements/documents/g-cloud pdfs
 
 """
 import sys
