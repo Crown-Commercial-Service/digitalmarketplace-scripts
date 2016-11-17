@@ -17,6 +17,7 @@ Example:
 import sys
 import os
 import shutil
+import tempfile
 
 sys.path.insert(0, '.')
 
@@ -37,9 +38,7 @@ if __name__ == '__main__':
     TEMPLATE_FOLDER = arguments['<template_folder>']
     OUTPUT_FOLDER = arguments['<output_folder>']
 
-    html_dir = os.path.join(OUTPUT_FOLDER, 'html')
-
-    os.makedirs(html_dir)
+    html_dir = tempfile.mkdtemp()
 
     client = DataAPIClient(get_api_endpoint_from_stage(STAGE), API_TOKEN)
 
