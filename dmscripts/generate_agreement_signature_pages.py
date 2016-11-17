@@ -5,6 +5,9 @@ import re
 import subprocess
 
 from .html import render_html
+from . import logging
+
+logger = logging.configure_logger({'dmapiclient.base': logging.WARNING})
 
 
 def save_page(html, supplier_id, output_dir):
@@ -27,6 +30,26 @@ def render_html_for_successful_suppliers(rows, framework, template_dir, output_d
     shutil.copyfile(template_css_path, os.path.join(output_dir, '{}-signature-page.css'.format(framework)))
 
 
+def render_html_for_suppliers_awaiting_countersignature(rows, framework, template_dir, output_dir):
+    template_path = os.path.join(template_dir, '{}-counterpart-signature-page.html'.format(framework))
+    template_css_path = os.path.join(template_dir, '{}-signature-page.css'.format(framework))
+    countersignature_img_path = os.path.join(template_dir, '{}-countersignature.png'.format(framework))
+    for data in rows:
+        if data['on_framework'] is False or data['countersigned_path'] or not data['countersigned_at']:
+            logger.info("SKIPPING {}: on_fwk={} countersigned_at={} countersigned_path={}".format(
+                data['supplier_id'],
+                data['on_framework'],
+                data['countersigned_at'],
+                data['countersigned_path'])
+            )
+            continue
+        data['appliedLots'] = filter(lambda lot: int(data[lot]) > 0, ['saas', 'paas', 'iaas', 'scs'])
+        html = render_html(template_path, data)
+        save_page(html, data['supplier_id'], output_dir)
+    shutil.copyfile(template_css_path, os.path.join(output_dir, '{}-signature-page.css'.format(framework)))
+    shutil.copyfile(countersignature_img_path, os.path.join(output_dir, '{}-countersignature.png'.format(framework)))
+
+
 def render_pdf_for_each_html_page(html_pages, html_dir, pdf_dir):
     html_dir = os.path.abspath(html_dir)
     pdf_dir = os.path.abspath(pdf_dir)
@@ -38,4 +61,4 @@ def render_pdf_for_each_html_page(html_pages, html_dir, pdf_dir):
         pdf_path = '{}'.format(re.sub(html_dir, pdf_dir, pdf_path))
         exit_code = subprocess.call(['wkhtmltopdf', 'file://{}'.format(html_path), pdf_path])
         if exit_code > 0:
-            print("ERROR: {} on {}".format(exit_code, html_page))
+            logger.error("ERROR {} on {}".format(exit_code, html_page))
