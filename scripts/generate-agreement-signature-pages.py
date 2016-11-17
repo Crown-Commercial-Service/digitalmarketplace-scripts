@@ -26,7 +26,6 @@ from dmscripts.export_framework_applicant_details import find_suppliers_with_det
 from dmscripts.generate_agreement_signature_pages import render_html_for_successful_suppliers, \
     render_pdf_for_each_html_page
 from dmapiclient import DataAPIClient
-from dmscripts import logging
 
 
 if __name__ == '__main__':
@@ -38,13 +37,9 @@ if __name__ == '__main__':
     TEMPLATE_FOLDER = arguments['<template_folder>']
     OUTPUT_FOLDER = arguments['<output_folder>']
 
-    repo_root = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), '..'))
     html_dir = os.path.join(OUTPUT_FOLDER, 'html')
 
     os.makedirs(html_dir)
-
-    logger = logging.configure_logger()
 
     client = DataAPIClient(get_api_endpoint_from_stage(STAGE), API_TOKEN)
 
