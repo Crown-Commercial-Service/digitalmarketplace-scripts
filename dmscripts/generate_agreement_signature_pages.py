@@ -10,10 +10,10 @@ from . import logging
 logger = logging.configure_logger({'dmapiclient.base': logging.WARNING})
 
 
-def save_page(html, supplier_id, output_dir):
+def save_page(html, supplier_id, output_dir, filename):
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
-    page_path = os.path.join(output_dir, '{}-signature-page.html'.format(supplier_id))
+    page_path = os.path.join(output_dir, '{}-{}.html'.format(supplier_id, filename))
     with io.open(page_path, 'w+', encoding='UTF-8') as htmlfile:
         htmlfile.write(html)
 
@@ -26,7 +26,7 @@ def render_html_for_successful_suppliers(rows, framework, template_dir, output_d
             continue
         data['appliedLots'] = filter(lambda lot: int(data[lot]) > 0, ['saas', 'paas', 'iaas', 'scs'])
         html = render_html(template_path, data)
-        save_page(html, data['supplier_id'], output_dir)
+        save_page(html, data['supplier_id'], output_dir, "signature-page")
     shutil.copyfile(template_css_path, os.path.join(output_dir, '{}-signature-page.css'.format(framework)))
 
 
@@ -45,7 +45,7 @@ def render_html_for_suppliers_awaiting_countersignature(rows, framework, templat
             continue
         data['appliedLots'] = filter(lambda lot: int(data[lot]) > 0, ['saas', 'paas', 'iaas', 'scs'])
         html = render_html(template_path, data)
-        save_page(html, data['supplier_id'], output_dir)
+        save_page(html, data['supplier_id'], output_dir, "counterpart-signature-page")
     shutil.copyfile(template_css_path, os.path.join(output_dir, '{}-signature-page.css'.format(framework)))
     shutil.copyfile(countersignature_img_path, os.path.join(output_dir, '{}-countersignature.png'.format(framework)))
 
