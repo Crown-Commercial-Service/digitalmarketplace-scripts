@@ -1,5 +1,9 @@
 #!/usr/bin/env python
-"""Generate framework agreement counterpart signature pages from supplier "about you" information for suppliers
+"""
+
+PREREQUISITE: You'll need wkhtmltopdf installed for this to work (http://wkhtmltopdf.org/)
+
+Generate framework agreement counterpart signature pages from supplier "about you" information for suppliers
 who applied to a framework.
 
 Currently will only work for framework_slug=g-cloud-8.
