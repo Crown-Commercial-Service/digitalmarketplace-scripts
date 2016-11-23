@@ -45,7 +45,7 @@ def render_html_for_suppliers_awaiting_countersignature(rows, framework, templat
             continue
         data['appliedLots'] = filter(lambda lot: int(data[lot]) > 0, ['saas', 'paas', 'iaas', 'scs'])
         html = render_html(template_path, data)
-        save_page(html, data['supplier_id'], output_dir, "counterpart-signature-page")
+        save_page(html, data['supplier_id'], output_dir, "agreement-countersignature")
     shutil.copyfile(template_css_path, os.path.join(output_dir, '{}-signature-page.css'.format(framework)))
     shutil.copyfile(countersignature_img_path, os.path.join(output_dir, '{}-countersignature.png'.format(framework)))
 
