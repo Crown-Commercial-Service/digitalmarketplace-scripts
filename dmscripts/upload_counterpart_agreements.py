@@ -1,10 +1,9 @@
 import getpass
 
-from dmutils.documents import generate_timestamped_document_upload_path
+from dmutils.documents import generate_timestamped_document_upload_path, generate_download_filename, \
+    COUNTERPART_FILENAME
 
-from dmscripts.bulk_upload_documents import get_supplier_id_from_framework_file_path, generate_download_filename
-
-COUNTERPART_FILENAME = "agreement-countersignature.pdf"
+from dmscripts.bulk_upload_documents import get_supplier_id_from_framework_file_path
 
 
 def upload_counterpart_file(bucket, framework_slug, file_path, dry_run, client, logger):
