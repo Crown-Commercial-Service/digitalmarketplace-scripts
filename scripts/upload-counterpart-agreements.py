@@ -25,7 +25,6 @@ Usage:
 import sys
 sys.path.insert(0, '.')
 
-from dmscripts import logging
 from dmscripts.env import get_api_endpoint_from_stage
 from dmscripts.bulk_upload_documents import get_bucket_name, get_all_files_of_type
 from dmscripts.upload_counterpart_agreements import upload_counterpart_file
@@ -33,9 +32,6 @@ from docopt import docopt
 from dmapiclient import DataAPIClient
 
 from dmutils.s3 import S3
-
-
-logger = logging.configure_logger({'dmapiclient.base': logging.WARNING})
 
 
 if __name__ == '__main__':
@@ -53,8 +49,4 @@ if __name__ == '__main__':
         bucket = S3(get_bucket_name(stage, "agreements"))
 
     for file_path in get_all_files_of_type(document_directory, "pdf"):
-        try:
-            upload_counterpart_file(bucket, framework_slug, file_path, dry_run, client)
-        except Exception as e:
-            logger.info("COULD NOT UPLOAD {}: {}".format(file_path, e.message))
-            continue
+        upload_counterpart_file(bucket, framework_slug, file_path, dry_run, client)
