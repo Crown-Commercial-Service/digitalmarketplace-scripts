@@ -1,5 +1,7 @@
 import getpass
 
+from boto.exception import S3ResponseError
+from dmapiclient import APIError
 from dmutils.documents import generate_timestamped_document_upload_path, generate_download_filename, \
     COUNTERPART_FILENAME
 
@@ -44,6 +46,13 @@ def upload_counterpart_file(bucket, framework_slug, file_path, dry_run, client):
             logger.info("[Dry-run] countersignedAgreementPath='{}' for agreement ID {}".format(
                 upload_path, supplier_framework['agreementId'])
             )
-
-    except Exception as e:
-        logger.error("{}".format(e.message))
+    except (OSError, IOError) as e:
+        logger.error("Error reading file '{}': {}".format(file_path, e.message))
+    except S3ResponseError as e:
+        logger.error("Error uploading '{}' to '{}': {}".format(file_path, upload_path, e.message))
+    except APIError as e:
+        logger.error("API error setting upload path '{}' on agreement ID {}: {}".format(
+            upload_path,
+            supplier_framework['agreementId'],
+            e.message)
+        )
