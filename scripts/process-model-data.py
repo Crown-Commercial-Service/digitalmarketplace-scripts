@@ -18,7 +18,7 @@ from dmscripts.models import queries
 
 
 CONFIG = {
-    'supplier_applications': queries.supplier_applications
+    'successful_supplier_applications': queries.successful_supplier_applications
 }
 
 

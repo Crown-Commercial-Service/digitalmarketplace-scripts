@@ -88,12 +88,14 @@ CONFIGS = {
             'supplierId',
             'createdAt',
             'supplierName',
-            'submittedAt'
+            'submittedAt',
+            'essentialRequirements'
         ),
         'get_data_kwargs': {},
         'process_rules': {
             'createdAt': format_datetime_string_as_date,
             'submittedAt': format_datetime_string_as_date,
+            'essentialRequirements': all # all essential requirements to be met TODO format of this field is changing, at which point this may not be required?
         },
         'filter_rules': [],
         'sort_by': 'createdAt'
