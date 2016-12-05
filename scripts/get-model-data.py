@@ -44,7 +44,7 @@ CONFIGS = {
         ],
         'sort_by': 'createdAt'
     },
-    'suppliers': {
+    'supplier_users': {
         'base_model': 'users',
         'keys': ('id', ('supplier', 'supplierId'), 'createdAt', 'role'),
         'get_data_kwargs': {},
