@@ -29,8 +29,8 @@ def upload_file(bucket, dry_run, file_path, framework_slug, bucket_category,
         download_filename = generate_download_filename(
             supplier_id, document_name, supplier_name)
     if not dry_run:
-        with open(file_path) as file_contents:
-            bucket.save(upload_path, file_contents, acl='private', move_prefix=None,
+        with open(file_path) as source_file:
+            bucket.save(upload_path, source_file, acl='private', move_prefix=None,
                         download_filename=download_filename)
         print(supplier_id)
     else:

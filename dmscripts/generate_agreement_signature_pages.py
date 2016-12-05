@@ -10,10 +10,10 @@ from . import logging
 logger = logging.configure_logger({'dmapiclient.base': logging.WARNING})
 
 
-def save_page(html, supplier_id, output_dir, filename):
+def save_page(html, supplier_id, output_dir, descriptive_filename_part):
     if not os.path.exists(output_dir):
         os.mkdir(output_dir)
-    page_path = os.path.join(output_dir, '{}-{}.html'.format(supplier_id, filename))
+    page_path = os.path.join(output_dir, '{}-{}.html'.format(supplier_id, descriptive_filename_part))
     with io.open(page_path, 'w+', encoding='UTF-8') as htmlfile:
         htmlfile.write(html)
 

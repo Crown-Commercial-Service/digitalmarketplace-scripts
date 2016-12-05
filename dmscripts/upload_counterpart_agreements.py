@@ -25,8 +25,8 @@ def upload_counterpart_file(bucket, framework_slug, file_path, dry_run, client):
     try:
         if not dry_run:
             # Upload file
-            with open(file_path) as file_contents:
-                bucket.save(upload_path, file_contents, acl='private', move_prefix=None,
+            with open(file_path) as source_file:
+                bucket.save(upload_path, source_file, acl='private', move_prefix=None,
                             download_filename=download_filename)
                 logger.info("UPLOADED: '{}' to '{}'".format(file_path, upload_path))
 
