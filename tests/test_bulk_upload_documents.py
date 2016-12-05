@@ -10,7 +10,7 @@ else:
 
 from dmscripts.bulk_upload_documents import get_bucket_name, get_all_files_of_type, \
     get_supplier_id_from_framework_file_path, upload_file, get_document_name_from_file_path, \
-    generate_download_filename, get_supplier_name_dict_from_tsv
+    get_supplier_name_dict_from_tsv
 import mock
 
 
@@ -59,10 +59,6 @@ def test_get_supplier_id_from_framework_ile_path_for_file_starting_with_supplier
 def test_get_document_name_from_file_path():
     path = '../../Downloads/Completed Frameworks BATCH2 SHARED WITH GDS/584425-result-letter.pdf'  # noqa
     assert get_document_name_from_file_path(path) == 'result-letter.pdf'
-
-
-def test_generate_download_filename():
-    assert generate_download_filename(584425, 'result-letter.pdf', 'ICNT_Consulting_Ltd') == 'ICNT_Consulting_Ltd-584425-result-letter.pdf'   # noqa
 
 
 @mock.patch('dmscripts.bulk_upload_documents.csv')
