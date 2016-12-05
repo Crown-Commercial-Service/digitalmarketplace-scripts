@@ -54,7 +54,7 @@ if __name__ == '__main__':
 
     for file_path in get_all_files_of_type(document_directory, "pdf"):
         try:
-            upload_counterpart_file(bucket, framework_slug, file_path, dry_run, client, logger)
+            upload_counterpart_file(bucket, framework_slug, file_path, dry_run, client)
         except Exception as e:
             logger.info("COULD NOT UPLOAD {}: {}".format(file_path, e.message))
             continue
