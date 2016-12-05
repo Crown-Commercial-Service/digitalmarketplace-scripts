@@ -4,9 +4,12 @@ from dmutils.documents import generate_timestamped_document_upload_path, generat
     COUNTERPART_FILENAME
 
 from dmscripts.bulk_upload_documents import get_supplier_id_from_framework_file_path
+from . import logging
+
+logger = logging.configure_logger({'dmapiclient.base': logging.WARNING})
 
 
-def upload_counterpart_file(bucket, framework_slug, file_path, dry_run, client, logger):
+def upload_counterpart_file(bucket, framework_slug, file_path, dry_run, client):
     supplier_id = get_supplier_id_from_framework_file_path(file_path)
     supplier_framework = client.get_supplier_framework_info(supplier_id, framework_slug)
     supplier_framework = supplier_framework['frameworkInterest']
@@ -43,4 +46,4 @@ def upload_counterpart_file(bucket, framework_slug, file_path, dry_run, client, 
             )
 
     except Exception as e:
-        logger.info("ERROR {}".format(e.message))
+        logger.error("{}".format(e.message))

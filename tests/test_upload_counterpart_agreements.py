@@ -14,7 +14,6 @@ def test_upload_counterpart_file_uploads_and_calls_api_if_not_dry_run(getuser):
     getuser.return_value = 'test user'
     bucket = mock.Mock()
     client = mock.Mock()
-    logger = mock.Mock()
     client.get_supplier_framework_info.return_value = {
         "frameworkInterest": {
             "agreementId": 23,
@@ -24,7 +23,7 @@ def test_upload_counterpart_file_uploads_and_calls_api_if_not_dry_run(getuser):
 
     with freeze_time('2016-11-12 13:14:15'):
         with mock.patch.object(builtins, 'open', mock.mock_open(read_data='foo')):
-            upload_counterpart_file(bucket, 'g-cloud-8', 'pdfs/123456-file.pdf', False, client, logger)
+            upload_counterpart_file(bucket, 'g-cloud-8', 'pdfs/123456-file.pdf', False, client)
 
             bucket.save.assert_called_once_with(
                 "g-cloud-8/agreements/123456/123456-agreement-countersignature-2016-11-12-131415.pdf",
@@ -46,7 +45,6 @@ def test_upload_counterpart_file_uploads_and_calls_api_if_not_dry_run(getuser):
 def test_upload_counterpart_file_does_not_upload_or_call_api_if_dry_run():
     bucket = mock.Mock()
     client = mock.Mock()
-    logger = mock.Mock()
     client.get_supplier_framework_info.return_value = {
         "frameworkInterest": {
             "agreementId": 23,
@@ -55,7 +53,7 @@ def test_upload_counterpart_file_does_not_upload_or_call_api_if_dry_run():
     }
 
     with mock.patch.object(builtins, 'open', mock.mock_open(read_data='foo')):
-        upload_counterpart_file(bucket, 'g-cloud-8', 'pdfs/123456-file.pdf', True, client, logger)
+        upload_counterpart_file(bucket, 'g-cloud-8', 'pdfs/123456-file.pdf', True, client)
 
         bucket.save.assert_not_called()
         client.update_framework_agreement.assert_not_called()
