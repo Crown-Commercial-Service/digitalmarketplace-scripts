@@ -86,11 +86,14 @@ CONFIGS = {
         'keys': (
             'briefId',
             'supplierId',
-            'createdAt'
+            'createdAt',
+            'supplierName',
+            'submittedAt'
         ),
         'get_data_kwargs': {},
         'process_rules': {
             'createdAt': format_datetime_string_as_date,
+            'submittedAt': format_datetime_string_as_date,
         },
         'filter_rules': [],
         'sort_by': 'createdAt'
