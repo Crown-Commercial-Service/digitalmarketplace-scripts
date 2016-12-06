@@ -100,7 +100,10 @@ def mark_definite_framework_results(
                 ):
             logger.info("\tResult: PASS")
             if not dry_run:
-                client.set_framework_result(supplier_id, framework_slug, True, updated_by)
+                if supplier_framework["onFramework"] != True:
+                    client.set_framework_result(supplier_id, framework_slug, True, updated_by)
+                else:
+                    logger.debug("\tUnchanged result - not re-setting")
         elif (not service_counter["passed"]) or (declaration_not_definite_fail_schema and not _passes_validation(
                 supplier_framework["declaration"],
                 declaration_not_definite_fail_schema,
@@ -110,7 +113,10 @@ def mark_definite_framework_results(
                 )):
             logger.info("\tResult: FAIL")
             if not dry_run:
-                client.set_framework_result(supplier_id, framework_slug, False, updated_by)
+                if supplier_framework["onFramework"] != False:
+                    client.set_framework_result(supplier_id, framework_slug, False, updated_by)
+                else:
+                    logger.debug("\tUnchanged result - not re-setting")
         else:
             # a result of DISCRETIONARY should pretty much never overwrite an already-made decision
             logger.info(
