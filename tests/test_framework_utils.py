@@ -3,28 +3,26 @@ from dmscripts.framework_utils import get_submitted_drafts, has_supplier_submitt
 
 
 def test_get_submitted_drafts_calls_with_correct_arguments(mock_data_client):
-    mock_data_client.find_draft_services.return_value = {'services': []}
+    mock_data_client.find_draft_services_iter.return_value = iter([])
     get_submitted_drafts(mock_data_client, 'digital-biscuits-and-cakes', 12345)
-    mock_data_client.find_draft_services.assert_called_with(12345, framework='digital-biscuits-and-cakes')
+    mock_data_client.find_draft_services_iter.assert_called_with(12345, framework='digital-biscuits-and-cakes')
 
 
 def test_get_submitted_drafts_returns_submitted_draft_services_only(mock_data_client):
-    mock_data_client.find_draft_services.return_value = {'services': [
+    mock_data_client.find_draft_services_iter.return_value = iter((
         {"id": 1, "status": "not-submitted"},
-        {"id": 2, "status": "submitted"}
-    ]
-    }
+        {"id": 2, "status": "submitted"},
+    ))
     result = get_submitted_drafts(mock_data_client, 12345, 'digital-biscuits-and-cakes')
     assert (result == [{"id": 2, "status": "submitted"}])
 
 
 def test_get_submitted_drafts_returns_submitted_draft_services_without_service_ids_only(mock_data_client):
-    mock_data_client.find_draft_services.return_value = {'services': [
+    mock_data_client.find_draft_services_iter.return_value = iter((
         {"id": 1, "status": "not-submitted"},
         {"id": 2, "status": "submitted", "serviceId": "ALREADY_A_LIVE_SERVICE"},
         {"id": 3, "status": "submitted"},
-    ]
-    }
+    ))
     result = get_submitted_drafts(mock_data_client, 12345, 'digital-biscuits-and-cakes')
     assert (result == [{"id": 3, "status": "submitted"}])
 
@@ -42,14 +40,13 @@ def test_set_framework_result_returns_error_message_if_update_fails(mock_data_cl
 
 
 def test_has_supplier_submitted_services_for_some_services(mock_data_client):
-    mock_data_client.find_draft_services.return_value = {
-        "services": [{"status": "submitted"}, {"status": "submitted"}]
-    }
+    mock_data_client.find_draft_services_iter.return_value = iter((
+        {"status": "submitted"},
+        {"status": "submitted"},
+    ))
     assert has_supplier_submitted_services(mock_data_client, 'g-spot-7', 12345) is True
 
 
 def test_has_supplier_submitted_services_for_no_services(mock_data_client):
-    mock_data_client.find_draft_services.return_value = {
-        "services": [{"status": "not-submitted"}]
-    }
+    mock_data_client.find_draft_services_iter.return_value = iter(({"status": "not-submitted"},))
     assert has_supplier_submitted_services(mock_data_client, 'g-spot-7', 12345) is False

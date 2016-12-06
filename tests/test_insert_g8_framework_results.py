@@ -110,9 +110,7 @@ def test_check_declaration_answers_fails_for_bad_yes_or_na():
 def test_process_g8_results_for_successful(mock_data_client):
     mock_data_client.get_interested_suppliers.return_value = {"interestedSuppliers": [123456]}
     mock_data_client.get_supplier_declaration.return_value = {"declaration": VALID_COMPLETE_G8_DECLARATION}
-    mock_data_client.find_draft_services.return_value = {
-        "services": [{"status": "submitted"}, {"status": "submitted"}]
-    }
+    mock_data_client.find_draft_services_iter.return_value = iter(({"status": "submitted"}, {"status": "submitted"},))
     process_g8_results(mock_data_client, 'user')
     mock_data_client.set_framework_result.assert_called_with(123456, 'g-cloud-8', True, 'user')
 
@@ -123,9 +121,7 @@ def test_process_g8_results_for_incomplete_declaration(mock_data_client):
     declaration['status'] = 'started'
     mock_data_client.get_interested_suppliers.return_value = {"interestedSuppliers": [123456]}
     mock_data_client.get_supplier_declaration.return_value = {"declaration": declaration}
-    mock_data_client.find_draft_services.return_value = {
-        "services": [{"status": "submitted"}, {"status": "submitted"}]
-    }
+    mock_data_client.find_draft_services_iter.return_value = iter(({"status": "submitted"}, {"status": "submitted"},))
     process_g8_results(mock_data_client, 'user')
     mock_data_client.set_framework_result.assert_called_with(123456, 'g-cloud-8', False, 'user')
 
@@ -136,9 +132,7 @@ def test_process_g8_results_for_discretionary(mock_data_client):
     declaration['bankrupt'] = True
     mock_data_client.get_interested_suppliers.return_value = {"interestedSuppliers": [123456]}
     mock_data_client.get_supplier_declaration.return_value = {"declaration": declaration}
-    mock_data_client.find_draft_services.return_value = {
-        "services": [{"status": "submitted"}, {"status": "submitted"}]
-    }
+    mock_data_client.find_draft_services_iter.return_value = iter(({"status": "submitted"}, {"status": "submitted"},))
     process_g8_results(mock_data_client, 'user')
     # Discretionary result should not update `supplier_frameworks` at all
     mock_data_client.set_framework_result.assert_not_called()
