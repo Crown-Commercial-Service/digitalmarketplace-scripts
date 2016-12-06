@@ -9,7 +9,9 @@ def _passes_validation(candidate, schema, logger, schema_name="schema", tablevel
     try:
         jsonschema.validate(candidate, schema)
     except jsonschema.ValidationError as e:
-        logger.log(loglevel, "%sFailed %s: %s", "\t"*tablevel, schema_name, e.message)
+        # extracting multiple errors from a single validation is possible but a bit more involved than i'm willing
+        # to go right now
+        logger.log(loglevel, "%sFailed %s @ %s: %s", "\t"*tablevel, schema_name, "/".join(e.absolute_path), e.message)
         return False
     else:
         return True
