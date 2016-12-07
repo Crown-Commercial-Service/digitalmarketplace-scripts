@@ -17,6 +17,7 @@ Usage: mark-definite-framework-results.py [options] <stage> <api_token> <framewo
 --reassess-passed-sf              Don't skip supplier_frameworks with onFramework already True
 --reassess-failed-sf              Don't skip supplier_frameworks with onFramework already False
 --reassess-failed-draft-services  Don't skip draft_services with "failed" status
+-v, --verbose                     Produce more detailed console output
 """
 # ew..
 import sys
@@ -30,7 +31,7 @@ import json
 from dmscripts.env import get_api_endpoint_from_stage
 from dmapiclient import DataAPIClient
 from dmscripts.mark_definite_framework_results import mark_definite_framework_results
-from dmscripts.logging import configure_logger
+from dmscripts.logging import configure_logger, INFO as loglevel_INFO, DEBUG as loglevel_DEBUG
 
 
 if __name__ == "__main__":
@@ -49,7 +50,7 @@ if __name__ == "__main__":
         open(args["<draft_service_schema_path>"], "r")
     ) if args["<draft_service_schema_path>"] else None
 
-    configure_logger()
+    configure_logger({"script": loglevel_DEBUG if args["--verbose"] else loglevel_INFO})
 
     mark_definite_framework_results(
         client,
