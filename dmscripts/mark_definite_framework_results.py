@@ -33,7 +33,7 @@ def _assess_draft_services(
             logger.debug("\tAssessing draft service %s", draft_service["id"])
             if draft_service["status"] == "failed" and not reassess_failed_draft_services:
                 logger.debug("\t\tSkipping - already marked failed")
-                counter["skipped"]+=1
+                counter["skipped"] += 1
             elif service_schema is not None:
                 if _passes_validation(
                         draft_service,
@@ -43,12 +43,12 @@ def _assess_draft_services(
                         tablevel=2,
                         loglevel=logging.DEBUG,
                         ):
-                    counter["passed"]+=1
+                    counter["passed"] += 1
                 else:
                     if not dry_run:
                         # mark this as failed
                         client.update_draft_service_status(draft_service["id"], "failed", updated_by)
-                    counter["failed"]+=1
+                    counter["failed"] += 1
 
     logger.info(
         "\tDraft services:  %s passed, %s failed, %s skipped",
@@ -76,7 +76,7 @@ def mark_definite_framework_results(
         logger.info("Supplier: %r", supplier_id)
         supplier_framework = client.get_supplier_framework_info(supplier_id, framework_slug)["frameworkInterest"]
         if (supplier_framework["onFramework"] is False and not reassess_failed) or \
-            (supplier_framework["onFramework"] is True and not reassess_passed):
+                (supplier_framework["onFramework"] is True and not reassess_passed):
             logger.info("\tSkipping: already %s", "passed" if supplier_framework["onFramework"] else "failed")
             continue
 
@@ -100,7 +100,7 @@ def mark_definite_framework_results(
                 ):
             logger.info("\tResult: PASS")
             if not dry_run:
-                if supplier_framework["onFramework"] != True:
+                if supplier_framework["onFramework"] is not True:
                     client.set_framework_result(supplier_id, framework_slug, True, updated_by)
                 else:
                     logger.debug("\tUnchanged result - not re-setting")
@@ -113,7 +113,7 @@ def mark_definite_framework_results(
                 )):
             logger.info("\tResult: FAIL")
             if not dry_run:
-                if supplier_framework["onFramework"] != False:
+                if supplier_framework["onFramework"] is not False:
                     client.set_framework_result(supplier_id, framework_slug, False, updated_by)
                 else:
                     logger.debug("\tUnchanged result - not re-setting")
