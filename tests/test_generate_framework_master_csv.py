@@ -47,3 +47,5 @@ def test_write_csv(fieldname_mock, mock_data_client):
     expected_data = "test_field_1,test_field_2\nfoo,bar\nbaz,quux\n"
 
     assert f.getvalue() == expected_data
+
+
