@@ -6,3 +6,4 @@ git+https://github.com/alphagov/digitalmarketplace-content-loader.git@1.0.0#egg=
 unicodecsv==0.14.1
 python-dateutil==2.4.2
 Jinja2==2.7.3
+pytest==2.8.7

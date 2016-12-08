@@ -21,8 +21,7 @@ class GenerateMasterCSV(object):
         self.lot_names = [i['slug'] for i in self.framework['lots']]
         self.output = []
 
-
-    def get_dynamic_field_names(self):
+    def _get_dynamic_field_names(self):
         """
         :return: List of strings. Dynamic field names for CSV.
         """
@@ -36,7 +35,7 @@ class GenerateMasterCSV(object):
         """
         :return: List of strings. All field names for CSV.
         """
-        return self.static_fieldnames + self.get_dynamic_field_names()
+        return self.static_fieldnames + self._get_dynamic_field_names()
 
     def populate_output(self):
         """Method to actually populate our output placeholder."""

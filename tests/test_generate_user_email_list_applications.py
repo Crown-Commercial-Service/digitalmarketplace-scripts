@@ -2,8 +2,7 @@ try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
-import pytest
-import mock
+
 from dmapiclient import HTTPError
 
 from dmscripts.generate_user_email_list_applications import (
@@ -12,11 +11,6 @@ from dmscripts.generate_user_email_list_applications import (
     find_all_users_given_supplier_frameworks,
     list_users
 )
-
-
-@pytest.fixture
-def mock_data_client():
-    return mock.Mock()
 
 
 def _return_supplier_framework(supplier_id, on_framework, agreement_returned=None):
