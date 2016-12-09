@@ -34,21 +34,20 @@ def _assess_draft_services(
             if draft_service["status"] == "failed" and not reassess_failed_draft_services:
                 logger.debug("\t\tSkipping - already marked failed")
                 counter["skipped"] += 1
-            elif service_schema is not None:
-                if _passes_validation(
-                        draft_service,
-                        service_schema,
-                        logger,
-                        schema_name="service_schema",
-                        tablevel=2,
-                        loglevel=logging.DEBUG,
-                        ):
-                    counter["passed"] += 1
-                else:
-                    if not dry_run:
-                        # mark this as failed
-                        client.update_draft_service_status(draft_service["id"], "failed", updated_by)
-                    counter["failed"] += 1
+            elif service_schema is None or _passes_validation(
+                    draft_service,
+                    service_schema,
+                    logger,
+                    schema_name="service_schema",
+                    tablevel=2,
+                    loglevel=logging.DEBUG,
+                    ):
+                counter["passed"] += 1
+            else:
+                if not dry_run:
+                    # mark this as failed
+                    client.update_draft_service_status(draft_service["id"], "failed", updated_by)
+                counter["failed"] += 1
 
     logger.info(
         "\tDraft services:  %s passed, %s failed, %s skipped",
