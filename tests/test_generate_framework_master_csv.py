@@ -39,15 +39,14 @@ def test_write_csv(fieldname_mock, mock_data_client):
     """Test writing csv."""
     csv_builder = GenerateMasterCSV(client=mock_data_client, target_framework_slug='test_framework_slug')
     assert fieldname_mock.called_once_with('test_framework_slug')
-
     csv_builder.output = [
         {'test_field_1': 'foo', 'test_field_2': 'bar'},
-        {'test_field_1': 'baz', 'test_field_2': 'quux'}
+        {'test_field_1': 'baz', 'test_field_2': 'Ąćĉ'}
     ]
     f = StringIO()
     csv_builder.write_csv(outfile=f)
 
-    expected_data = "test_field_1,test_field_2\nfoo,bar\nbaz,quux\n"
+    expected_data = "test_field_1,test_field_2\nfoo,bar\nbaz,Ąćĉ\n"
 
     assert f.getvalue() == expected_data
 
@@ -64,13 +63,14 @@ def test_populate_output_suppliers(mock_data_client):
     with open('tests/fixtures/test_populate_output_suppliers_expected_result.csv') as expected_file:
         assert f.getvalue() == expected_file.read()
 
+
 def test_one_supplier_one_lot(mock_data_client):
     """Test a single client in a single lot."""
     mock_data_client.get_framework.return_value = {
         'frameworks': {'lots': [{'slug': 'saas'}]}
     }
     mock_data_client.find_framework_suppliers.return_value = {
-        'supplierFrameworks':[
+        'supplierFrameworks': [
             {'supplierId': 123, 'supplierName': 'Bens cool supplier', 'extraneous_field': 'foo', 'declaration': ''}
         ]
     }
@@ -99,8 +99,13 @@ def test_many_suppliers_many_lots(mock_data_client):
     }
     mock_data_client.find_framework_suppliers.return_value = {
         'extraneous_field': 'foo',
-        'supplierFrameworks':[
-            {'supplierId': 123, 'supplierName': 'Bens cool supplier1', 'extraneous_field': 'foo', 'declaration': {'status': 'completed'}},
+        'supplierFrameworks': [
+            {
+                'supplierId': 123,
+                'supplierName': 'Bens cool supplier1',
+                'extraneous_field': 'foo',
+                'declaration': {'status': 'completed'}
+            },
             {'supplierId': 456, 'supplierName': 'Bens cool supplier2', 'extraneous_field': 'foo', 'declaration': ''},
             {'supplierId': 789, 'supplierName': 'Bens cool supplier3', 'extraneous_field': 'foo', 'declaration': ''},
             {'supplierId': 101, 'supplierName': 'Bens cool supplier3', 'extraneous_field': 'foo', 'declaration': ''}
