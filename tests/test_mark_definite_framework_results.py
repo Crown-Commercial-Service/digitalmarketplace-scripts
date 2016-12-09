@@ -304,11 +304,10 @@ def _assert_actions(mock_data_client, expected_sf_actions, expected_ds_actions, 
     # object is being written to twice (and hence overwritten) - but that's not a desired behaviour anyway and
     # it wouldn't be something sensible to assert for.
     assert sorted(mock_data_client.set_framework_result.call_args_list, key=lambda c: c[0]) == (sorted((
-        ((k, "h-cloud-99", act, "Blazes Boylan"), {},) for k, act in expected_sf_actions.items() if act is not None
+        ((k, "h-cloud-99", act, "Blazes Boylan"), {},) for k, act in expected_sf_actions.items()
     ), key=lambda c: c[0]) if not dry_run else [])
     assert sorted(mock_data_client.update_draft_service_status.call_args_list, key=lambda c: c[0]) == (sorted((
-        ((k, "submitted" if act else "failed", "Blazes Boylan"), {},)
-        for k, act in expected_ds_actions.items() if act is not None
+        ((k, "submitted" if act else "failed", "Blazes Boylan"), {},) for k, act in expected_ds_actions.items()
     ), key=lambda c: c[0]) if not dry_run else [])
 
 
@@ -344,7 +343,7 @@ def test_no_prev_results(mock_data_client, reassess_passed, reassess_failed, rea
         reassess_failed_draft_services=reassess_failed_ds,
     )
 
-    expected_sf_actions = dict(((k, None) for k in mock_supplier_frameworks.keys()), **{
+    expected_sf_actions = {
         2345: False,
         3456: False,
         4321: True,
@@ -352,12 +351,12 @@ def test_no_prev_results(mock_data_client, reassess_passed, reassess_failed, rea
         5432: False,
         6543: True,
         8765: True,
-    })
-    expected_ds_actions = dict(((k, None) for k in (chain.from_iterable(v) for v in mock_draft_services.values())), **{
+    }
+    expected_ds_actions = {
         999003: False,
         999005: False,
         999012: False,
-    })
+    }
     _assert_actions(mock_data_client, expected_sf_actions, expected_ds_actions, dry_run=dry_run)
 
 
@@ -392,7 +391,7 @@ def test_no_prev_results_no_ds_schema(mock_data_client, reassess_passed, reasses
         reassess_failed_draft_services=reassess_failed_ds,
     )
 
-    expected_sf_actions = dict(((k, None) for k in mock_supplier_frameworks.keys()), **{
+    expected_sf_actions = {
         2345: False,
         3456: True,
         4321: True,
@@ -400,8 +399,8 @@ def test_no_prev_results_no_ds_schema(mock_data_client, reassess_passed, reasses
         5432: False,
         6543: True,
         8765: True,
-    })
-    expected_ds_actions = dict(((k, None) for k in (chain.from_iterable(v) for v in mock_draft_services.values())))
+    }
+    expected_ds_actions = {}
     _assert_actions(mock_data_client, expected_sf_actions, expected_ds_actions, dry_run=dry_run)
 
 
@@ -442,18 +441,18 @@ def test_no_prev_results_no_not_definite_fail_schema(
         reassess_failed_draft_services=reassess_failed_ds,
     )
 
-    expected_sf_actions = dict(((k, None) for k in mock_supplier_frameworks.keys()), **{
+    expected_sf_actions = {
         3456: False,
         4321: True,
         5432: False,
         6543: True,
         8765: True,
-    })
-    expected_ds_actions = dict(((k, None) for k in (chain.from_iterable(v) for v in mock_draft_services.values())), **{
+    }
+    expected_ds_actions = {
         999003: False,
         999005: False,
         999012: False,
-    })
+    }
     _assert_actions(mock_data_client, expected_sf_actions, expected_ds_actions, dry_run=dry_run)
 
 
@@ -494,14 +493,14 @@ def test_no_prev_results_neither_optional_schema(
         reassess_failed_draft_services=reassess_failed_ds,
     )
 
-    expected_sf_actions = dict(((k, None) for k in mock_supplier_frameworks.keys()), **{
+    expected_sf_actions = {
         3456: True,
         4321: True,
         5432: False,
         6543: True,
         8765: True,
-    })
-    expected_ds_actions = dict(((k, None) for k in (chain.from_iterable(v) for v in mock_draft_services.values())))
+    }
+    expected_ds_actions = {}
     _assert_actions(mock_data_client, expected_sf_actions, expected_ds_actions, dry_run=dry_run)
 
 
@@ -525,15 +524,15 @@ def test_prev_results_reassess_none(mock_data_client, dry_run,):
         reassess_failed_draft_services=False,
     )
 
-    expected_sf_actions = dict(((k, None) for k in mock_supplier_frameworks.keys()), **{
+    expected_sf_actions = {
         2345: False,
         5432: False,
         6543: False,
         8765: True,
-    })
-    expected_ds_actions = dict(((k, None) for k in (chain.from_iterable(v) for v in mock_draft_services.values())), **{
+    }
+    expected_ds_actions = {
         999003: False,
-    })
+    }
     _assert_actions(mock_data_client, expected_sf_actions, expected_ds_actions, dry_run=dry_run)
 
 
@@ -557,16 +556,16 @@ def test_prev_results_reassess_failed(mock_data_client, dry_run,):
         reassess_failed_draft_services=False,
     )
 
-    expected_sf_actions = dict(((k, None) for k in mock_supplier_frameworks.keys()), **{
+    expected_sf_actions = {
         2345: False,
         4321: True,
         5432: False,
         6543: False,
         8765: True,
-    })
-    expected_ds_actions = dict(((k, None) for k in (chain.from_iterable(v) for v in mock_draft_services.values())), **{
+    }
+    expected_ds_actions = {
         999003: False,
-    })
+    }
     _assert_actions(mock_data_client, expected_sf_actions, expected_ds_actions, dry_run=dry_run)
 
 
@@ -590,17 +589,17 @@ def test_prev_results_reassess_passed(mock_data_client, dry_run,):
         reassess_failed_draft_services=False,
     )
 
-    expected_sf_actions = dict(((k, None) for k in mock_supplier_frameworks.keys()), **{
+    expected_sf_actions = {
         2345: False,
         3456: False,
         5432: False,
         6543: False,
         8765: True,
-    })
-    expected_ds_actions = dict(((k, None) for k in (chain.from_iterable(v) for v in mock_draft_services.values())), **{
+    }
+    expected_ds_actions = {
         999003: False,
         999005: False,
-    })
+    }
     _assert_actions(mock_data_client, expected_sf_actions, expected_ds_actions, dry_run=dry_run)
 
 
@@ -624,20 +623,20 @@ def test_prev_results_reassess_all(mock_data_client, dry_run,):
         reassess_failed_draft_services=True,
     )
 
-    expected_sf_actions = dict(((k, None) for k in mock_supplier_frameworks.keys()), **{
+    expected_sf_actions = {
         2345: False,
         3456: False,
         4321: True,
         5432: False,
         6543: True,
         8765: True,
-    })
-    expected_ds_actions = dict(((k, None) for k in (chain.from_iterable(v) for v in mock_draft_services.values())), **{
+    }
+    expected_ds_actions = {
         999003: False,
         999005: False,
         999010: True,
         999014: True,
-    })
+    }
     _assert_actions(mock_data_client, expected_sf_actions, expected_ds_actions, dry_run=dry_run)
 
 
@@ -661,16 +660,16 @@ def test_prev_results_reassess_all_no_service_schema(mock_data_client, dry_run,)
         reassess_failed_draft_services=True,
     )
 
-    expected_sf_actions = dict(((k, None) for k in mock_supplier_frameworks.keys()), **{
+    expected_sf_actions = {
         2345: False,
         4321: True,
         5432: False,
         6543: True,
         8765: True,
-    })
-    expected_ds_actions = dict(((k, None) for k in (chain.from_iterable(v) for v in mock_draft_services.values())), **{
+    }
+    expected_ds_actions = {
         999010: True,
         999012: True,
         999014: True,
-    })
+    }
     _assert_actions(mock_data_client, expected_sf_actions, expected_ds_actions, dry_run=dry_run)
