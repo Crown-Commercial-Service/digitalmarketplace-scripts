@@ -636,7 +636,6 @@ def test_prev_results_reassess_all(mock_data_client, dry_run,):
         999003: False,
         999005: False,
         999010: True,
-        999012: False,
         999014: True,
     })
     _assert_actions(mock_data_client, expected_sf_actions, expected_ds_actions, dry_run=dry_run)
