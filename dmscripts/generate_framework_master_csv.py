@@ -39,8 +39,8 @@ class GenerateMasterCSV(object):
 
     def populate_output(self):
         """Method to actually populate our output placeholder."""
-        self.update_with_supplier_data(self.output)
-        self.update_with_lot_data(self.output)
+        self._update_with_supplier_data(self.output)
+        self._update_with_lot_data(self.output)
 
     def write_csv(self, outfile=None):
         """Write CSV header from get_fieldnames and contents from self.output."""
@@ -56,17 +56,17 @@ class GenerateMasterCSV(object):
         """Given a supplier ID return a list of dictionaries for services related to framework."""
         return self.client.find_draft_services_iter(supplier_id, framework=self.target_framework_slug)
 
-    def update_with_supplier_data(self, output):
+    def _update_with_supplier_data(self, output):
         """Update self.output with supplier data."""
-        supplier_frameworks = self.client.find_framework_suppliers('g-cloud-8')['supplierFrameworks']
+        supplier_frameworks = self.client.find_framework_suppliers(self.target_framework_slug)['supplierFrameworks']
         field_names = self.get_fieldnames()
         for sf in supplier_frameworks:
             declaration = sf['declaration']['status'] if sf['declaration'] else ''
             supplier_info = [sf['supplierId'], sf['supplierName'], '', declaration]
-            lot_placeholders = [0 for i in self.get_dynamic_field_names()]
+            lot_placeholders = [0 for i in self._get_dynamic_field_names()]
             output.append(dict(zip(field_names, supplier_info + lot_placeholders)))
 
-    def update_with_lot_data(self, output):
+    def _update_with_lot_data(self, output):
         """Update self.output with lot data."""
         for supplier_dict in output:
             service_data = self.get_supplier_service_data(supplier_dict['supplier_id'])

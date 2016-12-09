@@ -1,0 +1,3 @@
+supplier_id,supplier_dm_name,application_status,declaration_status,draft_test_lot_slug_1,completed_test_lot_slug_1,draft_test_lot_slug_2,completed_test_lot_slug_2
+12345,Test Supplier 1,,complete,0,0,0,0
+23456,Test Supplier 2,,complete,0,0,0,0
