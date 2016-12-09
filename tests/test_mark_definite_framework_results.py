@@ -17,8 +17,8 @@ _declaration_definite_pass_schema = lambda: {
         {"$ref": "#/definitions/notDefiniteFail"},
         {
             "properties": {
-                "shouldBeFalseLax": {"enum": [False,]},
-                "shouldBeTrueLax": {"enum": [True,]},
+                "shouldBeFalseLax": {"enum": [False]},
+                "shouldBeTrueLax": {"enum": [True]},
                 "shouldMatchPatternLax": {
                     "type": "string",
                     "pattern": "^Good +[Pp]attern",
@@ -32,8 +32,8 @@ _declaration_definite_pass_schema = lambda: {
             "type": "object",
             "properties": {
                 "status": {"enum": ["complete"]},
-                "shouldBeFalseStrict": {"enum": [False,]},
-                "shouldBeTrueStrict": {"enum": [True,]},
+                "shouldBeFalseStrict": {"enum": [False]},
+                "shouldBeTrueStrict": {"enum": [True]},
                 "shouldMatchPatternStrict": {
                     "type": "string",
                     "pattern": "^H.? *E.? *L.? *Y.? *S?",
@@ -48,21 +48,21 @@ _draft_service_schema = lambda: {
     "anyOf": [
         {
             "properties": {
-                "lotSlug": {"enum": ["stuffed-roast-heart",]},
+                "lotSlug": {"enum": ["stuffed-roast-heart"]},
                 "kosher": {"type": "boolean"},
             },
-            "required": ["kosher",],
+            "required": ["kosher"],
         },
         {
             "properties": {
-                "lotSlug": {"enum": ["pork-kidney", "ham-and-eggs",]},
-                "kosher": {"enum": [False,]},
-                "butcher": {"enum": ["Dlugacz",]},
+                "lotSlug": {"enum": ["pork-kidney", "ham-and-eggs"]},
+                "kosher": {"enum": [False]},
+                "butcher": {"enum": ["Dlugacz"]},
             },
         },
         {
             "properties": {
-                "lotSlug": {"enum": ["grilled-mutton-kidney",]},
+                "lotSlug": {"enum": ["grilled-mutton-kidney"]},
             },
         },
     ],
@@ -86,7 +86,7 @@ _base_supplier_frameworks = lambda framework_slug: {k: dict(v, supplierId=k, fra
             "status": "complete",
             "shouldBeTrueLax": True,
             "shouldMatchPatternLax": "Good pattern",
-            "shouldBeFalseStrict": None, # <- subtle but important test here
+            "shouldBeFalseStrict": None,  # <- subtle but important test here
         },
     },
     3456: {
@@ -316,7 +316,7 @@ def _assert_actions(mock_data_client, expected_sf_actions, expected_ds_actions, 
     # we can very easily parametrize this into the 16 possible combinations of these flags - the results for the first
     # three flags should be identical and it's very easy to flip some of the assertions for the dry_run mode
     "reassess_passed,reassess_failed,reassess_failed_ds,dry_run",
-    tuple(product(*repeat((False,True,), 4))),
+    tuple(product(*repeat((False, True,), 4))),
 )
 def test_no_prev_results(mock_data_client, reassess_passed, reassess_failed, reassess_failed_ds, dry_run,):
     # no onFramework values should be set yet
@@ -364,7 +364,7 @@ def test_no_prev_results(mock_data_client, reassess_passed, reassess_failed, rea
 @pytest.mark.parametrize(
     # see above explanation of parameterization
     "reassess_passed,reassess_failed,reassess_failed_ds,dry_run",
-    tuple(product(*repeat((False,True,), 4))),
+    tuple(product(*repeat((False, True,), 4))),
 )
 def test_no_prev_results_no_ds_schema(mock_data_client, reassess_passed, reassess_failed, reassess_failed_ds, dry_run,):
     # no onFramework values should be set yet
@@ -408,7 +408,7 @@ def test_no_prev_results_no_ds_schema(mock_data_client, reassess_passed, reasses
 @pytest.mark.parametrize(
     # see above explanation of parameterization
     "reassess_passed,reassess_failed,reassess_failed_ds,dry_run",
-    tuple(product(*repeat((False,True,), 4))),
+    tuple(product(*repeat((False, True,), 4))),
 )
 def test_no_prev_results_no_not_definite_fail_schema(
         mock_data_client,
@@ -460,7 +460,7 @@ def test_no_prev_results_no_not_definite_fail_schema(
 @pytest.mark.parametrize(
     # see above explanation of parameterization
     "reassess_passed,reassess_failed,reassess_failed_ds,dry_run",
-    tuple(product(*repeat((False,True,), 4))),
+    tuple(product(*repeat((False, True,), 4))),
 )
 def test_no_prev_results_neither_optional_schema(
         mock_data_client,
