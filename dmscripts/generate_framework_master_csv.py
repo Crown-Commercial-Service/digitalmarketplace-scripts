@@ -1,6 +1,5 @@
 """Class used to output a framework master csv."""
 import csv
-import six
 from sys import stdout
 
 
@@ -51,7 +50,7 @@ class GenerateMasterCSV(object):
         writer.writeheader()
         for row in self.output:
             # Workaround to force unicode.
-            writer.writerow({k: six.text_type(v).encode('utf8') for k,v in row.items()})
+            writer.writerow({k: unicode(v).encode('utf8') for k,v in row.items()})
 
     def get_supplier_service_data(self, supplier_id):
         """Given a supplier ID return a list of dictionaries for services related to framework."""
