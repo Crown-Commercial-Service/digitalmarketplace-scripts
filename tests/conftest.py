@@ -14,6 +14,6 @@ def mock_data_client():
         {'slug': 'test_lot_slug_2'},
     ]))
     mock_data_client.find_draft_services_iter.return_value = {}
-    with open('fixtures/test_supplier_frameworks_response.json') as supplier_frameworks_response:
+    with open('tests/fixtures/test_supplier_frameworks_response.json') as supplier_frameworks_response:
         mock_data_client.find_framework_suppliers.return_value = json.loads(supplier_frameworks_response.read())
     return mock_data_client
