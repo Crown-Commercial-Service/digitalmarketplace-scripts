@@ -39,15 +39,14 @@ def test_write_csv(fieldname_mock, mock_data_client):
     """Test writing csv."""
     csv_builder = GenerateMasterCSV(client=mock_data_client, target_framework_slug='test_framework_slug')
     assert fieldname_mock.called_once_with('test_framework_slug')
-
     csv_builder.output = [
         {'test_field_1': 'foo', 'test_field_2': 'bar'},
-        {'test_field_1': 'baz', 'test_field_2': 'quux'}
+        {'test_field_1': 'baz', 'test_field_2': 'Ąćĉ'}
     ]
     f = StringIO()
     csv_builder.write_csv(outfile=f)
 
-    expected_data = "test_field_1,test_field_2\nfoo,bar\nbaz,quux\n"
+    expected_data = "test_field_1,test_field_2\nfoo,bar\nbaz,Ąćĉ\n"
 
     assert f.getvalue() == expected_data
 
