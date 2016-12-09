@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """Tests for GenerateMasterCSV class."""
 import json
-
 try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
 import mock
+import six
 
 from dmscripts.generate_framework_master_csv import GenerateMasterCSV
 
@@ -49,7 +49,7 @@ def test_write_csv(fieldname_mock, mock_data_client):
 
     expected_data = "test_field_1,test_field_2\nfoo,bar\nbaz,quux\n"
 
-    assert f.getvalue() == expected_data
+    assert six.text_type(f.getvalue()) == expected_data
 
 
 def test_populate_output_suppliers(mock_data_client):
@@ -62,7 +62,7 @@ def test_populate_output_suppliers(mock_data_client):
     csv_builder.write_csv(outfile=f)
 
     with open('tests/fixtures/test_populate_output_suppliers_expected_result.csv') as expected_file:
-        assert f.getvalue() == expected_file.read()
+        assert six.text_type(f.getvalue()) == expected_file.read()
 
 def test_one_supplier_one_lot(mock_data_client):
     """Test a single client in a single lot."""
@@ -84,7 +84,7 @@ def test_one_supplier_one_lot(mock_data_client):
     csv_builder.write_csv(outfile=f)
 
     with open('tests/fixtures/test_one_supplier_one_lot_result.csv') as expected_file:
-        assert f.getvalue() == expected_file.read()
+        assert six.text_type(f.getvalue()) == expected_file.read()
 
 
 def test_many_suppliers_many_lots(mock_data_client):
@@ -148,4 +148,4 @@ def test_many_suppliers_many_lots(mock_data_client):
     csv_builder.write_csv(outfile=f)
 
     with open('tests/fixtures/test_many_suppliers_many_lots_result.csv') as expected_file:
-        assert f.getvalue() == expected_file.read()
+        assert six.text_type(f.getvalue()) == expected_file.read()
