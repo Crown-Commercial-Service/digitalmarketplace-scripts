@@ -117,11 +117,13 @@ def test_find_all_users_given_supplier_frameworks(mock_data_client):
     users = find_all_users_given_supplier_frameworks(mock_data_client, supplier_frameworks)
 
     assert len(users) == 2
-    assert users[0]['supplier']['supplierId'] == 1
-    assert users[0]['supplier']['onFramework'] is True
 
-    assert users[1]['supplier']['supplierId'] == 2
-    assert users[1]['supplier']['onFramework'] is False
+    answers = [
+        (users[0]['supplier']['supplierId'], users[0]['supplier']['onFramework']),
+        (users[1]['supplier']['supplierId'], users[1]['supplier']['onFramework'])
+    ]
+    assert (1, True) in answers
+    assert (2, False) in answers
 
 
 def test_list_users_application_passed(mock_data_client):
