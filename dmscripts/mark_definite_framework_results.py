@@ -42,6 +42,12 @@ def _assess_draft_services(
                     tablevel=2,
                     loglevel=logging.DEBUG,
                     ):
+                if not dry_run:
+                    # (re-?)mark this as submitted
+                    if draft_service["status"] != "submitted":
+                        client.update_draft_service_status(draft_service["id"], "submitted", updated_by)
+                    else:
+                        logger.debug("\tUnchanged result - not re-setting")
                 counter["passed"] += 1
             else:
                 if not dry_run:
