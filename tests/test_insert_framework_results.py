@@ -1,13 +1,7 @@
-import pytest
+from mock import mock, call
 
 from dmscripts.insert_framework_results import insert_result, insert_results
-from mock import mock, call
 from dmapiclient import HTTPError
-
-
-@pytest.fixture
-def mock_data_client():
-    return mock.Mock()
 
 
 def test_insert_result_calls_for_valid_data(mock_data_client):

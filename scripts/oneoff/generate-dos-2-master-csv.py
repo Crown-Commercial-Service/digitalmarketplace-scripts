@@ -4,10 +4,10 @@
 Generate a CSV (to stdout) with per-lot draft statistics for each supplier
 
 Usage:
-    scripts/oneoff/generate-g-cloud-8-master-csv.py <base_url> <auth_token>
+    scripts/oneoff/generate-dos-2-master-csv.py <base_url> <auth_token>
 
 Example:
-    scripts/oneoff/generate-g-cloud-8-master-csv.py preview myToken
+    scripts/oneoff/generate-dos-2-master-csv.py preview myToken
 """
 from docopt import docopt
 
@@ -29,7 +29,7 @@ if __name__ == "__main__":
     )
     csv_builder = GenerateMasterCSV(
         client=client,
-        target_framework_slug='g-cloud-8'
+        target_framework_slug='digital-outcomes-and-specialists-2'
     )
     csv_builder.populate_output()
     csv_builder.write_csv()
