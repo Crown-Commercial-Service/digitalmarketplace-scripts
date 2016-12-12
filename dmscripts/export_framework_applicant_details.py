@@ -10,6 +10,12 @@ from dmutils.formats import dateformat
 
 LOTS = {
     "g-cloud-8": ("saas", "paas", "iaas", "scs",),
+    "digital-outcomes-and-specialists-2": (
+        "digital-outcomes",
+        "digital-specialists",
+        "user-research-participants",
+        "user-research-studios",
+    ),
 }
 
 DECLARATION_FIELDS = {
@@ -20,6 +26,31 @@ DECLARATION_FIELDS = {
         "registeredAddressBuilding",
         "registeredAddressTown",
         "registeredAddressPostcode",
+        "tradingStatus",
+        "tradingStatusOther",
+        "tradingNames",
+        "firstRegistered",
+        "currentRegisteredCountry",
+        "companyRegistrationNumber",
+        "dunsNumber",
+        "registeredVATNumber",
+        "establishedInTheUK",
+        "appropriateTradeRegisters",
+        "appropriateTradeRegistersNumber",
+        "licenceOrMemberRequired",
+        "licenceOrMemberRequiredDetails",
+        "organisationSize",
+        "subcontracting",
+        "contactNameContractNotice",
+        "contactEmailContractNotice",
+        "cyberEssentials",
+        "cyberEssentialsPlus",
+    ),
+    "digital-outcomes-and-specialists-2": (
+        "primaryContact",
+        "primaryContactEmail",
+        "nameOfOrganisation",
+        "registeredAddress",
         "tradingStatus",
         "tradingStatusOther",
         "tradingNames",
