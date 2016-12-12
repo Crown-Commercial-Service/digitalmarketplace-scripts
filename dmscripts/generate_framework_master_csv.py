@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 """Class used to output a framework master csv."""
-import csv
 from collections import OrderedDict
-from sys import stdout
+import sys
+if sys.version_info > (3, 0):
+    import csv
+else:
+    import unicodecsv as csv
 
 
 class GenerateCSVFromAPI(object):
@@ -21,7 +24,7 @@ class GenerateCSVFromAPI(object):
 
     def write_csv(self, outfile=None):
         """Write CSV header from get_fieldnames and contents from self.output."""
-        outfile = outfile or stdout
+        outfile = outfile or sys.stdout
         writer = csv.DictWriter(outfile, lineterminator="\n", fieldnames=self.get_fieldnames())
 
         writer.writeheader()

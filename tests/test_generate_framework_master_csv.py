@@ -41,7 +41,7 @@ def test_write_csv(fieldname_mock, mock_data_client):
     assert fieldname_mock.called_once_with('test_framework_slug')
     csv_builder.output = [
         {'test_field_1': 'foo', 'test_field_2': 'bar'},
-        {'test_field_1': 'baz', 'test_field_2': 'Ąćĉ'}
+        {'test_field_1': 'baz', 'test_field_2': u'Ąćĉ'}
     ]
     f = cStringIO()
     csv_builder.write_csv(outfile=f)
