@@ -9,11 +9,11 @@ from dmutils.formats import dateformat
 
 
 LOTS = {
-    "g-cloud-8": ["saas", "paas", "iaas", "scs"]
+    "g-cloud-8": ("saas", "paas", "iaas", "scs",),
 }
 
 DECLARATION_FIELDS = {
-    "g-cloud-8": [
+    "g-cloud-8": (
         "primaryContact",
         "primaryContactEmail",
         "nameOfOrganisation",
@@ -39,7 +39,7 @@ DECLARATION_FIELDS = {
         "contactEmailContractNotice",
         "cyberEssentials",
         "cyberEssentialsPlus",
-    ]
+    ),
 }
 
 
@@ -95,13 +95,13 @@ def get_csv_rows(records, framework_slug):
             if record['declaration'].get('status') == 'complete'
             and sum(record['counts'].values()) > 0
             ]
-    headers = [
+    headers = (
         "supplier_id",
         "supplier_name",
         "on_framework",
         "countersigned_at",
         "countersigned_path",
-        ] + LOTS[framework_slug] + DECLARATION_FIELDS[framework_slug]
+        ) + LOTS[framework_slug] + DECLARATION_FIELDS[framework_slug]
 
     return headers, rows
 
