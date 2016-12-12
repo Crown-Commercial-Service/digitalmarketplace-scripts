@@ -2,19 +2,14 @@ try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
-import pytest
 import mock
+import pytest
 
 from dmapiclient import HTTPError
 
 from dmscripts.generate_user_email_list_declarations import (
     selection_status, find_supplier_users, list_users
 )
-
-
-@pytest.fixture
-def mock_data_client():
-    return mock.Mock()
 
 
 @pytest.fixture
