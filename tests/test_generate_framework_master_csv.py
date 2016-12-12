@@ -2,14 +2,14 @@
 """Tests for GenerateMasterCSV class."""
 from collections import OrderedDict
 import json
-
-try:
-    from StringIO import StringIO
-except ImportError:
-    from io import StringIO
 import mock
+import os
+from six.moves import cStringIO
 
 from dmscripts.generate_framework_master_csv import GenerateMasterCSV
+
+
+FIXTURES_DIR = os.path.join(os.path.dirname(__file__), 'fixtures')
 
 
 def test_get_fieldnames(mock_data_client):
@@ -43,7 +43,7 @@ def test_write_csv(fieldname_mock, mock_data_client):
         {'test_field_1': 'foo', 'test_field_2': 'bar'},
         {'test_field_1': 'baz', 'test_field_2': 'Ąćĉ'}
     ]
-    f = StringIO()
+    f = cStringIO()
     csv_builder.write_csv(outfile=f)
 
     expected_data = "test_field_1,test_field_2\nfoo,bar\nbaz,Ąćĉ\n"
@@ -53,14 +53,14 @@ def test_write_csv(fieldname_mock, mock_data_client):
 
 def test_populate_output_suppliers(mock_data_client):
     """Test supplier info, no lot info."""
-    with open('tests/fixtures/test_supplier_frameworks_response.json') as supplier_frameworks_response:
+    with open(os.path.join(FIXTURES_DIR, 'test_supplier_frameworks_response.json')) as supplier_frameworks_response:
         mock_data_client.find_framework_suppliers.return_value = json.loads(supplier_frameworks_response.read())
     csv_builder = GenerateMasterCSV(client=mock_data_client, target_framework_slug='test_framework_slug')
-    f = StringIO()
+    f = cStringIO()
     csv_builder.populate_output()
     csv_builder.write_csv(outfile=f)
 
-    with open('tests/fixtures/test_populate_output_suppliers_expected_result.csv') as expected_file:
+    with open(os.path.join(FIXTURES_DIR, 'test_populate_output_suppliers_expected_result.csv')) as expected_file:
         assert f.getvalue() == expected_file.read()
 
 
@@ -79,11 +79,11 @@ def test_one_supplier_one_lot(mock_data_client):
     }])
 
     csv_builder = GenerateMasterCSV(client=mock_data_client, target_framework_slug='test_framework_slug')
-    f = StringIO()
+    f = cStringIO()
     csv_builder.populate_output()
     csv_builder.write_csv(outfile=f)
 
-    with open('tests/fixtures/test_one_supplier_one_lot_result.csv') as expected_file:
+    with open(os.path.join(FIXTURES_DIR, 'test_one_supplier_one_lot_result.csv')) as expected_file:
         assert f.getvalue() == expected_file.read()
 
 
@@ -148,9 +148,9 @@ def test_many_suppliers_many_lots(mock_data_client):
     mock_data_client.find_draft_services_iter.side_effect = service_api_side_effect
 
     csv_builder = GenerateMasterCSV(client=mock_data_client, target_framework_slug='test_framework_slug')
-    f = StringIO()
+    f = cStringIO()
     csv_builder.populate_output()
     csv_builder.write_csv(outfile=f)
 
-    with open('tests/fixtures/test_many_suppliers_many_lots_result.csv') as expected_file:
+    with open(os.path.join(FIXTURES_DIR, 'test_many_suppliers_many_lots_result.csv')) as expected_file:
         assert f.getvalue() == expected_file.read()
