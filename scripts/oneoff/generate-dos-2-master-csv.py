@@ -1,3 +1,5 @@
+#!/usr/bin/python
+# -*- coding: utf-8 -*-
 """
 Generate a CSV (to stdout) with per-lot draft statistics for each supplier
 
