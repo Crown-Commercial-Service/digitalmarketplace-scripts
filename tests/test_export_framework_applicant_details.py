@@ -20,60 +20,39 @@ def test_find_suppliers_produces_results_with_supplier_ids(mock_data_client):
     ]
 
 
-def test_add_supplier_info(mock_data_client):
-    mock_data_client.get_supplier.side_effect = [
-        {'suppliers': 'supplier 1'},
-        {'suppliers': 'supplier 2'},
-    ]
+@pytest.mark.parametrize("supplier_id", (1, 2,))
+def test_add_supplier_info(mock_data_client, supplier_id):
+    mock_data_client.get_supplier.return_value = {'suppliers': 'supplier {}'.format(supplier_id)}
 
-    records = [
-        export_framework_applicant_details.add_supplier_info({'supplier_id': 1}, mock_data_client),
-        export_framework_applicant_details.add_supplier_info({'supplier_id': 2}, mock_data_client),
-    ]
+    record = export_framework_applicant_details.add_supplier_info({'supplier_id': supplier_id}, mock_data_client)
 
-    mock_data_client.get_supplier.assert_has_calls([
-        call(1), call(2)
-    ])
-    assert records == [
-        {'supplier_id': 1, 'supplier': 'supplier 1'},
-        {'supplier_id': 2, 'supplier': 'supplier 2'},
-    ]
+    assert mock_data_client.get_supplier.call_args == ((supplier_id,),)
+    assert record == {'supplier_id': supplier_id, 'supplier': 'supplier {}'.format(supplier_id)}
 
 
-def test_add_framework_info(mock_data_client):
-    mock_data_client.get_supplier_framework_info.side_effect = [
-        {
-            'frameworkInterest': {
-                'declaration': {'status': 'complete'},
-                'onFramework': True,
-                'countersignedPath': None,
-                'countersignedAt': None
-            }
+@pytest.mark.parametrize("on_framework", (False, True,))
+def test_add_framework_info(mock_data_client, on_framework):
+    mock_data_client.get_supplier_framework_info.return_value = {
+        'frameworkInterest': {
+            'declaration': {'status': 'complete'},
+            'onFramework': on_framework,
+            'countersignedPath': None,
+            'countersignedAt': None,
+        }
+    }
+
+    record = export_framework_applicant_details.add_framework_info({'supplier_id': 1}, mock_data_client, 'g-cloud-8')
+
+    assert mock_data_client.get_supplier_framework_info.call_args == ((1, 'g-cloud-8',),)
+    assert record == {
+        'supplier_id': 1,
+        'onFramework': on_framework,
+        'declaration': {
+            'status': 'complete',
         },
-        {
-            'frameworkInterest': {
-                'declaration': {'status': 'complete'},
-                'onFramework': False,
-                'countersignedPath': None,
-                'countersignedAt': None
-            }
-        },
-    ]
-
-    records = [
-        export_framework_applicant_details.add_framework_info({'supplier_id': 1}, mock_data_client, 'g-cloud-8'),
-        export_framework_applicant_details.add_framework_info({'supplier_id': 2}, mock_data_client, 'g-cloud-8'),
-    ]
-
-    mock_data_client.get_supplier_framework_info.assert_has_calls([
-        call(1, 'g-cloud-8'), call(2, 'g-cloud-8')
-    ])
-    assert records == [
-        {'supplier_id': 1, 'onFramework': True, 'declaration': {'status': 'complete'},
-         'countersignedPath': '', 'countersignedAt': ''},
-        {'supplier_id': 2, 'onFramework': False, 'declaration': {'status': 'complete'},
-         'countersignedPath': '', 'countersignedAt': ''}
-    ]
+        'countersignedPath': '',
+        'countersignedAt': '',
+    }
 
 
 def test_add_framework_info_fails_on_non_404_error(mock_data_client):
