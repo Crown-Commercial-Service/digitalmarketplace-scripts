@@ -1,9 +1,11 @@
+from collections import Counter
 from functools import partial
 import sys
 if sys.version_info[0] < 3:
     import unicodecsv as csv
 else:
     import csv
+
 
 from multiprocessing.pool import ThreadPool
 from dmutils.formats import dateformat
@@ -86,28 +88,21 @@ def add_supplier_info(record, client):
 
 
 def add_framework_info(record, client, framework_slug):
-    supplier_framework = client.get_supplier_framework_info(record['supplier_id'], framework_slug)
-    supplier_framework = supplier_framework['frameworkInterest']
-    supplier_framework['declaration'] = supplier_framework['declaration'] or {}
-    supplier_framework['countersignedPath'] = supplier_framework['countersignedPath'] or ''
-    supplier_framework['countersignedAt'] = dateformat(supplier_framework['countersignedAt']) or ''
-
+    supplier_framework = client.get_supplier_framework_info(record['supplier_id'], framework_slug)['frameworkInterest']
     return dict(record,
-                declaration=supplier_framework['declaration'],
                 onFramework=supplier_framework['onFramework'],
-                countersignedPath=supplier_framework['countersignedPath'],
-                countersignedAt=supplier_framework['countersignedAt'],
+                declaration=supplier_framework['declaration'] or {},
+                countersignedPath=supplier_framework['countersignedPath'] or "",
+                countersignedAt=supplier_framework['countersignedAt'] or "",
                 )
 
 
 def add_submitted_draft_counts(record, client, framework_slug):
-    counts = {lot: 0 for lot in LOTS[framework_slug]}
-
-    for draft in client.find_draft_services_iter(record['supplier']['id'], framework=framework_slug):
-        if draft['status'] == 'submitted':
-            counts[draft['lot']] += 1
-
-    return dict(record, counts=counts)
+    return dict(record, counts=Counter(
+        ds['lot']
+        for ds in client.find_draft_services_iter(record['supplier']['id'], framework=framework_slug)
+        if ds['status'] == 'submitted'
+    ))
 
 
 def get_csv_rows(records, framework_slug):
@@ -135,9 +130,9 @@ def create_row(record, framework_slug):
         'countersigned_at': record['countersignedAt'],
         'countersigned_path': record['countersignedPath'],
     }
-    row.update({(lot, record['counts'][lot]) for lot in LOTS[framework_slug]})
+    row.update((lot, record['counts'][lot]) for lot in LOTS[framework_slug])
     row.update(((field, record['declaration'].get(field, "")) for field in DECLARATION_FIELDS[framework_slug]))
-    return dict(row)
+    return row
 
 
 def find_suppliers_with_details(client, framework_slug):
