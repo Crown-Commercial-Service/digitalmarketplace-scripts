@@ -4,7 +4,7 @@
 Generate a CSV (to stdout) with per-lot draft statistics for each supplier
 
 Usage:
-    scripts/oneoff/generate-g-cloud-8-master-csv.py <base_url> <auth_token>
+    scripts/oneoff/generate-g-cloud-8-master-csv.py <stage> <auth_token>
 
 Example:
     scripts/oneoff/generate-g-cloud-8-master-csv.py preview myToken
@@ -24,7 +24,7 @@ if __name__ == "__main__":
     arguments = docopt(__doc__)
 
     client = DataAPIClient(
-        base_url=get_api_endpoint_from_stage(arguments['<base_url>']),
+        base_url=get_api_endpoint_from_stage(arguments['<stage>']),
         auth_token=arguments['<auth_token>'],
     )
     csv_builder = GenerateMasterCSV(

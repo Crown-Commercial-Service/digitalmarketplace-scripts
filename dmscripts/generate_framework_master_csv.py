@@ -1,35 +1,8 @@
 # -*- coding: utf-8 -*-
 """Class used to output a framework master csv."""
 from collections import OrderedDict
-import sys
-if sys.version_info > (3, 0):
-    import csv
-else:
-    import unicodecsv as csv
 
-
-class GenerateCSVFromAPI(object):
-    """Stub class for master csv generation."""
-
-    def __init__(self, client):
-        self.client = client
-        self.output = []
-
-    def get_fieldnames(self):
-        raise NotImplementedError("Required: Method for getting fieldnames.")
-
-    def populate_output(self):
-        """Generally you should populate self.output here."""
-        raise NotImplementedError("Required: Method for populating output.")
-
-    def write_csv(self, outfile=None):
-        """Write CSV header from get_fieldnames and contents from self.output."""
-        outfile = outfile or sys.stdout
-        writer = csv.DictWriter(outfile, lineterminator="\n", fieldnames=self.get_fieldnames())
-
-        writer.writeheader()
-        for row in self.output:
-            writer.writerow(row)
+from dmscripts.dmscripts_csv import GenerateCSVFromAPI
 
 
 class GenerateMasterCSV(GenerateCSVFromAPI):
@@ -38,7 +11,8 @@ class GenerateMasterCSV(GenerateCSVFromAPI):
     static_fieldnames = ('supplier_id', 'supplier_dm_name', 'application_status', 'declaration_status')
     service_status_labels = OrderedDict([
         ("not-submitted", "draft"),
-        ("submitted", "completed")
+        ("submitted", "completed"),
+        ("failed", "completed")
     ])
 
     def __init__(self, client, target_framework_slug):
@@ -66,7 +40,9 @@ class GenerateMasterCSV(GenerateCSVFromAPI):
         dynamic_fields = []
         for lot_name in self.lot_slugs:
             for label_prefix in self.service_status_labels.keys():
-                dynamic_fields.append(self.get_column_name(label_prefix, lot_name))
+                column_name = self.get_column_name(label_prefix, lot_name)
+                if column_name not in dynamic_fields:
+                    dynamic_fields.append(column_name)
         return dynamic_fields
 
     def get_fieldnames(self):
