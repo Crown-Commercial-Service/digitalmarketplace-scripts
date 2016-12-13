@@ -26,10 +26,9 @@ def test_add_supplier_info(mock_data_client):
         {'suppliers': 'supplier 2'},
     ]
 
-    supplier_info_adder = export_framework_applicant_details.add_supplier_info(mock_data_client)
     records = [
-        supplier_info_adder({'supplier_id': 1}),
-        supplier_info_adder({'supplier_id': 2}),
+        export_framework_applicant_details.add_supplier_info({'supplier_id': 1}, mock_data_client),
+        export_framework_applicant_details.add_supplier_info({'supplier_id': 2}, mock_data_client),
     ]
 
     mock_data_client.get_supplier.assert_has_calls([
@@ -61,10 +60,9 @@ def test_add_framework_info(mock_data_client):
         },
     ]
 
-    framework_info_adder = export_framework_applicant_details.add_framework_info(mock_data_client, 'g-cloud-8')
     records = [
-        framework_info_adder({'supplier_id': 1}),
-        framework_info_adder({'supplier_id': 2}),
+        export_framework_applicant_details.add_framework_info({'supplier_id': 1}, mock_data_client, 'g-cloud-8'),
+        export_framework_applicant_details.add_framework_info({'supplier_id': 2}, mock_data_client, 'g-cloud-8'),
     ]
 
     mock_data_client.get_supplier_framework_info.assert_has_calls([
@@ -81,10 +79,8 @@ def test_add_framework_info(mock_data_client):
 def test_add_framework_info_fails_on_non_404_error(mock_data_client):
     mock_data_client.get_supplier_framework_info.side_effect = HTTPError(Mock(status_code=400))
 
-    framework_info_adder = export_framework_applicant_details.add_framework_info(mock_data_client, 'g-cloud-8')
-
     with pytest.raises(HTTPError):
-        framework_info_adder({'supplier_id': 1})
+        export_framework_applicant_details.add_framework_info({'supplier_id': 1}, mock_data_client, 'g-cloud-8')
 
 
 def test_add_submitted_draft_counts(mock_data_client):
@@ -99,7 +95,9 @@ def test_add_submitted_draft_counts(mock_data_client):
         {'status': 'published', 'lot': 'paas'},  # anything not submitted or failed is considered draft
     ]
 
-    counts_adder = export_framework_applicant_details.add_submitted_draft_counts(mock_data_client, 'g-cloud-8')
-
-    record = counts_adder({'supplier': {'id': 1}})
+    record = export_framework_applicant_details.add_submitted_draft_counts(
+        {'supplier': {'id': 1}},
+        mock_data_client,
+        'g-cloud-8',
+    )
     assert record['counts'] == {'paas': 1, 'iaas': 0, 'saas': 3, 'scs': 0}

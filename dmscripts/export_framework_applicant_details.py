@@ -1,3 +1,4 @@
+from functools import partial
 import sys
 if sys.version_info[0] < 3:
     import unicodecsv as csv
@@ -79,45 +80,34 @@ def find_suppliers(client, framework_slug):
     return ({'supplier_id': supplier_id} for supplier_id in suppliers)
 
 
-def add_supplier_info(client):
-    def inner(record):
-        supplier = client.get_supplier(record['supplier_id'])
-
-        return dict(record,
-                    supplier=supplier['suppliers'])
-
-    return inner
+def add_supplier_info(record, client):
+    supplier = client.get_supplier(record['supplier_id'])
+    return dict(record, supplier=supplier['suppliers'])
 
 
-def add_framework_info(client, framework_slug):
-    def inner(record):
-        supplier_framework = client.get_supplier_framework_info(record['supplier_id'], framework_slug)
-        supplier_framework = supplier_framework['frameworkInterest']
-        supplier_framework['declaration'] = supplier_framework['declaration'] or {}
-        supplier_framework['countersignedPath'] = supplier_framework['countersignedPath'] or ''
-        supplier_framework['countersignedAt'] = dateformat(supplier_framework['countersignedAt']) or ''
+def add_framework_info(record, client, framework_slug):
+    supplier_framework = client.get_supplier_framework_info(record['supplier_id'], framework_slug)
+    supplier_framework = supplier_framework['frameworkInterest']
+    supplier_framework['declaration'] = supplier_framework['declaration'] or {}
+    supplier_framework['countersignedPath'] = supplier_framework['countersignedPath'] or ''
+    supplier_framework['countersignedAt'] = dateformat(supplier_framework['countersignedAt']) or ''
 
-        return dict(record,
-                    declaration=supplier_framework['declaration'],
-                    onFramework=supplier_framework['onFramework'],
-                    countersignedPath=supplier_framework['countersignedPath'],
-                    countersignedAt=supplier_framework['countersignedAt'],
-                    )
-
-    return inner
+    return dict(record,
+                declaration=supplier_framework['declaration'],
+                onFramework=supplier_framework['onFramework'],
+                countersignedPath=supplier_framework['countersignedPath'],
+                countersignedAt=supplier_framework['countersignedAt'],
+                )
 
 
-def add_submitted_draft_counts(client, framework_slug):
-    def inner(record):
-        counts = {lot: 0 for lot in LOTS[framework_slug]}
+def add_submitted_draft_counts(record, client, framework_slug):
+    counts = {lot: 0 for lot in LOTS[framework_slug]}
 
-        for draft in client.find_draft_services_iter(record['supplier']['id'], framework=framework_slug):
-            if draft['status'] == 'submitted':
-                counts[draft['lot']] += 1
+    for draft in client.find_draft_services_iter(record['supplier']['id'], framework=framework_slug):
+        if draft['status'] == 'submitted':
+            counts[draft['lot']] += 1
 
-        return dict(record, counts=counts)
-
-    return inner
+    return dict(record, counts=counts)
 
 
 def get_csv_rows(records, framework_slug):
@@ -154,9 +144,9 @@ def find_suppliers_with_details(client, framework_slug):
     pool = ThreadPool(30)
 
     records = find_suppliers(client, framework_slug)
-    records = pool.imap(add_supplier_info(client), records)
-    records = pool.imap(add_framework_info(client, framework_slug), records)
-    records = pool.imap(add_submitted_draft_counts(client, framework_slug), records)
+    records = pool.imap(partial(add_supplier_info, client), records)
+    records = pool.imap(partial(add_framework_info, client, framework_slug), records)
+    records = pool.imap(partial(add_submitted_draft_counts, client, framework_slug), records)
 
     return get_csv_rows(records, framework_slug)
 
