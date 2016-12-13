@@ -1,13 +1,24 @@
 #!/usr/bin/env python
 """
-Uses a number of supplied json schemas to determine whether suppliers on a particular framework should be marked as
-onFramework. Attemots to recover a less strict subset of the schema from inside the declaration_definite_pass_schema
-at json path definitions/notDefiniteFail. This is used to differentiate between suppliers that definitely fail and those
-that will require a human decision ("discretionary"). If not found, all suppliers failing
-declaration_definite_pass_schema will have onFramework left unmodified (probably remaining null).
+This script is for marking suppliers as having passed/failed a framework, but it will only do so in cases where the
+result can be determined "automatically" not requiring human involvement.
 
-Will also mark draft services with their respectivee validity (in the status field) as determined by
-draft_service_schema.
+This is determined using a number of json schemas (specified in arguments). This information is used to decide if a
+particular supplier should be marked as onFramework. The script will attempt to recover a less strict subset of the
+schema from inside the (mandatory) declaration_definite_pass_schema at its' json path definitions/notDefiniteFail.
+This is used to differentiate between suppliers that definitely fail and those that will require a human decision
+("discretionary"). If this subschema is not found, all suppliers failing declaration_definite_pass_schema will have
+onFramework left unmodified (probably remaining null).
+
+If draft_service_schema is supplied, this script will also determine the result of individual draft services associated
+with the supplier_framework and mark those that fail the draft_service_schema as "failed".
+
+supplier_frameworks with no remaining non-failed draft services are considered a definite fail in all cases.
+
+The default behaviour is to skip supplier_frameworks which already have a non-null onFramework set and draft services
+whose status is already "failed", though this can be controlled with the --reassess-passed-sf, --reassess-failed-sf and
+--reassess-failed-draft-services, the latter of which will mark "failed" services back as "submitted" if it proves
+not to fail this time around (or if no draft_service_schema is supplied).
 
 Usage: mark-definite-framework-results.py [options] <stage> <api_token> <framework_slug>
             <declaration_definite_pass_schema_path> [<draft_service_schema_path>]
@@ -19,7 +30,6 @@ Usage: mark-definite-framework-results.py [options] <stage> <api_token> <framewo
 --reassess-failed-draft-services  Don't skip draft_services with "failed" status
 -v, --verbose                     Produce more detailed console output
 """
-# ew..
 import sys
 sys.path.insert(0, '.')
 
