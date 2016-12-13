@@ -89,6 +89,7 @@ def test_add_submitted_draft_counts(mock_data_client):
         {'status': 'submitted', 'lot': 'saas'},
         {'status': 'submitted', 'lot': 'saas'},
         {'status': 'submitted', 'lot': 'paas'},
+        {'status': 'failed', 'lot': 'iaas'},
         {'status': 'not-submitted', 'lot': 'saas'},
         {'status': 'not-submitted', 'lot': 'paas'},
         {'status': 'not-submitted', 'lot': 'paas'},
