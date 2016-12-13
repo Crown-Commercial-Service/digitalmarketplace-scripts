@@ -100,4 +100,4 @@ def test_add_submitted_draft_counts(mock_data_client):
         mock_data_client,
         'g-cloud-8',
     )
-    assert record['counts'] == {'paas': 1, 'iaas': 0, 'saas': 3, 'scs': 0}
+    assert record['counts'] == {'paas': 1, 'saas': 3}
