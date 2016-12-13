@@ -104,10 +104,20 @@ def test_many_suppliers_many_lots(mock_data_client):
                 'supplierId': 123,
                 'supplierName': 'Bens cool supplier1',
                 'extraneous_field': 'foo',
-                'declaration': {'status': 'completed'}
+                'declaration': {'status': 'complete'}
             },
-            {'supplierId': 456, 'supplierName': 'Bens cool supplier2', 'extraneous_field': 'foo', 'declaration': ''},
-            {'supplierId': 789, 'supplierName': 'Bens cool supplier3', 'extraneous_field': 'foo', 'declaration': ''},
+            {
+                'supplierId': 456,
+                'supplierName': 'Bens cool supplier2',
+                'extraneous_field': 'foo',
+                'declaration': {'status': 'complete'}
+            },
+            {
+                'supplierId': 789,
+                'supplierName': 'Bens cool supplier3',
+                'extraneous_field': 'foo',
+                'declaration': {'status': 'complete'}
+            },
             {'supplierId': 101, 'supplierName': 'Bens cool supplier3', 'extraneous_field': 'foo', 'declaration': ''}
         ]
     }
