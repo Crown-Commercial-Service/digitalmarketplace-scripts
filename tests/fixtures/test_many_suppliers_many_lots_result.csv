@@ -1,0 +1,5 @@
+supplier_id,supplier_dm_name,application_status,declaration_status,draft_saas,completed_saas,draft_test_lot,completed_test_lot,draft_test_lot2,completed_test_lot2
+123,Bens cool supplier1,application,complete,0,6,0,0,0,0
+456,Bens cool supplier2,application,complete,0,1,1,2,0,2
+789,Bens cool supplier3,no_application,complete,0,0,0,0,1,0
+101,Bens cool supplier3,no_application,,0,0,0,0,0,0

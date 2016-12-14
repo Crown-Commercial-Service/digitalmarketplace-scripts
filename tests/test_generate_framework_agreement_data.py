@@ -1,16 +1,8 @@
-import pytest
-import mock
-
 from dmapiclient import HTTPError
 
 from dmscripts.generate_framework_agreement_data import (
     make_filename_key,
     read_csv, supplier_is_on_framework)
-
-
-@pytest.fixture
-def mock_data_client():
-    return mock.Mock()
 
 
 def test_read_csv():
