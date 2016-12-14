@@ -2,7 +2,7 @@
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "allOf": [
-        {"$ref": "#/definitions/notDefiniteFail"},
+        {"$ref": "#/definitions/baseline"},
         {
             "properties": {
                 "taxEvasion": {"enum": [false]},
@@ -24,7 +24,7 @@
         }
     ],
     "definitions": {
-        "notDefiniteFail": {
+        "baseline": {
             "$schema": "http://json-schema.org/draft-04/schema#",
             "type": "object",
             "properties": {

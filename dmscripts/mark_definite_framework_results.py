@@ -72,7 +72,7 @@ def mark_definite_framework_results(
         updated_by,
         framework_slug,
         declaration_definite_pass_schema,
-        declaration_not_definite_fail_schema=None,
+        declaration_baseline_schema=None,
         service_schema=None,
         dry_run=True,
         reassess_passed=False,
@@ -112,11 +112,11 @@ def mark_definite_framework_results(
                     client.set_framework_result(supplier_id, framework_slug, True, updated_by)
                 else:
                     logger.debug("\tUnchanged result - not re-setting")
-        elif (not service_counter["passed"]) or (declaration_not_definite_fail_schema and not _passes_validation(
+        elif (not service_counter["passed"]) or (declaration_baseline_schema and not _passes_validation(
                 supplier_framework["declaration"],
-                declaration_not_definite_fail_schema,
+                declaration_baseline_schema,
                 logger,
-                schema_name="declaration_not_definite_fail_schema",
+                schema_name="declaration_baseline_schema",
                 tablevel=1,
                 )):
             logger.info("\tResult: FAIL")

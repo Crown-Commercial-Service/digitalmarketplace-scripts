@@ -14,7 +14,7 @@ _declaration_definite_pass_schema = lambda: {
     "$schema": "http://json-schema.org/draft-04/schema#",
     "type": "object",
     "allOf": [
-        {"$ref": "#/definitions/notDefiniteFail"},
+        {"$ref": "#/definitions/baseline"},
         {
             "properties": {
                 "shouldBeFalseLax": {"enum": [False]},
@@ -27,7 +27,7 @@ _declaration_definite_pass_schema = lambda: {
         },
     ],
     "definitions": {
-        "notDefiniteFail": {
+        "baseline": {
             "$schema": "http://json-schema.org/draft-04/schema#",
             "type": "object",
             "properties": {
@@ -335,7 +335,7 @@ def test_no_prev_results(mock_data_client, reassess_passed, reassess_failed, rea
         "Blazes Boylan",
         "h-cloud-99",
         _declaration_definite_pass_schema(),
-        declaration_not_definite_fail_schema=_declaration_definite_pass_schema()["definitions"]["notDefiniteFail"],
+        declaration_baseline_schema=_declaration_definite_pass_schema()["definitions"]["baseline"],
         service_schema=_draft_service_schema(),
         dry_run=dry_run,
         reassess_passed=reassess_passed,
@@ -383,7 +383,7 @@ def test_no_prev_results_no_ds_schema(mock_data_client, reassess_passed, reasses
         "Blazes Boylan",
         "h-cloud-99",
         _declaration_definite_pass_schema(),
-        declaration_not_definite_fail_schema=_declaration_definite_pass_schema()["definitions"]["notDefiniteFail"],
+        declaration_baseline_schema=_declaration_definite_pass_schema()["definitions"]["baseline"],
         service_schema=None,
         dry_run=dry_run,
         reassess_passed=reassess_passed,
@@ -409,7 +409,7 @@ def test_no_prev_results_no_ds_schema(mock_data_client, reassess_passed, reasses
     "reassess_passed,reassess_failed,reassess_failed_ds,dry_run",
     tuple(product(*repeat((False, True,), 4))),
 )
-def test_no_prev_results_no_not_definite_fail_schema(
+def test_no_prev_results_no_baseline_schema(
         mock_data_client,
         reassess_passed,
         reassess_failed,
@@ -433,7 +433,7 @@ def test_no_prev_results_no_not_definite_fail_schema(
         "Blazes Boylan",
         "h-cloud-99",
         _declaration_definite_pass_schema(),
-        declaration_not_definite_fail_schema=None,
+        declaration_baseline_schema=None,
         service_schema=_draft_service_schema(),
         dry_run=dry_run,
         reassess_passed=reassess_passed,
@@ -485,7 +485,7 @@ def test_no_prev_results_neither_optional_schema(
         "Blazes Boylan",
         "h-cloud-99",
         _declaration_definite_pass_schema(),
-        declaration_not_definite_fail_schema=None,
+        declaration_baseline_schema=None,
         service_schema=None,
         dry_run=dry_run,
         reassess_passed=reassess_passed,
@@ -516,7 +516,7 @@ def test_prev_results_reassess_none(mock_data_client, dry_run,):
         "Blazes Boylan",
         "h-cloud-99",
         _declaration_definite_pass_schema(),
-        declaration_not_definite_fail_schema=_declaration_definite_pass_schema()["definitions"]["notDefiniteFail"],
+        declaration_baseline_schema=_declaration_definite_pass_schema()["definitions"]["baseline"],
         service_schema=_draft_service_schema(),
         dry_run=dry_run,
         reassess_passed=False,
@@ -548,7 +548,7 @@ def test_prev_results_reassess_failed(mock_data_client, dry_run,):
         "Blazes Boylan",
         "h-cloud-99",
         _declaration_definite_pass_schema(),
-        declaration_not_definite_fail_schema=_declaration_definite_pass_schema()["definitions"]["notDefiniteFail"],
+        declaration_baseline_schema=_declaration_definite_pass_schema()["definitions"]["baseline"],
         service_schema=_draft_service_schema(),
         dry_run=dry_run,
         reassess_passed=False,
@@ -581,7 +581,7 @@ def test_prev_results_reassess_passed(mock_data_client, dry_run,):
         "Blazes Boylan",
         "h-cloud-99",
         _declaration_definite_pass_schema(),
-        declaration_not_definite_fail_schema=_declaration_definite_pass_schema()["definitions"]["notDefiniteFail"],
+        declaration_baseline_schema=_declaration_definite_pass_schema()["definitions"]["baseline"],
         service_schema=_draft_service_schema(),
         dry_run=dry_run,
         reassess_passed=True,
@@ -615,7 +615,7 @@ def test_prev_results_reassess_all(mock_data_client, dry_run,):
         "Blazes Boylan",
         "h-cloud-99",
         _declaration_definite_pass_schema(),
-        declaration_not_definite_fail_schema=_declaration_definite_pass_schema()["definitions"]["notDefiniteFail"],
+        declaration_baseline_schema=_declaration_definite_pass_schema()["definitions"]["baseline"],
         service_schema=_draft_service_schema(),
         dry_run=dry_run,
         reassess_passed=True,
@@ -652,7 +652,7 @@ def test_prev_results_reassess_all_no_service_schema(mock_data_client, dry_run,)
         "Blazes Boylan",
         "h-cloud-99",
         _declaration_definite_pass_schema(),
-        declaration_not_definite_fail_schema=_declaration_definite_pass_schema()["definitions"]["notDefiniteFail"],
+        declaration_baseline_schema=_declaration_definite_pass_schema()["definitions"]["baseline"],
         service_schema=None,
         dry_run=dry_run,
         reassess_passed=True,

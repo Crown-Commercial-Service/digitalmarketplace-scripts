@@ -5,7 +5,7 @@ result can be determined "automatically" not requiring human involvement.
 
 This is determined using a number of json schemas (specified in arguments). This information is used to decide if a
 particular supplier should be marked as onFramework. The script will attempt to recover a less strict subset of the
-schema from inside the (mandatory) declaration_definite_pass_schema at its' json path definitions/notDefiniteFail.
+schema from inside the (mandatory) declaration_definite_pass_schema at its' json path definitions/baseline.
 This is used to differentiate between suppliers that definitely fail and those that will require a human decision
 ("discretionary"). If this subschema is not found, all suppliers failing declaration_definite_pass_schema will have
 onFramework left unmodified (probably remaining null).
@@ -53,8 +53,8 @@ if __name__ == "__main__":
 
     declaration_definite_pass_schema = json.load(open(args["<declaration_definite_pass_schema_path>"], "r"))
 
-    declaration_not_definite_fail_schema = \
-        (declaration_definite_pass_schema.get("definitions") or {}).get("notDefiniteFail")
+    declaration_baseline_schema = \
+        (declaration_definite_pass_schema.get("definitions") or {}).get("baseline")
 
     service_schema = json.load(
         open(args["<draft_service_schema_path>"], "r")
@@ -67,7 +67,7 @@ if __name__ == "__main__":
         updated_by,
         args["<framework_slug>"],
         declaration_definite_pass_schema,
-        declaration_not_definite_fail_schema=declaration_not_definite_fail_schema,
+        declaration_baseline_schema=declaration_baseline_schema,
         service_schema=service_schema,
         reassess_passed=args["--reassess-passed-sf"],
         reassess_failed=args["--reassess-failed-sf"],
