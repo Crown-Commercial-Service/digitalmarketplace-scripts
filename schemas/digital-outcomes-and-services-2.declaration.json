@@ -62,7 +62,14 @@
                 "continuousProfessionalDevelopment": {"enum": [true]},
                 "customerSatisfactionProcess": {"enum": [true]},
                 "equalityAndDiversity": {"enum": [true]},
-                "civilServiceValues": {"enum": [true]}
+                "civilServiceValues": {"enum": [true]},
+                "technologyCodesOfPractice": {"enum": [true]},
+                "serviceStandard": {"enum": [true]},
+                "ongoingEngagement": {"enum": [true]},
+                "transparentContracting": {"enum": [true]},
+                "publishContracts": {"enum": [true]},
+                "safeguardOfficialInformation": {"enum": [true]},
+                "safeguardPersonalData": {"enum": [true]}
             }
         }
     }
