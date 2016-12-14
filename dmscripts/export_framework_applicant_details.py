@@ -82,12 +82,12 @@ def find_suppliers(client, framework_slug):
     return ({'supplier_id': supplier_id} for supplier_id in suppliers)
 
 
-def add_supplier_info(record, client):
+def add_supplier_info(client, record):
     supplier = client.get_supplier(record['supplier_id'])
     return dict(record, supplier=supplier['suppliers'])
 
 
-def add_framework_info(record, client, framework_slug):
+def add_framework_info(client, framework_slug, record):
     supplier_framework = client.get_supplier_framework_info(record['supplier_id'], framework_slug)['frameworkInterest']
     return dict(record,
                 onFramework=supplier_framework['onFramework'],
@@ -97,7 +97,7 @@ def add_framework_info(record, client, framework_slug):
                 )
 
 
-def add_submitted_draft_counts(record, client, framework_slug):
+def add_submitted_draft_counts(client, framework_slug, record):
     return dict(record, counts=Counter(
         ds['lot']
         for ds in client.find_draft_services_iter(record['supplier']['id'], framework=framework_slug)
@@ -106,7 +106,7 @@ def add_submitted_draft_counts(record, client, framework_slug):
 
 
 def get_csv_rows(records, framework_slug):
-    rows = [create_row(record, framework_slug)
+    rows = [create_row(framework_slug, record)
             for record in records
             if record['declaration'].get('status') == 'complete'
             and sum(record['counts'].values()) > 0
@@ -122,7 +122,7 @@ def get_csv_rows(records, framework_slug):
     return headers, rows
 
 
-def create_row(record, framework_slug):
+def create_row(framework_slug, record):
     row = {
         'supplier_id': record['supplier']['id'],
         'supplier_name': record['supplier']['name'],

@@ -24,7 +24,7 @@ def test_find_suppliers_produces_results_with_supplier_ids(mock_data_client):
 def test_add_supplier_info(mock_data_client, supplier_id):
     mock_data_client.get_supplier.return_value = {'suppliers': 'supplier {}'.format(supplier_id)}
 
-    record = export_framework_applicant_details.add_supplier_info({'supplier_id': supplier_id}, mock_data_client)
+    record = export_framework_applicant_details.add_supplier_info(mock_data_client, {'supplier_id': supplier_id})
 
     assert mock_data_client.get_supplier.call_args == ((supplier_id,),)
     assert record == {'supplier_id': supplier_id, 'supplier': 'supplier {}'.format(supplier_id)}
@@ -41,7 +41,7 @@ def test_add_framework_info(mock_data_client, on_framework):
         }
     }
 
-    record = export_framework_applicant_details.add_framework_info({'supplier_id': 1}, mock_data_client, 'g-cloud-8')
+    record = export_framework_applicant_details.add_framework_info(mock_data_client, 'g-cloud-8', {'supplier_id': 1})
 
     assert mock_data_client.get_supplier_framework_info.call_args == ((1, 'g-cloud-8',),)
     assert record == {
@@ -59,7 +59,7 @@ def test_add_framework_info_fails_on_non_404_error(mock_data_client):
     mock_data_client.get_supplier_framework_info.side_effect = HTTPError(Mock(status_code=400))
 
     with pytest.raises(HTTPError):
-        export_framework_applicant_details.add_framework_info({'supplier_id': 1}, mock_data_client, 'g-cloud-8')
+        export_framework_applicant_details.add_framework_info(mock_data_client, 'g-cloud-8', {'supplier_id': 1})
 
 
 def test_add_submitted_draft_counts(mock_data_client):
@@ -76,8 +76,8 @@ def test_add_submitted_draft_counts(mock_data_client):
     ]
 
     record = export_framework_applicant_details.add_submitted_draft_counts(
-        {'supplier': {'id': 1}},
         mock_data_client,
         'g-cloud-8',
+        {'supplier': {'id': 1}},
     )
     assert record['counts'] == {'paas': 1, 'saas': 3}
