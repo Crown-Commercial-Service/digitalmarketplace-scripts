@@ -70,7 +70,8 @@
                 "publishContracts": {"enum": [true]},
                 "safeguardOfficialInformation": {"enum": [true]},
                 "safeguardPersonalData": {"enum": [true]}
-            }
+            },
+            "required": ["status"]
         }
     }
 }
