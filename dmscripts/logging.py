@@ -2,7 +2,7 @@ from __future__ import absolute_import
 
 import sys
 import logging
-from logging import DEBUG, INFO, WARNING, ERROR, CRITICAL  # noqa
+from logging import DEBUG, INFO, WARNING, ERROR, CRITICAL, getLogger  # noqa
 
 from dmutils.logging import CustomLogFormatter
 

@@ -314,9 +314,10 @@ def test_check_declaration_answers_fails_for_bad_q14():
 
 
 def test_process_submitted_drafts_for_good_services(mock_data_client):
-    mock_data_client.find_draft_services.return_value = {
-        "services": [COMPLETE_OUTCOMES_DRAFT, COMPLETE_RESEARCH_PARTICIPANTS_DRAFT]
-    }
+    mock_data_client.find_draft_services_iter.return_value = iter((
+        COMPLETE_OUTCOMES_DRAFT,
+        COMPLETE_RESEARCH_PARTICIPANTS_DRAFT,
+    ))
     assert process_submitted_drafts(mock_data_client, 12345, 'user') is True
     mock_data_client.update_draft_service_status.assert_not_called()
 
@@ -325,9 +326,7 @@ def test_process_submitted_drafts_with_bad_service(mock_data_client):
     bad_service = COMPLETE_RESEARCH_PARTICIPANTS_DRAFT.copy()
     bad_service['anonymousRecruitment'] = False
     bad_service['id'] = 42
-    mock_data_client.find_draft_services.return_value = {
-        "services": [bad_service]
-    }
+    mock_data_client.find_draft_services_iter.return_value = iter((bad_service,))
     assert process_submitted_drafts(mock_data_client, 12345, 'user') is False
     mock_data_client.update_draft_service_status.assert_called_with(42, 'failed', 'user')
 
@@ -336,9 +335,7 @@ def test_process_submitted_drafts_with_bad_and_good_service(mock_data_client):
     bad_service = COMPLETE_RESEARCH_PARTICIPANTS_DRAFT.copy()
     bad_service['anonymousRecruitment'] = False
     bad_service['id'] = 24
-    mock_data_client.find_draft_services.return_value = {
-        "services": [bad_service, COMPLETE_STUDIOS_DRAFT]
-    }
+    mock_data_client.find_draft_services_iter.return_value = iter((bad_service, COMPLETE_STUDIOS_DRAFT,))
     assert process_submitted_drafts(mock_data_client, 12345, 'user') is True
     mock_data_client.update_draft_service_status.assert_called_with(24, 'failed', 'user')
 
@@ -354,9 +351,10 @@ def test_process_dos_results_for_successful(mock_data_client):
     declaration = OrderedDict([("key1", True), ("key2", False), ("key3", False), ("status", "complete")])
     mock_data_client.get_interested_suppliers.return_value = {"interestedSuppliers": [123456]}
     mock_data_client.get_supplier_declaration.return_value = {"declaration": declaration}
-    mock_data_client.find_draft_services.return_value = {
-        "services": [COMPLETE_OUTCOMES_DRAFT, COMPLETE_RESEARCH_PARTICIPANTS_DRAFT]
-    }
+    mock_data_client.find_draft_services_iter.return_value = iter((
+        COMPLETE_OUTCOMES_DRAFT,
+        COMPLETE_RESEARCH_PARTICIPANTS_DRAFT,
+    ))
     process_dos_results(mock_data_client, content_loader, 'user')
     mock_data_client.set_framework_result.assert_called_with(123456, 'digital-outcomes-and-specialists', True, 'user')
 
@@ -372,9 +370,10 @@ def test_process_dos_results_for_incomplete_declaration(mock_data_client):
     declaration = OrderedDict([("key1", True), ("key2", False), ("key3", False), ("status", "started")])
     mock_data_client.get_interested_suppliers.return_value = {"interestedSuppliers": [123456]}
     mock_data_client.get_supplier_declaration.return_value = {"declaration": declaration}
-    mock_data_client.find_draft_services.return_value = {
-        "services": [COMPLETE_OUTCOMES_DRAFT, COMPLETE_RESEARCH_PARTICIPANTS_DRAFT]
-    }
+    mock_data_client.find_draft_services_iter.return_value = iter((
+        COMPLETE_OUTCOMES_DRAFT,
+        COMPLETE_RESEARCH_PARTICIPANTS_DRAFT,
+    ))
     process_dos_results(mock_data_client, content_loader, 'user')
     mock_data_client.set_framework_result.assert_called_with(123456, 'digital-outcomes-and-specialists', False, 'user')
 
@@ -392,9 +391,7 @@ def test_process_dos_results_for_bad_service_essentials(mock_data_client):
     declaration = OrderedDict([("key1", True), ("key2", False), ("key3", False), ("status", "complete")])
     mock_data_client.get_interested_suppliers.return_value = {"interestedSuppliers": [123456]}
     mock_data_client.get_supplier_declaration.return_value = {"declaration": declaration}
-    mock_data_client.find_draft_services.return_value = {
-        "services": [bad_service]
-    }
+    mock_data_client.find_draft_services_iter.return_value = iter((bad_service,))
     process_dos_results(mock_data_client, content_loader, 'user')
     mock_data_client.set_framework_result.assert_called_with(123456, 'digital-outcomes-and-specialists', False, 'user')
 
@@ -412,9 +409,7 @@ def test_process_dos_results_for_one_good_one_bad_service(mock_data_client):
     declaration = OrderedDict([("key1", True), ("key2", False), ("key3", False), ("status", "complete")])
     mock_data_client.get_interested_suppliers.return_value = {"interestedSuppliers": [123456]}
     mock_data_client.get_supplier_declaration.return_value = {"declaration": declaration}
-    mock_data_client.find_draft_services.return_value = {
-        "services": [bad_service, COMPLETE_OUTCOMES_DRAFT]
-    }
+    mock_data_client.find_draft_services_iter.return_value = iter((bad_service, COMPLETE_OUTCOMES_DRAFT,))
     process_dos_results(mock_data_client, content_loader, 'user')
     mock_data_client.set_framework_result.assert_called_with(123456, 'digital-outcomes-and-specialists', True, 'user')
 
@@ -432,9 +427,7 @@ def test_process_dos_results_for_one_good_one_bad_service(mock_data_client):
     declaration = OrderedDict([("key1", True), ("key2", False), ("key3", False), ("status", "complete")])
     mock_data_client.get_interested_suppliers.return_value = {"interestedSuppliers": [123456]}
     mock_data_client.get_supplier_declaration.return_value = {"declaration": declaration}
-    mock_data_client.find_draft_services.return_value = {
-        "services": [bad_service, COMPLETE_OUTCOMES_DRAFT]
-    }
+    mock_data_client.find_draft_services_iter.return_value = iter((bad_service, COMPLETE_OUTCOMES_DRAFT,))
     process_dos_results(mock_data_client, content_loader, 'user')
     mock_data_client.set_framework_result.assert_called_with(123456, 'digital-outcomes-and-specialists', True, 'user')
 
@@ -450,9 +443,10 @@ def test_process_dos_results_for_successful(mock_data_client):
     declaration = OrderedDict([("key1", True), ("key2", False), ("key3", True), ("status", "complete")])
     mock_data_client.get_interested_suppliers.return_value = {"interestedSuppliers": [123456]}
     mock_data_client.get_supplier_declaration.return_value = {"declaration": declaration}
-    mock_data_client.find_draft_services.return_value = {
-        "services": [COMPLETE_OUTCOMES_DRAFT, COMPLETE_RESEARCH_PARTICIPANTS_DRAFT]
-    }
+    mock_data_client.find_draft_services_iter.return_value = iter((
+        COMPLETE_OUTCOMES_DRAFT,
+        COMPLETE_RESEARCH_PARTICIPANTS_DRAFT,
+    ))
     process_dos_results(mock_data_client, content_loader, 'user')
     # Discretionary result should not update `supplier_frameworks` at all
     mock_data_client.set_framework_result.assert_not_called()
