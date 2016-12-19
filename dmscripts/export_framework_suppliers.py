@@ -371,6 +371,8 @@ def export_suppliers(
         declaration_definite_pass_schema,
         declaration_baseline_schema=None
 ):
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
     records = find_suppliers_with_details(client,
                                           content_loader,
                                           framework_slug,
