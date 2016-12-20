@@ -136,43 +136,6 @@ def test_count_field_in_record(record, count):
     assert export_dos_suppliers.count_field_in_record("theId", "Label", record) == count
 
 
-def test_make_fields_from_content_question():
-    questions = [
-        ContentQuestion({"id": "check1",
-                         "type": "checkboxes",
-                         "options": [
-                             {"label": "Option 1"},
-                             {"label": "Option 2"},
-                         ]}),
-        ContentQuestion({"id": "custom",
-                         "type": "custom",
-                         "fields": {
-                             "field1": "field1",
-                             "field2": "field2",
-                         }}),
-        ContentQuestion({"id": "basic",
-                         "type": "boolean"}),
-    ]
-    record = {
-        "services": [
-            {"check1": ["Option 1"],
-             "field1": "Blah",
-             "field2": "Foo",
-             "basic": False},
-            {"check1": ["Option 1", "Option 2"],
-             "field1": "Foo",
-             "basic": True},
-        ]
-    }
-    assert export_dos_suppliers.make_fields_from_content_questions(questions, record) == [
-        ("check1 Option 1", 2),
-        ("check1 Option 2", 1),
-        ("field1", "Blah|Foo"),
-        ("field2", "Foo|"),
-        ("basic", "False|True"),
-    ]
-
-
 def test_add_framework_info(mock_data_client):
     mock_data_client.get_supplier_framework_info.side_effect = [
         {'frameworkInterest': {'declaration': {'status': 'complete'}, 'onFramework': True}},
