@@ -10,7 +10,7 @@ Before running this you will need to:
 pip install -r requirements.txt
 
 Usage:
-    scripts/generate-questions-csv.py <path_to_manifest> <output_directory> --framework=<slug>
+    scripts/generate-questions-csv.py <DM-content-root-dir> <output-directory> --framework=<slug>
 """
 import sys
 sys.path.insert(0, '.')
@@ -22,10 +22,10 @@ from dmscripts.generate_questions_csv import generate_csv
 if __name__ == '__main__':
     arguments = docopt(__doc__)
 
-    path_to_manifest = arguments['<path_to_manifest>']
+    path_to_manifest = arguments['<DM-content-root-dir>']
     content_loader = ContentLoader(path_to_manifest)
 
-    output_directory = arguments['<output_directory>']
+    output_directory = arguments['<output-directory>']
     framework_slug = arguments.get('--framework')
 
     generate_csv(output_directory, framework_slug, content_loader)
