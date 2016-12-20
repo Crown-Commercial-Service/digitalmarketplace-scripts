@@ -1,5 +1,6 @@
 from collections import Counter
 from functools import partial
+from itertools import chain
 import sys
 if sys.version_info[0] < 3:
     import unicodecsv as csv
@@ -103,7 +104,7 @@ def add_submitted_draft_counts(client, framework_slug, record):
     return dict(record, counts=Counter(
         ds['lot']
         for ds in client.find_draft_services_iter(record['supplier']['id'], framework=framework_slug)
-        if ds['status'] == 'submitted'
+        if ds['status'] in ("submitted", "failed",)
     ))
 
 
@@ -113,13 +114,17 @@ def get_csv_rows(records, framework_slug):
             if record['declaration'].get('status') == 'complete'
             and sum(record['counts'].values()) > 0
             ]
-    headers = (
-        "supplier_id",
-        "supplier_name",
-        "on_framework",
-        "countersigned_at",
-        "countersigned_path",
-        ) + LOTS[framework_slug] + DECLARATION_FIELDS[framework_slug]
+    headers = tuple(chain(
+        (
+            "supplier_id",
+            "supplier_name",
+            "pass_fail",
+            "countersigned_at",
+            "countersigned_path",
+        ),
+        ("submitted_{}".format(lot_slug) for lot_slug in LOTS[framework_slug]),
+        DECLARATION_FIELDS[framework_slug],
+    ))
 
     return headers, rows
 
@@ -132,7 +137,7 @@ def create_row(framework_slug, record):
         'countersigned_at': record['countersignedAt'],
         'countersigned_path': record['countersignedPath'],
     }
-    row.update((lot, record['counts'][lot]) for lot in LOTS[framework_slug])
+    row.update(("submitted_{}".format(lot), record['counts'][lot]) for lot in LOTS[framework_slug])
     row.update(((field, record['declaration'].get(field, "")) for field in DECLARATION_FIELDS[framework_slug]))
     return row
 
