@@ -15,13 +15,6 @@ MANIFESTS = [{
     'manifest':     'edit_submission'
 }]
 
-LOTS = {
-    'g-cloud-7': ['IaaS', 'PaaS', 'SaaS', 'SCS'],
-    'g-cloud-8': ['IaaS', 'PaaS', 'SaaS', 'SCS'],
-    'digital-outcomes-and-specialists':
-        ['digital-specialists', 'digital-outcomes', 'user-research-participants', 'user-research-studios']
-}
-
 
 def get_questions(questions):
 
@@ -78,7 +71,7 @@ def return_rows_for_sections(sections):
     return local_rows
 
 
-def generate_csv(output_directory, framework_slug, content_loader):
+def generate_csv(output_directory, framework_slug, content_loader, context):
 
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
@@ -88,15 +81,11 @@ def generate_csv(output_directory, framework_slug, content_loader):
     for manifest in MANIFESTS:
         content_loader.load_manifest(framework_slug, manifest['question_set'], manifest['manifest'])
 
-        if manifest['question_set'] == 'services':
-            if framework_slug in LOTS:
-                for lot in LOTS[framework_slug]:
-                    content = content_loader.get_manifest(
-                        framework_slug, manifest['manifest']).filter({'lot': lot})
-                    rows.extend(return_rows_for_sections(content.sections))
-        else:
-            content = content_loader.get_manifest(framework_slug, manifest['manifest'])
-            rows.extend(return_rows_for_sections(content.sections))
+        content = content_loader.get_manifest(framework_slug, manifest['manifest'])
+        if context is not None:
+            content = content.filter(context)
+
+        rows.extend(return_rows_for_sections(content.sections))
 
     # find the longest array
     max_length = max(len(row) for row in rows)
