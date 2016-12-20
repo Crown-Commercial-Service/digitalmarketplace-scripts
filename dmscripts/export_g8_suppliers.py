@@ -87,14 +87,6 @@ def make_fields_from_content_question(question, record):
         )
 
 
-def make_fields_from_content_questions(questions, record):
-    return [
-        field
-        for question in questions
-        for field in make_fields_from_content_question(question, record)
-    ]
-
-
 def add_framework_info(client, framework_slug):
     def inner(record):
         supplier_framework = client.get_supplier_framework_info(record['supplier_id'], framework_slug)
