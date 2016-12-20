@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
 This script generates a CSV file for the supplier declaration and questions in each lot for a specified framework.
 
