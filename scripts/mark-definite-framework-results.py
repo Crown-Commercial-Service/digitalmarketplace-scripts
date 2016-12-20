@@ -16,8 +16,8 @@ with the supplier_framework and mark those that fail the draft_service_schema as
 supplier_frameworks with no remaining non-failed draft services are considered a definite fail in all cases.
 
 The default behaviour is to skip supplier_frameworks which already have a non-null onFramework set and draft services
-whose status is already "failed", though this can be controlled with the --reassess-passed-sf, --reassess-failed-sf and
---reassess-failed-draft-services, the latter of which will mark "failed" services back as "submitted" if it proves
+whose status is already "failed", though this can be controlled with the --reassess-passed-sf, --reassess-failed-sf
+and --reassess-failed-draft-services, the latter of which will mark "failed" services back as "submitted" if it proves
 not to fail this time around (or if no draft_service_schema is supplied).
 
 Usage: mark-definite-framework-results.py [options] <stage> <api_token> <framework_slug>
