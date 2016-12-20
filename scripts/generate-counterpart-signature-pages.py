@@ -46,7 +46,13 @@ if __name__ == '__main__':
 
     client = DataAPIClient(get_api_endpoint_from_stage(STAGE), API_TOKEN)
 
-    headers, rows = find_suppliers_with_details(client, FRAMEWORK)
+    supplier_id_file = arguments['<supplier_id_file>']
+    if supplier_id_file:
+        with open(supplier_id_file, 'r') as f:
+            supplier_ids = map(int, filter(None, [l.strip() for l in f.readlines()]))
+    else:
+        supplier_ids = None
+    headers, rows = find_suppliers_with_details(client, FRAMEWORK, supplier_ids)
 
     render_html_for_suppliers_awaiting_countersignature(rows, FRAMEWORK, TEMPLATE_FOLDER, html_dir)
 
