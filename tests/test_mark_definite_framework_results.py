@@ -36,7 +36,7 @@ _declaration_definite_pass_schema = lambda: {
                 "shouldBeTrueStrict": {"enum": [True]},
                 "shouldMatchPatternStrict": {
                     "type": "string",
-                    "pattern": "^H.? *E.? *L.? *Y.? *S?",
+                    "pattern": "^H\\.? *E\\.? *L\\.? *Y\\.? *S?",
                 },
             },
         },
