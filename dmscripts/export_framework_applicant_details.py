@@ -129,17 +129,23 @@ def get_csv_rows(records, framework_slug):
     return headers, rows_iter
 
 
+def _pass_fail_from_record(record):
+    if record["onFramework"] is False:
+        return "fail"
+    else:
+        return (
+            "pass" if record["onFramework"] else "discretionary"
+        ) + (
+            "" if record["counts"] else "_with_failed_services"
+        )
+
+
 def create_row(framework_slug, record):
     return dict(chain(
         (
             ("supplier_id", record["supplier"]["id"]),
             ("supplier_name", record["supplier"]["name"]),
-            (
-                "pass_fail",
-                "pass" if record["onFramework"] and record["counts"] else (
-                    "pass_with_failed_services" if record["onFramework"] else "fail"
-                )
-            ),
+            ("pass_fail", _pass_fail_from_record(record)),
             ("countersigned_at", record["countersignedAt"]),
             ("countersigned_path", record["countersignedPath"]),
         ),
