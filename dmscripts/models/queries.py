@@ -56,6 +56,6 @@ def add_counts(join, group_by, model, data, directory):
         data["{}-{}".format(group_by, group)] = data.merge(
             count_data[count_data[group_by] == group],
             left_on=left_on, right_on=right_on, how='left'
-        )['_count']
+        )['_count'].fillna(0)
 
     return data
