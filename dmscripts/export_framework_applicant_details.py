@@ -109,11 +109,11 @@ def add_submitted_draft_counts(client, framework_slug, record):
 
 
 def get_csv_rows(records, framework_slug):
-    rows = [create_row(framework_slug, record)
-            for record in records
-            if record['declaration'].get('status') == 'complete'
-            and sum(record['counts'].values()) > 0
-            ]
+    rows_iter = (
+        create_row(framework_slug, record)
+        for record in records
+        if record['declaration'].get('status') == 'complete' and record['counts']  # i.e. has any submitted services
+    )
     headers = tuple(chain(
         (
             "supplier_id",
@@ -126,20 +126,26 @@ def get_csv_rows(records, framework_slug):
         DECLARATION_FIELDS[framework_slug],
     ))
 
-    return headers, rows
+    return headers, rows_iter
 
 
 def create_row(framework_slug, record):
-    row = {
-        'supplier_id': record['supplier']['id'],
-        'supplier_name': record['supplier']['name'],
-        'on_framework': record['onFramework'],
-        'countersigned_at': record['countersignedAt'],
-        'countersigned_path': record['countersignedPath'],
-    }
-    row.update(("submitted_{}".format(lot), record['counts'][lot]) for lot in LOTS[framework_slug])
-    row.update(((field, record['declaration'].get(field, "")) for field in DECLARATION_FIELDS[framework_slug]))
-    return row
+    return dict(chain(
+        (
+            ("supplier_id", record["supplier"]["id"]),
+            ("supplier_name", record["supplier"]["name"]),
+            (
+                "pass_fail",
+                "pass" if record["onFramework"] and record["counts"] else (
+                    "pass_with_failed_services" if record["onFramework"] else "fail"
+                )
+            ),
+            ("countersigned_at", record["countersignedAt"]),
+            ("countersigned_path", record["countersignedPath"]),
+        ),
+        (("submitted_{}".format(lot), record["counts"][lot]) for lot in LOTS[framework_slug]),
+        ((field, record["declaration"].get(field, "")) for field in DECLARATION_FIELDS[framework_slug]),
+    ))
 
 
 def find_suppliers_with_details(client, framework_slug):
@@ -153,12 +159,12 @@ def find_suppliers_with_details(client, framework_slug):
     return get_csv_rows(records, framework_slug)
 
 
-def write_csv(headers, rows, filename):
+def write_csv(headers, rows_iter, filename):
     """Write a list of rows out to CSV"""
 
     writer = None
     with open(filename, "w+") as f:
-        for row in rows:
+        for row in rows_iter:
             if writer is None:
                 writer = csv.DictWriter(f, fieldnames=headers)
                 writer.writeheader()
@@ -166,5 +172,5 @@ def write_csv(headers, rows, filename):
 
 
 def export_supplier_details(data_api_client, framework_slug, filename):
-    headers, rows = find_suppliers_with_details(data_api_client, framework_slug)
-    write_csv(headers, rows, filename)
+    headers, rows_iter = find_suppliers_with_details(data_api_client, framework_slug)
+    write_csv(headers, rows_iter, filename)
