@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
 """
-This script generates a CSV file for the supplier declaration and questions in each lot for a specified framework.
+For a given framework, this script generates a CSV file for the supplier declaration and questions in the 'edit
+submission' manifest. Questions can be filtered by supplying a context (for example to include questions in one
+particular lot).
 
 The order of fields in the generated file is:
 "Page title", "Question", "Hint", "Answer 1", "Answer 2", ...
@@ -11,6 +13,8 @@ pip install -r requirements.txt
 
 Usage:
     scripts/generate-questions-csv.py <DM-content-root-dir> <output-directory> --framework=<slug> [--context=<yaml>]
+
+-h --help    show this message
 
 Example:
     scripts/generate-questions-csv.py /path/to/dm-frameworks/ ~ --framework=g-cloud-9 --context="lot: SaaS"
