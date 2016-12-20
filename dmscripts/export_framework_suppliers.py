@@ -167,21 +167,6 @@ def add_failed_questions(declaration_content,
     return inner
 
 
-def find_services_by_lot(client, framework_slug, lot_slug):
-    pool = ThreadPool(30)
-    service_adder = add_draft_services(client, framework_slug,
-                                       lot=lot_slug,
-                                       status="submitted")
-
-    records = find_suppliers(client, framework_slug)
-    records = pool.imap(add_supplier_info(client), records)
-    records = pool.imap(add_framework_info(client, framework_slug), records)
-    records = pool.imap(service_adder, records)
-    records = filter(lambda record: len(record["services"]) > 0, records)
-
-    return records
-
-
 def find_suppliers_with_details(client,
                                 content_loader,
                                 framework_slug,
