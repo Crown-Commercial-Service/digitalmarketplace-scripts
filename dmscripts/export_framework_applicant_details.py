@@ -9,7 +9,6 @@ else:
 
 
 from multiprocessing.pool import ThreadPool
-from dmutils.formats import dateformat
 
 
 LOTS = {
