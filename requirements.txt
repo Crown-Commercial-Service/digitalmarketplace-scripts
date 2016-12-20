@@ -7,3 +7,4 @@ unicodecsv==0.14.1
 python-dateutil==2.4.2
 Jinja2==2.7.3
 jsonschema==2.5.1
+pandas==0.19.1
