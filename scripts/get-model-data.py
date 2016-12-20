@@ -1,12 +1,12 @@
 #!/usr/bin/env python
-"""Export a CSV of all models or something
+"""Generate data export CSVs
 
-Looks for a corresponding find_{model}_iter() method in the api client and returns
-all of the results in a CSV with only requested keys being used as columns
-Before generating the final csv, it is possible to:
-- filter the list, looking for only those entries with a particular value
-- do some additional processing on a value
-- sort the list
+Load model data from the API or the existing CSV, process it according
+to the rules defined in the CONFIG and stor the output in the CSV.
+
+CSV files are read from and saved to `<output-dir>/<model>.csv`
+
+If called without a model name the script will dump all defined models.
 
 Usage:
     scripts/get-model-data.py [options] <stage> <api_token> [<model>...]
