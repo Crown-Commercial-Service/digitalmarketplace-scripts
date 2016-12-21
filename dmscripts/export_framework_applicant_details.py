@@ -101,8 +101,9 @@ def add_framework_info(client, framework_slug, record):
 
 
 def add_submitted_draft_counts(client, framework_slug, record):
+    # "counts" is actually a counter of (lotSlug, status) tuples
     return dict(record, counts=Counter(
-        ds['lot']
+        (ds['lot'], ds['status'])
         for ds in client.find_draft_services_iter(record['supplier']['id'], framework=framework_slug)
         if ds['status'] in ("submitted", "failed",)
     ))
@@ -112,7 +113,7 @@ def get_csv_rows(records, framework_slug):
     rows_iter = (
         create_row(framework_slug, record)
         for record in records
-        if record['declaration'].get('status') == 'complete' and record['counts']  # i.e. has any submitted services
+        if record['declaration'].get('status') == 'complete' and record['counts']  # i.e. has submitted any services
     )
     headers = tuple(chain(
         (
@@ -122,7 +123,7 @@ def get_csv_rows(records, framework_slug):
             "countersigned_at",
             "countersigned_path",
         ),
-        ("submitted_{}".format(lot_slug) for lot_slug in LOTS[framework_slug]),
+        (lot_slug for lot_slug in LOTS[framework_slug]),
         DECLARATION_FIELDS[framework_slug],
     ))
 
@@ -136,7 +137,9 @@ def _pass_fail_from_record(record):
         return (
             "pass" if record["onFramework"] else "discretionary"
         ) + (
-            "" if record["counts"] else "_with_failed_services"
+            "" if all(
+                status == "submitted" for (lot_slug, status), v in record['counts'].items()
+            ) else "_with_failed_services"
         )
 
 
@@ -149,7 +152,10 @@ def create_row(framework_slug, record):
             ("countersigned_at", record["countersignedAt"]),
             ("countersigned_path", record["countersignedPath"]),
         ),
-        (("submitted_{}".format(lot), record["counts"][lot]) for lot in LOTS[framework_slug]),
+        (
+            (lot, sum(record["counts"][(lot, status)] for status in ("submitted", "failed",)))
+            for lot in LOTS[framework_slug]
+        ),
         ((field, record["declaration"].get(field, "")) for field in DECLARATION_FIELDS[framework_slug]),
     ))
 

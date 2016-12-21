@@ -80,7 +80,7 @@ def test_add_submitted_draft_counts(mock_data_client):
         'g-cloud-8',
         {'supplier': {'id': 1}},
     )
-    assert record['counts'] == {'iaas': 1, 'paas': 1, 'saas': 3}
+    assert record['counts'] == {("iaas", "failed"): 1, ("paas", "submitted"): 1, ("saas", "submitted"): 3}
 
 #
 # TODO these tests are not comprehensive enough - fix that. Notably they fail to check the final output of the script
