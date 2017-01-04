@@ -30,8 +30,8 @@ import yaml
 if __name__ == '__main__':
     arguments = docopt(__doc__)
 
-    path_to_manifest = arguments['<DM-content-root-dir>']
-    content_loader = ContentLoader(path_to_manifest)
+    content_path = arguments['<DM-content-root-dir>']
+    content_loader = ContentLoader(content_path)
 
     output_directory = arguments['<output-directory>']
     framework_slug = arguments.get('--framework')
