@@ -63,33 +63,26 @@ class GenerateMasterCSV(GenerateCSVFromAPI):
         """Return supplier frameworks."""
         return self.client.find_framework_suppliers(self.target_framework_slug)['supplierFrameworks']
 
-    def _tmp_update_with_application_status(self, supplier_dict, sf):
-        """TODO: Temporary method to calculate application script side until we get it from the api.
-
-        To remove this method remove the method, the single call in _update_with_supplier_data and
-        add in another way to get the application status, preferably from the api.
-        """
-        try:
-            declaration_complete = sf['declaration'].get('status') == 'complete'
-        except (KeyError, AttributeError):
-            declaration_complete = False
-        if declaration_complete:
-            completed_service_keys = filter(lambda i: i.startswith('completed_'), supplier_dict.keys())
-            completed_service = any(supplier_dict[k] for k in completed_service_keys)
-            if completed_service:
-                supplier_dict['application_status'] = 'application'
-        if not declaration_complete or not completed_service:
-            supplier_dict['application_status'] = 'no_application'
+    def get_supplier_application_status(self):
+        """Return a dict, supplier id: application status."""
+        users = self.client.export_users(self.target_framework_slug).get('users', [])
+        return {user['supplier_id']: user['application_status'] for user in users}
 
     def _update_with_supplier_data(self, output):
         """Update self.output with supplier data."""
         supplier_frameworks = self.get_supplier_frameworks()
         field_names = self.get_fieldnames()
+        supplier_application_statuses = self.get_supplier_application_status()
         for sf in supplier_frameworks:
             # This bit takes care of the columns in static_fieldnames.
             supplier_id = sf['supplierId']
             declaration = sf['declaration']['status'] if sf['declaration'] else ''
-            supplier_info = [supplier_id, sf['supplierName'], '', declaration]
+            supplier_info = [
+                supplier_id,
+                sf['supplierName'],
+                supplier_application_statuses.get(supplier_id, 'no_application'),
+                declaration
+            ]
             # This creates placeholders for the dynamic lot fieldnames.
             lot_placeholders = [0 for i in self._get_dynamic_field_names()]
             supplier_dict = dict(zip(field_names, supplier_info + lot_placeholders))
@@ -99,5 +92,4 @@ class GenerateMasterCSV(GenerateCSVFromAPI):
                 # Calculate the status of each service an what lot it is in then +1 to the corresponding column.
                 column_name = self.get_column_name(service['status'], service['lotSlug'])
                 supplier_dict[column_name] += 1
-            self._tmp_update_with_application_status(supplier_dict, sf)
             output.append(supplier_dict)

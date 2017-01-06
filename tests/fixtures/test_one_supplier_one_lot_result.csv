@@ -1,2 +1,2 @@
 supplier_id,supplier_dm_name,application_status,declaration_status,draft_saas,completed_saas
-123,Bens cool supplier,no_application,,0,1
+123,Bens cool supplier,application,,0,1
