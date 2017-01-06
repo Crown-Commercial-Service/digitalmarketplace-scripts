@@ -80,7 +80,7 @@ class GenerateMasterCSV(GenerateCSVFromAPI):
             supplier_info = [
                 supplier_id,
                 sf['supplierName'],
-                supplier_application_statuses.get(supplier_id, ''),
+                supplier_application_statuses.get(supplier_id, 'no_application'),
                 declaration
             ]
             # This creates placeholders for the dynamic lot fieldnames.
