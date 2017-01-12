@@ -1,5 +1,6 @@
 from collections import Counter
 from functools import partial
+from itertools import chain
 import sys
 if sys.version_info[0] < 3:
     import unicodecsv as csv
@@ -100,41 +101,63 @@ def add_framework_info(client, framework_slug, record):
 
 
 def add_submitted_draft_counts(client, framework_slug, record):
+    # "counts" is actually a counter of (lotSlug, status) tuples
     return dict(record, counts=Counter(
-        ds['lot']
+        (ds['lot'], ds['status'])
         for ds in client.find_draft_services_iter(record['supplier']['id'], framework=framework_slug)
-        if ds['status'] == 'submitted'
+        if ds['status'] in ("submitted", "failed",)
     ))
 
 
 def get_csv_rows(records, framework_slug):
-    rows = [create_row(framework_slug, record)
-            for record in records
-            if record['declaration'].get('status') == 'complete'
-            and sum(record['counts'].values()) > 0
-            ]
-    headers = (
-        "supplier_id",
-        "supplier_name",
-        "on_framework",
-        "countersigned_at",
-        "countersigned_path",
-        ) + LOTS[framework_slug] + DECLARATION_FIELDS[framework_slug]
+    rows_iter = (
+        create_row(framework_slug, record)
+        for record in records
+        if record['declaration'].get('status') == 'complete' and record['counts']  # i.e. has submitted any services
+    )
+    headers = tuple(chain(
+        (
+            "supplier_id",
+            "supplier_name",
+            "pass_fail",
+            "countersigned_at",
+            "countersigned_path",
+        ),
+        (lot_slug for lot_slug in LOTS[framework_slug]),
+        DECLARATION_FIELDS[framework_slug],
+    ))
 
-    return headers, rows
+    return headers, rows_iter
+
+
+def _pass_fail_from_record(record):
+    if record["onFramework"] is False:
+        return "fail"
+    else:
+        return (
+            "pass" if record["onFramework"] else "discretionary"
+        ) + (
+            "" if all(
+                status == "submitted" for (lot_slug, status), v in record['counts'].items()
+            ) else "_with_failed_services"
+        )
 
 
 def create_row(framework_slug, record):
-    row = {
-        'supplier_id': record['supplier']['id'],
-        'supplier_name': record['supplier']['name'],
-        'on_framework': record['onFramework'],
-        'countersigned_at': record['countersignedAt'],
-        'countersigned_path': record['countersignedPath'],
-    }
-    row.update((lot, record['counts'][lot]) for lot in LOTS[framework_slug])
-    row.update(((field, record['declaration'].get(field, "")) for field in DECLARATION_FIELDS[framework_slug]))
-    return row
+    return dict(chain(
+        (
+            ("supplier_id", record["supplier"]["id"]),
+            ("supplier_name", record["supplier"]["name"]),
+            ("pass_fail", _pass_fail_from_record(record)),
+            ("countersigned_at", record["countersignedAt"]),
+            ("countersigned_path", record["countersignedPath"]),
+        ),
+        (
+            (lot, sum(record["counts"][(lot, status)] for status in ("submitted", "failed",)))
+            for lot in LOTS[framework_slug]
+        ),
+        ((field, record["declaration"].get(field, "")) for field in DECLARATION_FIELDS[framework_slug]),
+    ))
 
 
 def find_suppliers_with_details(client, framework_slug):
@@ -148,12 +171,12 @@ def find_suppliers_with_details(client, framework_slug):
     return get_csv_rows(records, framework_slug)
 
 
-def write_csv(headers, rows, filename):
+def write_csv(headers, rows_iter, filename):
     """Write a list of rows out to CSV"""
 
     writer = None
     with open(filename, "w+") as f:
-        for row in rows:
+        for row in rows_iter:
             if writer is None:
                 writer = csv.DictWriter(f, fieldnames=headers)
                 writer.writeheader()
@@ -161,5 +184,5 @@ def write_csv(headers, rows, filename):
 
 
 def export_supplier_details(data_api_client, framework_slug, filename):
-    headers, rows = find_suppliers_with_details(data_api_client, framework_slug)
-    write_csv(headers, rows, filename)
+    headers, rows_iter = find_suppliers_with_details(data_api_client, framework_slug)
+    write_csv(headers, rows_iter, filename)
