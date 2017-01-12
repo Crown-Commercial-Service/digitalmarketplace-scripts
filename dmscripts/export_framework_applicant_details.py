@@ -9,7 +9,6 @@ else:
 
 
 from multiprocessing.pool import ThreadPool
-from dmutils.formats import dateformat
 
 
 LOTS = {
@@ -80,9 +79,10 @@ DECLARATION_FIELDS = {
 }
 
 
-def find_suppliers(client, framework_slug):
+def find_suppliers(client, framework_slug, supplier_ids=None):
     suppliers = client.get_interested_suppliers(framework_slug)['interestedSuppliers']
-    return ({'supplier_id': supplier_id} for supplier_id in suppliers)
+    return ({'supplier_id': supplier_id} for supplier_id in suppliers
+            if (supplier_ids is None) or (supplier_id in supplier_ids))
 
 
 def add_supplier_info(client, record):
@@ -160,10 +160,10 @@ def create_row(framework_slug, record):
     ))
 
 
-def find_suppliers_with_details(client, framework_slug):
+def find_suppliers_with_details(client, framework_slug, supplier_ids=None):
     pool = ThreadPool(30)
 
-    records = find_suppliers(client, framework_slug)
+    records = find_suppliers(client, framework_slug, supplier_ids)
     records = pool.imap(partial(add_supplier_info, client), records)
     records = pool.imap(partial(add_framework_info, client, framework_slug), records)
     records = pool.imap(partial(add_submitted_draft_counts, client, framework_slug), records)

@@ -1,29 +1,29 @@
 # -*- coding: utf-8 -*-
+import collections
+import jsonschema
 import os
 import sys
-from multiprocessing.pool import ThreadPool
-
-from dmscripts.insert_dos_framework_results import (
-    CORRECT_DECLARATION_RESPONSE_MUST_BE_TRUE, CORRECT_DECLARATION_RESPONSE_MUST_BE_FALSE,
-    CORRECT_DECLARATION_RESPONSE_SHOULD_BE_FALSE, MITIGATING_FACTORS,
-    CORRECT_DECLARATION_RESPONSES
-)
 
 if sys.version_info[0] < 3:
     import unicodecsv as csv
 else:
     import csv
 
-FRAMEWORK_SLUG = 'digital-outcomes-and-specialists'
+from multiprocessing.pool import ThreadPool
+
+
 DRAFT_STATUSES = [
     'completed',
     'failed',
     'draft',
 ]
-LOTS = [
-    'digital-outcomes', 'digital-specialists',
-    'user-research-studios', 'user-research-participants',
-]
+
+
+def get_validation_errors(candidate, schema):
+    validator = jsonschema.Draft4Validator(schema)
+    errors = validator.iter_errors(candidate)
+    error_keys = [error.path[0] for error in errors]
+    return error_keys
 
 
 def find_suppliers(client, framework_slug, supplier_ids=None):
@@ -36,8 +36,7 @@ def add_supplier_info(client):
     def inner(record):
         supplier = client.get_supplier(record['supplier_id'])
 
-        return dict(record,
-                    supplier=supplier['suppliers'])
+        return dict(record, supplier=supplier['suppliers'])
 
     return inner
 
@@ -52,8 +51,7 @@ def add_draft_services(client, framework_slug, lot=None, status=None):
             if (not lot or draft["lotSlug"] == lot) and (not status or draft["status"] == status)
         ]
 
-        return dict(record,
-                    services=drafts)
+        return dict(record, services=drafts)
 
     return inner
 
@@ -68,7 +66,7 @@ def make_field_title(field_id, field_label):
     return "{} {}".format(field_id, field_label)
 
 
-def make_fields_from_content_question(question, record):
+def fields_from_content_question_gen(question, record):
     if question["type"] == "checkboxes":
         for option in question.options:
             # Make a CSV column for each label
@@ -107,9 +105,9 @@ def add_framework_info(client, framework_slug):
     return inner
 
 
-def add_draft_counts(client, framework_slug):
+def add_draft_counts(client, framework_slug, lot_slugs):
     def inner(record):
-        counts = {status: {lot: 0 for lot in LOTS} for status in DRAFT_STATUSES}
+        counts = {status: {lot: 0 for lot in lot_slugs} for status in DRAFT_STATUSES}
 
         for draft in client.find_draft_services_iter(record['supplier']['id'], framework=framework_slug):
             if draft['status'] == 'submitted':
@@ -130,19 +128,10 @@ def get_declaration_questions(declaration_content, record):
             yield question, record['declaration'].get(question.id)
 
 
-def is_incorrect_mandatory_question(question, answer):
-    if question.number in CORRECT_DECLARATION_RESPONSE_MUST_BE_TRUE and answer is not True:
-        return True
-    if question.number in CORRECT_DECLARATION_RESPONSE_MUST_BE_FALSE and answer is not False:
-        return True
-    if question.number in CORRECT_DECLARATION_RESPONSES:
-        if answer not in CORRECT_DECLARATION_RESPONSES[question.number]:
-            return True
-
-    return False
-
-
-def add_failed_questions(declaration_content):
+def add_failed_questions(declaration_content,
+                         declaration_definite_pass_schema,
+                         declaration_baseline_schema
+                         ):
     def inner(record):
         if record['declaration'].get('status') != 'complete':
             return dict(record,
@@ -151,16 +140,22 @@ def add_failed_questions(declaration_content):
 
         declaration_questions = list(get_declaration_questions(declaration_content, record))
 
-        failed_mandatory = [
-            "Q{}".format(question.number)
-            for question, answer in declaration_questions
-            if is_incorrect_mandatory_question(question, answer)
-        ]
+        all_failed_keys = get_validation_errors(record['declaration'], declaration_definite_pass_schema)
 
-        discretionary = [
-            ("Q{}".format(question.number), answer)
+        if declaration_baseline_schema:
+            baseline_only_failed_keys = get_validation_errors(record['declaration'], declaration_baseline_schema)
+        else:
+            baseline_only_failed_keys = all_failed_keys
+
+        failed_mandatory = [
+            "Q{} - {}".format(question.number, question.id)
             for question, answer in declaration_questions
-            if question.number in CORRECT_DECLARATION_RESPONSE_SHOULD_BE_FALSE + MITIGATING_FACTORS
+            if question.id in baseline_only_failed_keys
+            ]
+        discretionary = [
+            ("Q{} - {}".format(question.number, question.id), answer)
+            for question, answer in declaration_questions
+            if question.id in all_failed_keys and question.id not in baseline_only_failed_keys
         ]
 
         return dict(record,
@@ -170,7 +165,14 @@ def add_failed_questions(declaration_content):
     return inner
 
 
-def find_suppliers_with_details(client, content_loader, framework_slug, supplier_ids=None):
+def find_suppliers_with_details(client,
+                                content_loader,
+                                framework_slug,
+                                lot_slugs,
+                                declaration_definite_pass_schema,
+                                declaration_baseline_schema,
+                                supplier_ids=None
+                                ):
     pool = ThreadPool(30)
 
     content_loader.load_manifest(framework_slug, 'declaration', 'declaration')
@@ -179,8 +181,10 @@ def find_suppliers_with_details(client, content_loader, framework_slug, supplier
     records = find_suppliers(client, framework_slug, supplier_ids)
     records = pool.imap(add_supplier_info(client), records)
     records = pool.imap(add_framework_info(client, framework_slug), records)
-    records = pool.imap(add_draft_counts(client, framework_slug), records)
-    records = map(add_failed_questions(declaration_content), records)
+    records = pool.imap(add_draft_counts(client, framework_slug, lot_slugs), records)
+    records = map(add_failed_questions(declaration_content,
+                                       declaration_definite_pass_schema,
+                                       declaration_baseline_schema), records)
 
     return records
 
@@ -188,17 +192,7 @@ def find_suppliers_with_details(client, content_loader, framework_slug, supplier
 def supplier_info(record):
     return [
         ('supplier_name', record['supplier']['name']),
-        ('supplier_declaration_name', record['declaration'].get('nameOfOrganisation', '')),
         ('supplier_id', record['supplier']['id']),
-        ('trading_name', record['declaration'].get('tradingNames', '')),
-        ('trading_status', record['declaration'].get('tradingStatus', '')),
-        ('registered_address', record['declaration'].get('registeredAddress', '')),
-        ('duns_number', record['supplier'].get('dunsNumber', '')),
-        ('company_number', record['declaration'].get('companyRegistrationNumber', '')),
-        ('country_of_registration', record['declaration'].get('currentRegisteredCountry', '')),
-        ('vat_number', record['declaration'].get('registeredVATNumber', '')),
-        ('size', record['declaration'].get('organisationSize', '')),
-        ('subcontracting', record['declaration'].get('subcontracting', '')),
     ]
 
 
@@ -209,23 +203,18 @@ def failed_mandatory_questions(record):
 
 
 def discretionary_questions(record):
-    return [
-        (question, answer) for question, answer in record['discretionary']
+    failed_questions = [("failed_discretionary", record['discretionary'])]
+    mitigating_factors = [
+        ("mitigating factors 1", record['declaration'].get('mitigatingFactors', '')),
+        ("mitigating factors 2", record['declaration'].get('mitigatingFactors2', ''))
     ]
+    return failed_questions + mitigating_factors
 
 
 def contact_details(record):
     return [
         ('contact_name', record['declaration'].get('primaryContact', '')),
         ('contact_email', record['declaration'].get('primaryContactEmail', '')),
-    ]
-
-
-def service_counts(record):
-    return [
-        ('{}_{}'.format(status, lot), record['counts'][status][lot])
-        for status in DRAFT_STATUSES
-        for lot in LOTS
     ]
 
 
@@ -253,11 +242,13 @@ class SuccessfulHandler(object):
     def matches(self, record):
         return record['onFramework'] is True
 
+    def should_write(self, record):
+        return True
+
     def create_row(self, record):
         return \
             supplier_info(record) + \
-            contact_details(record) + \
-            service_counts(record)
+            contact_details(record)
 
 
 class FailedHandler(object):
@@ -266,12 +257,29 @@ class FailedHandler(object):
     def matches(self, record):
         return record['onFramework'] is False
 
+    def should_write(self, record):
+        # Only include failed complete applications, not people who didn't make an application
+        if record.get('failed_mandatory') and 'INCOMPLETE' in record.get('failed_mandatory'):
+            return False
+        completed_count = 0
+        completed = record.get('counts').get('completed')
+        for key in completed:
+            completed_count += completed.get(key)
+        # Failed services are also "submitted" and "complete" so count these too
+        failed = record.get('counts').get('failed')
+        for key in failed:
+            completed_count += failed.get(key)
+        if completed_count == 0:
+            return False
+        if not record.get('failed_mandatory'):
+            record['failed_mandatory'] = ['No passed lot']
+        return True
+
     def create_row(self, record):
         return \
             supplier_info(record) + \
             failed_mandatory_questions(record) + \
-            contact_details(record) + \
-            service_counts(record)
+            contact_details(record)
 
 
 class DiscretionaryHandler(object):
@@ -280,12 +288,14 @@ class DiscretionaryHandler(object):
     def matches(self, record):
         return record['onFramework'] is None
 
+    def should_write(self, record):
+        return True
+
     def create_row(self, record):
         return \
             supplier_info(record) + \
             discretionary_questions(record) + \
-            contact_details(record) + \
-            service_counts(record)
+            contact_details(record)
 
 
 class MultiCSVWriter(object):
@@ -295,17 +305,18 @@ class MultiCSVWriter(object):
         self.handlers = handlers
         self._csv_writers = dict()
         self._csv_files = dict()
-        self._counters = {
-            handler.NAME: 0 for handler in handlers
-        }
+        self._counters = collections.Counter()
 
     def write_row(self, record):
         for handler in self.handlers:
-            if handler.matches(record):
-                self._counters[handler.NAME] += 1
+            should_write = handler.should_write(record)
+            if handler.matches(record) and should_write:
+                self._counters.update([handler.NAME])
                 row = handler.create_row(record)
                 return self.csv_writer(handler, row).writerow(dict(row))
-        raise Exception("record not handled by any handler")
+            elif not should_write:
+                return self.csv_writer
+        raise ValueError("record not handled by any handler")
 
     def csv_writer(self, handler, row):
         if handler.NAME not in self._csv_writers:
@@ -331,8 +342,27 @@ class MultiCSVWriter(object):
         print(" ".join("{}={}".format(handler.NAME, self._counters[handler.NAME]) for handler in self.handlers))
 
 
-def export_suppliers(client, content_loader, output_dir, supplier_ids=None):
-    records = find_suppliers_with_details(client, content_loader, FRAMEWORK_SLUG, supplier_ids)
+def export_suppliers(
+        client,
+        framework_slug,
+        content_loader,
+        output_dir,
+        declaration_definite_pass_schema,
+        declaration_baseline_schema=None,
+        supplier_ids=None,
+):
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    lot_slugs = [lot['slug'] for lot in client.get_framework(framework_slug)['frameworks']['lots']]
+    records = find_suppliers_with_details(
+        client,
+        content_loader,
+        framework_slug,
+        lot_slugs,
+        declaration_definite_pass_schema,
+        declaration_baseline_schema,
+        supplier_ids
+    )
 
     handlers = [SuccessfulHandler(), FailedHandler(), DiscretionaryHandler()]
 

@@ -12,7 +12,8 @@ To add support for future frameworks we will will need to add to the LOTS and DE
 dmscripts/export_framework_applicant_details.py
 
 Usage:
-    scripts/generate-agreement-signature-pages.py <stage> <api_token> <framework_slug> <template_folder> <output_folder>
+    scripts/generate-agreement-signature-pages.py <stage> <api_token> <framework_slug> <template_folder>
+      <output_folder> [<supplier_id_file>]
 
 Example:
     generate-agreement-signature-pages.py dev myToken g-cloud-8 ../digitalmarketplace-agreements/documents/g-cloud pdfs
@@ -46,7 +47,14 @@ if __name__ == '__main__':
 
     client = DataAPIClient(get_api_endpoint_from_stage(STAGE), API_TOKEN)
 
-    headers, rows = find_suppliers_with_details(client, FRAMEWORK)
+    supplier_id_file = arguments['<supplier_id_file>']
+    if supplier_id_file:
+        with open(supplier_id_file, 'r') as f:
+            supplier_ids = map(int, filter(None, [l.strip() for l in f.readlines()]))
+    else:
+        supplier_ids = None
+
+    headers, rows = find_suppliers_with_details(client, FRAMEWORK, supplier_ids)
 
     render_html_for_successful_suppliers(rows, FRAMEWORK, TEMPLATE_FOLDER, html_dir)
     html_pages = os.listdir(html_dir)
