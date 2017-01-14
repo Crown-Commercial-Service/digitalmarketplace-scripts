@@ -1,5 +1,5 @@
 git+https://github.com/madzak/python-json-logger.git@v0.1.5#egg=python-json-logger==v0.1.5
-git+https://github.com/alphagov/digitalmarketplace-utils.git@23.1.1#egg=digitalmarketplace-utils==23.1.1
+git+https://github.com/alphagov/digitalmarketplace-utils.git@24.0.0#egg=digitalmarketplace-utils==24.0.0
 git+https://github.com/alphagov/digitalmarketplace-apiclient.git@7.5.0#egg=digitalmarketplace-apiclient==7.5.0
 git+https://github.com/alphagov/digitalmarketplace-content-loader.git@1.0.0#egg=digitalmarketplace-content-loader==1.0.0
 
