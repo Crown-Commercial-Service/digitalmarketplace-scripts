@@ -9,6 +9,9 @@ def get_submitted_drafts(client, framework_slug, supplier_id):
 
 
 def set_framework_result(client, framework_slug, supplier_id, result, user):
+    """
+    :param result: A boolean - True if supplier is on framework, False if not.
+    """
     try:
         client.set_framework_result(supplier_id, framework_slug, result, user)
         return "  Result set OK: {} - {}".format(supplier_id, "PASS" if result else "FAIL")
