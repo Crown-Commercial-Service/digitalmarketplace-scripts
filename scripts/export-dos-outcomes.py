@@ -7,13 +7,8 @@ Usage:
 import sys
 sys.path.insert(0, '.')
 
-from multiprocessing.pool import ThreadPool
-import itertools
-import os
-import csv
-
 from docopt import docopt
-from dmscripts.env import get_api_endpoint_from_stage
+from dmscripts.helpers.env import get_api_endpoint_from_stage
 from dmscripts.export_dos_suppliers import (
     find_services_by_lot, FRAMEWORK_SLUG, make_fields_from_content_questions, write_csv
 )

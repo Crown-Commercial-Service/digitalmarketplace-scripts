@@ -14,7 +14,7 @@ else:
 import six
 import re
 from docopt import docopt
-from dmscripts.env import get_api_endpoint_from_stage
+from dmscripts.helpers.env import get_api_endpoint_from_stage
 from dmapiclient import DataAPIClient
 
 

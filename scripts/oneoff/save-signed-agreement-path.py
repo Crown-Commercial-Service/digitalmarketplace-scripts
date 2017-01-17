@@ -15,7 +15,7 @@ import getpass
 
 from docopt import docopt
 from dmapiclient import DataAPIClient
-from dmscripts.env import get_api_endpoint_from_stage
+from dmscripts.helpers.env import get_api_endpoint_from_stage
 
 from dmutils import s3
 from dmutils.documents import get_agreement_document_path, SIGNED_AGREEMENT_PREFIX

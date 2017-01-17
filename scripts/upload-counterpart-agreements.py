@@ -25,7 +25,7 @@ Usage:
 import sys
 sys.path.insert(0, '.')
 
-from dmscripts.env import get_api_endpoint_from_stage
+from dmscripts.helpers.env import get_api_endpoint_from_stage
 from dmscripts.bulk_upload_documents import get_bucket_name, get_all_files_of_type
 from dmscripts.upload_counterpart_agreements import upload_counterpart_file
 from docopt import docopt

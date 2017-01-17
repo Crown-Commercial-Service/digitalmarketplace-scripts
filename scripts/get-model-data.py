@@ -35,7 +35,7 @@ sys.path.insert(0, '.')
 
 from docopt import docopt
 from dmapiclient import DataAPIClient
-from dmscripts.env import get_api_endpoint_from_stage
+from dmscripts.helpers.env import get_api_endpoint_from_stage
 from dmscripts.models.process_rules import format_datetime_string_as_date, remove_username_from_email_address
 from dmscripts.models.writecsv import csv_path
 from dmscripts.models import queries

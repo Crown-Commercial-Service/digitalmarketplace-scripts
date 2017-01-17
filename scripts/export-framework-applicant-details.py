@@ -14,14 +14,14 @@ Example:
 
 """
 import datetime
-import sys
 import errno
 import os
+import sys
 
 sys.path.insert(0, '.')
 
 from docopt import docopt
-from dmscripts.env import get_api_endpoint_from_stage
+from dmscripts.helpers.env import get_api_endpoint_from_stage
 from dmscripts.export_framework_applicant_details import export_supplier_details
 from dmapiclient import DataAPIClient
 

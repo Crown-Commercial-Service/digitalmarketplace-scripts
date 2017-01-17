@@ -21,7 +21,7 @@ from docopt import docopt
 
 from dmapiclient import DataAPIClient
 
-from dmscripts.env import get_api_endpoint_from_stage
+from dmscripts.helpers.env import get_api_endpoint_from_stage
 from dmscripts.logging import configure_logger
 from dmscripts.framework_utils import set_framework_result
 

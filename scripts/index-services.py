@@ -13,18 +13,17 @@ Example:
 """
 
 import sys
-from multiprocessing.pool import ThreadPool
-import six
-from six.moves import map
 from datetime import datetime
+from multiprocessing.pool import ThreadPool
 
 import backoff
-from docopt import docopt
-
 import dmapiclient
+import six
+from docopt import docopt
+from six.moves import map
 
 sys.path.insert(0, '.')
-from dmscripts.env import get_api_endpoint_from_stage
+from dmscripts.helpers.env import get_api_endpoint_from_stage
 from dmscripts import logging
 
 logger = logging.configure_logger({'dmapiclient': logging.WARNING})

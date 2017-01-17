@@ -11,7 +11,7 @@ from multiprocessing.pool import ThreadPool
 import itertools
 
 from docopt import docopt
-from dmscripts.env import get_api_endpoint_from_stage
+from dmscripts.helpers.env import get_api_endpoint_from_stage
 from dmscripts.export_dos_suppliers import find_suppliers, FRAMEWORK_SLUG, add_framework_info, add_draft_services
 from dmapiclient import DataAPIClient
 

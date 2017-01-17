@@ -18,15 +18,15 @@ Example:
     generate-counterpart-signature-pages.py dev myToken g-cloud-8 ../digitalmarketplace-agreements/documents/g-cloud pdf
 
 """
-import sys
 import os
 import shutil
+import sys
 import tempfile
 
 sys.path.insert(0, '.')
 
 from docopt import docopt
-from dmscripts.env import get_api_endpoint_from_stage
+from dmscripts.helpers.env import get_api_endpoint_from_stage
 from dmscripts.export_framework_applicant_details import find_suppliers_with_details
 from dmscripts.generate_agreement_signature_pages import render_html_for_suppliers_awaiting_countersignature, \
     render_pdf_for_each_html_page

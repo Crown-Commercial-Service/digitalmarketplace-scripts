@@ -9,16 +9,14 @@ Usage:
 Example:
     scripts/oneoff/generate-dos-2-master-csv.py preview myToken
 """
-from docopt import docopt
+import sys
 
 from dmapiclient import DataAPIClient
-
-# add cwd to pythonpath
-import sys
+from docopt import docopt
 sys.path.insert(0, '.')
 
 from dmscripts.generate_framework_master_csv import GenerateMasterCSV
-from dmscripts.env import get_api_endpoint_from_stage
+from dmscripts.helpers.env import get_api_endpoint_from_stage
 
 if __name__ == "__main__":
     arguments = docopt(__doc__)

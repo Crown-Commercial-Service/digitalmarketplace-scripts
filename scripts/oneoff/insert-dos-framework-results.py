@@ -19,8 +19,7 @@ import sys
 sys.path.insert(0, '.')
 
 import getpass
-from dmscripts.env import get_api_endpoint_from_stage
-from dmutils import content_loader
+from dmscripts.helpers.env import get_api_endpoint_from_stage
 
 from docopt import docopt
 from dmapiclient import DataAPIClient
