@@ -6,8 +6,9 @@ from dmutils.email import send_email
 from dmutils.email.exceptions import EmailError
 from dmutils.formats import DATE_FORMAT, DATETIME_FORMAT
 
+from dmscripts.helpers.email_helpers import get_sent_emails
 from . import logging
-from .email import get_sent_emails
+
 from .html import render_html
 
 logger = logging.configure_logger({'dmapiclient': logging.INFO})
