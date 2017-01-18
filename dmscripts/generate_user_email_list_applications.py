@@ -11,7 +11,7 @@ else:
     import unicodecsv as csv
 
 
-def find_suppliers(data_api_client):
+def suppliers_generator(data_api_client):
     for supplier in data_api_client.find_suppliers_iter():
         yield supplier
 
@@ -86,7 +86,7 @@ def list_users(data_api_client, output, framework_slug, on_framework=None, agree
     start_time = time.time()
     writer = csv.writer(output, delimiter=',', quotechar='"')
 
-    suppliers = find_suppliers(data_api_client)
+    suppliers = suppliers_generator(data_api_client)
     supplier_frameworks = get_all_supplier_framework_info(data_api_client, framework_slug, suppliers)
     print('{} total supplier_frameworks in {}s'.format(len(supplier_frameworks), time.time() - start_time))
 
