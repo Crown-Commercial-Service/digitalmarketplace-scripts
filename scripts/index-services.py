@@ -23,7 +23,7 @@ from docopt import docopt
 from six.moves import map
 
 sys.path.insert(0, '.')
-from dmscripts.helpers.env import get_api_endpoint_from_stage
+from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts import logging
 
 logger = logging.configure_logger({'dmapiclient': logging.WARNING})

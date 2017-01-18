@@ -16,7 +16,7 @@ from docopt import docopt
 sys.path.insert(0, '.')
 
 from dmscripts.generate_framework_master_csv import GenerateMasterCSV
-from dmscripts.helpers.env import get_api_endpoint_from_stage
+from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 
 if __name__ == "__main__":
     arguments = docopt(__doc__)
