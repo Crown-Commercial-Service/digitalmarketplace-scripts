@@ -16,7 +16,7 @@ import re
 
 from docopt import docopt
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage, get_assets_endpoint_from_stage
-from dmscripts.framework_utils import find_suppliers_on_framework, get_submitted_drafts
+from dmscripts.helpers.framework_helpers import find_suppliers_on_framework, get_submitted_drafts
 from dmapiclient import DataAPIClient
 from dmutils.s3 import S3
 

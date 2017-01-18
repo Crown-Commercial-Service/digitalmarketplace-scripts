@@ -1,5 +1,8 @@
 from dmapiclient import HTTPError
-from dmscripts.framework_utils import get_submitted_drafts, has_supplier_submitted_services, set_framework_result
+
+from dmscripts.helpers.framework_helpers import (
+    get_submitted_drafts, has_supplier_submitted_services, set_framework_result
+)
 
 
 def test_get_submitted_drafts_calls_with_correct_arguments(mock_data_client):

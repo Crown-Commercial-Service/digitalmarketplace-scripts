@@ -8,7 +8,7 @@ sys.path.insert(0, '.')
 
 from docopt import docopt
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
-from dmscripts.framework_utils import find_suppliers_on_framework
+from dmscripts.helpers.framework_helpers import find_suppliers_on_framework
 from dmapiclient import DataAPIClient
 
 

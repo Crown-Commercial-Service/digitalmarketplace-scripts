@@ -23,7 +23,7 @@ from dmapiclient import DataAPIClient
 
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.logging import configure_logger
-from dmscripts.framework_utils import set_framework_result
+from dmscripts.helpers.framework_helpers import set_framework_result
 
 
 logger = configure_logger()

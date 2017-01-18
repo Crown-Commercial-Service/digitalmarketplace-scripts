@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
-from dmscripts.framework_utils import get_submitted_drafts, set_framework_result
+
+from dmscripts.helpers.framework_helpers import get_submitted_drafts, set_framework_result
 
 FRAMEWORK_SLUG = 'digital-outcomes-and-specialists'
 
