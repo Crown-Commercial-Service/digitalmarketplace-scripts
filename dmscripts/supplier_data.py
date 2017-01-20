@@ -79,6 +79,7 @@ class SuccessfulSupplierContextForNotify(SupplierFrameworkData):
         sorted_draft_services = sorted(supplier_framework['draft_services'], key=sort_by_func)
         grouped_draft_services = groupby(sorted_draft_services, key=sort_by_func)
         for lotName, draft_services in grouped_draft_services:
+            draft_services = list(draft_services)
             if any(draft_service['status'] == 'submitted' for draft_service in draft_services):
                 status = 'submitted'
             elif any(draft_service['status'] == 'failed' for draft_service in draft_services):

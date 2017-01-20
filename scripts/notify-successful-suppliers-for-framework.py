@@ -3,11 +3,11 @@
 Uses the Notify API to inform suppliers of success result.
 
 Usage:
-    scripts/notify_successful_suppliers_for_framework.py <stage> <api_token> <framework_slug>
+    scripts/notify-successful-suppliers-for-framework.py <stage> <api_token> <framework_slug>
         <govuk_notify_api_key> <govuk_notify_template_id>
 
 Example:
-    scripts/notify_successful_suppliers_for_framework.py preview myToken g-cloud-8
+    scripts/notify-successful-suppliers-for-framework.py preview myToken g-cloud-8
         my-awesome-key govuk_notify_template_id
 
 Options:
@@ -17,15 +17,14 @@ import sys
 
 sys.path.insert(0, '.')
 from docopt import docopt
-import logging
 
 from dmapiclient import DataAPIClient
 from dmutils.email.dm_notify import DMNotifyClient
 from dmscripts.env import get_api_endpoint_from_stage
 from dmscripts.supplier_data import SuccessfulSupplierContextForNotify
+from dmscripts import logging
 
-
-logger = logging.getLogger(__name__)
+logger = logging.configure_logger({'dmapiclient': logging.INFO})
 
 
 if __name__ == '__main__':
@@ -45,4 +44,5 @@ if __name__ == '__main__':
     context_data = context_helper.get_users_peronalisations()
 
     for user_email, personalisation in context_data.items():
+        logger.info(user_email)
         mail_client.send_email(user_email, GOVUK_NOTIFY_TEMPLATE_ID, personalisation, allow_resend=False)
