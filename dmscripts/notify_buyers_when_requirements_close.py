@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
-
 from datetime import datetime, timedelta
 
 import dmapiclient
+from dmutils.email import send_email
+from dmutils.email.exceptions import EmailError
 from dmutils.formats import DATE_FORMAT, DATETIME_FORMAT
-from dmutils.email import send_email, MandrillException
-
-from .email import get_sent_emails
-from .html import render_html
 
 from . import logging
+from .email import get_sent_emails
+from .html import render_html
 
 logger = logging.configure_logger({'dmapiclient': logging.INFO})
 
@@ -45,7 +44,7 @@ def notify_users(email_api_key, brief):
             )
 
             return True
-        except MandrillException as e:
+        except EmailError as e:
             logger.error(
                 "Email failed to send for brief_id: {brief_id}",
                 extra={'error': e, 'brief_id': brief['id']}

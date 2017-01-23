@@ -9,11 +9,25 @@ from dmscripts.notify_buyers_when_requirements_close import (
     get_date_closed,
     get_notified_briefs,
     notify_users,
-    MandrillException,
     main
 )
+from dmutils.email.exceptions import EmailError
 
-from .helpers import FakeMail
+
+class FakeMail(object):
+    """An object that equals strings containing all of the given substrings
+
+    Can be used in mock.call comparisons (eg to verify email templates).
+
+    """
+    def __init__(self, *substrings):
+        self.substrings = substrings
+
+    def __eq__(self, other):
+        return all(substring in other for substring in self.substrings)
+
+    def __repr__(self):
+        return "<FakeMail: {}>".format(self.substrings)
 
 
 def test_get_closed_briefs_filters_by_date_closed():
@@ -95,7 +109,7 @@ def test_notify_users(send_email):
 
 @mock.patch('dmscripts.notify_buyers_when_requirements_close.send_email')
 def test_notify_users_returns_false_on_error(send_email):
-    send_email.side_effect = MandrillException('Error')
+    send_email.side_effect = EmailError('Error')
     assert not notify_users('KEY', {
         'id': 100,
         'title': 'My brief title',
