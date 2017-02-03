@@ -6,6 +6,7 @@ if sys.version_info > (3, 0):
     import csv
 else:
     import unicodecsv as csv
+import os.path
 
 MANIFESTS = [{
     'question_set': 'declaration',
@@ -25,13 +26,16 @@ def get_questions(questions):
         return question
 
     def get_question(question):
-        if question.questions:
-            return [
-                augment_question_data(nested_question, question.get('name'), question.get('hint'))
-                for nested_question in question.questions
-            ]
+        # only multiquestions have nested (child) questions that we want to flatten into our CSV
+        try:
+            nested_questions = question.questions
+        except AttributeError:
+            return [question]
 
-        return [question]
+        return [
+            augment_question_data(nested_question, question.get('name'), question.get('hint'))
+            for nested_question in nested_questions
+        ]
 
     questions_list = []
     for question in questions:
@@ -71,21 +75,22 @@ def return_rows_for_sections(sections):
     return local_rows
 
 
-def generate_csv(output_directory, framework_slug, content_loader, context):
-
+def generate_csv(output_file, framework_slug, content_loader, question_set, context):
+    output_directory = os.path.dirname(output_file)
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
 
     rows = []
 
     for manifest in MANIFESTS:
-        content_loader.load_manifest(framework_slug, manifest['question_set'], manifest['manifest'])
+        if not question_set or question_set == manifest['question_set']:
+            content_loader.load_manifest(framework_slug, manifest['question_set'], manifest['manifest'])
 
-        content = content_loader.get_manifest(framework_slug, manifest['manifest'])
-        if context is not None:
-            content = content.filter(context)
+            content = content_loader.get_manifest(framework_slug, manifest['manifest'])
+            if context is not None:
+                content = content.filter(context)
 
-        rows.extend(return_rows_for_sections(content.sections))
+            rows.extend(return_rows_for_sections(content.sections))
 
     # find the longest array
     max_length = max(len(row) for row in rows)
@@ -95,7 +100,14 @@ def generate_csv(output_directory, framework_slug, content_loader, context):
     for index, row in enumerate(rows):
         row.extend([''] * (max_length - len(row)))
 
-    with open('{}/{}-questions.csv'.format(output_directory, framework_slug), 'wb') as csvfile:
+    filename = framework_slug
+    if question_set:
+        filename += '-' + question_set
+    if context:
+        for v in context.values():
+            filename += '-' + v
+
+    with open(output_file, 'wb') as csvfile:
         writer = csv.writer(csvfile, delimiter=b',', quotechar=b'"')
         header = ["Page title", "Page title hint", "Question", "Hint"]
         header.extend(
