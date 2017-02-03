@@ -25,13 +25,16 @@ def get_questions(questions):
         return question
 
     def get_question(question):
-        if question.questions:
-            return [
-                augment_question_data(nested_question, question.get('name'), question.get('hint'))
-                for nested_question in question.questions
-            ]
+        # only multiquestions have nested (child) questions that we want to flatten into our CSV
+        try:
+            nested_questions = question.questions
+        except AttributeError:
+            return [question]
 
-        return [question]
+        return [
+            augment_question_data(nested_question, question.get('name'), question.get('hint'))
+            for nested_question in nested_questions
+        ]
 
     questions_list = []
     for question in questions:
