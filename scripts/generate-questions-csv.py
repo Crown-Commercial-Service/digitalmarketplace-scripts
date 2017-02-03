@@ -12,12 +12,12 @@ Before running this you will need to:
 pip install -r requirements.txt
 
 Usage:
-    scripts/generate-questions-csv.py <DM-content-root-dir> <output-directory> --framework=<slug> [--context=<yaml>]
+    scripts/generate-questions-csv.py <DM-content-root-dir> <output-file> --framework=<slug> [--question-set=<question-set-directory-name>] [--context=<yaml>]
 
 -h --help    show this message
 
 Example:
-    scripts/generate-questions-csv.py /path/to/dm-frameworks/ ~ --framework=g-cloud-9 --context="lot: SaaS"
+    scripts/generate-questions-csv.py /path/to/dm-frameworks/ ~/mystuff.csv --framework=g-cloud-9 --context="lot: SaaS"
 """
 import sys
 sys.path.insert(0, '.')
@@ -33,10 +33,11 @@ if __name__ == '__main__':
     content_path = arguments['<DM-content-root-dir>']
     content_loader = ContentLoader(content_path)
 
-    output_directory = arguments['<output-directory>']
+    output_file = arguments['<output-file>']
     framework_slug = arguments.get('--framework')
 
     context_string = arguments.get('--context')
     context = yaml.safe_load(context_string) if context_string else None
 
-    generate_csv(output_directory, framework_slug, content_loader, context)
+    question_set = arguments.get('--question-set')
+    generate_csv(output_file, framework_slug, content_loader, question_set, context)
