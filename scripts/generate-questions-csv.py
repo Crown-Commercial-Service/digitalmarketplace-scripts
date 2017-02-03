@@ -12,8 +12,11 @@ Before running this you will need to:
 pip install -r requirements.txt
 
 Usage:
-    scripts/generate-questions-csv.py <DM-content-root-dir> <output-file> --framework=<slug> [--question-set=<question-set-directory-name>] [--context=<yaml>]
+    scripts/generate-questions-csv.py <DM-content-root-dir> <output-file> [options]
 
+--framework=<slug>
+--question-set=<question-set-directory-name>
+--context=<yaml>
 -h --help    show this message
 
 Example:
