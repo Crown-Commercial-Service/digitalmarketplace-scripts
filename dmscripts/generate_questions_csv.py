@@ -19,10 +19,8 @@ MANIFESTS = [{
 
 def get_questions(questions):
 
-    def augment_question_data(question, name, hint):
-        question.multiquestion_name = name
-        if hint:
-            question.multiquestion_hint = hint
+    def augment_question_data(question, parent_question):
+        question.parent = parent_question
         return question
 
     def get_question(question):
@@ -33,7 +31,7 @@ def get_questions(questions):
             return [question]
 
         return [
-            augment_question_data(nested_question, question.get('name'), question.get('hint'))
+            augment_question_data(nested_question, question)
             for nested_question in nested_questions
         ]
 
@@ -49,11 +47,22 @@ def return_rows_for_sections(sections):
 
     for section in sections:
         for question in get_questions(section.questions):
+            page_title = question.get('parent', {}).get('name', question.get('name'))
+            section_and_page_title = ' / '.join(filter(None, [section.name, page_title]))
+
+            # section.description is no longer expected to be used
+            multiquestion_description = question.get('parent', {}).get('description')
+            multiquestion_hint = question.get('parent', {}).get('hint')
+
+            page_description = ' '.join(filter(None, [multiquestion_description, multiquestion_hint]))
+
+            question_description = ' '.join(filter(None, [question.get('description'), question.get('hint')]))
+
             row = [
-                question.get('multiquestion_name', section.name),
-                question.get('multiquestion_hint', None),
+                section_and_page_title,
+                page_description,
                 question.get('question'),
-                question.get('hint')
+                question_description
             ]
 
             options = []
@@ -109,7 +118,7 @@ def generate_csv(output_file, framework_slug, content_loader, question_set, cont
 
     with open(output_file, 'wb') as csvfile:
         writer = csv.writer(csvfile, delimiter=b',', quotechar=b'"')
-        header = ["Page title", "Page title hint", "Question", "Hint"]
+        header = ["Section / page title", "Page description & hint", "Question", "Description & hint"]
         header.extend(
             ["Answer {}".format(i) for i in range(1, max_length_options+1)]
         )
