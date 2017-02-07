@@ -40,7 +40,7 @@ from dmscripts.models.process_rules import format_datetime_string_as_date, remov
 from dmscripts.models.writecsv import csv_path
 from dmscripts.models import queries
 
-from dmscripts import logging
+from dmscripts.helpers.logging_helpers import logging
 
 
 CONFIGS = [

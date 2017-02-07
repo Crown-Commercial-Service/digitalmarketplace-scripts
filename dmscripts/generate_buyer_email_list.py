@@ -1,6 +1,6 @@
 from multiprocessing.pool import ThreadPool
 from dmapiclient import HTTPError
-from dmscripts.logging import configure_logger
+
 import sys
 if sys.version_info > (3, 0):
     import csv

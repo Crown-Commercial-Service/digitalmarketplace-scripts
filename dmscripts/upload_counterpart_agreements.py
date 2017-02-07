@@ -6,9 +6,10 @@ from dmutils.documents import generate_timestamped_document_upload_path, generat
     COUNTERPART_FILENAME
 
 from dmscripts.bulk_upload_documents import get_supplier_id_from_framework_file_path
-from . import logging
+from dmscripts.helpers import logging_helpers
+from dmscripts.helpers.logging_helpers import logging
 
-logger = logging.configure_logger({'dmapiclient.base': logging.WARNING})
+logger = logging_helpers.configure_logger({'dmapiclient.base': logging.WARNING})
 
 
 def upload_counterpart_file(bucket, framework_slug, file_path, dry_run, client):

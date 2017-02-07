@@ -45,8 +45,9 @@ import tempfile
 sys.path.insert(0, '.')
 
 from docopt import docopt
+from dmscripts.export_framework_applicant_details import get_csv_rows
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
-from dmscripts.export_framework_applicant_details import find_suppliers_with_details
+from dmscripts.helpers.framework_helpers import find_suppliers_with_details_and_draft_service_counts
 from dmscripts.generate_framework_agreement_signature_pages import render_html_for_successful_suppliers, \
     render_pdf_for_each_html_page
 from dmapiclient import DataAPIClient
@@ -67,7 +68,9 @@ if __name__ == '__main__':
         supplier_ids = None
     html_dir = tempfile.mkdtemp()
     # headers, rows = find_suppliers_with_details(client, framework_slug, supplier_ids)
-    headers, rows = find_suppliers_with_details(client, framework_slug)
+    # headers, rows = find_suppliers_with_details(client, framework_slug)
+    records = find_suppliers_with_details_and_draft_service_counts(client, framework_slug, supplier_ids)
+    headers, rows = get_csv_rows(records, framework_slug)
     render_html_for_successful_suppliers(rows, framework_kwargs, args['<template_folder>'], html_dir)
     html_pages = os.listdir(html_dir)
     html_pages.remove('framework-agreement-signature-page.css')

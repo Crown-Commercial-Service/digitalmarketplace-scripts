@@ -1,28 +1,33 @@
 #!/usr/bin/env python
-"""Export DOS specialists
+"""
 
-Export DOS specialists as a CSV for manual review.
+For a DOS-type framework this will export details of all "digital-specialists" services, including the
+specialist roles the supplier provides, the locations they can provide them in and the min and max prices per role.
 
 Usage:
-    scripts/export-dos-specialists.py <stage> <api_token> <content_path>
+    scripts/export-dos-specialists.py <stage> <api_token> <framework_slug> <content_path>
 """
 import sys
 sys.path.insert(0, '.')
 
 from docopt import docopt
+from dmscripts.helpers.csv_helpers import make_fields_from_content_questions, write_csv
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
-from dmscripts.export_dos_suppliers import (
-    find_services_by_lot, FRAMEWORK_SLUG, make_fields_from_content_questions, write_csv
-)
+from dmscripts.helpers.framework_helpers import find_suppliers_with_details_and_draft_services
 from dmapiclient import DataAPIClient
 from dmcontent.content_loader import ContentLoader
-from dmscripts.logging import configure_logger, WARNING
+from dmscripts.helpers import logging_helpers
+from dmscripts.helpers.logging_helpers import logging
 
-logger = configure_logger({"dmapiclient": WARNING})
+logger = logging_helpers.configure_logger({"dmapiclient": logging.WARNING})
 
 
 def find_all_specialists(client):
-    return find_services_by_lot(client, FRAMEWORK_SLUG, "digital-specialists")
+    return find_suppliers_with_details_and_draft_services(client,
+                                                          FRAMEWORK_SLUG,
+                                                          lot="digital-specialists",
+                                                          statuses="submitted"
+                                                          )
 
 
 def make_row(content_manifest):
@@ -55,6 +60,7 @@ if __name__ == '__main__':
     STAGE = arguments['<stage>']
     API_TOKEN = arguments['<api_token>']
     CONTENT_PATH = arguments['<content_path>']
+    FRAMEWORK_SLUG = arguments['<framework_slug>']
 
     client = DataAPIClient(get_api_endpoint_from_stage(STAGE), API_TOKEN)
 
@@ -66,4 +72,4 @@ if __name__ == '__main__':
 
     write_csv(suppliers,
               make_row(content_manifest),
-              "output/dos-specialists.csv")
+              "output/{}-specialists.csv".format(FRAMEWORK_SLUG))

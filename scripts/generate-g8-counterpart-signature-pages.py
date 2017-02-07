@@ -6,16 +6,18 @@ PREREQUISITE: You'll need wkhtmltopdf installed for this to work (http://wkhtmlt
 Generate framework agreement counterpart signature pages from supplier "about you" information for suppliers
 who applied to a framework.
 
-Currently will only work for framework_slug=g-cloud-8.
+This is a LEGACY script, retained for when we need to generate new G8 counterpart pages.
+It will *only* work for framework_slug=g-cloud-8.
 
-To add support for future frameworks we will will need to add to the LOTS and DECLARATION_FIELDS in
-dmscripts/export_framework_applicant_details.py
+For any newer frameworks use generate-framework-agreement-counterpart-signature-pages.py instead.
 
 Usage:
-    scripts/generate-counterpart-signature-pages.py <stage> <api_token> <framework_slug> <template_folder> <out_folder>
+    scripts/generate-g8-counterpart-signature-pages.py <stage> <api_token> <framework_slug> <template_folder>
+    <out_folder> [<supplier_id_file>]
 
 Example:
-    generate-counterpart-signature-pages.py dev myToken g-cloud-8 ../digitalmarketplace-agreements/documents/g-cloud pdf
+    generate-g8-counterpart-signature-pages.py dev myToken g-cloud-8 \
+    ../digitalmarketplace-agreements/documents/g-cloud pdf
 
 """
 import os
@@ -26,9 +28,10 @@ import tempfile
 sys.path.insert(0, '.')
 
 from docopt import docopt
+from dmscripts.export_framework_applicant_details import get_csv_rows
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
-from dmscripts.export_framework_applicant_details import find_suppliers_with_details
-from dmscripts.generate_agreement_signature_pages import render_html_for_suppliers_awaiting_countersignature, \
+from dmscripts.helpers.framework_helpers import find_suppliers_with_details_and_draft_service_counts
+from dmscripts.generate_g8_agreement_signature_pages import render_html_for_suppliers_awaiting_countersignature, \
     render_pdf_for_each_html_page
 from dmapiclient import DataAPIClient
 
@@ -52,8 +55,9 @@ if __name__ == '__main__':
             supplier_ids = map(int, filter(None, [l.strip() for l in f.readlines()]))
     else:
         supplier_ids = None
-    headers, rows = find_suppliers_with_details(client, FRAMEWORK, supplier_ids)
 
+    records = find_suppliers_with_details_and_draft_service_counts(client, FRAMEWORK, supplier_ids)
+    headers, rows = get_csv_rows(records, FRAMEWORK)
     render_html_for_suppliers_awaiting_countersignature(rows, FRAMEWORK, TEMPLATE_FOLDER, html_dir)
 
     html_pages = os.listdir(html_dir)

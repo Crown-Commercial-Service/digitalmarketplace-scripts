@@ -4,10 +4,11 @@ import shutil
 import re
 import subprocess
 
-from .html import render_html
-from . import logging
+from dmscripts.helpers.html_helpers import render_html
+from dmscripts.helpers import logging_helpers
+from dmscripts.helpers.logging_helpers import logging
 
-logger = logging.configure_logger({'dmapiclient.base': logging.WARNING})
+logger = logging_helpers.configure_logger({'dmapiclient.base': logging.WARNING})
 
 
 def save_page(html, supplier_id, output_dir, descriptive_filename_part):
@@ -23,7 +24,7 @@ def render_html_for_successful_suppliers(rows, framework_kwargs, template_dir, o
     template_css_path = os.path.join(template_dir, 'framework-agreement-signature-page.css')
     for data in rows:
         data.update(framework_kwargs)
-        if data['on_framework'] is False:
+        if data['pass_fail'] == 'fail':
             continue
         data['awardedLots'] = filter(lambda lot: int(data[lot]) > 0, framework_kwargs['lotOrder'])
         html = render_html(template_path, data)
@@ -37,10 +38,10 @@ def render_html_for_suppliers_awaiting_countersignature(rows, framework_kwargs, 
     countersignature_img_path = os.path.join(template_dir, 'framework-agreement-countersignature.png')
     for data in rows:
         data.update(framework_kwargs)
-        if data['on_framework'] is False or data['countersigned_path'] or not data['countersigned_at']:
-            logger.info("SKIPPING {}: on_fwk={} countersigned_at={} countersigned_path={}".format(
+        if data['pass_fail'] == 'fail' or data['countersigned_path'] or not data['countersigned_at']:
+            logger.info("SKIPPING {}: pass_fail={} countersigned_at={} countersigned_path={}".format(
                 data['supplier_id'],
-                data['on_framework'],
+                data['pass_fail'],
                 data['countersigned_at'],
                 data['countersigned_path'])
             )

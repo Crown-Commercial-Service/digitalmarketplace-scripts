@@ -22,11 +22,10 @@ from docopt import docopt
 from dmapiclient import DataAPIClient
 
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
-from dmscripts.logging import configure_logger
 from dmscripts.helpers.framework_helpers import set_framework_result
+from dmscripts.helpers import logging_helpers
 
-
-logger = configure_logger()
+logger = logging_helpers.configure_logger()
 
 if __name__ == '__main__':
     arguments = docopt(__doc__)

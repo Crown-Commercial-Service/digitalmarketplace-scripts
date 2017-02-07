@@ -7,11 +7,11 @@ from dmutils.email.exceptions import EmailError
 from dmutils.formats import DATE_FORMAT, DATETIME_FORMAT
 
 from dmscripts.helpers.email_helpers import get_sent_emails
-from . import logging
+from dmscripts.helpers.html_helpers import render_html
+from dmscripts.helpers import logging_helpers
+from dmscripts.helpers.logging_helpers import logging
 
-from .html import render_html
-
-logger = logging.configure_logger({'dmapiclient': logging.INFO})
+logger = logging_helpers.configure_logger({'dmapiclient': logging.INFO})
 
 
 def get_closed_briefs(data_api_client, date_closed):
