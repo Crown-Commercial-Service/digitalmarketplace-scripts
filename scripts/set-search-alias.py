@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """
+This can be used to set a new alias to an existing Elasticsearch index, via the Search API
 
 Usage:
     set-search-alias.py <stage> <search_api_token> <alias> <index>
