@@ -24,7 +24,7 @@ def get_closed_briefs(data_api_client, date_closed):
 def notify_users(email_api_key, brief):
     logger.info("Notifying users about brief ID: {brief_id} - '{brief_title}'",
                 extra={'brief_title': brief['title'], 'brief_id': brief['id']})
-    for user in brief['users']:
+    if brief['users']:
         try:
             email_body = render_html('email_templates/requirements_closed.html', data={
                 'brief_id': brief['id'],
