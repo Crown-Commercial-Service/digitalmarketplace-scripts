@@ -1,5 +1,10 @@
 """
 
+For a G-Cloud style framework (with uploaded documents to migrate) this will:
+ 1. Find all suppliers awarded onto the framework
+ 2. Find all their submitted draft services on the framework
+ 3. Migrate these from drafts to "real" services, which includes moving documents to the live documents bucket
+    and updating document URLs in the migrated version of the services
 Usage:
     scripts/make-g-cloud-live.py <framework_slug> <stage> <api_token> <draft_bucket> <documents_bucket> [--dry-run]
 """
