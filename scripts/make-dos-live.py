@@ -1,7 +1,12 @@
 """
 
+For a DOS-style framework (with no documents to migrate) this will:
+ 1. Find all suppliers awarded onto the framework
+ 2. Find all their submitted draft services on the framework
+ 3. Migrate these from drafts to "real" services
+
 Usage:
-    scripts/make-dos-live.py <stage> <api_token> [--dry-run]
+    scripts/make-dos-live.py <framework_slug> <stage> <api_token> [--dry-run]
 """
 import sys
 sys.path.insert(0, '.')
@@ -40,7 +45,7 @@ if __name__ == "__main__":
 
     STAGE = arguments['<stage>']
     DRY_RUN = arguments['--dry-run']
-    FRAMEWORK_SLUG = "digital-outcomes-and-specialists"
+    FRAMEWORK_SLUG = arguments['<framework_slug>']
 
     api_url = get_api_endpoint_from_stage(STAGE)
     client = DataAPIClient(api_url, arguments['<api_token>'])
