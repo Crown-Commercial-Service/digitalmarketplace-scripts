@@ -1,12 +1,15 @@
 """
+!!! Use this for ad-hoc updating of results for a known list of supplier IDs.
+
 Takes a CSV file with rows in the format: Supplier ID, Supplier Name, Result
 e.g:
 123456, Supplier name 1, pass
 123212, Supplier name 2, fail
 234567, Supplier name 3, pass
 
-The supplier name is cross-referenced against the supplier name in the Digital Marketplace
-for that supplier ID. If the names don't match then the script will not update the framework status.
+The supplier name is cross-referenced against the supplier name in the Digital Marketplace for that supplier ID,
+as a sanity check against sloppy CSV creation.
+If the names don't match then the script will not update the framework status.
 
 Usage:
     scripts/insert-framework-results.py <framework_slug> <stage> <data_api_token> <filename> [<user>]

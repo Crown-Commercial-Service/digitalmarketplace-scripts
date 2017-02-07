@@ -1,4 +1,9 @@
 """
+!!! NOTE: THIS IS AN OLD SCRIPT AND PROBABLY NOT THE ONE YOU WANT !!!
+
+For uploading result letters and framework agreements you should prefer bulk-upload-documents.py because it sets a
+nice supplier-friendly filename at the same time.
+
 This will:
  * scan a directory for files with filenames matching ignored-stuff-<supplier_id>-ignored-stuff.<document_type>
 
