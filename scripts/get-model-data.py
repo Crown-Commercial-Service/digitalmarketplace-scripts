@@ -2,7 +2,7 @@
 """Generate data export CSVs
 
 Load model data from the API or the existing CSV, process it according
-to the rules defined in the CONFIG and stor the output in the CSV.
+to the rules defined in the CONFIG and store the output in the CSV.
 
 CSV files are read from and saved to `<output-dir>/<model>.csv`
 
