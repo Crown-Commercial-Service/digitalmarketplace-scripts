@@ -47,7 +47,7 @@ def return_rows_for_sections(sections):
 
     for section in sections:
         for question in get_questions(section.questions):
-            page_title = question.get('parent', {}).get('name', question.get('name'))
+            page_title = question.get('parent', {}).get('question')
             section_and_page_title = ' / '.join(filter(None, [section.name, page_title]))
 
             # section.description is no longer expected to be used
