@@ -75,9 +75,13 @@ DECLARATION_FIELDS = {
 }
 
 
-def get_csv_rows(records, framework_slug):
+def get_csv_rows(records, framework_slug, count_statuses=("submitted", "failed",)):
+    """
+    :param count_statuses: tuple of draft service statuses that should be counted. The default ("submitted", "failed")
+                           gives a count of all drafts that were originally submitted.
+    """
     rows_iter = (
-        create_row(framework_slug, record)
+        _create_row(framework_slug, record, count_statuses)
         for record in records
         if record['declaration'].get('status') == 'complete' and record['counts']  # i.e. has submitted any services
     )
@@ -109,7 +113,7 @@ def _pass_fail_from_record(record):
         )
 
 
-def create_row(framework_slug, record):
+def _create_row(framework_slug, record, count_statuses):
     return dict(chain(
         (
             ("supplier_id", record["supplier"]["id"]),
@@ -119,7 +123,7 @@ def create_row(framework_slug, record):
             ("countersigned_path", record["countersignedPath"]),
         ),
         (
-            (lot, sum(record["counts"][(lot, status)] for status in ("submitted", "failed",)))
+            (lot, sum(record["counts"][(lot, status)] for status in count_statuses))
             for lot in LOTS[framework_slug]
         ),
         ((field, record["declaration"].get(field, "")) for field in DECLARATION_FIELDS[framework_slug]),

@@ -67,10 +67,9 @@ if __name__ == '__main__':
     else:
         supplier_ids = None
     html_dir = tempfile.mkdtemp()
-    # headers, rows = find_suppliers_with_details(client, framework_slug, supplier_ids)
-    # headers, rows = find_suppliers_with_details(client, framework_slug)
+
     records = find_suppliers_with_details_and_draft_service_counts(client, framework_slug, supplier_ids)
-    headers, rows = get_csv_rows(records, framework_slug)
+    headers, rows = get_csv_rows(records, framework_slug, count_statuses=("submitted",))
     render_html_for_successful_suppliers(rows, framework_kwargs, args['<template_folder>'], html_dir)
     html_pages = os.listdir(html_dir)
     html_pages.remove('framework-agreement-signature-page.css')
