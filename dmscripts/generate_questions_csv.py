@@ -117,7 +117,7 @@ def generate_csv(output_file, framework_slug, content_loader, question_set, cont
             filename += '-' + v
 
     with open(output_file, 'wb') as csvfile:
-        writer = csv.writer(csvfile, delimiter=b',', quotechar=b'"')
+        writer = csv.writer(csvfile, delimiter=b',', quotechar=b'"', quoting=csv.QUOTE_ALL)
         header = ["Section / page title", "Page description & hint", "Question", "Description & hint"]
         header.extend(
             ["Answer {}".format(i) for i in range(1, max_length_options+1)]
