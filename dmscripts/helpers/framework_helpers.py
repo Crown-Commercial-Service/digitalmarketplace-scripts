@@ -95,6 +95,4 @@ def add_draft_counts(client, framework_slug, record):
         (ds['lot'], ds['status'])
         for ds in client.find_draft_services_iter(record['supplier']['id'], framework=framework_slug)
     )
-    print("RECORD IN HELPER: {}".format(record))
-    print("GOT COUNTS IN HELPER: {}".format(counts))
     return dict(record, counts=counts)
