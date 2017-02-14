@@ -133,7 +133,7 @@ def test_find_suppliers_with_details_and_draft_services(mock_data_client):
 
     records = framework_helpers.find_suppliers_with_details_and_draft_services(mock_data_client, 'framework-slug')
     # Ordering of records is not guaranteed so compare individually
-    assert len(records) == 3
+    assert len(list(records)) == 3
     for record in records:
         assert record in [
             {
