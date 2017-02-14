@@ -6,52 +6,66 @@ from dmapiclient import HTTPError
 import dmscripts.helpers.framework_helpers as framework_helpers
 
 
-def test_get_submitted_drafts(mock_data_client):
-    mock_data_client.find_draft_services_iter.return_value = [
+def test_get_submitted_drafts_calls_with_correct_arguments(mock_data_client):
+    mock_data_client.find_draft_services_iter.return_value = iter([])
+    framework_helpers.get_submitted_drafts(mock_data_client, 'digital-biscuits-and-cakes', 12345)
+    mock_data_client.find_draft_services_iter.assert_called_with(12345, framework='digital-biscuits-and-cakes')
+
+
+def test_get_submitted_drafts_returns_submitted_draft_services_only(mock_data_client):
+    mock_data_client.find_draft_services_iter.return_value = iter((
         {"id": 123, "status": "submitted"},
         {"id": 234, "status": "failed"},
         {"id": 345, "status": "submitted"},
         {"id": 456, "status": "draft"}
-    ]
-
-    assert framework_helpers.get_submitted_drafts(mock_data_client, 'framework-slug', 567890) == [
-        {"id": 123, "status": "submitted"},
-        {"id": 345, "status": "submitted"},
-    ]
-    mock_data_client.find_draft_services_iter.assert_has_calls([call(567890, framework='framework-slug')])
+    ))
+    result = framework_helpers.get_submitted_drafts(mock_data_client, 12345, 'digital-biscuits-and-cakes')
+    assert result == [{"id": 123, "status": "submitted"}, {"id": 345, "status": "submitted"}]
 
 
-def test_set_framework_result(mock_data_client):
-    assert framework_helpers.set_framework_result(mock_data_client, 'g-slug-1', 567890, True, 'script-user') == \
-        "  Result set OK: 567890 - PASS"
+def test_get_submitted_drafts_returns_submitted_draft_services_without_service_ids_only(mock_data_client):
+    mock_data_client.find_draft_services_iter.return_value = iter((
+        {"id": 1, "status": "not-submitted"},
+        {"id": 2, "status": "submitted", "serviceId": "ALREADY_A_LIVE_SERVICE"},
+        {"id": 3, "status": "submitted"},
+    ))
+    result = framework_helpers.get_submitted_drafts(mock_data_client, 12345, 'digital-biscuits-and-cakes')
+    assert (result == [{"id": 3, "status": "submitted"}])
+
+
+def test_set_framework_result_calls_with_correct_arguments(mock_data_client):
+    assert framework_helpers.set_framework_result(mock_data_client, 'g-whizz-6', 123456, True, 'user') == \
+        "  Result set OK: 123456 - PASS"
     assert framework_helpers.set_framework_result(mock_data_client, 'g-slug-2', 567890, False, 'script-user') == \
         "  Result set OK: 567890 - FAIL"
-
-    mock_data_client.set_framework_result.side_effect = HTTPError(Mock(status_code=400))
-    assert framework_helpers.set_framework_result(mock_data_client, 'digital-stuff', 567890, True, 'script-user') == \
-        "  Error inserting result for 567890 (True): Request failed (status: 400)"
-
     mock_data_client.set_framework_result.assert_has_calls([
-        call(567890, 'g-slug-1', True, 'script-user'),
+        call(123456, 'g-whizz-6', True, 'user'),
         call(567890, 'g-slug-2', False, 'script-user'),
-        call(567890, 'digital-stuff', True, 'script-user'),
     ])
+
+
+def test_set_framework_result_returns_error_message_if_update_fails(mock_data_client):
+    mock_data_client.set_framework_result.side_effect = [HTTPError(),  HTTPError(Mock(status_code=400))]
+    assert framework_helpers.set_framework_result(mock_data_client, 'g-whizz-6', 123456, True, 'user') == \
+        "  Error inserting result for 123456 (True): Request failed (status: 503)"
+    assert framework_helpers.set_framework_result(mock_data_client, 'digital-stuff', 567890, False, 'script-user') == \
+        "  Error inserting result for 567890 (False): Request failed (status: 400)"
 
 
 def test_has_supplier_submitted_services_with_no_submitted_services(mock_data_client):
     mock_data_client.find_draft_services_iter.return_value = [
         {"id": 234, "status": "failed"},
-        {"id": 456, "status": "draft"}
+        {"id": 456, "status": "not-submitted"}
     ]
-    assert framework_helpers.has_supplier_submitted_services(mock_data_client, 'framework-slug', 567890) is False
+    assert framework_helpers.has_supplier_submitted_services(mock_data_client, 'g-spot-7', 567890) is False
 
 
 def test_has_supplier_submitted_services_with_submitted_services(mock_data_client):
     mock_data_client.find_draft_services_iter.return_value = [
         {"id": 234, "status": "submitted"},
-        {"id": 456, "status": "draft"}
+        {"id": 456, "status": "not-submitted"}
     ]
-    assert framework_helpers.has_supplier_submitted_services(mock_data_client, 'framework-slug', 567890) is True
+    assert framework_helpers.has_supplier_submitted_services(mock_data_client, 'g-spot-7', 567890) is True
 
 
 def test_find_suppliers_on_framework(mock_data_client):
