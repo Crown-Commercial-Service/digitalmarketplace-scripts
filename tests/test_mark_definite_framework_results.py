@@ -1,12 +1,9 @@
-from functools import partial
-from itertools import chain, product, repeat
-
-
 import pytest
 
+from functools import partial
+from itertools import product, repeat
 
 from dmscripts.mark_definite_framework_results import mark_definite_framework_results
-from dmscripts.logging import configure_logger, DEBUG as loglevel_DEBUG
 
 
 # putting these in lambdas so we are sure to always get a clean copy
