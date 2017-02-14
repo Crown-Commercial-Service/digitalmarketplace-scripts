@@ -118,6 +118,15 @@ def count_field_in_record(field_id, field_label, record):
                if field_label in service.get(field_id, []))
 
 
+def read_csv(filepath):
+    all_rows = []
+    with open(filepath, 'r') as csvfile:
+        csv_file = csv.reader(csvfile, delimiter=',', quotechar='"')
+        for row in csv_file:
+            all_rows.append(row)
+    return all_rows
+
+
 def write_csv(records, make_row, filename):
     """Write a list of records out to CSV"""
     def fieldnames(row):
