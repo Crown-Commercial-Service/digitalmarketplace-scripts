@@ -56,7 +56,7 @@ if __name__ == '__main__':
         supplier_ids = None
 
     records = find_suppliers_with_details_and_draft_service_counts(client, FRAMEWORK, supplier_ids)
-    headers, rows = get_csv_rows(records, FRAMEWORK)
+    headers, rows = get_csv_rows(records, FRAMEWORK, count_statuses=("submitted",))
     render_html_for_successful_suppliers(rows, FRAMEWORK, TEMPLATE_FOLDER, html_dir)
     html_pages = os.listdir(html_dir)
     html_pages.remove('{}-signature-page.css'.format(FRAMEWORK))
