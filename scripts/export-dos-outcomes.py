@@ -15,7 +15,7 @@ from docopt import docopt
 from dmapiclient import DataAPIClient
 from dmcontent.content_loader import ContentLoader
 
-from dmscripts.helpers.csv_helpers import make_fields_from_content_questions, write_csv
+from dmscripts.helpers.csv_helpers import make_fields_from_content_questions, write_csv_with_make_row
 from dmscripts.helpers.framework_helpers import find_suppliers_with_details_and_draft_services
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 
@@ -74,6 +74,8 @@ if __name__ == '__main__':
     locations = get_outcomes_locations(content_manifest)
     suppliers = find_all_outcomes(client)
 
-    write_csv(suppliers,
-              make_row(capabilities, locations),
-              "output/{}-outcomes.csv".format(FRAMEWORK_SLUG))
+    write_csv_with_make_row(
+        suppliers,
+        make_row(capabilities, locations),
+        "output/{}-outcomes.csv".format(FRAMEWORK_SLUG)
+    )

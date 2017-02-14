@@ -14,7 +14,7 @@ from dmscripts.helpers.csv_helpers import make_fields_from_content_questions
 from dmscripts.helpers.framework_helpers import find_suppliers_with_details_and_draft_services
 
 from docopt import docopt
-from dmscripts.helpers.csv_helpers import write_csv
+from dmscripts.helpers.csv_helpers import write_csv_with_make_row
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmapiclient import DataAPIClient
 from dmcontent.content_loader import ContentLoader
@@ -66,6 +66,8 @@ if __name__ == '__main__':
 
     records = find_all_participants(client)
 
-    write_csv(records,
-              make_row(content_manifest),
-              "output/{}-user-research-participants.csv".format(FRAMEWORK_SLUG))
+    write_csv_with_make_row(
+        records,
+        make_row(content_manifest),
+        "output/{}-user-research-participants.csv".format(FRAMEWORK_SLUG)
+    )

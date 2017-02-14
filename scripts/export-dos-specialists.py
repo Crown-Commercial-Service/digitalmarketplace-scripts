@@ -11,7 +11,7 @@ import sys
 sys.path.insert(0, '.')
 
 from docopt import docopt
-from dmscripts.helpers.csv_helpers import make_fields_from_content_questions, write_csv
+from dmscripts.helpers.csv_helpers import make_fields_from_content_questions, write_csv_with_make_row
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.helpers.framework_helpers import find_suppliers_with_details_and_draft_services
 from dmapiclient import DataAPIClient
@@ -70,6 +70,8 @@ if __name__ == '__main__':
 
     suppliers = find_all_specialists(client)
 
-    write_csv(suppliers,
-              make_row(content_manifest),
-              "output/{}-specialists.csv".format(FRAMEWORK_SLUG))
+    write_csv_with_make_row(
+        suppliers,
+        make_row(content_manifest),
+        "output/{}-specialists.csv".format(FRAMEWORK_SLUG)
+    )

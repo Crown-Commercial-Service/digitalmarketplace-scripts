@@ -127,8 +127,8 @@ def read_csv(filepath):
     return all_rows
 
 
-def write_csv(records, make_row, filename):
-    """Write a list of records out to CSV"""
+def write_csv_with_make_row(records, make_row, filename):
+    """Write a list of records out to CSV, using a custom make_row method to convert records to rows"""
     def fieldnames(row):
         return [field[0] for field in row]
 
