@@ -47,21 +47,27 @@ def return_rows_for_sections(sections):
 
     for section in sections:
         for question in get_questions(section.questions):
-            page_title = question.get('parent', {}).get('question')
+            # Using get_source because we want the original markdown, not the rendered HTML
+            # this means that no context can be reflected in the question content, i.e. our passed-in
+            # context can only influence whether a question is displayed or not.
+            # TODO if this turned out to matter, instead of get_source, we could convert back to markdown(!)
+
+            parent = question.get('parent')
+            page_title = parent.get_source('question') if parent else None
             section_and_page_title = ' / '.join(filter(None, [section.name, page_title]))
 
             # section.description is no longer expected to be used
-            multiquestion_description = question.get('parent', {}).get('description')
-            multiquestion_hint = question.get('parent', {}).get('hint')
+            multiquestion_description = parent.get_source('description') if parent else None
+            multiquestion_hint = parent.get_source('hint') if parent else None
 
             page_description = ' '.join(filter(None, [multiquestion_description, multiquestion_hint]))
 
-            question_description = ' '.join(filter(None, [question.get('description'), question.get('hint')]))
+            question_description = ' '.join(filter(None, [question.get_source('description'), question.get_source('hint')]))
 
             row = [
                 section_and_page_title,
                 page_description,
-                question.get('question'),
+                question.get_source('question'),
                 question_description
             ]
 
