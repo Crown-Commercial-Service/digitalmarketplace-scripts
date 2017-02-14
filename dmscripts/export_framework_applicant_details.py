@@ -1,10 +1,6 @@
 from itertools import chain
-import sys
-if sys.version_info[0] < 3:
-    import unicodecsv as csv
-else:
-    import csv
 
+from dmscripts.helpers.csv_helpers import write_csv
 from dmscripts.helpers.framework_helpers import find_suppliers_with_details_and_draft_service_counts
 
 LOTS = {
@@ -128,18 +124,6 @@ def _create_row(framework_slug, record, count_statuses):
         ),
         ((field, record["declaration"].get(field, "")) for field in DECLARATION_FIELDS[framework_slug]),
     ))
-
-
-def write_csv(headers, rows_iter, filename):
-    """Write a list of rows out to CSV"""
-
-    writer = None
-    with open(filename, "w+") as f:
-        for row in rows_iter:
-            if writer is None:
-                writer = csv.DictWriter(f, fieldnames=headers)
-                writer.writeheader()
-            writer.writerow(dict(row))
 
 
 def export_supplier_details(data_api_client, framework_slug, filename):

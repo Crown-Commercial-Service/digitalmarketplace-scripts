@@ -127,6 +127,18 @@ def read_csv(filepath):
     return all_rows
 
 
+def write_csv(headers, rows_iter, filename):
+    """Write a list of rows out to CSV"""
+
+    writer = None
+    with open(filename, "w+") as f:
+        for row in rows_iter:
+            if writer is None:
+                writer = csv.DictWriter(f, fieldnames=headers)
+                writer.writeheader()
+            writer.writerow(dict(row))
+
+
 def write_csv_with_make_row(records, make_row, filename):
     """Write a list of records out to CSV, using a custom make_row method to convert records to rows"""
     def fieldnames(row):
