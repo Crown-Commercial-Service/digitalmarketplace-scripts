@@ -75,13 +75,10 @@ def test_find_suppliers_with_details_and_draft_services(mock_data_client):
     mock_data_client.get_interested_suppliers.return_value = {
         'interestedSuppliers': [4, 3, 2]
     }
-    mock_data_client.get_supplier.side_effect = [
-        {'suppliers': 'supplier 4'},
-        {'suppliers': 'supplier 3'},
-        {'suppliers': 'supplier 2'},
-    ]
-    mock_data_client.get_supplier_framework_info.side_effect = [
-        {
+    mock_data_client.get_supplier.side_effect = lambda id: {'suppliers': 'supplier {}'.format(id)}
+
+    mock_data_client.get_supplier_framework_info.side_effect = lambda *args: {
+        (4, 'framework-slug'): {
             'frameworkInterest': {
                 'declaration': {'status': 'complete'},
                 'onFramework': True,
@@ -89,7 +86,7 @@ def test_find_suppliers_with_details_and_draft_services(mock_data_client):
                 'countersignedAt': None,
             }
         },
-        {
+        (3, 'framework-slug'): {
             'frameworkInterest': {
                 'declaration': {'status': 'started'},
                 'onFramework': False,
@@ -97,7 +94,7 @@ def test_find_suppliers_with_details_and_draft_services(mock_data_client):
                 'countersignedAt': None,
             }
         },
-        {
+        (2, 'framework-slug'): {
             'frameworkInterest': {
                 'declaration': {'status': 'complete'},
                 'onFramework': True,
@@ -105,7 +102,8 @@ def test_find_suppliers_with_details_and_draft_services(mock_data_client):
                 'countersignedAt': '2017-01-02T03:04:05.000006Z',
             }
         },
-    ]
+    }[args]
+
     mock_data_client.find_draft_services.return_value = {
         "services": [
             {'status': 'submitted', 'lot': 'saas'},
@@ -120,74 +118,74 @@ def test_find_suppliers_with_details_and_draft_services(mock_data_client):
     }
 
     records = framework_helpers.find_suppliers_with_details_and_draft_services(mock_data_client, 'framework-slug')
-    assert records == [
-        {
-            'supplier': 'supplier 4',
-            'supplier_id': 4,
-            'services': [
-                {'status': 'submitted', 'lot': 'saas'},
-                {'status': 'submitted', 'lot': 'saas'},
-                {'status': 'submitted', 'lot': 'saas'},
-                {'status': 'submitted', 'lot': 'paas'},
-                {'status': 'failed', 'lot': 'iaas'},
-                {'status': 'not-submitted', 'lot': 'saas'},
-                {'status': 'not-submitted', 'lot': 'paas'},
-                {'status': 'not-submitted', 'lot': 'paas'}
-            ],
-            'declaration': {'status': 'complete'},
-            'countersignedPath': '',
-            'countersignedAt': '',
-            'onFramework': True
-        },
-        {
-            'supplier': 'supplier 3',
-            'supplier_id': 3,
-            'services': [
-                {'status': 'submitted', 'lot': 'saas'},
-                {'status': 'submitted', 'lot': 'saas'},
-                {'status': 'submitted', 'lot': 'saas'},
-                {'status': 'submitted', 'lot': 'paas'},
-                {'status': 'failed', 'lot': 'iaas'},
-                {'status': 'not-submitted', 'lot': 'saas'},
-                {'status': 'not-submitted', 'lot': 'paas'},
-                {'status': 'not-submitted', 'lot': 'paas'}
-            ],
-            'declaration': {'status': 'started'},
-            'countersignedPath': '',
-            'countersignedAt': '',
-            'onFramework': False
-        },
-        {
-            'supplier': 'supplier 2',
-            'supplier_id': 2,
-            'services': [
-                {'status': 'submitted', 'lot': 'saas'},
-                {'status': 'submitted', 'lot': 'saas'},
-                {'status': 'submitted', 'lot': 'saas'},
-                {'status': 'submitted', 'lot': 'paas'},
-                {'status': 'failed', 'lot': 'iaas'},
-                {'status': 'not-submitted', 'lot': 'saas'},
-                {'status': 'not-submitted', 'lot': 'paas'},
-                {'status': 'not-submitted', 'lot': 'paas'}
-            ],
-            'declaration': {'status': 'complete'},
-            'countersignedPath': 'some/path',
-            'countersignedAt': '2017-01-02T03:04:05.000006Z',
-            'onFramework': True}
-    ]
+    # Ordering of records is not guaranteed so compare individually
+    assert len(records) == 3
+    for record in records:
+        assert record in [
+            {
+                'supplier': 'supplier 4',
+                'supplier_id': 4,
+                'services': [
+                    {'status': 'submitted', 'lot': 'saas'},
+                    {'status': 'submitted', 'lot': 'saas'},
+                    {'status': 'submitted', 'lot': 'saas'},
+                    {'status': 'submitted', 'lot': 'paas'},
+                    {'status': 'failed', 'lot': 'iaas'},
+                    {'status': 'not-submitted', 'lot': 'saas'},
+                    {'status': 'not-submitted', 'lot': 'paas'},
+                    {'status': 'not-submitted', 'lot': 'paas'}
+                ],
+                'declaration': {'status': 'complete'},
+                'countersignedPath': '',
+                'countersignedAt': '',
+                'onFramework': True
+            },
+            {
+                'supplier': 'supplier 3',
+                'supplier_id': 3,
+                'services': [
+                    {'status': 'submitted', 'lot': 'saas'},
+                    {'status': 'submitted', 'lot': 'saas'},
+                    {'status': 'submitted', 'lot': 'saas'},
+                    {'status': 'submitted', 'lot': 'paas'},
+                    {'status': 'failed', 'lot': 'iaas'},
+                    {'status': 'not-submitted', 'lot': 'saas'},
+                    {'status': 'not-submitted', 'lot': 'paas'},
+                    {'status': 'not-submitted', 'lot': 'paas'}
+                ],
+                'declaration': {'status': 'started'},
+                'countersignedPath': '',
+                'countersignedAt': '',
+                'onFramework': False
+            },
+            {
+                'supplier': 'supplier 2',
+                'supplier_id': 2,
+                'services': [
+                    {'status': 'submitted', 'lot': 'saas'},
+                    {'status': 'submitted', 'lot': 'saas'},
+                    {'status': 'submitted', 'lot': 'saas'},
+                    {'status': 'submitted', 'lot': 'paas'},
+                    {'status': 'failed', 'lot': 'iaas'},
+                    {'status': 'not-submitted', 'lot': 'saas'},
+                    {'status': 'not-submitted', 'lot': 'paas'},
+                    {'status': 'not-submitted', 'lot': 'paas'}
+                ],
+                'declaration': {'status': 'complete'},
+                'countersignedPath': 'some/path',
+                'countersignedAt': '2017-01-02T03:04:05.000006Z',
+                'onFramework': True}
+        ]
 
 
 def test_find_suppliers_with_details_and_draft_service_counts(mock_data_client):
     mock_data_client.get_interested_suppliers.return_value = {
         'interestedSuppliers': [4, 3, 2]
     }
-    mock_data_client.get_supplier.side_effect = [
-        {'suppliers': {'id': 4, 'name': 'supplier 4'}},
-        {'suppliers': {'id': 3, 'name': 'supplier 3'}},
-        {'suppliers': {'id': 2, 'name': 'supplier 2'}},
-    ]
-    mock_data_client.get_supplier_framework_info.side_effect = [
-        {
+    mock_data_client.get_supplier.side_effect = lambda id: {'suppliers': {'id': id, 'name': 'supplier {}'.format(id)}}
+
+    mock_data_client.get_supplier_framework_info.side_effect = lambda *args: {
+        (4, 'framework-slug'): {
             'frameworkInterest': {
                 'declaration': {'status': 'complete'},
                 'onFramework': True,
@@ -195,7 +193,7 @@ def test_find_suppliers_with_details_and_draft_service_counts(mock_data_client):
                 'countersignedAt': None,
             }
         },
-        {
+        (3, 'framework-slug'): {
             'frameworkInterest': {
                 'declaration': {'status': 'started'},
                 'onFramework': False,
@@ -203,7 +201,7 @@ def test_find_suppliers_with_details_and_draft_service_counts(mock_data_client):
                 'countersignedAt': None,
             }
         },
-        {
+        (2, 'framework-slug'): {
             'frameworkInterest': {
                 'declaration': {'status': 'complete'},
                 'onFramework': True,
@@ -211,7 +209,8 @@ def test_find_suppliers_with_details_and_draft_service_counts(mock_data_client):
                 'countersignedAt': '2017-01-02T03:04:05.000006Z',
             }
         },
-    ]
+    }[args]
+
     mock_data_client.find_draft_services_iter.return_value = [
         {'status': 'submitted', 'lot': 'saas'},
         {'status': 'submitted', 'lot': 'saas'},
