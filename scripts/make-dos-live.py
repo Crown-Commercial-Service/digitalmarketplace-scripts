@@ -16,7 +16,7 @@ def find_submitted_draft_services(client, supplier_id, framework_slug):
     return (
         draft for draft in
         client.find_draft_services(supplier_id, framework=framework_slug)['services']
-        if draft['status'] == "submitted" and not draft.get("service_id")
+        if draft['status'] == "submitted" and not draft.get("serviceId")
     )
 
 
