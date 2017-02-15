@@ -62,7 +62,10 @@ def return_rows_for_sections(sections):
 
             page_description = ' '.join(filter(None, [multiquestion_description, multiquestion_hint]))
 
-            question_description = ' '.join(filter(None, [question.get_source('description'), question.get_source('hint')]))
+            question_description = ' '.join(filter(None, [
+                question.get_source('description'),
+                question.get_source('hint')
+            ]))
 
             row = [
                 section_and_page_title,
