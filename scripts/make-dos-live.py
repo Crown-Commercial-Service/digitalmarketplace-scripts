@@ -13,16 +13,8 @@ sys.path.insert(0, '.')
 
 from docopt import docopt
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
-from dmscripts.helpers.framework_helpers import find_suppliers_on_framework
+from dmscripts.helpers.framework_helpers import find_suppliers_on_framework, get_submitted_drafts
 from dmapiclient import DataAPIClient
-
-
-def find_submitted_draft_services(client, supplier_id, framework_slug):
-    return (
-        draft for draft in
-        client.find_draft_services(supplier_id, framework=framework_slug)['services']
-        if draft['status'] == "submitted" and not draft.get("serviceId")
-    )
 
 
 def make_draft_service_live(client, draft, dry_run):
@@ -54,7 +46,7 @@ if __name__ == "__main__":
 
     for supplier in suppliers:
         print(u"Migrating drafts for supplier {} - {}".format(supplier['supplierId'], supplier['supplierName']))
-        drafts = find_submitted_draft_services(client, supplier['supplierId'], FRAMEWORK_SLUG)
+        draft_services = get_submitted_drafts(client, FRAMEWORK_SLUG, supplier['supplierId'])
 
-        for draft in drafts:
-            make_draft_service_live(client, draft, DRY_RUN)
+        for draft_service in draft_services:
+            make_draft_service_live(client, draft_service, DRY_RUN)

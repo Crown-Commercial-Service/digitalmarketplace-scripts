@@ -7,9 +7,9 @@ from dmapiclient import HTTPError
 
 def get_submitted_drafts(client, framework_slug, supplier_id):
     draft_services = client.find_draft_services_iter(supplier_id, framework=framework_slug)
-    submitted_services = [service for service in draft_services if service["status"] == "submitted"
-                          and not service.get('serviceId')]
-    return submitted_services
+    submitted_drafts = [draft for draft in draft_services
+                        if draft["status"] == "submitted" and not draft.get('serviceId')]
+    return submitted_drafts
 
 
 def set_framework_result(client, framework_slug, supplier_id, result, user):
