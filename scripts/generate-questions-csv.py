@@ -15,7 +15,7 @@ Usage:
     scripts/generate-questions-csv.py <DM-content-root-dir> <output-file> [options]
 
 --framework=<slug>
---question-set=<question-set-directory-name>
+--question-set=<question-set-directory-name> i.e. one of 'declaration' or 'services'
 --context=<yaml>
 -h --help    show this message
 
