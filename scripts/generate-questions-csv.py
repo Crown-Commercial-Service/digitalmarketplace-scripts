@@ -20,7 +20,8 @@ Options:
   -h --help    show this message
 
 Example:
-    scripts/generate-questions-csv.py /path/to/dm-frameworks/ ~/mystuff.csv --framework=g-cloud-9 --context="lot: SaaS"
+    scripts/generate-questions-csv.py /path/to/dm-frameworks/ ~/mystuff.csv \
+--framework=g-cloud-9 --question-set=services --context="lot: cloud-software"
 """
 import sys
 sys.path.insert(0, '.')
