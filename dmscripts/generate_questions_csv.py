@@ -118,13 +118,6 @@ def generate_csv(output_file, framework_slug, content_loader, question_set, cont
     for index, row in enumerate(rows):
         row.extend([''] * (max_length - len(row)))
 
-    filename = framework_slug
-    if question_set:
-        filename += '-' + question_set
-    if context:
-        for v in context.values():
-            filename += '-' + v
-
     with open(output_file, 'wb') as csvfile:
         writer = csv.writer(csvfile, delimiter=b',', quotechar=b'"', quoting=csv.QUOTE_ALL)
         header = ["Section / page title", "Page description & hint", "Question", "Description & hint"]
