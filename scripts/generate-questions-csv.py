@@ -12,12 +12,12 @@ Before running this you will need to:
 pip install -r requirements.txt
 
 Usage:
-    scripts/generate-questions-csv.py <DM-content-root-dir> <output-file> [options]
+    scripts/generate-questions-csv.py <DM-content-root-dir> <output-file> --framework=<slug> [options]
 
---framework=<slug>
---question-set=<question-set-directory-name> i.e. one of 'declaration' or 'services'
---context=<yaml>
--h --help    show this message
+Options:
+  --question-set=<question-set-directory-name> i.e. one of 'declaration' or 'services'
+  --context=<yaml>
+  -h --help    show this message
 
 Example:
     scripts/generate-questions-csv.py /path/to/dm-frameworks/ ~/mystuff.csv --framework=g-cloud-9 --context="lot: SaaS"
