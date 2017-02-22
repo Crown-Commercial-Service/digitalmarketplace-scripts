@@ -44,7 +44,7 @@ def get_section(questions=None, multiquestions=None):
         'editable': False,
         'description': None,
         'summary_page_description': 'You must be able to provide at least one option',
-        'name': 'Options',
+        'name': 'Section name',
         'questions': [],
         'edit_questions': True,
         'id': 'options',
@@ -94,7 +94,10 @@ def return_row_and_question(question_type, is_multiquestion=False):
     rows = return_rows_for_sections([section])
     question = get_question(question_type, '0')
     assert len(rows) == 2
-    assert rows[0][0] == 'Options'
+    if is_multiquestion:
+        assert rows[0][0] == 'Section name / Options'
+    else:
+        assert rows[0][0] == 'Section name'
     assert rows[0][2] == question['question']
     if is_multiquestion:
         assert rows[0][1] == 'Please indicate your preferred options'
@@ -125,8 +128,8 @@ def test_get_questions_sets_multiquestion_names_and_hints():
     # hint and name of multiquestion should be preserved in nested_questions
     for question in get_questions(section.questions):
         if question.get('id').startswith('multiquestion_'):
-            assert question.get('multiquestion_name') == 'Options'
-            assert question.get('multiquestion_hint') == 'Please indicate your preferred options'
+            assert question.get('parent').get('name') == 'Options'
+            assert question.get('parent').get('hint') == 'Please indicate your preferred options'
 
 
 def test_return_row_for_text_question():
