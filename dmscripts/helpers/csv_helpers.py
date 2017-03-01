@@ -35,7 +35,17 @@ class GenerateCSVFromAPI(object):
 
 
 class MultiCSVWriter(object):
-    """Manage writing to multiple CSV files"""
+    """
+       Manage writing to multiple CSV files
+
+       This allows writing to several CSV files at once - it needs "handlers" defined for each output file,
+       that can decide whether or not to write a row to the file they handle based on data in the record passed in.
+
+        Handlers need to implement three methods:
+        * matches(record) - returns a boolean, True if the handler will deal with the record passed in
+        * should_write(record) - returns a boolean, True if the handler should write a line for this particular record
+        * create_row(record) - returns a list of things that should be written as a csv row from the record
+    """
     def __init__(self, output_dir, handlers):
         self.output_dir = output_dir
         self.handlers = handlers
