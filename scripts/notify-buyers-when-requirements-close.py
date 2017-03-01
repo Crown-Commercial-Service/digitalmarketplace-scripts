@@ -16,7 +16,7 @@ import sys
 from docopt import docopt
 
 sys.path.insert(0, '.')
-from dmscripts.env import get_api_endpoint_from_stage
+from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.notify_buyers_when_requirements_close import main
 
 

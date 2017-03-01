@@ -2,7 +2,7 @@
 """Class used to output a framework master csv."""
 from collections import OrderedDict
 
-from dmscripts.dmscripts_csv import GenerateCSVFromAPI
+from dmscripts.helpers.csv_helpers import GenerateCSVFromAPI
 
 
 class GenerateMasterCSV(GenerateCSVFromAPI):

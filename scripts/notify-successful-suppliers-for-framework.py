@@ -20,11 +20,12 @@ from docopt import docopt
 
 from dmapiclient import DataAPIClient
 from dmutils.email.dm_notify import DMNotifyClient
-from dmscripts.env import get_api_endpoint_from_stage
-from dmscripts.supplier_data import SuccessfulSupplierContextForNotify
-from dmscripts import logging
+from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
+from dmscripts.helpers import logging_helpers
+from dmscripts.helpers.logging_helpers import logging
+from dmscripts.helpers.supplier_data_helpers import SuccessfulSupplierContextForNotify
 
-logger = logging.configure_logger({'dmapiclient': logging.INFO})
+logger = logging_helpers.configure_logger({"dmapiclient": logging.INFO})
 
 
 if __name__ == '__main__':

@@ -4,10 +4,11 @@ import shutil
 import re
 import subprocess
 
-from .html import render_html
-from . import logging
+from dmscripts.helpers.html_helpers import render_html
+from dmscripts.helpers import logging_helpers
+from dmscripts.helpers.logging_helpers import logging
 
-logger = logging.configure_logger({'dmapiclient.base': logging.WARNING})
+logger = logging_helpers.configure_logger({'dmapiclient.base': logging.WARNING})
 
 
 def save_page(html, supplier_id, output_dir, descriptive_filename_part):
@@ -22,9 +23,10 @@ def render_html_for_successful_suppliers(rows, framework, template_dir, output_d
     template_path = os.path.join(template_dir, '{}-signature-page.html'.format(framework))
     template_css_path = os.path.join(template_dir, '{}-signature-page.css'.format(framework))
     for data in rows:
-        if data['on_framework'] is False:
+        if data['pass_fail'] == 'fail':
+            logger.info("FAILED: {}".format(data['supplier_id']))
             continue
-        data['appliedLots'] = filter(lambda lot: int(data[lot]) > 0, ['saas', 'paas', 'iaas', 'scs'])
+        data['awardedLots'] = filter(lambda lot: int(data[lot]) > 0, ['saas', 'paas', 'iaas', 'scs'])
         html = render_html(template_path, data)
         save_page(html, data['supplier_id'], output_dir, "signature-page")
     shutil.copyfile(template_css_path, os.path.join(output_dir, '{}-signature-page.css'.format(framework)))
@@ -35,15 +37,15 @@ def render_html_for_suppliers_awaiting_countersignature(rows, framework, templat
     template_css_path = os.path.join(template_dir, '{}-signature-page.css'.format(framework))
     countersignature_img_path = os.path.join(template_dir, '{}-countersignature.png'.format(framework))
     for data in rows:
-        if data['on_framework'] is False or data['countersigned_path'] or not data['countersigned_at']:
-            logger.info("SKIPPING {}: on_fwk={} countersigned_at={} countersigned_path={}".format(
+        if data['pass_fail'] == 'fail' or data['countersigned_path'] or not data['countersigned_at']:
+            logger.info("SKIPPING {}: pass_fail={} countersigned_at={} countersigned_path={}".format(
                 data['supplier_id'],
-                data['on_framework'],
+                data['pass_fail'],
                 data['countersigned_at'],
                 data['countersigned_path'])
             )
             continue
-        data['appliedLots'] = filter(lambda lot: int(data[lot]) > 0, ['saas', 'paas', 'iaas', 'scs'])
+        data['awardedLots'] = filter(lambda lot: int(data[lot]) > 0, ['saas', 'paas', 'iaas', 'scs'])
         html = render_html(template_path, data)
         save_page(html, data['supplier_id'], output_dir, "agreement-countersignature")
     shutil.copyfile(template_css_path, os.path.join(output_dir, '{}-signature-page.css'.format(framework)))

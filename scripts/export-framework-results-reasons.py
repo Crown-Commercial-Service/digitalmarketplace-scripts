@@ -24,7 +24,7 @@ import sys
 sys.path.insert(0, '.')
 
 from docopt import docopt
-from dmscripts.env import get_api_endpoint_from_stage
+from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.export_framework_results_reasons import export_suppliers
 from dmapiclient import DataAPIClient
 from dmcontent.content_loader import ContentLoader

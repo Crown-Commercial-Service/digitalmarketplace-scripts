@@ -2,7 +2,7 @@
 """Generate data export CSVs
 
 Load model data from the API or the existing CSV, process it according
-to the rules defined in the CONFIG and stor the output in the CSV.
+to the rules defined in the CONFIG and store the output in the CSV.
 
 CSV files are read from and saved to `<output-dir>/<model>.csv`
 
@@ -35,12 +35,12 @@ sys.path.insert(0, '.')
 
 from docopt import docopt
 from dmapiclient import DataAPIClient
-from dmscripts.env import get_api_endpoint_from_stage
+from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.models.process_rules import format_datetime_string_as_date, remove_username_from_email_address
 from dmscripts.models.writecsv import csv_path
 from dmscripts.models import queries
 
-from dmscripts import logging
+from dmscripts.helpers.logging_helpers import logging
 
 
 CONFIGS = [

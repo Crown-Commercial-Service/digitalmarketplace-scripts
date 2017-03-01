@@ -1,5 +1,10 @@
 """
 
+For a G-Cloud style framework (with uploaded documents to migrate) this will:
+ 1. Find all suppliers awarded onto the framework
+ 2. Find all their submitted draft services on the framework
+ 3. Migrate these from drafts to "real" services, which includes moving documents to the live documents bucket
+    and updating document URLs in the migrated version of the services
 Usage:
     scripts/make-g-cloud-live.py <framework_slug> <stage> <api_token> <draft_bucket> <documents_bucket> [--dry-run]
 """
@@ -15,8 +20,8 @@ import random
 import re
 
 from docopt import docopt
-from dmscripts.env import get_api_endpoint_from_stage, get_assets_endpoint_from_stage
-from dmscripts.framework_utils import find_suppliers_on_framework, get_submitted_drafts
+from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage, get_assets_endpoint_from_stage
+from dmscripts.helpers.framework_helpers import find_suppliers_on_framework, get_submitted_drafts
 from dmapiclient import DataAPIClient
 from dmutils.s3 import S3
 

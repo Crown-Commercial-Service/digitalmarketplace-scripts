@@ -15,9 +15,9 @@ from dateutil.parser import parse as parse_time
 from dmutils.s3 import S3
 from dmutils.formats import DATETIME_FORMAT
 
-from dmscripts import logging
+from dmscripts.helpers import logging_helpers
 
-logger = logging.configure_logger()
+logger = logging_helpers.configure_logger()
 
 
 def make_copier(src_bucket, target_bucket):

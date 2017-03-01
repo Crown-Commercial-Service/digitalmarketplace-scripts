@@ -1,15 +1,9 @@
 # -*- coding: utf-8 -*-
-import collections
 import jsonschema
 import os
-import sys
 
-if sys.version_info[0] < 3:
-    import unicodecsv as csv
-else:
-    import csv
-
-from multiprocessing.pool import ThreadPool
+from dmscripts.helpers.csv_helpers import make_field_title, count_field_in_record, MultiCSVWriter
+from dmscripts.helpers.framework_helpers import find_suppliers_with_details_and_draft_service_counts
 
 
 DRAFT_STATUSES = [
@@ -24,46 +18,6 @@ def get_validation_errors(candidate, schema):
     errors = validator.iter_errors(candidate)
     error_keys = [error.path[0] for error in errors]
     return error_keys
-
-
-def find_suppliers(client, framework_slug, supplier_ids=None):
-    suppliers = client.get_interested_suppliers(framework_slug)['interestedSuppliers']
-    return ({'supplier_id': supplier_id} for supplier_id in suppliers
-            if (supplier_ids is None) or (supplier_id in supplier_ids))
-
-
-def add_supplier_info(client):
-    def inner(record):
-        supplier = client.get_supplier(record['supplier_id'])
-
-        return dict(record, supplier=supplier['suppliers'])
-
-    return inner
-
-
-def add_draft_services(client, framework_slug, lot=None, status=None):
-    def inner(record):
-        drafts = client.find_draft_services(record["supplier_id"], framework=framework_slug)
-        drafts = drafts["services"]
-
-        drafts = [
-            draft for draft in drafts
-            if (not lot or draft["lotSlug"] == lot) and (not status or draft["status"] == status)
-        ]
-
-        return dict(record, services=drafts)
-
-    return inner
-
-
-def count_field_in_record(field_id, field_label, record):
-    return sum(1
-               for service in record["services"]
-               if field_label in service.get(field_id, []))
-
-
-def make_field_title(field_id, field_label):
-    return "{} {}".format(field_id, field_label)
 
 
 def fields_from_content_question_gen(question, record):
@@ -86,40 +40,6 @@ def fields_from_content_question_gen(question, record):
             question["id"],
             "|".join(str(service.get(question["id"], "")) for service in record["services"])
         )
-
-
-def add_framework_info(client, framework_slug):
-    def inner(record):
-        supplier_framework = client.get_supplier_framework_info(record['supplier_id'], framework_slug)
-        supplier_framework = supplier_framework['frameworkInterest']
-        supplier_framework['declaration'] = supplier_framework['declaration'] or {}
-
-        if supplier_framework['declaration'].get('status') != 'complete':
-            assert supplier_framework['onFramework'] is False, \
-                "Incomplete declaration but not failed, have you inserted the framework result?"
-
-        return dict(record,
-                    declaration=supplier_framework['declaration'],
-                    onFramework=supplier_framework['onFramework'])
-
-    return inner
-
-
-def add_draft_counts(client, framework_slug, lot_slugs):
-    def inner(record):
-        counts = {status: {lot: 0 for lot in lot_slugs} for status in DRAFT_STATUSES}
-
-        for draft in client.find_draft_services_iter(record['supplier']['id'], framework=framework_slug):
-            if draft['status'] == 'submitted':
-                counts['completed'][draft['lot']] += 1
-            elif draft['status'] == 'failed':
-                counts['failed'][draft['lot']] += 1
-            else:
-                counts['draft'][draft['lot']] += 1
-
-        return dict(record, counts=counts)
-
-    return inner
 
 
 def get_declaration_questions(declaration_content, record):
@@ -168,20 +88,15 @@ def add_failed_questions(declaration_content,
 def find_suppliers_with_details(client,
                                 content_loader,
                                 framework_slug,
-                                lot_slugs,
                                 declaration_definite_pass_schema,
                                 declaration_baseline_schema,
                                 supplier_ids=None
                                 ):
-    pool = ThreadPool(30)
 
     content_loader.load_manifest(framework_slug, 'declaration', 'declaration')
     declaration_content = content_loader.get_manifest(framework_slug, 'declaration')
 
-    records = find_suppliers(client, framework_slug, supplier_ids)
-    records = pool.imap(add_supplier_info(client), records)
-    records = pool.imap(add_framework_info(client, framework_slug), records)
-    records = pool.imap(add_draft_counts(client, framework_slug, lot_slugs), records)
+    records = find_suppliers_with_details_and_draft_service_counts(client, framework_slug, supplier_ids)
     records = map(add_failed_questions(declaration_content,
                                        declaration_definite_pass_schema,
                                        declaration_baseline_schema), records)
@@ -218,24 +133,6 @@ def contact_details(record):
     ]
 
 
-def write_csv(records, make_row, filename):
-    """Write a list of records out to CSV"""
-    def fieldnames(row):
-        return [field[0] for field in row]
-
-    writer = None
-
-    with open(filename, "w+") as f:
-        for record in records:
-            sys.stdout.write(".")
-            sys.stdout.flush()
-            row = make_row(record)
-            if writer is None:
-                writer = csv.DictWriter(f, fieldnames=fieldnames(row))
-                writer.writeheader()
-            writer.writerow(dict(row))
-
-
 class SuccessfulHandler(object):
     NAME = 'successful'
 
@@ -261,14 +158,13 @@ class FailedHandler(object):
         # Only include failed complete applications, not people who didn't make an application
         if record.get('failed_mandatory') and 'INCOMPLETE' in record.get('failed_mandatory'):
             return False
-        completed_count = 0
-        completed = record.get('counts').get('completed')
-        for key in completed:
-            completed_count += completed.get(key)
+        draft_counts = record.get('counts')
+        # Keys in the Counter are tuples such as ('digital-specialists', 'submitted') so count[1] will match the status
         # Failed services are also "submitted" and "complete" so count these too
-        failed = record.get('counts').get('failed')
-        for key in failed:
-            completed_count += failed.get(key)
+        completed_count = sum(
+            draft_counts[key] for key in
+            [count for count in draft_counts if count[1] in ['submitted', 'failed']]
+        )
         if completed_count == 0:
             return False
         if not record.get('failed_mandatory'):
@@ -298,50 +194,6 @@ class DiscretionaryHandler(object):
             contact_details(record)
 
 
-class MultiCSVWriter(object):
-    """Manage writing to multiple CSV files"""
-    def __init__(self, output_dir, handlers):
-        self.output_dir = output_dir
-        self.handlers = handlers
-        self._csv_writers = dict()
-        self._csv_files = dict()
-        self._counters = collections.Counter()
-
-    def write_row(self, record):
-        for handler in self.handlers:
-            should_write = handler.should_write(record)
-            if handler.matches(record) and should_write:
-                self._counters.update([handler.NAME])
-                row = handler.create_row(record)
-                return self.csv_writer(handler, row).writerow(dict(row))
-            elif not should_write:
-                return self.csv_writer
-        raise ValueError("record not handled by any handler")
-
-    def csv_writer(self, handler, row):
-        if handler.NAME not in self._csv_writers:
-            fieldnames = [key for key, _ in row]
-            self._csv_writers[handler.NAME] = csv.DictWriter(self._csv_files[handler.NAME], fieldnames=fieldnames)
-            self._csv_writers[handler.NAME].writeheader()
-
-        return self._csv_writers[handler.NAME]
-
-    def csv_path(self, handler):
-        return os.path.join(self.output_dir, handler.NAME + '.csv')
-
-    def __enter__(self):
-        for handler in self.handlers:
-            self._csv_files[handler.NAME] = open(self.csv_path(handler), 'w+')
-        return self
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        for f in self._csv_files.values():
-            f.close()
-
-    def print_counts(self):
-        print(" ".join("{}={}".format(handler.NAME, self._counters[handler.NAME]) for handler in self.handlers))
-
-
 def export_suppliers(
         client,
         framework_slug,
@@ -353,12 +205,10 @@ def export_suppliers(
 ):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
-    lot_slugs = [lot['slug'] for lot in client.get_framework(framework_slug)['frameworks']['lots']]
     records = find_suppliers_with_details(
         client,
         content_loader,
         framework_slug,
-        lot_slugs,
         declaration_definite_pass_schema,
         declaration_baseline_schema,
         supplier_ids

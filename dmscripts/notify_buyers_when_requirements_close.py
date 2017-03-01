@@ -6,11 +6,12 @@ from dmutils.email import send_email
 from dmutils.email.exceptions import EmailError
 from dmutils.formats import DATE_FORMAT, DATETIME_FORMAT
 
-from . import logging
-from .email import get_sent_emails
-from .html import render_html
+from dmscripts.helpers.email_helpers import get_sent_emails
+from dmscripts.helpers.html_helpers import render_html
+from dmscripts.helpers import logging_helpers
+from dmscripts.helpers.logging_helpers import logging
 
-logger = logging.configure_logger({'dmapiclient': logging.INFO})
+logger = logging_helpers.configure_logger({'dmapiclient': logging.INFO})
 
 
 def get_closed_briefs(data_api_client, date_closed):
@@ -23,7 +24,7 @@ def get_closed_briefs(data_api_client, date_closed):
 def notify_users(email_api_key, brief):
     logger.info("Notifying users about brief ID: {brief_id} - '{brief_title}'",
                 extra={'brief_title': brief['title'], 'brief_id': brief['id']})
-    for user in brief['users']:
+    if brief['users']:
         try:
             email_body = render_html('email_templates/requirements_closed.html', data={
                 'brief_id': brief['id'],

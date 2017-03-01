@@ -1,23 +1,20 @@
 """
 
+For a DOS-style framework (with no documents to migrate) this will:
+ 1. Find all suppliers awarded onto the framework
+ 2. Find all their submitted draft services on the framework
+ 3. Migrate these from drafts to "real" services
+
 Usage:
-    scripts/make-dos-live.py <stage> <api_token> [--dry-run]
+    scripts/make-dos-live.py <framework_slug> <stage> <api_token> [--dry-run]
 """
 import sys
 sys.path.insert(0, '.')
 
 from docopt import docopt
-from dmscripts.env import get_api_endpoint_from_stage
-from dmscripts.framework_utils import find_suppliers_on_framework
+from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
+from dmscripts.helpers.framework_helpers import find_suppliers_on_framework, get_submitted_drafts
 from dmapiclient import DataAPIClient
-
-
-def find_submitted_draft_services(client, supplier_id, framework_slug):
-    return (
-        draft for draft in
-        client.find_draft_services(supplier_id, framework=framework_slug)['services']
-        if draft['status'] == "submitted" and not draft.get("serviceId")
-    )
 
 
 def make_draft_service_live(client, draft, dry_run):
@@ -40,7 +37,7 @@ if __name__ == "__main__":
 
     STAGE = arguments['<stage>']
     DRY_RUN = arguments['--dry-run']
-    FRAMEWORK_SLUG = "digital-outcomes-and-specialists"
+    FRAMEWORK_SLUG = arguments['<framework_slug>']
 
     api_url = get_api_endpoint_from_stage(STAGE)
     client = DataAPIClient(api_url, arguments['<api_token>'])
@@ -49,7 +46,7 @@ if __name__ == "__main__":
 
     for supplier in suppliers:
         print(u"Migrating drafts for supplier {} - {}".format(supplier['supplierId'], supplier['supplierName']))
-        drafts = find_submitted_draft_services(client, supplier['supplierId'], FRAMEWORK_SLUG)
+        draft_services = get_submitted_drafts(client, FRAMEWORK_SLUG, supplier['supplierId'])
 
-        for draft in drafts:
-            make_draft_service_live(client, draft, DRY_RUN)
+        for draft_service in draft_services:
+            make_draft_service_live(client, draft_service, DRY_RUN)

@@ -13,21 +13,21 @@ Example:
 """
 
 import sys
-from multiprocessing.pool import ThreadPool
-import six
-from six.moves import map
 from datetime import datetime
+from multiprocessing.pool import ThreadPool
 
 import backoff
-from docopt import docopt
-
 import dmapiclient
+import six
+from docopt import docopt
+from six.moves import map
 
 sys.path.insert(0, '.')
-from dmscripts.env import get_api_endpoint_from_stage
-from dmscripts import logging
+from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
+from dmscripts.helpers import logging_helpers
+from dmscripts.helpers.logging_helpers import logging
 
-logger = logging.configure_logger({'dmapiclient': logging.WARNING})
+logger = logging_helpers.configure_logger({"dmapiclient": logging.WARNING})
 
 
 def request_services(api_url, api_access_token, frameworks):

@@ -1,7 +1,10 @@
 """
+This script will check all free-text fields in submitted G-Cloud draft services for "bad words", as defined in
+the file at <bad_words_path> (typically blacklist.txt in https://github.gds/gds/digitalmarketplace-bad-words),
+and generate a CSV report of any bad word found.
 
 Usage:
-    scripts/bad_words.py <stage> <api_token> <bad_words_path> <framework_slug> <output_dir>
+    scripts/scan-g-cloud-drafts-for-bad-words.py <stage> <api_token> <bad_words_path> <framework_slug> <output_dir>
 """
 
 import sys
@@ -14,7 +17,7 @@ else:
 import six
 import re
 from docopt import docopt
-from dmscripts.env import get_api_endpoint_from_stage
+from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmapiclient import DataAPIClient
 
 

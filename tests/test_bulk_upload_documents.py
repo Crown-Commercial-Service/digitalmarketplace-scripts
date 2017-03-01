@@ -51,7 +51,7 @@ def test_get_supplier_id_from_framework_file_path_for_file_with_underscores():
     assert get_supplier_id_from_framework_file_path(path) == '584425'
 
 
-def test_get_supplier_id_from_framework_ile_path_for_file_starting_with_supplier_id():
+def test_get_supplier_id_from_framework_file_path_for_file_starting_with_supplier_id():
     path = '../../Downloads/Completed Frameworks BATCH2 SHARED WITH GDS/584425-result-letter.pdf'  # noqa
     assert get_supplier_id_from_framework_file_path(path) == '584425'
 
