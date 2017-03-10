@@ -40,7 +40,7 @@ from dmscripts.models.process_rules import format_datetime_string_as_date, remov
 from dmscripts.models.writecsv import csv_path
 from dmscripts.models import queries
 
-from dmscripts.helpers.logging_helpers import logging
+from dmscripts.helpers.logging_helpers import logging, configure_logger
 
 
 CONFIGS = [
@@ -159,7 +159,7 @@ if __name__ == '__main__':
 
     logging_config = {'dmapiclient': logging.INFO} if bool(arguments.get('--verbose')) \
         else {'dmapiclient': logging.WARNING}
-    logger = logging.configure_logger(logging_config)
+    logger = configure_logger(logging_config)
 
     if not os.path.exists(OUTPUT_DIR):
         logger.info("Creating {} directory".format(OUTPUT_DIR))
