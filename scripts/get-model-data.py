@@ -83,6 +83,7 @@ CONFIGS = [
             'requirementsLength',
             'specialistRole',
             'clarificationQuestions',
+            'frameworkSlug'
         ),
         'get_data_kwargs': {'with_users': 'true'},
         'process_fields': {
