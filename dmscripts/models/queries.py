@@ -42,6 +42,11 @@ def process_fields(rules, data):
     return data
 
 
+def rename_fields(columns, data):
+    """ Replace any column names using a dict of 'old column name': 'new column name' """
+    return data.rename(columns=columns)
+
+
 def sort_by(columns, data):
     return data.sort_values(by=columns)
 

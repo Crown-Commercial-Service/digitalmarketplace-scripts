@@ -71,6 +71,21 @@ def test_sort_by():
     ]
 
 
+def test_rename_fields():
+    data = queries.rename_fields({'old key': 'new key'}, DataFrame([
+        {'id': 1, 'old key': 7},
+        {'id': 2, 'old key': 9},
+        {'id': 4, 'old key': 8},
+    ]))
+
+    assert data.axes[1].tolist() == [u'id', u'new key']
+    assert data.values.tolist() == [
+        [1, 7],
+        [2, 9],
+        [4, 8]
+    ]
+
+
 def test_add_counts(csv_reader):
     csv_reader.return_value = DataFrame([
         {'fk': 1, 'status': True},
