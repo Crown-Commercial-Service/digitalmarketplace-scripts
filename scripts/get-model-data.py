@@ -123,6 +123,7 @@ CONFIGS = [
             'supplierId',
             'supplierName',
             'submittedAt',
+            'status',
         ),
         'sort_by': ['briefId', 'submittedAt']
     },
