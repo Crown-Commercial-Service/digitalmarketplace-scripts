@@ -27,6 +27,22 @@ logger = logging_helpers.configure_logger({'dmapiclient': logging.WARNING})
 
 
 def _format_statistics(stats, category, groupings):
+    """Filter statistics according to specified groupings
+
+    :param stats: Framework statistics as returned by our API
+    :param category: Top-level key from the statistics that we want to filter, e.g. 'interested_suppliers'
+    :param groupings: Rules about how data should be grouped, with new keys specified along with a set of conditions
+                      that must be met for data to be included under that key.
+                      Lists will match with any values that are in the list, and exact values are matched exactly.
+                      e.g.
+                       'interested': {
+                            'declaration_status': [None, 'started'],
+                            'has_completed_services': False
+                        }
+                      Will result in a key 'interested' in the return value that has a count of 'interested_suppliers'
+                      with a declaration status in [None or 'started'] and 'has_completed_services' == False
+    :return: A dictionary of statistics formatted according to the specified groupings
+    """
     return _label_and_count(stats[category], groupings)
 
 
