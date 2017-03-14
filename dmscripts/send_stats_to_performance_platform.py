@@ -1,5 +1,3 @@
-import json
-
 import backoff
 import base64
 import requests
