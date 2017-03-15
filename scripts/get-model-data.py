@@ -22,6 +22,7 @@ Arguments:
     models:
         buyer_users
         supplier_users
+        dos_services
         briefs
         brief_responses
         successful_brief_responses
@@ -40,8 +41,28 @@ from dmscripts.models.process_rules import format_datetime_string_as_date, remov
 from dmscripts.models.writecsv import csv_path
 from dmscripts.models import queries
 
-from dmscripts.helpers.logging_helpers import logging
+from dmscripts.helpers.logging_helpers import logging, configure_logger
 
+DOS_SPECIALIST_ROLES = [
+    "agileCoach",
+    "businessAnalyst",
+    "communicationsManager",
+    "contentDesigner",
+    "securityConsultant",
+    "deliveryManager",
+    "designer",
+    "developer",
+    "performanceAnalyst",
+    "portfolioManager",
+    "productManager",
+    "programmeManager",
+    "qualityAssurance",
+    "serviceManager",
+    "technicalArchitect",
+    "userResearcher",
+    "webOperations"
+]
+DOS_SPECIALIST_ROLES_PRICE_MAX = [s + 'PriceMax' for s in DOS_SPECIALIST_ROLES]
 
 CONFIGS = [
     {
@@ -68,6 +89,26 @@ CONFIGS = [
         'sort_by': ['createdAt', 'id']
     },
     {
+        'name': 'dos_services',
+        'base_model': 'services',
+        'get_data_kwargs': {'framework': 'digital-outcomes-and-specialists, digital-outcomes-and-specialists-2'},
+        'keys': (
+            [
+                'id',
+                'frameworkSlug',
+                'lotSlug',
+                'status',
+                'supplierId',
+                'supplierName'
+            ] + DOS_SPECIALIST_ROLES_PRICE_MAX  # We use price max as a proxy for a service having a role
+        ),
+        'process_fields': {
+            role: bool for role in DOS_SPECIALIST_ROLES_PRICE_MAX
+        },
+        'rename_fields': dict(zip(DOS_SPECIALIST_ROLES_PRICE_MAX, DOS_SPECIALIST_ROLES)),
+        'sort_by': ['frameworkSlug', 'supplierId', 'lotSlug']
+    },
+    {
         'name': 'briefs',
         'base_model': 'briefs',
         'keys': (
@@ -83,6 +124,7 @@ CONFIGS = [
             'requirementsLength',
             'specialistRole',
             'clarificationQuestions',
+            'frameworkSlug'
         ),
         'get_data_kwargs': {'with_users': 'true'},
         'process_fields': {
@@ -159,7 +201,7 @@ if __name__ == '__main__':
 
     logging_config = {'dmapiclient': logging.INFO} if bool(arguments.get('--verbose')) \
         else {'dmapiclient': logging.WARNING}
-    logger = logging.configure_logger(logging_config)
+    logger = configure_logger(logging_config)
 
     if not os.path.exists(OUTPUT_DIR):
         logger.info("Creating {} directory".format(OUTPUT_DIR))
@@ -203,6 +245,9 @@ if __name__ == '__main__':
         # Only keep requested keys in the output CSV
         keys = [k[len(k)-1] if isinstance(k, (tuple, list)) else k for k in config['keys']]
         data = data[keys]
+
+        if 'rename_fields' in config:
+            data = queries.rename_fields(config['rename_fields'], data)
 
         # sort list by some dict value
         if 'sort_by' in config:
