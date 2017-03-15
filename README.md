@@ -95,6 +95,10 @@ The `scripts` folder in this repository contains scripts that interact with the 
   Checks all free-text fields in submitted G-Cloud draft services for "bad words" and generates a CSV report of any bad
   words found.
 
+* `send-stats-to-performance-platform.py`
+
+  Fetches application statistics for a framework from the API and pushes them to the Performance Platform.
+
 * `set-search-alias.py`
 
   Used to set a new alias to an existing Elasticsearch index, via the Search API.
