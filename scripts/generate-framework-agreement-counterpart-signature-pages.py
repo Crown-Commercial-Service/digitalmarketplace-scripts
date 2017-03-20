@@ -7,10 +7,10 @@ Generate framework agreement counterpart signature pages from supplier "about yo
 who successfully applied to a framework and whose signed agreements have been approved by CCS.
 
 This script supersedes the old "generate-g8-counterpart-signature-pages.py" which uses framework-specific templates.
-Instead, this script requires a dict of framework-specific information, that is read as JSON from a file supplied
-as the "framework_json" command-line argument.
+Instead, this script requires a dict of framework-specific information, that is read from 'frameworkAgreementDetails'
+in the API response for the given framework.
 
-The supplied JSON file should look something like this:
+The 'frameworkAgreementDetails' JSON object from the API should look something like this:
 {
     "frameworkName": "Digital Outcomes and Specialists 2",
     "frameworkAgreementVersion": "RM1043iv",
@@ -33,10 +33,9 @@ The supplied JSON file should look something like this:
 
 Usage:
     scripts/generate-framework-agreement-counterpart-signature-pages.py <stage> <api_token> <framework_slug>
-    <framework_json> <template_folder> <output_folder> [<supplier_id_file>]
+    <template_folder> <output_folder> [<supplier_id_file>]
 
 """
-import json
 import os
 import shutil
 import sys
@@ -58,8 +57,8 @@ if __name__ == '__main__':
     args = docopt(__doc__)
 
     framework_slug = args['<framework_slug>']
-    framework_kwargs = declaration_definite_pass_schema = json.load(open(args["<framework_json>"], "r"))
     client = DataAPIClient(get_api_endpoint_from_stage(args['<stage>']), args['<api_token>'])
+    framework_kwargs = client.get_framework(framework_slug)['frameworks']['frameworkAgreementDetails']
 
     supplier_id_file = args['<supplier_id_file>']
     if supplier_id_file:
