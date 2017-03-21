@@ -1,4 +1,9 @@
 """
+PREREQUISITE: You'll need AWS credentials set up for the environment that you're uploading to:
+              Save your aws_access_key_id and aws_secret_access_key in ~/.aws/credentials
+              If you have more than one set of credentials in there then be sure to set your AWS_PROFILE environment
+              variable to reference the right credentials before running the script.
+
 This will:
  * scan a directory for pdf files (they should be in the format <supplier_id>-some-ignored-words.pdf but this isn't
    enforced)

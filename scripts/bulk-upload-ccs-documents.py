@@ -1,6 +1,11 @@
 """
 !!! NOTE: THIS IS AN OLD SCRIPT AND PROBABLY NOT THE ONE YOU WANT !!!
 
+PREREQUISITE: You'll need AWS credentials set up for the environment that you're uploading to:
+              Save your aws_access_key_id and aws_secret_access_key in ~/.aws/credentials
+              If you have more than one set of credentials in there then be sure to set your AWS_PROFILE environment
+              variable to reference the right credentials before running the script.
+
 For uploading result letters and framework agreements you should prefer bulk-upload-documents.py because it sets a
 nice supplier-friendly filename at the same time.
 
