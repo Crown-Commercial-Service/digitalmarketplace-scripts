@@ -7,36 +7,39 @@ Generate framework agreement counterpart signature pages from supplier "about yo
 who successfully applied to a framework and whose signed agreements have been approved by CCS.
 
 This script supersedes the old "generate-g8-counterpart-signature-pages.py" which uses framework-specific templates.
-Instead, this script requires a dict of framework-specific information, that is read as JSON from a file supplied
-as the "framework_json" command-line argument.
+Instead, this script requires a dict of framework-specific information, that is read from 'frameworkAgreementDetails'
+in the API response for the given framework.
 
-The supplied JSON file should look something like this:
+The 'frameworkAgreementDetails' JSON object from the API should look something like this:
 {
-    "frameworkName": "Digital Outcomes and Specialists 2",
+    "contractNoticeNumber": "2016/S 217-395765",
     "frameworkAgreementVersion": "RM1043iv",
-    "frameworkRefDate": "16-01-2017",
-    "frameworkStartDate": "30/01/2017",
     "frameworkEndDate": "29/01/2018",
     "frameworkExtensionLength": "12 months",
+    "frameworkRefDate": "16-01-2017",
+    "frameworkStartDate": "30/01/2017",
     "frameworkURL": "https://www.gov.uk/government/publications/digital-outcomes-and-specialists-2-framework-agreement",
-    "pageNumber": "3",
-    "pageTotal": "45",
-    "contractNoticeNumber": "2016/S 217-395765",
-    "lotOrder": ["digital-outcomes", "digital-specialists", "user-research-studios", "user-research-participants"],
     "lotDescriptions": {
-        "digital-outcomes": "Lot 1: digital outcomes",
-        "digital-specialists": "Lot 2: digital specialists",
-        "user-research-studios": "Lot 3: user research studios",
-        "user-research-participants": "Lot 4: user research participants"
-    }
+      "digital-outcomes": "Lot 1: digital outcomes",
+      "digital-specialists": "Lot 2: digital specialists",
+      "user-research-participants": "Lot 4: user research participants",
+      "user-research-studios": "Lot 3: user research studios"
+    },
+    "lotOrder": [
+      "digital-outcomes",
+      "digital-specialists",
+      "user-research-studios",
+      "user-research-participants"
+    ],
+    "pageTotal": 45,
+    "signaturePageNumber": 3
 }
 
 Usage:
     scripts/generate-framework-agreement-counterpart-signature-pages.py <stage> <api_token> <framework_slug>
-    <framework_json> <template_folder> <output_folder> [<supplier_id_file>]
+    <template_folder> <output_folder> [<supplier_id_file>]
 
 """
-import json
 import os
 import shutil
 import sys
@@ -58,8 +61,10 @@ if __name__ == '__main__':
     args = docopt(__doc__)
 
     framework_slug = args['<framework_slug>']
-    framework_kwargs = declaration_definite_pass_schema = json.load(open(args["<framework_json>"], "r"))
     client = DataAPIClient(get_api_endpoint_from_stage(args['<stage>']), args['<api_token>'])
+    framework = client.get_framework(framework_slug)['frameworks']
+    framework_kwargs = framework['frameworkAgreementDetails']
+    framework_kwargs['frameworkName'] = framework['name']
 
     supplier_id_file = args['<supplier_id_file>']
     if supplier_id_file:

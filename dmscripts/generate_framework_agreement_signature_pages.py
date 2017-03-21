@@ -23,9 +23,9 @@ def render_html_for_successful_suppliers(rows, framework_kwargs, template_dir, o
     template_path = os.path.join(template_dir, 'framework-agreement-signature-page.html')
     template_css_path = os.path.join(template_dir, 'framework-agreement-signature-page.css')
     for data in rows:
-        data.update(framework_kwargs)
         if data['pass_fail'] == 'fail':
             continue
+        data.update(framework_kwargs)
         data['awardedLots'] = filter(lambda lot: int(data[lot]) > 0, framework_kwargs['lotOrder'])
         html = render_html(template_path, data)
         save_page(html, data['supplier_id'], output_dir, "signature-page")
@@ -37,7 +37,6 @@ def render_html_for_suppliers_awaiting_countersignature(rows, framework_kwargs, 
     template_css_path = os.path.join(template_dir, 'framework-agreement-signature-page.css')
     countersignature_img_path = os.path.join(template_dir, 'framework-agreement-countersignature.png')
     for data in rows:
-        data.update(framework_kwargs)
         if data['pass_fail'] == 'fail' or data['countersigned_path'] or not data['countersigned_at']:
             logger.info("SKIPPING {}: pass_fail={} countersigned_at={} countersigned_path={}".format(
                 data['supplier_id'],
@@ -46,6 +45,7 @@ def render_html_for_suppliers_awaiting_countersignature(rows, framework_kwargs, 
                 data['countersigned_path'])
             )
             continue
+        data.update(framework_kwargs)
         data['awardedLots'] = filter(lambda lot: int(data[lot]) > 0, framework_kwargs['lotOrder'])
         html = render_html(template_path, data)
         save_page(html, data['supplier_id'], output_dir, "agreement-countersignature")

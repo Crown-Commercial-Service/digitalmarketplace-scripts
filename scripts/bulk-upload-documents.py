@@ -3,6 +3,12 @@
 !!! NOTE: This script is the preferred way to upload framework agreement signature pages and "fail" letters.
 !!! You can't upload countersigned/counterpart pages with this script because the DB also needs to be updated for those.
 
+PREREQUISITE: You'll need AWS credentials set up for the environment that you're uploading to:
+              Save your aws_access_key_id and aws_secret_access_key in ~/.aws/credentials
+              If you have more than one set of credentials in there then be sure to set your AWS_PROFILE environment
+              variable to reference the right credentials before running the script.
+
+
 This script requires a tab-separated file matching supplier ids to supplier names; the first column must be the
 supplier ID and the second column is the supplier name, e.g.:
 
