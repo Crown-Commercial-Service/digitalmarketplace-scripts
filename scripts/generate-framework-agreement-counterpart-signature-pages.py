@@ -12,23 +12,27 @@ in the API response for the given framework.
 
 The 'frameworkAgreementDetails' JSON object from the API should look something like this:
 {
-    "frameworkName": "Digital Outcomes and Specialists 2",
+    "contractNoticeNumber": "2016/S 217-395765",
     "frameworkAgreementVersion": "RM1043iv",
-    "frameworkRefDate": "16-01-2017",
-    "frameworkStartDate": "30/01/2017",
     "frameworkEndDate": "29/01/2018",
     "frameworkExtensionLength": "12 months",
+    "frameworkRefDate": "16-01-2017",
+    "frameworkStartDate": "30/01/2017",
     "frameworkURL": "https://www.gov.uk/government/publications/digital-outcomes-and-specialists-2-framework-agreement",
-    "pageNumber": "3",
-    "pageTotal": "45",
-    "contractNoticeNumber": "2016/S 217-395765",
-    "lotOrder": ["digital-outcomes", "digital-specialists", "user-research-studios", "user-research-participants"],
     "lotDescriptions": {
-        "digital-outcomes": "Lot 1: digital outcomes",
-        "digital-specialists": "Lot 2: digital specialists",
-        "user-research-studios": "Lot 3: user research studios",
-        "user-research-participants": "Lot 4: user research participants"
-    }
+      "digital-outcomes": "Lot 1: digital outcomes",
+      "digital-specialists": "Lot 2: digital specialists",
+      "user-research-participants": "Lot 4: user research participants",
+      "user-research-studios": "Lot 3: user research studios"
+    },
+    "lotOrder": [
+      "digital-outcomes",
+      "digital-specialists",
+      "user-research-studios",
+      "user-research-participants"
+    ],
+    "pageTotal": 45,
+    "signaturePageNumber": 3
 }
 
 Usage:
@@ -58,7 +62,9 @@ if __name__ == '__main__':
 
     framework_slug = args['<framework_slug>']
     client = DataAPIClient(get_api_endpoint_from_stage(args['<stage>']), args['<api_token>'])
-    framework_kwargs = client.get_framework(framework_slug)['frameworks']['frameworkAgreementDetails']
+    framework = client.get_framework(framework_slug)['frameworks']
+    framework_kwargs = framework['frameworkAgreementDetails']
+    framework_kwargs['frameworkName'] = framework['name']
 
     supplier_id_file = args['<supplier_id_file>']
     if supplier_id_file:
