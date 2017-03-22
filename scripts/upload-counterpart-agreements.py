@@ -50,7 +50,10 @@ from dmutils.s3 import S3
 from dmutils.email.dm_notify import DMNotifyClient
 
 
-logger = logging_helpers.configure_logger({'dmapiclient.base': logging.WARNING})
+logger = logging_helpers.configure_logger({
+    'dmapiclient.base': logging.WARNING,
+    'notifications_python_client.base': logging.WARNING,
+})
 
 
 if __name__ == '__main__':
