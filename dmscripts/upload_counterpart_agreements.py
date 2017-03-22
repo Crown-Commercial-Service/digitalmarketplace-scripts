@@ -5,6 +5,8 @@ from boto.exception import S3ResponseError
 from dmapiclient import APIError
 from dmutils.documents import generate_timestamped_document_upload_path, generate_download_filename, \
     COUNTERPART_FILENAME
+from dmutils.email.exceptions import EmailError
+from dmutils.email.helpers import hash_string
 
 from dmscripts.bulk_upload_documents import get_supplier_id_from_framework_file_path
 from dmscripts.helpers import logging_helpers
@@ -77,11 +79,14 @@ def upload_counterpart_file(
                     "supplier_name": supplier_name,
                 }, allow_resend=True)
             else:
-                logger.info("[Dry-run] Send notify email to %s", notify_email)
+                logger.info("[Dry-run] Send notify email to %s", hash_string(notify_email))
     except (OSError, IOError) as e:
         logger.error("Error reading file '{}': {}".format(file_path, e.message))
     except S3ResponseError as e:
         logger.error("Error uploading '{}' to '{}': {}".format(file_path, upload_path, e.message))
+    except EmailError as e:
+        # dm_notify_client should have already logged the error
+        pass
     except APIError as e:
         logger.error("API error setting upload path '{}' on agreement ID {}: {}".format(
             upload_path,
