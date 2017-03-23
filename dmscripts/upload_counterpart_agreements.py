@@ -34,7 +34,7 @@ def upload_counterpart_file(
     supplier_name = supplier_framework['declaration']['nameOfOrganisation']
     download_filename = generate_download_filename(supplier_id, COUNTERPART_FILENAME, supplier_name)
 
-    notify_emails = dm_notify_client and frozenset(chain(
+    email_addresses_to_notify = dm_notify_client and frozenset(chain(
         (supplier_framework["declaration"]["primaryContactEmail"],),
         (
             user["emailAddress"]
@@ -71,7 +71,7 @@ def upload_counterpart_file(
                 upload_path, supplier_framework['agreementId'])
             )
 
-        for notify_email in (notify_emails or ()):
+        for notify_email in (email_addresses_to_notify or ()):
             if not dry_run:
                 dm_notify_client.send_email(notify_email, notify_template_id, {
                     "framework_slug": framework["slug"],
