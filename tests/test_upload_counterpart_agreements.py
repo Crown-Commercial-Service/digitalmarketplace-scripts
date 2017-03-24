@@ -10,8 +10,9 @@ else:
     import builtins
 
 
+@pytest.mark.parametrize("notify_fail_early", (False, True,))  # should make no difference
 @mock.patch('dmscripts.upload_counterpart_agreements.getpass.getuser')
-def test_upload_counterpart_file_uploads_and_calls_api_if_not_dry_run(getuser):
+def test_upload_counterpart_file_uploads_and_calls_api_if_not_dry_run(getuser, notify_fail_early):
     getuser.return_value = 'test user'
     bucket = mock.Mock()
     data_api_client = mock.Mock()
@@ -35,6 +36,7 @@ def test_upload_counterpart_file_uploads_and_calls_api_if_not_dry_run(getuser):
                 'pdfs/123456-file.pdf',
                 False,
                 data_api_client,
+                notify_fail_early=notify_fail_early,
             )
 
             bucket.save.assert_called_once_with(
@@ -55,7 +57,8 @@ def test_upload_counterpart_file_uploads_and_calls_api_if_not_dry_run(getuser):
             )
 
 
-def test_upload_counterpart_file_does_not_perform_actions_if_dry_run():
+@pytest.mark.parametrize("notify_fail_early", (False, True,))  # should make no difference
+def test_upload_counterpart_file_does_not_perform_actions_if_dry_run(notify_fail_early):
     bucket = mock.Mock()
     data_api_client = mock.Mock()
     data_api_client.get_supplier_framework_info.return_value = {
@@ -96,6 +99,7 @@ def test_upload_counterpart_file_does_not_perform_actions_if_dry_run():
             data_api_client,
             dm_notify_client=dm_notify_client,
             notify_template_id="dead-beef-baad-f00d",
+            notify_fail_early=notify_fail_early,
         )
 
         assert bucket.save.called is False
@@ -171,7 +175,12 @@ def test_upload_counterpart_file_does_not_perform_actions_if_dry_run():
         ),
     ),
 ))
-def test_upload_counterpart_file_sends_correct_emails(find_users_iterable, expected_send_email_emails):
+@pytest.mark.parametrize("notify_fail_early", (False, True,))  # should make no difference
+def test_upload_counterpart_file_sends_correct_emails(
+        notify_fail_early,
+        find_users_iterable,
+        expected_send_email_emails,
+        ):
     bucket = mock.Mock()
     data_api_client = mock.Mock()
     data_api_client.get_supplier_framework_info.return_value = {
@@ -198,6 +207,7 @@ def test_upload_counterpart_file_sends_correct_emails(find_users_iterable, expec
             data_api_client,
             dm_notify_client=dm_notify_client,
             notify_template_id="dead-beef-baad-f00d",
+            notify_fail_early=notify_fail_early,
         )
 
         assert bucket.save.called is True

@@ -44,10 +44,12 @@ from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.logging_helpers import logging
 
 from docopt import docopt
-from dmapiclient import DataAPIClient
+from dmapiclient import DataAPIClient, APIError
+from boto.exception import S3ResponseError
 
 from dmutils.s3 import S3
 from dmutils.email.dm_notify import DMNotifyClient
+from dmutils.email.exceptions import EmailError
 
 
 logger = logging_helpers.configure_logger({
@@ -74,14 +76,26 @@ if __name__ == '__main__':
     else:
         bucket = S3(get_bucket_name(stage, "agreements"))
 
+    failure_count = 0
+
     for file_path in get_all_files_of_type(document_directory, "pdf"):
-        upload_counterpart_file(
-            bucket,
-            framework,
-            file_path,
-            dry_run,
-            data_api_client,
-            dm_notify_client=dm_notify_client,
-            notify_template_id=arguments.get("--notify-template-id"),
-            logger=logger,
-        )
+        try:
+            upload_counterpart_file(
+                bucket,
+                framework,
+                file_path,
+                dry_run,
+                data_api_client,
+                dm_notify_client=dm_notify_client,
+                notify_template_id=arguments.get("--notify-template-id"),
+                notify_fail_early=False,
+                logger=logger,
+            )
+        except (OSError, IOError, S3ResponseError, EmailError, APIError) as e:
+            # upload_counterpart_file should have already logged these so no need here
+            failure_count += 1
+
+    # we return the failure_count as the error code, though note these count "failures" quite pessimistically, a single
+    # email's notify call failing will count the supplier's action as a failure even if the file was successfully
+    # uploaded (and possibly even other emails managed to get out)
+    sys.exit(failure_count)
