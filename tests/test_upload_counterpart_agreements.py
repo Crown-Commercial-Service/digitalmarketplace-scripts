@@ -1,7 +1,10 @@
 import mock
 import pytest
 from sys import version_info
+from contextlib import contextmanager
 from freezegun import freeze_time
+from dmutils.email.exceptions import EmailError
+
 from dmscripts.upload_counterpart_agreements import upload_counterpart_file
 
 if version_info.major == 2:
@@ -107,9 +110,14 @@ def test_upload_counterpart_file_does_not_perform_actions_if_dry_run(notify_fail
         data_api_client.find_users_iter.assert_called_with(supplier_id=123456)
 
 
+@contextmanager
+def _empty_context_manager():
+    yield
+
+
 @pytest.mark.parametrize("find_users_iterable,expected_send_email_emails", (
     (
-        (
+        (  # find_users_iterable
             {
                 "id": 111322,
                 "emailAddress": "user.111322@example.com",
@@ -135,14 +143,14 @@ def test_upload_counterpart_file_does_not_perform_actions_if_dry_run(notify_fail
                 "active": True,
             },
         ),
-        (
+        (  # expected_send_email_emails
             "supplier.primary@example.com",
             "user.111321@example.com",
             "user.111322@example.com",
         ),
     ),
     (
-        (
+        (  # find_users_iterable
             {
                 "id": 111329,
                 "emailAddress": "user.111329@example.com",
@@ -156,13 +164,13 @@ def test_upload_counterpart_file_does_not_perform_actions_if_dry_run(notify_fail
                 "active": False,
             },
         ),
-        (
+        (  # expected_send_email_emails
             "supplier.primary@example.com",
             "user.111329@example.com",
         ),
     ),
     (
-        (
+        (  # find_users_iterable
             {
                 "id": 222765,
                 "emailAddress": "user.222765@example.com",
@@ -170,13 +178,15 @@ def test_upload_counterpart_file_does_not_perform_actions_if_dry_run(notify_fail
                 "active": False,
             },
         ),
-        (
+        (  # expected_send_email_emails
             "supplier.primary@example.com",
         ),
     ),
 ))
-@pytest.mark.parametrize("notify_fail_early", (False, True,))  # should make no difference
+@pytest.mark.parametrize("notify_fail_early", (False, True,))
+@pytest.mark.parametrize("notify_raise_email_error", (False, True,))
 def test_upload_counterpart_file_sends_correct_emails(
+        notify_raise_email_error,
         notify_fail_early,
         find_users_iterable,
         expected_send_email_emails,
@@ -194,21 +204,24 @@ def test_upload_counterpart_file_sends_correct_emails(
     }
     data_api_client.find_users_iter.side_effect = lambda *args, **kwargs: iter(find_users_iterable)
     dm_notify_client = mock.Mock()
+    if notify_raise_email_error:
+        dm_notify_client.send_email.side_effect = EmailError("Forgot the stamp")
 
     with mock.patch.object(builtins, 'open', mock.mock_open(read_data='foo')):
-        upload_counterpart_file(
-            bucket,
-            {
-                "name": "Dos Two",
-                "slug": "digital-outcomes-and-specialists-2",
-            },
-            'pdfs/123456-file.pdf',
-            False,
-            data_api_client,
-            dm_notify_client=dm_notify_client,
-            notify_template_id="dead-beef-baad-f00d",
-            notify_fail_early=notify_fail_early,
-        )
+        with (pytest.raises(EmailError) if notify_raise_email_error else _empty_context_manager()) as excinfo:
+            upload_counterpart_file(
+                bucket,
+                {
+                    "name": "Dos Two",
+                    "slug": "digital-outcomes-and-specialists-2",
+                },
+                'pdfs/123456-file.pdf',
+                False,
+                data_api_client,
+                dm_notify_client=dm_notify_client,
+                notify_template_id="dead-beef-baad-f00d",
+                notify_fail_early=notify_fail_early,
+            )
 
         assert bucket.save.called is True
         assert data_api_client.update_framework_agreement.called is True
@@ -220,9 +233,14 @@ def test_upload_counterpart_file_sends_correct_emails(
             "supplier_name": "The supplier who signed",
         }
 
-        assert sorted(dm_notify_client.send_email.call_args_list) == sorted(
-            (
-                (email, "dead-beef-baad-f00d", expected_personalisation),
-                {"allow_resend": True},
-            ) for email in expected_send_email_emails
-        )
+        if notify_raise_email_error and notify_fail_early:
+            # we don't want to dictate anything about the order emails are tried in so we can't know which one it will
+            # have tried first - this is probably the only useful thing we can assert
+            assert len(dm_notify_client.send_email.call_args_list) == 1
+        else:
+            assert sorted(dm_notify_client.send_email.call_args_list) == sorted(
+                (
+                    (email, "dead-beef-baad-f00d", expected_personalisation),
+                    {"allow_resend": True},
+                ) for email in expected_send_email_emails
+            )
