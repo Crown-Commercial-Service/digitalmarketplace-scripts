@@ -1,0 +1,76 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "allOf": [
+        {"$ref": "#/definitions/baseline"},
+        {
+            "properties": {
+                "taxEvasion": {"enum": [false]},
+                "environmentalSocialLabourLaw": {"enum": [false]},
+                "bankrupt": {"enum": [false]},
+                "graveProfessionalMisconduct": {"enum": [false]},
+                "distortingCompetition": {"enum": [false]},
+                "conflictOfInterest": {"enum": [false]},
+                "distortedCompetition": {"enum": [false]},
+                "significantOrPersistentDeficiencies": {"enum": [false]},
+                "seriousMisrepresentation": {"enum": [false]},
+                "witheldSupportingDocuments": {"enum": [false]},
+                "influencedContractingAuthority": {"enum": [false]},
+                "confidentialInformation": {"enum": [false]},
+                "misleadingInformation": {"enum": [false]},
+                "unspentTaxConvictions": {"enum": [false]},
+                "GAAR": {"enum": [false]}
+            }
+        }
+    ],
+    "definitions": {
+        "baseline": {
+            "$schema": "http://json-schema.org/draft-04/schema#",
+            "type": "object",
+            "properties": {
+                "status": {"enum": ["complete"]},
+                "termsOfParticipation": {"enum": [true]},
+                "termsAndConditions": {"enum": [true]},
+                "10WorkingDays": {"enum": [true]},
+                "informationChanges": {"enum": [true]},
+                "requisiteAuthority": {"enum": [true]},
+                "accurateInformation": {"enum": [true]},
+                "unfairCompetition": {"enum": [true]},
+                "readUnderstoodGuidance": {"enum": [true]},
+                "understandTool": {"enum": [true]},
+                "understandHowToAskQuestions": {"enum": [true]},
+                "proofOfClaims": {"enum": [true]},
+                "accuratelyDescribed": {"enum": [true]},
+                "employersInsurance": {
+                    "type": "string",
+                    "pattern": "^(Yes |Not applicable )"
+                },
+                "offerServicesYourselves": {"enum": [true]},
+                "fullAccountability": {"enum": [true]},
+                "conspiracy": {"enum": [false]},
+                "corruptionBribery": {"enum": [false]},
+                "fraudAndTheft": {"enum": [false]},
+                "terrorism": {"enum": [false]},
+                "organisedCrime": {"enum": [false]},
+                "MI": {"enum": [true]},
+                "canProvideFromDayOne": {"enum": [true]},
+                "evidence": {"enum": [true]},
+                "environmentallyFriendly": {"enum": [true]},
+                "consistentDelivery": {"enum": [true]},
+                "skillsAndCapabilityAssessment": {"enum": [true]},
+                "continuousProfessionalDevelopment": {"enum": [true]},
+                "customerSatisfactionProcess": {"enum": [true]},
+                "equalityAndDiversity": {"enum": [true]},
+                "civilServiceValues": {"enum": [true]},
+                "technologyCodesOfPractice": {"enum": [true]},
+                "serviceStandard": {"enum": [true]},
+                "ongoingEngagement": {"enum": [true]},
+                "transparentContracting": {"enum": [true]},
+                "publishContracts": {"enum": [true]},
+                "safeguardOfficialInformation": {"enum": [true]},
+                "safeguardPersonalData": {"enum": [true]}
+            },
+            "required": ["status"]
+        }
+    }
+}

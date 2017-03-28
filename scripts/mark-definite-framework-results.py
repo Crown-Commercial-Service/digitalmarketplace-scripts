@@ -42,7 +42,7 @@ from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmapiclient import DataAPIClient
 from dmscripts.mark_definite_framework_results import mark_definite_framework_results
 from dmscripts.helpers.logging_helpers import configure_logger
-from dmscripts.helpers.logging_helpers.logging import INFO as loglevel_INFO, DEBUG as loglevel_DEBUG
+from dmscripts.helpers.logging_helpers import INFO as loglevel_INFO, DEBUG as loglevel_DEBUG
 
 
 if __name__ == "__main__":
