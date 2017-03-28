@@ -28,7 +28,6 @@ _declaration_definite_pass_schema = lambda: {
             "$schema": "http://json-schema.org/draft-04/schema#",
             "type": "object",
             "properties": {
-                "status": {"enum": ["complete"]},
                 "shouldBeFalseStrict": {"enum": [False]},
                 "shouldBeTrueStrict": {"enum": [True]},
                 "shouldMatchPatternStrict": {
@@ -441,6 +440,7 @@ def test_no_prev_results_no_baseline_schema(
     expected_sf_actions = {
         3456: False,
         4321: True,
+        4567: False,
         5432: False,
         6543: True,
         8765: True,
@@ -493,6 +493,7 @@ def test_no_prev_results_neither_optional_schema(
     expected_sf_actions = {
         3456: True,
         4321: True,
+        4567: False,
         5432: False,
         6543: True,
         8765: True,

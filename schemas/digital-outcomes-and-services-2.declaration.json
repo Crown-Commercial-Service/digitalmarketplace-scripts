@@ -28,7 +28,6 @@
             "$schema": "http://json-schema.org/draft-04/schema#",
             "type": "object",
             "properties": {
-                "status": {"enum": ["complete"]},
                 "termsOfParticipation": {"enum": [true]},
                 "termsAndConditions": {"enum": [true]},
                 "10WorkingDays": {"enum": [true]},
@@ -70,8 +69,7 @@
                 "publishContracts": {"enum": [true]},
                 "safeguardOfficialInformation": {"enum": [true]},
                 "safeguardPersonalData": {"enum": [true]}
-            },
-            "required": ["status"]
+            }
         }
     }
 }
