@@ -186,6 +186,8 @@ CONFIGS = [
             'essentialRequirements-False',
             'essentialRequirements-True',
             'clarificationQuestions',
+            'frameworkSlug',
+            'specialistRole'
         ),
         'sort_by': ['id']
     }
