@@ -67,7 +67,21 @@ class BaseAssessmentTest(object):
         }
 
     def _get_supplier_frameworks(self):
-        return {k: dict(v, supplierId=k, frameworkSlug=self.framework_slug) for k, v in {
+        return {
+            k: dict(
+                v,
+                supplierId=k,
+                frameworkSlug=self.framework_slug,
+                declaration=dict(
+                    v["declaration"],
+                    primaryContact=u"Supplier {} Empl\u00f6yee 123".format(k),
+                    primaryContactEmail="supplier.{}.{}@example.com".format(k, self.framework_slug),
+                    mitigatingFactors="Permit, brevi manu, Supplier {}\u2019s sight is somewhat troubled".format(k),
+                    mitigatingFactors2=(
+                        "Supplier {} can scarcely be prepared for every emergency that might crop up".format(k)
+                    ),
+                ),
+            ) for k, v in {
             # this has many fields filled out, the intention being to take a quick dict comprehension-modified copy blanket-
             # overriding any undesired values where necessary
             1234: {
