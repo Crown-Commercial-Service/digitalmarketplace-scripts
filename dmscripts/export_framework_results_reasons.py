@@ -20,28 +20,6 @@ def get_validation_errors(candidate, schema):
     return error_keys
 
 
-def fields_from_content_question_gen(question, record):
-    if question["type"] == "checkboxes":
-        for option in question.options:
-            # Make a CSV column for each label
-            yield (
-                make_field_title(question.id, option["label"]),
-                count_field_in_record(question.id, option["label"], record)
-            )
-    elif question.fields:
-        for field_id in sorted(question.fields.values()):
-            # Make a CSV column containing all values
-            yield (
-                field_id,
-                "|".join(service.get(field_id, "") for service in record["services"])
-            )
-    else:
-        yield (
-            question["id"],
-            "|".join(str(service.get(question["id"], "")) for service in record["services"])
-        )
-
-
 def get_declaration_questions(declaration_content, record):
     for section in declaration_content:
         for question in section.questions:
