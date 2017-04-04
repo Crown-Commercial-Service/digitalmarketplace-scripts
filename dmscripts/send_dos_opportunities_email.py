@@ -2,7 +2,7 @@
 
 Test list ID is "096e52cebb" which can be used for local development
 """
-from datetime import datetime
+from datetime import datetime, date, timedelta
 
 from mailchimp3 import MailChimp
 
@@ -11,9 +11,11 @@ from requests.exceptions import RequestException
 from dmscripts.helpers.html_helpers import render_html
 from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.logging_helpers import logging
+from dmutils.formats import DATETIME_FORMAT
+
+import dmapiclient
 
 logger = logging_helpers.configure_logger({'dmapiclient': logging.INFO})
-
 
 lots = [
     {
@@ -32,6 +34,14 @@ lots = [
         "list_id": "096e52cebb"
     }
 ]
+
+
+def get_live_briefs_between_two_dates(data_api_client, lot_slug, start_date, end_date):
+    return [
+        brief for brief in data_api_client.find_briefs_iter(status="live", lot=lot_slug)
+        if datetime.strptime(brief['publishedAt'], DATETIME_FORMAT).date() >= start_date
+        and datetime.strptime(brief['publishedAt'], DATETIME_FORMAT).date() <= end_date
+    ]
 
 
 def create_campaign_data(lot_name, list_id):
@@ -108,10 +118,16 @@ def get_mailchimp_client(mailchimp_username, mailchimp_api_key):
     return MailChimp(mailchimp_username, mailchimp_api_key)
 
 
-def main(mailchimp_username, mailchimp_api_key):
+def main(data_api_url, data_api_access_token, mailchimp_username, mailchimp_api_key, number_of_days):
+    data_api_client = dmapiclient.DataAPIClient(data_api_url, data_api_access_token)
     mailchimp_client = get_mailchimp_client(mailchimp_username, mailchimp_api_key)
 
+    start_date = date.today() - timedelta(days=number_of_days)
+    end_date = date.today() - timedelta(days=1)
+
     for lot in lots:
+        get_live_briefs_between_two_dates(data_api_client, lot["lot_slug"], start_date, end_date)
+
         campaign_data = create_campaign_data(lot["lot_name"], lot["list_id"])
         campaign_id = create_campaign(mailchimp_client, campaign_data)
         if not campaign_id:
