@@ -25,7 +25,7 @@ This will:
    * if <notify_key> and <notify_template_id> are provided, will send a notification email to all the supplier's active
      users (and their primaryContactEmail for that framework)
 
-Usage: scripts/upload-counterpart-agreemets.py <stage> <api_token> <documents_directory> <framework_slug> [options]
+Usage: scripts/upload-counterpart-agreements.py <stage> <api_token> <documents_directory> <framework_slug> [options]
 
 Options:
     --dry-run                                   # Don't actually do anything
