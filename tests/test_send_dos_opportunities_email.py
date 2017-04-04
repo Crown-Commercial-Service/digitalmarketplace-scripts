@@ -9,7 +9,8 @@ from dmscripts.send_dos_opportunities_email import (
     main,
     create_campaign_data,
     create_campaign,
-    set_campaign_content
+    set_campaign_content,
+    send_campaign
 )
 
 
@@ -72,7 +73,25 @@ def test_log_error_message_if_error_setting_campaign_content(mailchimp_client, l
         "html": "some html"
     }
 
-    assert set_campaign_content(mailchimp_client, 1, content_data) is False
+    assert set_campaign_content(mailchimp_client, "1", content_data) is False
     logger.error.assert_called_once_with(
         "Mailchimp failed to set content for campaign id '1'", extra={"error": "error message"}
+    )
+
+
+@mock.patch('dmscripts.send_dos_opportunities_email.MailChimp')
+def test_send_campaign(mailchimp_client):
+    campaign_id = "1"
+    res = send_campaign(mailchimp_client, campaign_id)
+    assert res is True
+    mailchimp_client.campaigns.actions.send.assert_called_once_with(campaign_id)
+
+
+@mock.patch('dmscripts.send_dos_opportunities_email.logger', autospec=True)
+@mock.patch('dmscripts.send_dos_opportunities_email.MailChimp')
+def test_log_error_message_if_error_sending_campaign(mailchimp_client, logger):
+    mailchimp_client.campaigns.actions.send.side_effect = RequestException("error sending")
+    assert send_campaign(mailchimp_client, "1") is False
+    logger.error.assert_called_once_with(
+        "Mailchimp failed to send campaign id '1'", extra={"error": "error sending"}
     )
