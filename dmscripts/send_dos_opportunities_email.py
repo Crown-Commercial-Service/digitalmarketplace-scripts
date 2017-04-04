@@ -15,20 +15,23 @@ from dmscripts.helpers.logging_helpers import logging
 logger = logging_helpers.configure_logger({'dmapiclient': logging.INFO})
 
 
-lots = {
-    "digital-specialists": {
+lots = [
+    {
+        "lot_slug": "digital-specialists",
         "lot_name": "Digital specialists",
         "list_id": "096e52cebb"
     },
-    "digital-outcomes": {
+    {
+        "lot_slug": "digital-outcomes",
         "lot_name": "Digital outcomes",
         "list_id": "096e52cebb"
     },
-    "user-research-participants": {
+    {
+        "lot_slug": "user-research-participants",
         "lot_name": "User research participants",
         "list_id": "096e52cebb"
     }
-}
+]
 
 
 def create_campaign_data(lot_name, list_id):
@@ -101,10 +104,24 @@ def send_campaign(mailchimp_client, campaign_id):
     return False
 
 
-def main(mailchimp_username, mailchimp_api_key):
-    mailchimp_client = MailChimp(mailchimp_username, mailchimp_api_key)
+def get_mailchimp_client(mailchimp_username, mailchimp_api_key):
+    return MailChimp(mailchimp_username, mailchimp_api_key)
 
-    campaign_id = create_campaign(mailchimp_client)
-    if not campaign_id:
-        return False
+
+def main(mailchimp_username, mailchimp_api_key):
+    mailchimp_client = get_mailchimp_client(mailchimp_username, mailchimp_api_key)
+
+    for lot in lots:
+        campaign_data = create_campaign_data(lot["lot_name"], lot["list_id"])
+        campaign_id = create_campaign(mailchimp_client, campaign_data)
+        if not campaign_id:
+            return False
+
+        content_data = get_html_content()
+        if not set_campaign_content(mailchimp_client, campaign_id, content_data):
+            return False
+
+        if not send_campaign(mailchimp_client, campaign_id):
+            return False
+
     return True
