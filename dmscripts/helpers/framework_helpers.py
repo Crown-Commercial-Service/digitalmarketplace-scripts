@@ -39,7 +39,7 @@ def find_suppliers_on_framework(client, framework_slug):
 
 
 def find_suppliers_with_details_and_draft_services(client, framework_slug, supplier_ids=None, lot=None, statuses=None):
-    pool = ThreadPool(30)
+    pool = ThreadPool(3)
 
     records = find_suppliers(client, framework_slug, supplier_ids)
     records = pool.imap(partial(add_supplier_info, client), records)
@@ -50,7 +50,7 @@ def find_suppliers_with_details_and_draft_services(client, framework_slug, suppl
 
 
 def find_suppliers_with_details_and_draft_service_counts(client, framework_slug, supplier_ids=None):
-    pool = ThreadPool(30)
+    pool = ThreadPool(3)
 
     records = find_suppliers(client, framework_slug, supplier_ids)
     records = pool.imap(partial(add_supplier_info, client), records)
