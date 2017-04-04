@@ -80,5 +80,7 @@ if __name__ == '__main__':
     html_pages = os.listdir(html_dir)
     html_pages.remove('framework-agreement-signature-page.css')
     html_pages.remove('framework-agreement-countersignature.png')
-    render_pdf_for_each_html_page(html_pages, html_dir, args['<output_folder>'])
+    ok = render_pdf_for_each_html_page(html_pages, html_dir, args['<output_folder>'])
     shutil.rmtree(html_dir)
+    if not ok:
+        sys.exit(1)
