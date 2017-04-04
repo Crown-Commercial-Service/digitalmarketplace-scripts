@@ -91,9 +91,14 @@ def set_campaign_content(mailchimp_client, campaign_id, content_data):
 
 def send_campaign(mailchimp_client, campaign_id):
     try:
-        return client.campaigns.actions.send(campaign_id=campaign_id)
-    except Exception as e:
-        print e
+        mailchimp_client.campaigns.actions.send(campaign_id)
+        return True
+    except RequestException as e:
+        logger.error(
+            "Mailchimp failed to send campaign id '{0}'".format(campaign_id),
+            extra={"error": e.message}
+        )
+    return False
 
 
 def main(mailchimp_username, mailchimp_api_key):
