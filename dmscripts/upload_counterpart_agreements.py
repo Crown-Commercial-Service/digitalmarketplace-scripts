@@ -5,12 +5,10 @@ from boto.exception import S3ResponseError
 from dmapiclient import APIError
 from dmutils.documents import generate_timestamped_document_upload_path, generate_download_filename, \
     COUNTERPART_FILENAME
-from dmutils.email.helpers import hash_string
 from dmutils.email.exceptions import EmailError
 
 from dmscripts.bulk_upload_documents import get_supplier_id_from_framework_file_path
 from dmscripts.helpers import logging_helpers
-from dmscripts.helpers.logging_helpers import logging
 
 
 def upload_counterpart_file(
@@ -82,7 +80,7 @@ def upload_counterpart_file(
                         "supplier_name": supplier_name,
                     }, allow_resend=True)
                 else:
-                    logger.info("[Dry-run] Send notify email to %s", hash_string(notify_email))
+                    logger.info("[Dry-run] Send notify email to %s", notify_email)
             except EmailError as e:
                 if notify_fail_early:
                     raise

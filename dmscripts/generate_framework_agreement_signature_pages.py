@@ -56,6 +56,7 @@ def render_html_for_suppliers_awaiting_countersignature(rows, framework_kwargs, 
 def render_pdf_for_each_html_page(html_pages, html_dir, pdf_dir):
     html_dir = os.path.abspath(html_dir)
     pdf_dir = os.path.abspath(pdf_dir)
+    ok = True
     if not os.path.exists(pdf_dir):
         os.mkdir(pdf_dir)
     for index, html_page in enumerate(html_pages):
@@ -65,3 +66,5 @@ def render_pdf_for_each_html_page(html_pages, html_dir, pdf_dir):
         exit_code = subprocess.call(['wkhtmltopdf', 'file://{}'.format(html_path), pdf_path])
         if exit_code > 0:
             logger.error("ERROR {} on {}".format(exit_code, html_page))
+            ok = False
+    return ok
