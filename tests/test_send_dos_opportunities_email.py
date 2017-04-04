@@ -95,3 +95,51 @@ def test_log_error_message_if_error_sending_campaign(mailchimp_client, logger):
     logger.error.assert_called_once_with(
         "Mailchimp failed to send campaign id '1'", extra={"error": "error sending"}
     )
+
+
+@mock.patch('dmscripts.send_dos_opportunities_email.get_mailchimp_client')
+@mock.patch('dmscripts.send_dos_opportunities_email.create_campaign_data')
+@mock.patch('dmscripts.send_dos_opportunities_email.create_campaign')
+def test_main_creates_campaigns_for_each_lot(create_campaign, create_campaign_data, get_mailchimp_client):
+    create_campaign_data.side_effect = [{"first": "campaign"}, {"second": "campaign"}, {"third": "campaign"}]
+
+    main("username", "API KEY")
+
+    create_campaign_data.assert_any_call("Digital specialists", "096e52cebb")
+    create_campaign.assert_any_call(mock.ANY, {"first": "campaign"})
+
+    create_campaign_data.assert_any_call("Digital outcomes", "096e52cebb")
+    create_campaign.assert_any_call(mock.ANY, {"second": "campaign"})
+
+    create_campaign_data.assert_any_call("User research participants", "096e52cebb")
+    create_campaign.assert_any_call(mock.ANY, {"third": "campaign"})
+
+
+@mock.patch('dmscripts.send_dos_opportunities_email.create_campaign')
+@mock.patch('dmscripts.send_dos_opportunities_email.get_html_content')
+@mock.patch('dmscripts.send_dos_opportunities_email.get_mailchimp_client')
+@mock.patch('dmscripts.send_dos_opportunities_email.set_campaign_content')
+def test_main_sets_content_for_each_lot(set_campaign_content, get_mailchimp_client, get_html_content, create_campaign):
+    get_html_content.side_effect = [{"first": "content"}, {"second": "content"}, {"third": "content"}]
+    create_campaign.side_effect = ["1", "2", "3"]
+    main("username", "API KEY")
+
+    get_html_content.assert_any_call()
+    set_campaign_content.assert_any_call(mock.ANY, "1", {"first": "content"})
+
+    get_html_content.assert_any_call()
+    set_campaign_content.assert_any_call(mock.ANY, "2", {"second": "content"})
+
+    get_html_content.assert_any_call()
+    set_campaign_content.assert_any_call(mock.ANY, "3", {"third": "content"})
+
+
+@mock.patch('dmscripts.send_dos_opportunities_email.create_campaign')
+@mock.patch('dmscripts.send_dos_opportunities_email.get_mailchimp_client')
+@mock.patch('dmscripts.send_dos_opportunities_email.send_campaign')
+def test_main_sends_campaign_for_each_lot(send_campaign, get_mailchimp_client, create_campaign):
+    create_campaign.side_effect = ["1", "2", "3"]
+    main("username", "API KEY")
+    send_campaign.assert_any_call(mock.ANY, "1")
+    send_campaign.assert_any_call(mock.ANY, "2")
+    send_campaign.assert_any_call(mock.ANY, "3")
