@@ -92,7 +92,7 @@ def add_draft_services(client, framework_slug, record, lot=None, statuses=None):
 def add_draft_counts(client, framework_slug, record):
     # "counts" is a counter of (lotSlug, status) tuples
     counts = Counter(
-        (ds['lot'], ds['status'])
+        (ds['lotSlug'], ds['status'])
         for ds in client.find_draft_services_iter(record['supplier']['id'], framework=framework_slug)
     )
     return dict(record, counts=counts)
