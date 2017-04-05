@@ -74,6 +74,8 @@ import subprocess
 import sys
 sys.path.insert(0, '.')
 
+from datetime import date
+
 from dmapiclient import DataAPIClient, SearchAPIClient  # noqa
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage  # noqa
 from dmscripts.json_schema_service_faker import JsonSchemaGCloudServiceFaker  # noqa
@@ -209,7 +211,8 @@ if __name__ == '__main__':
     subprocess.call(['python', 'scripts/make-dos-live.py', args.new_slug, args.env, args.data_api_token])
 
     # 6) Runs the `index-services.py` script to index the new services
-    subprocess.call(['python', 'scripts/index-services.py', '--index', 'g-cloud', '--frameworks', args.new_slug,
+    index_name = 'g-cloud-{}'.format(date.today().isoformat())
+    subprocess.call(['python', 'scripts/index-services.py', '--index', index_name, '--frameworks', args.new_slug,
                      '--api-token', args.data_api_token, '--search-api-token', args.search_api_token, args.env])
 
     # 7) Return the framework to its initial state.
