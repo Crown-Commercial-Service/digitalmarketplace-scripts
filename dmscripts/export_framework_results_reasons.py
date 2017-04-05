@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from itertools import chain
 import jsonschema
 import os
 
@@ -20,13 +21,7 @@ def get_validation_errors(candidate, schema):
     return error_keys
 
 
-def get_declaration_questions(declaration_content, record):
-    for section in declaration_content:
-        for question in section.questions:
-            yield question, record['declaration'].get(question.id)
-
-
-def add_failed_questions(declaration_content,
+def add_failed_questions(questions_numbers,
                          declaration_definite_pass_schema,
                          declaration_baseline_schema
                          ):
@@ -36,8 +31,6 @@ def add_failed_questions(declaration_content,
                         failed_mandatory=['INCOMPLETE'],
                         discretionary=[])
 
-        declaration_questions = list(get_declaration_questions(declaration_content, record))
-
         all_failed_keys = get_validation_errors(record['declaration'], declaration_definite_pass_schema)
 
         if declaration_baseline_schema:
@@ -46,14 +39,14 @@ def add_failed_questions(declaration_content,
             baseline_only_failed_keys = all_failed_keys
 
         failed_mandatory = [
-            "Q{} - {}".format(question.number, question.id)
-            for question, answer in declaration_questions
-            if question.id in baseline_only_failed_keys
+            "Q{} - {}".format(question_number, question_id)
+            for question_id, question_number in questions_numbers.items()
+            if question_id in baseline_only_failed_keys
             ]
         discretionary = [
-            ("Q{} - {}".format(question.number, question.id), answer)
-            for question, answer in declaration_questions
-            if question.id in all_failed_keys and question.id not in baseline_only_failed_keys
+            ("Q{} - {}".format(question_number, question_id), record['declaration'].get(question_id, ""))
+            for question_id, question_number in questions_numbers.items()
+            if question_id in all_failed_keys and question_id not in baseline_only_failed_keys
         ]
 
         return dict(record,
@@ -64,18 +57,14 @@ def add_failed_questions(declaration_content,
 
 
 def find_suppliers_with_details(client,
-                                content_loader,
+                                questions_numbers,
                                 framework_slug,
                                 declaration_definite_pass_schema,
                                 declaration_baseline_schema,
                                 supplier_ids=None
                                 ):
-
-    content_loader.load_manifest(framework_slug, 'declaration', 'declaration')
-    declaration_content = content_loader.get_manifest(framework_slug, 'declaration')
-
     records = find_suppliers_with_details_and_draft_service_counts(client, framework_slug, supplier_ids)
-    records = map(add_failed_questions(declaration_content,
+    records = map(add_failed_questions(questions_numbers,
                                        declaration_definite_pass_schema,
                                        declaration_baseline_schema), records)
 
@@ -172,6 +161,16 @@ class DiscretionaryHandler(object):
             contact_details(record)
 
 
+def get_questions_numbers_from_framework(framework_slug, content_loader):
+    content_loader.load_manifest(framework_slug, 'declaration', 'declaration')
+    return {
+        question.id: question.number
+        for question in chain.from_iterable(
+            section.questions for section in content_loader.get_manifest(framework_slug, 'declaration').sections
+        )
+    }
+
+
 def export_suppliers(
         client,
         framework_slug,
@@ -180,12 +179,15 @@ def export_suppliers(
         declaration_definite_pass_schema,
         declaration_baseline_schema=None,
         supplier_ids=None,
-):
+        ):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
+
+    questions_numbers = get_questions_numbers_from_framework(framework_slug, content_loader)
+
     records = find_suppliers_with_details(
         client,
-        content_loader,
+        questions_numbers,
         framework_slug,
         declaration_definite_pass_schema,
         declaration_baseline_schema,
