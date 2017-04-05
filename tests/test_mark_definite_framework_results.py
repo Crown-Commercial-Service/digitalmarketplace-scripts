@@ -4,10 +4,10 @@ from itertools import product, repeat
 
 from dmscripts.mark_definite_framework_results import mark_definite_framework_results
 
-from .assessment_helpers import BaseAssessmentTest
+from .assessment_helpers import BaseAssessmentTest, BaseAssessmentMismatchedOnFrameworksTestMixin
 
 
-class _BaseMarkResultsTest(BaseAssessmentTest):
+class _BaseMarkResultsTestMixin(object):
     def _assert_actions(self, expected_sf_actions, expected_ds_actions, dry_run=False):
         # comparing these with the order normalized because we don't really care about that - unless of course the same
         # object is being written to twice (and hence overwritten) - but that's not a desired behaviour anyway and
@@ -20,7 +20,7 @@ class _BaseMarkResultsTest(BaseAssessmentTest):
         ), key=lambda c: c[0]) if not dry_run else [])
 
 
-class TestNoPrevResults(_BaseMarkResultsTest):
+class TestNoPrevResults(_BaseMarkResultsTestMixin, BaseAssessmentTest):
     def _get_supplier_frameworks(self):
         # no onFramework values should be set yet
         return {
@@ -36,8 +36,8 @@ class TestNoPrevResults(_BaseMarkResultsTest):
         }
 
     @pytest.mark.parametrize(
-        # we can very easily parametrize this into the 16 possible combinations of these flags - the results for the first
-        # three flags should be identical and it's very easy to flip some of the assertions for the dry_run mode
+        # we can very easily parametrize this into the 16 possible combinations of these flags - the results for the
+        # first three flags should be identical and it's very easy to flip some of the assertions for the dry_run mode
         "reassess_passed,reassess_failed,reassess_failed_ds,dry_run",
         tuple(product(*repeat((False, True,), 4))),
     )
@@ -179,7 +179,7 @@ class TestNoPrevResults(_BaseMarkResultsTest):
         self._assert_actions(expected_sf_actions, expected_ds_actions, dry_run=dry_run)
 
 
-class TestPrevResults(_BaseMarkResultsTest):
+class TestPrevResults(_BaseMarkResultsTestMixin, BaseAssessmentMismatchedOnFrameworksTestMixin, BaseAssessmentTest):
     # it's very easy to flip some of the assertions for the dry_run mode so using parametrization here
     @pytest.mark.parametrize("dry_run", (False, True,),)
     def test_reassess_none(self, dry_run,):
