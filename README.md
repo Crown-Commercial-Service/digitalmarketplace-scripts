@@ -15,7 +15,7 @@ The `scripts` folder in this repository contains scripts that interact with the 
 
   Script for uploading framework result letters and agreement signature pages.
 
-* `export-dos-labs.py`, `export-dos-labs.py`, `export-dos-labs.py`, `export-dos-labs.py`
+* `export-dos-labs.py`, `export-dos-outcomes.py`, `export-dos-participants.py`, `export-dos-specialists.py`
 
   Scripts to extract CSV reports about all draft services submitted to a Digital Ouctcomes and Specialists style
   framework, generally to be run after applications have closed and supplier pass/fails have been set in the database.
