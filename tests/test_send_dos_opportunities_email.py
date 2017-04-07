@@ -134,74 +134,90 @@ def test_log_error_message_if_error_sending_campaign(mailchimp_client, logger):
         "Mailchimp failed to send campaign id '1'", extra={"error": "error sending"}
     )
 
+
 @mock.patch('dmscripts.send_dos_opportunities_email.get_live_briefs_between_two_dates')
 @mock.patch('dmscripts.send_dos_opportunities_email.get_mailchimp_client')
 @mock.patch('dmscripts.send_dos_opportunities_email.create_campaign_data')
 @mock.patch('dmscripts.send_dos_opportunities_email.create_campaign')
-def test_main_creates_campaigns_for_each_lot(
+def test_main_creates_campaigns(
     create_campaign, create_campaign_data, get_mailchimp_client, get_live_briefs_between_two_dates
 ):
-    create_campaign_data.side_effect = [{"first": "campaign"}, {"second": "campaign"}, {"third": "campaign"}]
+    lot_data = {
+        "lot_slug": "digital-specialists",
+        "lot_name": "Digital specialists",
+        "list_id": "096e52cebb"
+    }
+    create_campaign_data.return_value = {"created": "campaign"}
 
-    main("data_api_url", "data_api_access_token", "username", "API KEY", 1)
+    main("data_api_url", "data_api_access_token", "username", "API KEY", lot_data, 1)
+    create_campaign_data.assert_called_once_with("Digital specialists", "096e52cebb")
+    create_campaign.assert_called_once_with(mock.ANY, {"created": "campaign"})
 
-    create_campaign_data.assert_any_call("Digital specialists", "096e52cebb")
-    create_campaign.assert_any_call(mock.ANY, {"first": "campaign"})
-
-    create_campaign_data.assert_any_call("Digital outcomes", "096e52cebb")
-    create_campaign.assert_any_call(mock.ANY, {"second": "campaign"})
-
-    create_campaign_data.assert_any_call("User research participants", "096e52cebb")
-    create_campaign.assert_any_call(mock.ANY, {"third": "campaign"})
 
 @mock.patch('dmscripts.send_dos_opportunities_email.get_live_briefs_between_two_dates')
 @mock.patch('dmscripts.send_dos_opportunities_email.create_campaign')
 @mock.patch('dmscripts.send_dos_opportunities_email.get_html_content')
 @mock.patch('dmscripts.send_dos_opportunities_email.get_mailchimp_client')
 @mock.patch('dmscripts.send_dos_opportunities_email.set_campaign_content')
-def test_main_sets_content_for_each_lot(
+def test_main_sets_content(
     set_campaign_content, get_mailchimp_client, get_html_content, create_campaign, get_live_briefs_between_two_dates
 ):
-    get_html_content.side_effect = [{"first": "content"}, {"second": "content"}, {"third": "content"}]
-    create_campaign.side_effect = ["1", "2", "3"]
-    main("data_api_url", "data_api_access_token", "username", "API KEY", 1)
+    lot_data = {
+        "lot_slug": "digital-specialists",
+        "lot_name": "Digital specialists",
+        "list_id": "096e52cebb"
+    }
+    get_html_content.return_value = {"first": "content"}
+    create_campaign.return_value = "1"
 
-    get_html_content.assert_any_call()
-    set_campaign_content.assert_any_call(mock.ANY, "1", {"first": "content"})
-
-    get_html_content.assert_any_call()
-    set_campaign_content.assert_any_call(mock.ANY, "2", {"second": "content"})
-
-    get_html_content.assert_any_call()
-    set_campaign_content.assert_any_call(mock.ANY, "3", {"third": "content"})
+    main("data_api_url", "data_api_access_token", "username", "API KEY", lot_data, 1)
+    get_html_content.assert_called_once_with()
+    set_campaign_content.assert_called_once_with(mock.ANY, "1", {"first": "content"})
 
 
 @mock.patch('dmscripts.send_dos_opportunities_email.get_live_briefs_between_two_dates')
 @mock.patch('dmscripts.send_dos_opportunities_email.create_campaign')
 @mock.patch('dmscripts.send_dos_opportunities_email.get_mailchimp_client')
 @mock.patch('dmscripts.send_dos_opportunities_email.send_campaign')
-def test_main_sends_campaign_for_each_lot(
+def test_main_sends_campaign(
     send_campaign, get_mailchimp_client, create_campaign, get_live_briefs_between_two_dates
 ):
-    create_campaign.side_effect = ["1", "2", "3"]
-    main("data_api_url", "data_api_access_token", "username", "API KEY", 1)
-    send_campaign.assert_any_call(mock.ANY, "1")
-    send_campaign.assert_any_call(mock.ANY, "2")
-    send_campaign.assert_any_call(mock.ANY, "3")
+    lot_data = {
+        "lot_slug": "digital-specialists",
+        "lot_name": "Digital specialists",
+        "list_id": "096e52cebb"
+    }
+    create_campaign.return_value = "1"
+
+    main("data_api_url", "data_api_access_token", "username", "API KEY", lot_data, 1)
+    send_campaign.assert_called_once_with(mock.ANY, "1")
+
 
 @mock.patch('dmscripts.send_dos_opportunities_email.get_live_briefs_between_two_dates')
 def test_main_gets_live_briefs_for_one_day(get_live_briefs_between_two_dates):
+    lot_data = {
+        "lot_slug": "digital-specialists",
+        "lot_name": "Digital specialists",
+        "list_id": "096e52cebb"
+    }
+
     with freeze_time('2017-04-19 08:00:00'):
-        main("data_api_url", "data_api_access_token", "username", "API KEY", 1)
-        get_live_briefs_between_two_dates.assert_any_call(
+        main("data_api_url", "data_api_access_token", "username", "API KEY", lot_data, 1)
+        get_live_briefs_between_two_dates.assert_called_once_with(
             mock.ANY, "digital-specialists", date(2017, 4, 18), date(2017, 4, 18)
         )
 
 
 @mock.patch('dmscripts.send_dos_opportunities_email.get_live_briefs_between_two_dates')
 def test_main_gets_live_briefs_for_three_days(get_live_briefs_between_two_dates):
+    lot_data = {
+        "lot_slug": "digital-specialists",
+        "lot_name": "Digital specialists",
+        "list_id": "096e52cebb"
+    }
+
     with freeze_time('2017-04-10 08:00:00'):
-        main("data_api_url", "data_api_access_token", "username", "API KEY", 3)
-        get_live_briefs_between_two_dates.assert_any_call(
+        main("data_api_url", "data_api_access_token", "username", "API KEY", lot_data, 3)
+        get_live_briefs_between_two_dates.assert_called_once_with(
             mock.ANY, "digital-specialists", date(2017, 4, 7), date(2017, 4, 9)
         )

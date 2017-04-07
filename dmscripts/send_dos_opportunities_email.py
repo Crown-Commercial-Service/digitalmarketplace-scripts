@@ -17,24 +17,6 @@ import dmapiclient
 
 logger = logging_helpers.configure_logger({'dmapiclient': logging.INFO})
 
-lots = [
-    {
-        "lot_slug": "digital-specialists",
-        "lot_name": "Digital specialists",
-        "list_id": "096e52cebb"
-    },
-    {
-        "lot_slug": "digital-outcomes",
-        "lot_name": "Digital outcomes",
-        "list_id": "096e52cebb"
-    },
-    {
-        "lot_slug": "user-research-participants",
-        "lot_name": "User research participants",
-        "list_id": "096e52cebb"
-    }
-]
-
 
 def get_live_briefs_between_two_dates(data_api_client, lot_slug, start_date, end_date):
     return [
@@ -118,26 +100,25 @@ def get_mailchimp_client(mailchimp_username, mailchimp_api_key):
     return MailChimp(mailchimp_username, mailchimp_api_key)
 
 
-def main(data_api_url, data_api_access_token, mailchimp_username, mailchimp_api_key, number_of_days):
+def main(data_api_url, data_api_access_token, mailchimp_username, mailchimp_api_key, lot_data, number_of_days):
     data_api_client = dmapiclient.DataAPIClient(data_api_url, data_api_access_token)
     mailchimp_client = get_mailchimp_client(mailchimp_username, mailchimp_api_key)
 
     start_date = date.today() - timedelta(days=number_of_days)
     end_date = date.today() - timedelta(days=1)
 
-    for lot in lots:
-        get_live_briefs_between_two_dates(data_api_client, lot["lot_slug"], start_date, end_date)
+    get_live_briefs_between_two_dates(data_api_client, lot_data["lot_slug"], start_date, end_date)
 
-        campaign_data = create_campaign_data(lot["lot_name"], lot["list_id"])
-        campaign_id = create_campaign(mailchimp_client, campaign_data)
-        if not campaign_id:
-            return False
+    campaign_data = create_campaign_data(lot_data["lot_name"], lot_data["list_id"])
+    campaign_id = create_campaign(mailchimp_client, campaign_data)
+    if not campaign_id:
+        return False
 
-        content_data = get_html_content()
-        if not set_campaign_content(mailchimp_client, campaign_id, content_data):
-            return False
+    content_data = get_html_content()
+    if not set_campaign_content(mailchimp_client, campaign_id, content_data):
+        return False
 
-        if not send_campaign(mailchimp_client, campaign_id):
-            return False
+    if not send_campaign(mailchimp_client, campaign_id):
+        return False
 
     return True
