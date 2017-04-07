@@ -107,7 +107,12 @@ def main(data_api_url, data_api_access_token, mailchimp_username, mailchimp_api_
     start_date = date.today() - timedelta(days=number_of_days)
     end_date = date.today() - timedelta(days=1)
 
-    get_live_briefs_between_two_dates(data_api_client, lot_data["lot_slug"], start_date, end_date)
+    if not get_live_briefs_between_two_dates(data_api_client, lot_data["lot_slug"], start_date, end_date):
+        logger.info(
+            "No new briefs found for '{0}' lot".format(lot_data["lot_slug"]),
+            extra={"number_of_days": number_of_days}
+        )
+        return True
 
     campaign_data = create_campaign_data(lot_data["lot_name"], lot_data["list_id"])
     campaign_id = create_campaign(mailchimp_client, campaign_data)
