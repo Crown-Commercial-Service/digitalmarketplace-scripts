@@ -23,7 +23,6 @@ class _BaseExportFrameworkResultsReasonsTest(BaseAssessmentTest):
         self.mock_content_loader = Mock()
         self.get_questions_numbers_from_framework_patcher = patch(
             "dmscripts.export_framework_results_reasons.get_questions_numbers_from_framework",
-            autospec=True,
         )
         self.mock_get_questions_numbers_from_framework = self.get_questions_numbers_from_framework_patcher.start()
         self.mock_get_questions_numbers_from_framework.side_effect = \
@@ -57,7 +56,7 @@ class _BaseExportTest(_BaseExportFrameworkResultsReasonsTest):
             "successful.csv",
         ))
 
-        with tmpdir.join("doesnt.exist.yet", "failed.csv").open("r") as f:
+        with tmpdir.join("doesnt.exist.yet", "failed.csv").open("rb") as f:
             freader = reader(f, encoding="utf-8")
             lines = tuple(freader)
             assert lines[0] == [
@@ -69,7 +68,7 @@ class _BaseExportTest(_BaseExportFrameworkResultsReasonsTest):
             ]
             assert sorted(lines[1:]) == sorted(expected_failed)
 
-        with tmpdir.join("doesnt.exist.yet", "discretionary.csv").open("r") as f:
+        with tmpdir.join("doesnt.exist.yet", "discretionary.csv").open("rb") as f:
             freader = reader(f, encoding="utf-8")
             lines = tuple(freader)
             assert lines[0] == [
@@ -83,7 +82,7 @@ class _BaseExportTest(_BaseExportFrameworkResultsReasonsTest):
             ]
             assert sorted(lines[1:]) == sorted(expected_discretionary)
 
-        with tmpdir.join("doesnt.exist.yet", "successful.csv").open("r") as f:
+        with tmpdir.join("doesnt.exist.yet", "successful.csv").open("rb") as f:
             freader = reader(f, encoding="utf-8")
             lines = tuple(freader)
             assert lines[0] == [
