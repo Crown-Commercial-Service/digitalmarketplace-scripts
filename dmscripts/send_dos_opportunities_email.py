@@ -26,7 +26,7 @@ def get_live_briefs_between_two_dates(data_api_client, lot_slug, start_date, end
     ]
 
 
-def create_campaign_data(lot_name, list_id):
+def get_campaign_data(lot_name, list_id):
     return {
         "type": "regular",
         "recipients": {
@@ -114,7 +114,7 @@ def main(data_api_url, data_api_access_token, mailchimp_username, mailchimp_api_
         )
         return True
 
-    campaign_data = create_campaign_data(lot_data["lot_name"], lot_data["list_id"])
+    campaign_data = get_campaign_data(lot_data["lot_name"], lot_data["list_id"])
     campaign_id = create_campaign(mailchimp_client, campaign_data)
     if not campaign_id:
         return False
