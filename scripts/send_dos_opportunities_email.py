@@ -1,9 +1,26 @@
 #!/usr/bin/env python
 
-"""Description to be added here
+"""
+Description:
+    For every lot the script will:
+        - look for latest briefs for Digital Outcomes and Specialists
+        - if there are new briefs on that lot:
+            - it will create a Mailchimp campaign
+            - it will set the content of the campaign to be the briefs found
+            - it will send that campaign to the list_id as referenced in the `lots` variable
+        - if there are no new briefs on that lot no campaign is created or sent
+
+    Number of days tells the script for how many days before current date it should include in its search for briefs
+        example:  if you run this script on a Wednesday and set number of days=1,
+                    then it will only include briefs from Tuesday (preceding day).
+        example2: if you run it on Wednesday and set number of days=3,
+                    then it will include all briefs published on Sunday, Monday and Tuesday.
 
 Usage:
     send_dos_opportunities_email.py <stage> <api_token> <mailchimp_username> <mailchimp_api_key> <number_of_days>
+
+Example:
+    send_dos_opportunities_email.py preview b7g5r7e6gv876tv6 user@gds.gov.uk 7483crh87h34c3£@£ 3
 """
 
 import sys
