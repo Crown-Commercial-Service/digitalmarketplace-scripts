@@ -4,8 +4,6 @@ Test list ID is "096e52cebb" which can be used for local development
 """
 from datetime import datetime, date, timedelta
 
-from mailchimp3 import MailChimp
-
 from requests.exceptions import RequestException
 
 from dmscripts.helpers.html_helpers import render_html
@@ -55,8 +53,8 @@ def get_campaign_data(lot_name, list_id):
 
 
 def get_html_content():
-    email_body = render_html("email_templates/dos_opportunities.html", data={})
-    return email_body
+    html_content = render_html("email_templates/dos_opportunities.html", data={})
+    return {"html": html_content}
 
 
 def create_campaign(mailchimp_client, campaign_data):
