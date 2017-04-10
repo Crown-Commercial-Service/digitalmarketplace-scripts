@@ -96,17 +96,11 @@ def send_campaign(mailchimp_client, campaign_id):
     return False
 
 
-def get_mailchimp_client(mailchimp_username, mailchimp_api_key):
-    return MailChimp(mailchimp_username, mailchimp_api_key)
-
-
-def main(data_api_url, data_api_access_token, mailchimp_username, mailchimp_api_key, lot_data, number_of_days):
+def main(data_api_client, mailchimp_client, lot_data, number_of_days):
     logger.info(
         "Begin process to send DOS notification emails for '{0}' lot".format(lot_data["lot_slug"]),
-        extra={"data_api_url": data_api_url, "lot_data": lot_data, "number_of_days": number_of_days}
+        extra={"lot_data": lot_data, "number_of_days": number_of_days}
     )
-    data_api_client = dmapiclient.DataAPIClient(data_api_url, data_api_access_token)
-    mailchimp_client = get_mailchimp_client(mailchimp_username, mailchimp_api_key)
 
     start_date = date.today() - timedelta(days=number_of_days)
     end_date = date.today() - timedelta(days=1)

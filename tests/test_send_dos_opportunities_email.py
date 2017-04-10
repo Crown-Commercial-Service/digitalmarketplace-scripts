@@ -145,18 +145,17 @@ def test_log_error_message_if_error_sending_campaign(mailchimp_client, logger):
 @mock.patch('dmscripts.send_dos_opportunities_email.send_campaign')
 @mock.patch('dmscripts.send_dos_opportunities_email.set_campaign_content')
 @mock.patch('dmscripts.send_dos_opportunities_email.get_live_briefs_between_two_dates')
-@mock.patch('dmscripts.send_dos_opportunities_email.get_mailchimp_client')
 @mock.patch('dmscripts.send_dos_opportunities_email.get_campaign_data')
 @mock.patch('dmscripts.send_dos_opportunities_email.create_campaign')
 def test_main_creates_campaign_sets_content_and_sends_campaign(
-    create_campaign, get_campaign_data, get_mailchimp_client, get_live_briefs_between_two_dates,
+    create_campaign, get_campaign_data, get_live_briefs_between_two_dates,
     set_campaign_content, send_campaign, get_html_content
 ):
     get_campaign_data.return_value = {"created": "campaign"}
     get_html_content.return_value = {"first": "content"}
     create_campaign.return_value = "1"
 
-    main("data_api_url", "data_api_access_token", "username", "API KEY", LOT_DATA, 1)
+    main(mock.MagicMock(), mock.MagicMock(), LOT_DATA, 1)
 
     # Creates campaign
     get_campaign_data.assert_called_once_with("Digital specialists", "096e52cebb")
@@ -173,7 +172,7 @@ def test_main_creates_campaign_sets_content_and_sends_campaign(
 @mock.patch('dmscripts.send_dos_opportunities_email.get_live_briefs_between_two_dates')
 def test_main_gets_live_briefs_for_one_day(get_live_briefs_between_two_dates):
     with freeze_time('2017-04-19 08:00:00'):
-        main("data_api_url", "data_api_access_token", "username", "API KEY", LOT_DATA, 1)
+        main(mock.MagicMock(), mock.MagicMock(), LOT_DATA, 1)
         get_live_briefs_between_two_dates.assert_called_once_with(
             mock.ANY, "digital-specialists", date(2017, 4, 18), date(2017, 4, 18)
         )
@@ -182,7 +181,7 @@ def test_main_gets_live_briefs_for_one_day(get_live_briefs_between_two_dates):
 @mock.patch('dmscripts.send_dos_opportunities_email.get_live_briefs_between_two_dates')
 def test_main_gets_live_briefs_for_three_days(get_live_briefs_between_two_dates):
     with freeze_time('2017-04-10 08:00:00'):
-        main("data_api_url", "data_api_access_token", "username", "API KEY", LOT_DATA, 3)
+        main(mock.MagicMock(), mock.MagicMock(), LOT_DATA, 3)
         get_live_briefs_between_two_dates.assert_called_once_with(
             mock.ANY, "digital-specialists", date(2017, 4, 7), date(2017, 4, 9)
         )
@@ -197,12 +196,12 @@ def test_if_no_briefs_then_no_campaign_created_nor_sent(
     get_live_briefs_between_two_dates, create_campaign, set_campaign_content, send_campaign, logger
 ):
     get_live_briefs_between_two_dates.return_value = []
-    result = main("data_api_url", "data_api_access_token", "username", "API KEY", LOT_DATA, 3)
+    result = main(mock.MagicMock(), mock.MagicMock(), LOT_DATA, 3)
     assert result is True
     create_campaign.assert_not_called()
     set_campaign_content.assert_not_called()
     send_campaign.assert_not_called()
 
-    logger.info.assert_called_once_with(
+    logger.info.assert_called_with(
         "No new briefs found for 'digital-specialists' lot", extra={"number_of_days": 3}
     )
