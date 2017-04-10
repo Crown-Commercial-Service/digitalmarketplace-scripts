@@ -141,46 +141,32 @@ def test_log_error_message_if_error_sending_campaign(mailchimp_client, logger):
     )
 
 
+@mock.patch('dmscripts.send_dos_opportunities_email.get_html_content')
+@mock.patch('dmscripts.send_dos_opportunities_email.send_campaign')
+@mock.patch('dmscripts.send_dos_opportunities_email.set_campaign_content')
 @mock.patch('dmscripts.send_dos_opportunities_email.get_live_briefs_between_two_dates')
 @mock.patch('dmscripts.send_dos_opportunities_email.get_mailchimp_client')
 @mock.patch('dmscripts.send_dos_opportunities_email.get_campaign_data')
 @mock.patch('dmscripts.send_dos_opportunities_email.create_campaign')
-def test_main_creates_campaigns(
-    create_campaign, get_campaign_data, get_mailchimp_client, get_live_briefs_between_two_dates
+def test_main_creates_campaign_sets_content_and_sends_campaign(
+    create_campaign, get_campaign_data, get_mailchimp_client, get_live_briefs_between_two_dates,
+    set_campaign_content, send_campaign, get_html_content
 ):
     get_campaign_data.return_value = {"created": "campaign"}
-
-    main("data_api_url", "data_api_access_token", "username", "API KEY", LOT_DATA, 1)
-    get_campaign_data.assert_called_once_with("Digital specialists", "096e52cebb")
-    create_campaign.assert_called_once_with(mock.ANY, {"created": "campaign"})
-
-
-@mock.patch('dmscripts.send_dos_opportunities_email.get_live_briefs_between_two_dates')
-@mock.patch('dmscripts.send_dos_opportunities_email.create_campaign')
-@mock.patch('dmscripts.send_dos_opportunities_email.get_html_content')
-@mock.patch('dmscripts.send_dos_opportunities_email.get_mailchimp_client')
-@mock.patch('dmscripts.send_dos_opportunities_email.set_campaign_content')
-def test_main_sets_content(
-    set_campaign_content, get_mailchimp_client, get_html_content, create_campaign, get_live_briefs_between_two_dates
-):
     get_html_content.return_value = {"first": "content"}
     create_campaign.return_value = "1"
 
     main("data_api_url", "data_api_access_token", "username", "API KEY", LOT_DATA, 1)
+
+    # Creates campaign
+    get_campaign_data.assert_called_once_with("Digital specialists", "096e52cebb")
+    create_campaign.assert_called_once_with(mock.ANY, {"created": "campaign"})
+
+    # Sets campaign content
     get_html_content.assert_called_once_with()
     set_campaign_content.assert_called_once_with(mock.ANY, "1", {"first": "content"})
 
-
-@mock.patch('dmscripts.send_dos_opportunities_email.get_live_briefs_between_two_dates')
-@mock.patch('dmscripts.send_dos_opportunities_email.create_campaign')
-@mock.patch('dmscripts.send_dos_opportunities_email.get_mailchimp_client')
-@mock.patch('dmscripts.send_dos_opportunities_email.send_campaign')
-def test_main_sends_campaign(
-    send_campaign, get_mailchimp_client, create_campaign, get_live_briefs_between_two_dates
-):
-    create_campaign.return_value = "1"
-
-    main("data_api_url", "data_api_access_token", "username", "API KEY", LOT_DATA, 1)
+    # Sends campaign
     send_campaign.assert_called_once_with(mock.ANY, "1")
 
 
