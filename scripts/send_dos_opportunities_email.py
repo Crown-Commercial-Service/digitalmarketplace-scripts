@@ -16,11 +16,16 @@ Description:
         example2: if you run it on Wednesday and set number of days=3,
                     then it will include all briefs published on Sunday, Monday and Tuesday.
 
+    For testing purposes, you can override the list ID so you can send it to yourself only as
+    we have set up a testing list with ID "096e52cebb"
+
 Usage:
-    send_dos_opportunities_email.py <stage> <api_token> <mailchimp_username> <mailchimp_api_key> <number_of_days>
+    send_dos_opportunities_email.py
+        <stage> <api_token> <mailchimp_username> <mailchimp_api_key> <number_of_days> --list_id=<list_id>
 
 Example:
-    send_dos_opportunities_email.py preview b7g5r7e6gv876tv6 user@gds.gov.uk 7483crh87h34c3£@£ 3
+    send_dos_opportunities_email.py
+        preview b7g5r7e6gv876tv6 user@gds.gov.uk 7483crh87h34c3 3 --list_id=988972hse
 """
 
 import sys
@@ -38,23 +43,27 @@ lots = [
     {
         "lot_slug": "digital-specialists",
         "lot_name": "Digital specialists",
-        "list_id": "096e52cebb"
+        "list_id": "TO BE FILLED IN"
     },
     {
         "lot_slug": "digital-outcomes",
         "lot_name": "Digital outcomes",
-        "list_id": "096e52cebb"
+        "list_id": "TO BE FILLED IN"
     },
     {
         "lot_slug": "user-research-participants",
         "lot_name": "User research participants",
-        "list_id": "096e52cebb"
+        "list_id": "TO BE FILLED IN"
     }
 ]
 
 
 if __name__ == "__main__":
     arguments = docopt(__doc__)
+
+    if arguments.get("--list_id"):
+        for lot in lots:
+            lot.update({"list_id": arguments["--list_id"]})
 
     api_url = get_api_endpoint_from_stage(arguments['<stage>'])
     data_api_client = DataAPIClient(api_url, arguments['<api_token>'])
