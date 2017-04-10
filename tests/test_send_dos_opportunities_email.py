@@ -72,8 +72,8 @@ def test_get_campaign_data():
         assert campaign_data["settings"]["reply_to"] == "do-not-reply@digitalmarketplace.service.gov.uk"
 
 
-@mock.patch('dmscripts.send_dos_opportunities_email.MailChimp')
-def test_create_campaign(mailchimp_client):
+def test_create_campaign():
+    mailchimp_client = mock.MagicMock()
     mailchimp_client.campaigns.create.return_value = {"id": "100"}
 
     res = create_campaign(mailchimp_client, {"example": "data"})
@@ -82,8 +82,8 @@ def test_create_campaign(mailchimp_client):
 
 
 @mock.patch('dmscripts.send_dos_opportunities_email.logger', autospec=True)
-@mock.patch('dmscripts.send_dos_opportunities_email.MailChimp')
-def test_log_error_message_if_error_creating_campaign(mailchimp_client, logger):
+def test_log_error_message_if_error_creating_campaign(logger):
+    mailchimp_client = mock.MagicMock()
     mailchimp_client.campaigns.create.side_effect = RequestException("error message")
     campaign_data = {
         "example": "data",
@@ -98,10 +98,10 @@ def test_log_error_message_if_error_creating_campaign(mailchimp_client, logger):
     )
 
 
-@mock.patch('dmscripts.send_dos_opportunities_email.MailChimp')
-def test_set_campaign_content(mailchimp_client):
+def test_set_campaign_content():
     campaign_id = "1"
     html_content = {"html": "<p>One or two words</p>"}
+    mailchimp_client = mock.MagicMock()
     mailchimp_client.campaigns.content.update.return_value = html_content
 
     res = set_campaign_content(mailchimp_client, campaign_id, html_content)
@@ -110,8 +110,8 @@ def test_set_campaign_content(mailchimp_client):
 
 
 @mock.patch('dmscripts.send_dos_opportunities_email.logger', autospec=True)
-@mock.patch('dmscripts.send_dos_opportunities_email.MailChimp')
-def test_log_error_message_if_error_setting_campaign_content(mailchimp_client, logger):
+def test_log_error_message_if_error_setting_campaign_content(logger):
+    mailchimp_client = mock.MagicMock()
     mailchimp_client.campaigns.content.update.side_effect = RequestException("error message")
     content_data = {
         "html": "some html"
@@ -123,17 +123,17 @@ def test_log_error_message_if_error_setting_campaign_content(mailchimp_client, l
     )
 
 
-@mock.patch('dmscripts.send_dos_opportunities_email.MailChimp')
-def test_send_campaign(mailchimp_client):
+def test_send_campaign():
     campaign_id = "1"
+    mailchimp_client = mock.MagicMock()
     res = send_campaign(mailchimp_client, campaign_id)
     assert res is True
     mailchimp_client.campaigns.actions.send.assert_called_once_with(campaign_id)
 
 
 @mock.patch('dmscripts.send_dos_opportunities_email.logger', autospec=True)
-@mock.patch('dmscripts.send_dos_opportunities_email.MailChimp')
-def test_log_error_message_if_error_sending_campaign(mailchimp_client, logger):
+def test_log_error_message_if_error_sending_campaign(logger):
+    mailchimp_client = mock.MagicMock()
     mailchimp_client.campaigns.actions.send.side_effect = RequestException("error sending")
     assert send_campaign(mailchimp_client, "1") is False
     logger.error.assert_called_once_with(
