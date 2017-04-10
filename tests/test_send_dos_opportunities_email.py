@@ -7,7 +7,7 @@ from datetime import datetime, date
 
 from dmscripts.send_dos_opportunities_email import (
     main,
-    create_campaign_data,
+    get_campaign_data,
     create_campaign,
     set_campaign_content,
     send_campaign,
@@ -58,13 +58,13 @@ def test_get_live_briefs_between_two_dates():
     ]
 
 
-def test_create_campaign_data():
+def test_get_campaign_data():
     lot_name = "Digital Outcomes"
     list_id = "1111111"
     expected_subject = "New opportunities for Digital Outcomes: Digital Outcomes and Specialists 2"
 
     with freeze_time('2017-04-19 08:00:00'):
-        campaign_data = create_campaign_data(lot_name, list_id)
+        campaign_data = get_campaign_data(lot_name, list_id)
         assert campaign_data["recipients"]["list_id"] == list_id
         assert campaign_data["settings"]["subject_line"] == expected_subject
         assert campaign_data["settings"]["title"] == "DOS Suppliers: Digital Outcomes [19 April]"
@@ -143,15 +143,15 @@ def test_log_error_message_if_error_sending_campaign(mailchimp_client, logger):
 
 @mock.patch('dmscripts.send_dos_opportunities_email.get_live_briefs_between_two_dates')
 @mock.patch('dmscripts.send_dos_opportunities_email.get_mailchimp_client')
-@mock.patch('dmscripts.send_dos_opportunities_email.create_campaign_data')
+@mock.patch('dmscripts.send_dos_opportunities_email.get_campaign_data')
 @mock.patch('dmscripts.send_dos_opportunities_email.create_campaign')
 def test_main_creates_campaigns(
-    create_campaign, create_campaign_data, get_mailchimp_client, get_live_briefs_between_two_dates
+    create_campaign, get_campaign_data, get_mailchimp_client, get_live_briefs_between_two_dates
 ):
-    create_campaign_data.return_value = {"created": "campaign"}
+    get_campaign_data.return_value = {"created": "campaign"}
 
     main("data_api_url", "data_api_access_token", "username", "API KEY", LOT_DATA, 1)
-    create_campaign_data.assert_called_once_with("Digital specialists", "096e52cebb")
+    get_campaign_data.assert_called_once_with("Digital specialists", "096e52cebb")
     create_campaign.assert_called_once_with(mock.ANY, {"created": "campaign"})
 
 
