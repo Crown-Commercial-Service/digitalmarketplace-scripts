@@ -101,6 +101,10 @@ def get_mailchimp_client(mailchimp_username, mailchimp_api_key):
 
 
 def main(data_api_url, data_api_access_token, mailchimp_username, mailchimp_api_key, lot_data, number_of_days):
+    logger.info(
+        "Begin process to send DOS notification emails for '{0}' lot".format(lot_data["lot_slug"]),
+        extra={"data_api_url": data_api_url, "lot_data": lot_data, "number_of_days": number_of_days}
+    )
     data_api_client = dmapiclient.DataAPIClient(data_api_url, data_api_access_token)
     mailchimp_client = get_mailchimp_client(mailchimp_username, mailchimp_api_key)
 
@@ -115,14 +119,23 @@ def main(data_api_url, data_api_access_token, mailchimp_username, mailchimp_api_
         return True
 
     campaign_data = get_campaign_data(lot_data["lot_name"], lot_data["list_id"])
+    logger.info(
+        "Creating campaign for '{0}' lot".format(lot_data["lot_slug"])
+    )
     campaign_id = create_campaign(mailchimp_client, campaign_data)
     if not campaign_id:
         return False
 
     content_data = get_html_content()
+    logger.info(
+        "Setting campaign data for '{0}' lot and '{1}' campaign id".format(lot_data["lot_slug"], campaign_id)
+    )
     if not set_campaign_content(mailchimp_client, campaign_id, content_data):
         return False
 
+    logger.info(
+        "Sending campaign for '{0}' lot and '{1}' campaign id".format(lot_data["lot_slug"], campaign_id)
+    )
     if not send_campaign(mailchimp_client, campaign_id):
         return False
 
