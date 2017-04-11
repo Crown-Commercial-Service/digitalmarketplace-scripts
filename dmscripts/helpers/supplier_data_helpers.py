@@ -58,7 +58,7 @@ class SuccessfulSupplierContextForNotify(SupplierFrameworkData):
         self.framework = client.get_framework(self.target_framework_slug)['frameworks']
         self.framework_lots = [i['name'] for i in self.framework['lots']]
 
-    def get_users_peronalisations(self):
+    def get_users_personalisations(self):
         """Return {email_address: {personalisations}} for users eligible for the
         'Your application result - if successful' email
         """
@@ -110,4 +110,38 @@ class SuccessfulSupplierContextForNotify(SupplierFrameworkData):
             'framework_slug': self.framework['slug'],
         }
         personalisation.update(lot_dict)
+        return {user['email address']: personalisation}
+
+
+class AppliedToFrameworkSupplierContextForNotify(SupplierFrameworkData):
+    """Get the personalisation/ context for 'You application result - if successful email'"""
+
+    def __init__(self, client, target_framework_slug, successful_notification_date):
+        """Get the target framework to operate on and list the lots.
+
+        :param client: Instantiated api client
+        :param target_framework_slug: Framework to fetch data for
+        """
+        super(AppliedToFrameworkSupplierContextForNotify, self).__init__(client, target_framework_slug)
+
+        self.successful_notification_date = successful_notification_date
+        self.framework = client.get_framework(self.target_framework_slug)['frameworks']
+
+    def get_users_personalisations(self):
+        """Return {email_address: {personalisations}} for all users who expressed interest in the framework
+        """
+        output = {}
+        for supplier_framework in self.data:
+            for user in supplier_framework['users']:
+                output.update(self.get_user_personalisation(user))
+        return output
+
+    def get_user_personalisation(self, user):
+        """Get dict of all info required by template given a user and framework."""
+        personalisation = {
+            'successful_notification_date': self.successful_notification_date,
+            'framework_name': self.framework['name'],
+            'framework_slug': self.framework['slug'],
+            'applied': user['application_status'] == 'application'
+        }
         return {user['email address']: personalisation}
