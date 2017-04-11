@@ -1,7 +1,3 @@
-"""Spike script into mail chimp email sending.
-
-Test list ID is "096e52cebb" which can be used for local development
-"""
 from datetime import datetime, date, timedelta
 
 from requests.exceptions import RequestException
@@ -53,6 +49,7 @@ def get_campaign_data(lot_name, list_id):
 
 
 def get_html_content():
+    # function not yet implemented
     html_content = render_html("email_templates/dos_opportunities.html", data={})
     return {"html": html_content}
 
