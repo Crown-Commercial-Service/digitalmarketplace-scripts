@@ -37,7 +37,7 @@ if __name__ == '__main__':
     client = DataAPIClient(get_api_endpoint_from_stage(STAGE), API_TOKEN)
     now = datetime.datetime.now()
 
-    filename = OUTPUT_DIR + os.sep if OUTPUT_DIR else ""
+    filename = (OUTPUT_DIR if OUTPUT_DIR else ".") + os.sep
     filename = filename + FRAMEWORK + "-applicant_details-" + now.strftime("%Y-%m-%d_%H.%M-") + STAGE + ".csv"
 
     # Create output directory if it doesn't already exist
