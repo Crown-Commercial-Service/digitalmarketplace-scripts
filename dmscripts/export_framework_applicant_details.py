@@ -11,6 +11,7 @@ LOTS = {
         "user-research-participants",
         "user-research-studios",
     ),
+    "g-cloud-9": ("cloud-hosting", "cloud-software", "cloud-support",),
 }
 
 DECLARATION_FIELDS = {
@@ -67,6 +68,31 @@ DECLARATION_FIELDS = {
         "contactEmailContractNotice",
         "cyberEssentials",
         "cyberEssentialsPlus",
+    ),
+    "g-cloud-9": (
+        "primaryContact",
+        "primaryContactEmail",
+        "nameOfOrganisation",
+        "registeredAddressBuilding",
+        "registeredAddressTown",
+        "registeredAddressPostcode",
+        "tradingStatus",
+        "tradingStatusOther",
+        "tradingNames",
+        "firstRegistered",
+        "currentRegisteredCountry",
+        "companyRegistrationNumber",
+        "dunsNumber",
+        "registeredVATNumber",
+        "establishedInTheUK",
+        "appropriateTradeRegisters",
+        "appropriateTradeRegistersNumber",
+        "licenceOrMemberRequired",
+        "licenceOrMemberRequiredDetails",
+        "organisationSize",
+        "subcontracting",
+        "contactNameContractNotice",
+        "contactEmailContractNotice",
     ),
 }
 
