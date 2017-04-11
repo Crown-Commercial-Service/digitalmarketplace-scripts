@@ -58,7 +58,7 @@ class SuccessfulSupplierContextForNotify(SupplierFrameworkData):
         self.framework = client.get_framework(self.target_framework_slug)['frameworks']
         self.framework_lots = [i['name'] for i in self.framework['lots']]
 
-    def get_users_peronalisations(self):
+    def get_users_personalisations(self):
         """Return {email_address: {personalisations}} for users eligible for the
         'Your application result - if successful' email
         """
@@ -127,7 +127,7 @@ class AppliedToFrameworkSupplierContextForNotify(SupplierFrameworkData):
         self.successful_notification_date = successful_notification_date
         self.framework = client.get_framework(self.target_framework_slug)['frameworks']
 
-    def get_users_peronalisations(self):
+    def get_users_personalisations(self):
         """Return {email_address: {personalisations}} for all users who expressed interest in the framework
         """
         output = {}

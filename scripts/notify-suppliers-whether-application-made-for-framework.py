@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
     context_helper = AppliedToFrameworkSupplierContextForNotify(api_client, FRAMEWORK_SLUG, NOTIFICATION_DATE)
     context_helper.populate_data()
-    context_data = context_helper.get_users_peronalisations()
+    context_data = context_helper.get_users_personalisations()
     error_count = 0
     for user_email, personalisation in context_data.items():
         logger.info(user_email)
