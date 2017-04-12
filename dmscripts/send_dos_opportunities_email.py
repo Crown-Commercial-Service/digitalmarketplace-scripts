@@ -63,7 +63,7 @@ def create_campaign(mailchimp_client, campaign_data):
             "Mailchimp failed to create campaign for '{0}'".format(
                 campaign_data.get("settings").get("title")
             ),
-            extra={"error": e.message}
+            extra={"error": str(e)}
         )
     return False
 
@@ -74,7 +74,7 @@ def set_campaign_content(mailchimp_client, campaign_id, content_data):
     except RequestException as e:
         logger.error(
             "Mailchimp failed to set content for campaign id '{0}'".format(campaign_id),
-            extra={"error": e.message}
+            extra={"error": str(e)}
         )
     return False
 
@@ -86,7 +86,7 @@ def send_campaign(mailchimp_client, campaign_id):
     except RequestException as e:
         logger.error(
             "Mailchimp failed to send campaign id '{0}'".format(campaign_id),
-            extra={"error": e.message}
+            extra={"error": str(e)}
         )
     return False
 
