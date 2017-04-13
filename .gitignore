@@ -2,4 +2,4 @@
 __pycache__
 output/
 venv
-venv3
+venv*
