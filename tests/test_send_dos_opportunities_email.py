@@ -65,24 +65,31 @@ def test_get_html_content_renders_brief_information():
             "title": "Brief 1",
             "organisation": "the big SME",
             "location": "London",
-            "applicationsClosedAt": "2016-07-05T23:59:59.000000Z"
+            "applicationsClosedAt": "2016-07-05T23:59:59.000000Z",
+            "id": "234"
         },
         {
             "title": "Brief 2",
             "organisation": "ministry of weird steps",
             "location": "Manchester",
-            "applicationsClosedAt": "2016-07-07T23:59:59.000000Z"
+            "applicationsClosedAt": "2016-07-07T23:59:59.000000Z",
+            "id": "235"
         }
     ]
-    html = get_html_content(briefs)["html"]
 
-    assert "Dear supplier" in html
-    for brief in briefs:
-        assert brief["title"] in html
-        assert brief["organisation"] in html
-        assert brief["location"] in html
-    assert "Closing Tuesday 5 July 2016" in html
-    assert "Closing Thursday 7 July 2016" in html
+    with freeze_time('2017-04-19 08:00:00'):
+        html = get_html_content(briefs)["html"]
+
+        assert "Dear supplier" in html
+        for brief in briefs:
+            assert brief["title"] in html
+            assert brief["organisation"] in html
+            assert brief["location"] in html
+
+        assert "Closing Tuesday 5 July 2016" in html
+        assert "Closing Thursday 7 July 2016" in html
+        assert "https://www.digitalmarketplace.service.gov.uk/digital-outcomes-and-specialists/opportunities/234?utm_id=20170419" in html
+        assert "https://www.digitalmarketplace.service.gov.uk/digital-outcomes-and-specialists/opportunities/235?utm_id=20170419" in html
 
 
 def test_get_campaign_data():

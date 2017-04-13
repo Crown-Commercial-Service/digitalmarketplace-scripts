@@ -624,7 +624,7 @@
 	<span style="color:#000000">{{ brief.organisation }}<br>
 	{{ brief.location }}</span><br>
 	<span style="color:#000000">Closing {{ (datetime.strptime(brief.applicationsClosedAt, dateformat)).strftime('%A %-d %B %Y ') }}</span><br>
-	<font color="#005ea5">Link</font><br>
+	<font color="#005ea5">https://www.digitalmarketplace.service.gov.uk/digital-outcomes-and-specialists/opportunities/{{ brief.id }}?utm_id={{ datetime.today().strftime('%Y%m%d') }}</font><br>
 {% endfor %}
 
 <br>
