@@ -124,7 +124,10 @@ CONFIGS = [
             'requirementsLength',
             'specialistRole',
             'clarificationQuestions',
-            'frameworkSlug'
+            'frameworkSlug',
+            'budgetRange',
+            'startDate',
+            'contractLength'
         ),
         'get_data_kwargs': {'with_users': 'true'},
         'process_fields': {
