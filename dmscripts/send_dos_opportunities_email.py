@@ -48,9 +48,9 @@ def get_campaign_data(lot_name, list_id):
     }
 
 
-def get_html_content():
+def get_html_content(briefs):
     # function not yet implemented
-    html_content = render_html("email_templates/dos_opportunities.html", data={})
+    html_content = render_html("email_templates/dos_opportunities.html", data={"briefs": briefs, "datetime": datetime, "dateformat": DATETIME_FORMAT})
     return {"html": html_content}
 
 

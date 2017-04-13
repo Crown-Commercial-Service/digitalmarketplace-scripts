@@ -14,7 +14,7 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>*|MC:SUBJECT|*</title>
-        
+
     <style type="text/css">
 		p{
 			margin:10px 0;
@@ -555,7 +555,7 @@
     <tbody class="mcnCaptionBlockOuter">
         <tr>
             <td class="mcnCaptionBlockInner" valign="top" style="padding:9px;">
-                
+
 
 
 
@@ -565,13 +565,13 @@
             <table align="left" border="0" cellpadding="0" cellspacing="0" class="mcnCaptionRightImageContentContainer">
                 <tbody><tr>
                     <td class="mcnCaptionRightImageContent" valign="top">
-                    
-                        
+
+
 
                         <img alt="" src="https://gallery.mailchimp.com/2f3ed6987c26fa8f18b3cdd5d/images/36cd6bbc-d08f-4df1-9f7d-ab1da4b2c1c5.jpg" width="264" style="max-width:928px;" class="mcnImage">
-                        
 
-                    
+
+
                     </td>
                 </tr>
             </tbody></table>
@@ -605,30 +605,28 @@
 				<table align="left" border="0" cellspacing="0" cellpadding="0" width="100%" style="width:100%;">
 				<tr>
 				<![endif]-->
-			    
+
 				<!--[if mso]>
 				<td valign="top" width="600" style="width:600px;">
 				<![endif]-->
                 <table align="left" border="0" cellpadding="0" cellspacing="0" style="max-width:100%; min-width:100%;" width="100%" class="mcnTextContentContainer">
                     <tbody><tr>
-                        
+
                         <td valign="top" class="mcnTextContent" style="padding-top:0; padding-right:18px; padding-bottom:9px; padding-left:18px;">
-                        
+
                             <p><span style="color:#000000"><span style="font-size:19px">Dear supplier,</span></span><br>
 <br>
 <span style="color:#000000"><span style="font-size:19px">In the last day, [number of opportunities]&nbsp;new [name of lot] opportunities were published on the Digital Marketplace. View and apply for these opportunities:</span></span><br>
 <br>
-<span style="font-size:16px"><font color="#000000"><strong>Title</strong></font><br>
-<span style="color:#000000">Company name<br>
-Location</span><br>
-<span style="color:#000000">Closing date</span><br>
-<font color="#005ea5">Link</font><br>
-<br>
-<strong><span style="color:#000000">Title</span></strong><br>
-<span style="color:#000000">Company name<br>
-Location</span><br>
-<span style="color:#000000">Closing date</span><br>
-<font color="#005ea5">Link</font></span><br>
+
+{% for brief in briefs %}
+	<span style="font-size:16px"><font color="#000000"><strong>{{ brief.title }}</strong></font><br>
+	<span style="color:#000000">{{ brief.organisation }}<br>
+	{{ brief.location }}</span><br>
+	<span style="color:#000000">Closing {{ (datetime.strptime(brief.applicationsClosedAt, dateformat)).strftime('%A %-d %B %Y ') }}</span><br>
+	<font color="#005ea5">Link</font><br>
+{% endfor %}
+
 <br>
 <span style="color:#000000"><span style="font-size:19px">Thanks,<br>
 The Digital Marketplace team</span></span></p>
@@ -639,7 +637,7 @@ The Digital Marketplace team</span></span></p>
 				<!--[if mso]>
 				</td>
 				<![endif]-->
-                
+
 				<!--[if mso]>
 				</tr>
 				</table>
@@ -661,15 +659,15 @@ The Digital Marketplace team</span></span></p>
 				<table align="left" border="0" cellspacing="0" cellpadding="0" width="100%" style="width:100%;">
 				<tr>
 				<![endif]-->
-			    
+
 				<!--[if mso]>
 				<td valign="top" width="600" style="width:600px;">
 				<![endif]-->
                 <table align="left" border="0" cellpadding="0" cellspacing="0" style="max-width:100%; min-width:100%;" width="100%" class="mcnTextContentContainer">
                     <tbody><tr>
-                        
+
                         <td valign="top" class="mcnTextContent" style="padding-top:0; padding-right:18px; padding-bottom:9px; padding-left:18px;">
-                        
+
                             <div style="text-align: left;"><em>Copyright © *|CURRENT_YEAR|* *|LIST:COMPANY|*, All rights reserved.</em><br>
 *|IFNOT:ARCHIVE_PAGE|* *|LIST:DESCRIPTION|*<br>
 <br>
@@ -686,7 +684,7 @@ The Digital Marketplace team</span></span></p>
 				<!--[if mso]>
 				</td>
 				<![endif]-->
-                
+
 				<!--[if mso]>
 				</tr>
 				</table>

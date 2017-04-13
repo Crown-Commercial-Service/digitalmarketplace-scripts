@@ -11,7 +11,8 @@ from dmscripts.send_dos_opportunities_email import (
     create_campaign,
     set_campaign_content,
     send_campaign,
-    get_live_briefs_between_two_dates
+    get_live_briefs_between_two_dates,
+    get_html_content
 )
 
 LOT_DATA = {
@@ -56,6 +57,32 @@ def test_get_live_briefs_between_two_dates():
         {"publishedAt": "2017-03-19T09:52:17.669156Z"},
         {"publishedAt": "2017-03-18T09:52:17.669156Z"}
     ]
+
+
+def test_get_html_content_renders_brief_information():
+    briefs = [
+        {
+            "title": "Brief 1",
+            "organisation": "the big SME",
+            "location": "London",
+            "applicationsClosedAt": "2016-07-05T23:59:59.000000Z"
+        },
+        {
+            "title": "Brief 2",
+            "organisation": "ministry of weird steps",
+            "location": "Manchester",
+            "applicationsClosedAt": "2016-07-07T23:59:59.000000Z"
+        }
+    ]
+    html = get_html_content(briefs)["html"]
+
+    assert "Dear supplier" in html
+    for brief in briefs:
+        assert brief["title"] in html
+        assert brief["organisation"] in html
+        assert brief["location"] in html
+    assert "Closing Tuesday 5 July 2016" in html
+    assert "Closing Thursday 7 July 2016" in html
 
 
 def test_get_campaign_data():
