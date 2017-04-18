@@ -5,7 +5,7 @@ from requests.exceptions import RequestException
 from dmscripts.helpers.html_helpers import render_html
 from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.logging_helpers import logging
-from dmutils.formats import DATETIME_FORMAT
+from dmutils.formats import DATETIME_FORMAT, DISPLAY_DATE_FORMAT
 
 import dmapiclient
 
@@ -50,7 +50,12 @@ def get_campaign_data(lot_name, list_id):
 
 def get_html_content(briefs):
     # function not yet implemented
-    html_content = render_html("email_templates/dos_opportunities.html", data={"briefs": briefs, "datetime": datetime, "dateformat": DATETIME_FORMAT})
+    html_content = render_html("email_templates/dos_opportunities.html", data={
+        "briefs": briefs,
+        "datetime": datetime,
+        "datetime_format": DATETIME_FORMAT,
+        "display_date_format": DISPLAY_DATE_FORMAT
+    })
     return {"html": html_content}
 
 

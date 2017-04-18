@@ -88,8 +88,8 @@ def test_get_html_content_renders_brief_information():
 
         assert "Closing Tuesday 5 July 2016" in html
         assert "Closing Thursday 7 July 2016" in html
-        assert "https://www.digitalmarketplace.service.gov.uk/digital-outcomes-and-specialists/opportunities/234?utm_id=20170419" in html
-        assert "https://www.digitalmarketplace.service.gov.uk/digital-outcomes-and-specialists/opportunities/235?utm_id=20170419" in html
+        assert "https://www.digitalmarketplace.service.gov.uk/digital-outcomes-and-specialists/opportunities/234?utm_id=20170419" in html  # noqa
+        assert "https://www.digitalmarketplace.service.gov.uk/digital-outcomes-and-specialists/opportunities/235?utm_id=20170419" in html  # noqa
 
 
 def test_get_campaign_data():
