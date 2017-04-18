@@ -4,6 +4,7 @@ from freezegun import freeze_time
 from requests.exceptions import RequestException
 
 from datetime import datetime, date
+from lxml import html
 
 from dmscripts.send_dos_opportunities_email import (
     main,
@@ -68,28 +69,69 @@ def test_get_html_content_renders_brief_information():
             "applicationsClosedAt": "2016-07-05T23:59:59.000000Z",
             "id": "234"
         },
+    ]
+
+    with freeze_time('2017-04-19 08:00:00'):
+        html_content = get_html_content(briefs)["html"]
+        doc = html.fromstring(html_content)
+        assert doc.xpath('//*[@class="opportunity-title"]')[0].text_content() == briefs[0]["title"]
+        assert doc.xpath('//*[@class="opportunity-organisation"]')[0].text_content() == briefs[0]["organisation"]
+        assert doc.xpath('//*[@class="opportunity-location"]')[0].text_content() == briefs[0]["location"]
+        assert doc.xpath('//*[@class="opportunity-closing"]')[0].text_content() == "Closing Tuesday 5 July 2016"
+        assert doc.xpath('//a[@class="opportunity-link"]')[0].text_content() == "https://www.digitalmarketplace.service.gov.uk/digital-outcomes-and-specialists/opportunities/234?utm_id=20170419"  # noqa
+
+
+def test_get_html_content_renders_multiple_briefs():
+    briefs = [
+        {
+            "title": "Brief 1",
+            "organisation": "the big SME",
+            "location": "London",
+            "applicationsClosedAt": "2016-07-05T23:59:59.000000Z",
+            "id": "234",
+            "lotName": "Digital specialists"
+        },
         {
             "title": "Brief 2",
             "organisation": "ministry of weird steps",
             "location": "Manchester",
             "applicationsClosedAt": "2016-07-07T23:59:59.000000Z",
-            "id": "235"
+            "id": "235",
+            "lotName": "Digital specialists"
         }
     ]
 
-    with freeze_time('2017-04-19 08:00:00'):
-        html = get_html_content(briefs)["html"]
+    html_content = get_html_content(briefs)["html"]
+    assert "In the last day, 2 new digital specialists opportunities were published" in html_content
+    assert "View and apply for these opportunities:" in html_content
 
-        assert "Dear supplier" in html
-        for brief in briefs:
-            assert brief["title"] in html
-            assert brief["organisation"] in html
-            assert brief["location"] in html
+    doc = html.fromstring(html_content)
+    brief_titles = doc.xpath('//*[@class="opportunity-title"]')
+    assert len(brief_titles) == 2
+    assert brief_titles[0].text_content() == "Brief 1"
+    assert brief_titles[1].text_content() == "Brief 2"
 
-        assert "Closing Tuesday 5 July 2016" in html
-        assert "Closing Thursday 7 July 2016" in html
-        assert "https://www.digitalmarketplace.service.gov.uk/digital-outcomes-and-specialists/opportunities/234?utm_id=20170419" in html  # noqa
-        assert "https://www.digitalmarketplace.service.gov.uk/digital-outcomes-and-specialists/opportunities/235?utm_id=20170419" in html  # noqa
+
+def test_get_html_content_renders_singular_for_single_brief():
+    briefs = [
+        {
+            "title": "Only one brief",
+            "organisation": "the big SME",
+            "location": "London",
+            "applicationsClosedAt": "2016-07-05T23:59:59.000000Z",
+            "id": "234",
+            "lotName": "Digital specialists"
+        },
+    ]
+
+    html_content = get_html_content(briefs)["html"]
+    assert "In the last day, 1 new digital specialists opportunity was published" in html_content
+    assert "View and apply for this opportunity:" in html_content
+
+    doc = html.fromstring(html_content)
+    brief_titles = doc.xpath('//*[@class="opportunity-title"]')
+    assert len(brief_titles) == 1
+    assert brief_titles[0].text_content() == "Only one brief"
 
 
 def test_get_campaign_data():

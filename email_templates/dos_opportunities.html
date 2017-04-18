@@ -616,15 +616,17 @@
 
                             <p><span style="color:#000000"><span style="font-size:19px">Dear supplier,</span></span><br>
 <br>
-<span style="color:#000000"><span style="font-size:19px">In the last day, [number of opportunities]&nbsp;new [name of lot] opportunities were published on the Digital Marketplace. View and apply for these opportunities:</span></span><br>
+<span id="opening-paragraph" style="color:#000000"><span style="font-size:19px">In the last day, {{ briefs|length }} new {{ briefs[0].lotName|lower }} {% if briefs|length == 1 %}opportunity was{% else %}opportunities were{% endif %} published on the Digital Marketplace. View and apply for {% if briefs|length == 1 %}this opportunity{% else %}these opportunities{% endif %}:</span></span><br>
 <br>
 
 {% for brief in briefs %}
-	<span style="font-size:16px"><font color="#000000"><strong>{{ brief.title }}</strong></font><br>
-	<span style="color:#000000">{{ brief.organisation }}<br>
-	{{ brief.location }}</span><br>
-	<span style="color:#000000">Closing {{ (datetime.strptime(brief.applicationsClosedAt, datetime_format)).strftime(display_date_format) }}</span><br>
-	<font color="#005ea5">https://www.digitalmarketplace.service.gov.uk/digital-outcomes-and-specialists/opportunities/{{ brief.id }}?utm_id={{ datetime.today().strftime('%Y%m%d') }}</font><br>
+	<span class="opportunity-title" style="font-size:16px"><font color="#000000"><strong>{{ brief.title }}</strong></font></span><br>
+	<span class="opportunity-organisation" style="color:#000000">{{ brief.organisation }}<br></span>
+	<span class="opportunity-location" style="color:#000000">{{ brief.location }}</span><br>
+	<span class="opportunity-closing" style="color:#000000">Closing {{ (datetime.strptime(brief.applicationsClosedAt, datetime_format)).strftime(display_date_format) }}</span><br>
+	<font color="#005ea5"><a class="opportunity-link"
+		href="https://www.digitalmarketplace.service.gov.uk/digital-outcomes-and-specialists/opportunities/{{ brief.id }}?utm_id={{ datetime.today().strftime('%Y%m%d') }}">https://www.digitalmarketplace.service.gov.uk/digital-outcomes-and-specialists/opportunities/{{ brief.id }}?utm_id={{ datetime.today().strftime('%Y%m%d') }}</a>
+	</font><br>
 {% endfor %}
 
 <br>
