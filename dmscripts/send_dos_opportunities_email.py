@@ -127,7 +127,7 @@ def main(data_api_client, mailchimp_client, lot_data, number_of_days):
     if not campaign_id:
         return False
 
-    content_data = get_html_content()
+    content_data = get_html_content(live_briefs, number_of_days)
     logger.info(
         "Setting campaign data for '{0}' lot and '{1}' campaign id".format(lot_data["lot_slug"], campaign_id)
     )

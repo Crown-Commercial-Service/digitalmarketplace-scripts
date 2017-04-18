@@ -59,49 +59,49 @@ def test_get_live_briefs_between_two_dates():
         {"publishedAt": "2017-03-18T09:52:17.669156Z"}
     ]
 
+ONE_BRIEF = [
+    {
+        "title": "Brief 1",
+        "organisation": "the big SME",
+        "location": "London",
+        "applicationsClosedAt": "2016-07-05T23:59:59.000000Z",
+        "id": "234",
+        "lotName": "Digital specialists"
+    },
+]
+MANY_BRIEFS = [
+    {
+        "title": "Brief 1",
+        "organisation": "the big SME",
+        "location": "London",
+        "applicationsClosedAt": "2016-07-05T23:59:59.000000Z",
+        "id": "234",
+        "lotName": "Digital specialists"
+    },
+    {
+        "title": "Brief 2",
+        "organisation": "ministry of weird steps",
+        "location": "Manchester",
+        "applicationsClosedAt": "2016-07-07T23:59:59.000000Z",
+        "id": "235",
+        "lotName": "Digital specialists"
+    }
+]
+
 
 def test_get_html_content_renders_brief_information():
-    briefs = [
-        {
-            "title": "Brief 1",
-            "organisation": "the big SME",
-            "location": "London",
-            "applicationsClosedAt": "2016-07-05T23:59:59.000000Z",
-            "id": "234"
-        },
-    ]
-
     with freeze_time('2017-04-19 08:00:00'):
-        html_content = get_html_content(briefs)["html"]
+        html_content = get_html_content(ONE_BRIEF, 1)["html"]
         doc = html.fromstring(html_content)
-        assert doc.xpath('//*[@class="opportunity-title"]')[0].text_content() == briefs[0]["title"]
-        assert doc.xpath('//*[@class="opportunity-organisation"]')[0].text_content() == briefs[0]["organisation"]
-        assert doc.xpath('//*[@class="opportunity-location"]')[0].text_content() == briefs[0]["location"]
+        assert doc.xpath('//*[@class="opportunity-title"]')[0].text_content() == ONE_BRIEF[0]["title"]
+        assert doc.xpath('//*[@class="opportunity-organisation"]')[0].text_content() == ONE_BRIEF[0]["organisation"]
+        assert doc.xpath('//*[@class="opportunity-location"]')[0].text_content() == ONE_BRIEF[0]["location"]
         assert doc.xpath('//*[@class="opportunity-closing"]')[0].text_content() == "Closing Tuesday 5 July 2016"
         assert doc.xpath('//a[@class="opportunity-link"]')[0].text_content() == "https://www.digitalmarketplace.service.gov.uk/digital-outcomes-and-specialists/opportunities/234?utm_id=20170419"  # noqa
 
 
 def test_get_html_content_renders_multiple_briefs():
-    briefs = [
-        {
-            "title": "Brief 1",
-            "organisation": "the big SME",
-            "location": "London",
-            "applicationsClosedAt": "2016-07-05T23:59:59.000000Z",
-            "id": "234",
-            "lotName": "Digital specialists"
-        },
-        {
-            "title": "Brief 2",
-            "organisation": "ministry of weird steps",
-            "location": "Manchester",
-            "applicationsClosedAt": "2016-07-07T23:59:59.000000Z",
-            "id": "235",
-            "lotName": "Digital specialists"
-        }
-    ]
-
-    html_content = get_html_content(briefs)["html"]
+    html_content = get_html_content(MANY_BRIEFS, 1)["html"]
     assert "2 new digital specialists opportunities were published" in html_content
     assert "View and apply for these opportunities:" in html_content
 
@@ -113,57 +113,24 @@ def test_get_html_content_renders_multiple_briefs():
 
 
 def test_get_html_content_renders_singular_for_single_brief():
-    briefs = [
-        {
-            "title": "Only one brief",
-            "organisation": "the big SME",
-            "location": "London",
-            "applicationsClosedAt": "2016-07-05T23:59:59.000000Z",
-            "id": "234",
-            "lotName": "Digital specialists"
-        },
-    ]
-
-    html_content = get_html_content(briefs)["html"]
+    html_content = get_html_content(ONE_BRIEF, 1)["html"]
     assert "1 new digital specialists opportunity was published" in html_content
     assert "View and apply for this opportunity:" in html_content
 
     doc = html.fromstring(html_content)
     brief_titles = doc.xpath('//*[@class="opportunity-title"]')
     assert len(brief_titles) == 1
-    assert brief_titles[0].text_content() == "Only one brief"
+    assert brief_titles[0].text_content() == "Brief 1"
 
 
 def test_get_html_content_with_briefs_from_last_day():
-    briefs = [
-        {
-            "title": "Only one brief",
-            "organisation": "the big SME",
-            "location": "London",
-            "applicationsClosedAt": "2016-07-05T23:59:59.000000Z",
-            "id": "234",
-            "lotName": "Digital specialists"
-        },
-    ]
-
-    html_content = get_html_content(briefs, 1)["html"]
+    html_content = get_html_content(ONE_BRIEF, 1)["html"]
     assert "In the last day" in html_content
 
 
 def test_get_html_content_with_briefs_from_several_days():
-    briefs = [
-        {
-            "title": "Only one brief",
-            "organisation": "the big SME",
-            "location": "London",
-            "applicationsClosedAt": "2016-07-05T23:59:59.000000Z",
-            "id": "234",
-            "lotName": "Digital specialists"
-        },
-    ]
-
     with freeze_time('2017-04-17 08:00:00'):
-        html_content = get_html_content(briefs, 3)["html"]
+        html_content = get_html_content(ONE_BRIEF, 3)["html"]
         assert "Since Friday" in html_content
 
 
@@ -260,6 +227,7 @@ def test_main_creates_campaign_sets_content_and_sends_campaign(
     create_campaign, get_campaign_data, get_live_briefs_between_two_dates,
     set_campaign_content, send_campaign, get_html_content
 ):
+    get_live_briefs_between_two_dates.return_value = [{"brief": "yaytest"}]
     get_campaign_data.return_value = {"created": "campaign"}
     get_html_content.return_value = {"first": "content"}
     create_campaign.return_value = "1"
@@ -271,7 +239,7 @@ def test_main_creates_campaign_sets_content_and_sends_campaign(
     create_campaign.assert_called_once_with(mock.ANY, {"created": "campaign"})
 
     # Sets campaign content
-    get_html_content.assert_called_once_with()
+    get_html_content.assert_called_once_with([{"brief": "yaytest"}], 1)
     set_campaign_content.assert_called_once_with(mock.ANY, "1", {"first": "content"})
 
     # Sends campaign
