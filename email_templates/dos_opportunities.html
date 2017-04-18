@@ -616,7 +616,7 @@
 
                             <p><span style="color:#000000"><span style="font-size:19px">Dear supplier,</span></span><br>
 <br>
-<span id="opening-paragraph" style="color:#000000"><span style="font-size:19px">In the last day, {{ briefs|length }} new {{ briefs[0].lotName|lower }} {% if briefs|length == 1 %}opportunity was{% else %}opportunities were{% endif %} published on the Digital Marketplace. View and apply for {% if briefs|length == 1 %}this opportunity{% else %}these opportunities{% endif %}:</span></span><br>
+<span id="opening-paragraph" style="color:#000000"><span style="font-size:19px">{% if number_of_days == 1 %}In the last day{% else %}Since {{ start_date.strftime("%A") }}{% endif %}, {{ briefs|length }} new {{ briefs[0].lotName|lower }} {% if briefs|length == 1 %}opportunity was{% else %}opportunities were{% endif %} published on the Digital Marketplace. View and apply for {% if briefs|length == 1 %}this opportunity{% else %}these opportunities{% endif %}:</span></span><br>
 <br>
 
 {% for brief in briefs %}

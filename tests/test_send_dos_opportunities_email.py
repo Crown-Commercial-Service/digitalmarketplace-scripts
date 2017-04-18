@@ -102,7 +102,7 @@ def test_get_html_content_renders_multiple_briefs():
     ]
 
     html_content = get_html_content(briefs)["html"]
-    assert "In the last day, 2 new digital specialists opportunities were published" in html_content
+    assert "2 new digital specialists opportunities were published" in html_content
     assert "View and apply for these opportunities:" in html_content
 
     doc = html.fromstring(html_content)
@@ -125,13 +125,46 @@ def test_get_html_content_renders_singular_for_single_brief():
     ]
 
     html_content = get_html_content(briefs)["html"]
-    assert "In the last day, 1 new digital specialists opportunity was published" in html_content
+    assert "1 new digital specialists opportunity was published" in html_content
     assert "View and apply for this opportunity:" in html_content
 
     doc = html.fromstring(html_content)
     brief_titles = doc.xpath('//*[@class="opportunity-title"]')
     assert len(brief_titles) == 1
     assert brief_titles[0].text_content() == "Only one brief"
+
+
+def test_get_html_content_with_briefs_from_last_day():
+    briefs = [
+        {
+            "title": "Only one brief",
+            "organisation": "the big SME",
+            "location": "London",
+            "applicationsClosedAt": "2016-07-05T23:59:59.000000Z",
+            "id": "234",
+            "lotName": "Digital specialists"
+        },
+    ]
+
+    html_content = get_html_content(briefs, 1)["html"]
+    assert "In the last day" in html_content
+
+
+def test_get_html_content_with_briefs_from_several_days():
+    briefs = [
+        {
+            "title": "Only one brief",
+            "organisation": "the big SME",
+            "location": "London",
+            "applicationsClosedAt": "2016-07-05T23:59:59.000000Z",
+            "id": "234",
+            "lotName": "Digital specialists"
+        },
+    ]
+
+    with freeze_time('2017-04-17 08:00:00'):
+        html_content = get_html_content(briefs, 3)["html"]
+        assert "Since Friday" in html_content
 
 
 def test_get_campaign_data():
