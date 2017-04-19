@@ -14,7 +14,7 @@ logger = logging_helpers.configure_logger({'dmapiclient': logging.INFO})
 
 def get_live_briefs_between_two_dates(data_api_client, lot_slug, start_date, end_date):
     return [
-        brief for brief in data_api_client.find_briefs_iter(status="live", lot=lot_slug)
+        brief for brief in data_api_client.find_briefs_iter(status="live", lot=lot_slug, human=True)
         if datetime.strptime(brief['publishedAt'], DATETIME_FORMAT).date() >= start_date
         and datetime.strptime(brief['publishedAt'], DATETIME_FORMAT).date() <= end_date
     ]

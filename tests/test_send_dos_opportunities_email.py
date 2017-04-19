@@ -42,7 +42,7 @@ def test_get_live_briefs_between_two_dates():
     briefs = get_live_briefs_between_two_dates(
         data_api_client, "digital-specialists", date(2017, 3, 23), date(2017, 3, 23)
     )
-    data_api_client.find_briefs_iter.assert_called_once_with(status="live", lot="digital-specialists")
+    data_api_client.find_briefs_iter.assert_called_once_with(status="live", lot="digital-specialists", human=True)
     assert briefs == [
         {"publishedAt": "2017-03-23T23:59:59.669156Z"},
         {"publishedAt": "2017-03-23T09:52:17.669156Z"},
