@@ -51,10 +51,14 @@ def get_campaign_data(lot_name, list_id):
 def get_html_content(briefs, number_of_days):
     start_date = date.today() - timedelta(days=number_of_days)
 
+    for brief in briefs:
+        brief.update(
+            {"applicationsClosedAtDateTime": datetime.strptime(brief["applicationsClosedAt"], DATETIME_FORMAT)}
+        )
+
     html_content = render_html("email_templates/dos_opportunities.html", data={
         "briefs": briefs,
-        "datetime": datetime,
-        "datetime_format": DATETIME_FORMAT,
+        "today": datetime.today(),
         "display_date_format": DISPLAY_DATE_FORMAT,
         "number_of_days": number_of_days,
         "start_date": start_date
