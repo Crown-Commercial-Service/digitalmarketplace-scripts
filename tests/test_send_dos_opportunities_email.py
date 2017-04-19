@@ -217,12 +217,12 @@ def test_log_error_message_if_error_sending_campaign(logger):
     )
 
 
-@mock.patch('dmscripts.send_dos_opportunities_email.get_html_content')
-@mock.patch('dmscripts.send_dos_opportunities_email.send_campaign')
-@mock.patch('dmscripts.send_dos_opportunities_email.set_campaign_content')
-@mock.patch('dmscripts.send_dos_opportunities_email.get_live_briefs_between_two_dates')
-@mock.patch('dmscripts.send_dos_opportunities_email.get_campaign_data')
-@mock.patch('dmscripts.send_dos_opportunities_email.create_campaign')
+@mock.patch('dmscripts.send_dos_opportunities_email.get_html_content', autospec=True)
+@mock.patch('dmscripts.send_dos_opportunities_email.send_campaign', autospec=True)
+@mock.patch('dmscripts.send_dos_opportunities_email.set_campaign_content', autospec=True)
+@mock.patch('dmscripts.send_dos_opportunities_email.get_live_briefs_between_two_dates', autospec=True)
+@mock.patch('dmscripts.send_dos_opportunities_email.get_campaign_data', autospec=True)
+@mock.patch('dmscripts.send_dos_opportunities_email.create_campaign', autospec=True)
 def test_main_creates_campaign_sets_content_and_sends_campaign(
     create_campaign, get_campaign_data, get_live_briefs_between_two_dates,
     set_campaign_content, send_campaign, get_html_content
@@ -246,7 +246,7 @@ def test_main_creates_campaign_sets_content_and_sends_campaign(
     send_campaign.assert_called_once_with(mock.ANY, "1")
 
 
-@mock.patch('dmscripts.send_dos_opportunities_email.get_live_briefs_between_two_dates')
+@mock.patch('dmscripts.send_dos_opportunities_email.get_live_briefs_between_two_dates', autospec=True)
 def test_main_gets_live_briefs_for_one_day(get_live_briefs_between_two_dates):
     with freeze_time('2017-04-19 08:00:00'):
         main(mock.MagicMock(), mock.MagicMock(), LOT_DATA, 1)
@@ -255,7 +255,7 @@ def test_main_gets_live_briefs_for_one_day(get_live_briefs_between_two_dates):
         )
 
 
-@mock.patch('dmscripts.send_dos_opportunities_email.get_live_briefs_between_two_dates')
+@mock.patch('dmscripts.send_dos_opportunities_email.get_live_briefs_between_two_dates', autospec=True)
 def test_main_gets_live_briefs_for_three_days(get_live_briefs_between_two_dates):
     with freeze_time('2017-04-10 08:00:00'):
         main(mock.MagicMock(), mock.MagicMock(), LOT_DATA, 3)
@@ -265,19 +265,19 @@ def test_main_gets_live_briefs_for_three_days(get_live_briefs_between_two_dates)
 
 
 @mock.patch('dmscripts.send_dos_opportunities_email.logger', autospec=True)
-@mock.patch('dmscripts.send_dos_opportunities_email.send_campaign')
-@mock.patch('dmscripts.send_dos_opportunities_email.set_campaign_content')
-@mock.patch('dmscripts.send_dos_opportunities_email.create_campaign')
-@mock.patch('dmscripts.send_dos_opportunities_email.get_live_briefs_between_two_dates')
+@mock.patch('dmscripts.send_dos_opportunities_email.send_campaign', autospec=True)
+@mock.patch('dmscripts.send_dos_opportunities_email.set_campaign_content', autospec=True)
+@mock.patch('dmscripts.send_dos_opportunities_email.create_campaign', autospec=True)
+@mock.patch('dmscripts.send_dos_opportunities_email.get_live_briefs_between_two_dates', autospec=True)
 def test_if_no_briefs_then_no_campaign_created_nor_sent(
     get_live_briefs_between_two_dates, create_campaign, set_campaign_content, send_campaign, logger
 ):
     get_live_briefs_between_two_dates.return_value = []
     result = main(mock.MagicMock(), mock.MagicMock(), LOT_DATA, 3)
     assert result is True
-    create_campaign.assert_not_called()
-    set_campaign_content.assert_not_called()
-    send_campaign.assert_not_called()
+    assert create_campaign.call_count == 0
+    assert set_campaign_content.call_count == 0
+    assert send_campaign.call_count == 0
 
     logger.info.assert_called_with(
         "No new briefs found for 'digital-specialists' lot", extra={"number_of_days": 3}
