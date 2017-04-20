@@ -21,14 +21,19 @@ Description:
     For testing purposes, you can override the list ID so you can send it to yourself only as
     we have set up a testing list with ID "096e52cebb"
 
+    If you only need to send opportunities for one lot rather than all of them, you can also do this via the command
+    line. Note, this may come in useful if the script was to fail halfway and you wish to continue from the lot which
+    failed.
+
 Usage:
     send_dos_opportunities_email.py
         <stage> <api_token> <mailchimp_username> <mailchimp_api_key>
-        [--number_of_days=<number_of_days>] [--list_id=<list_id>]
+        [--number_of_days=<number_of_days>] [--list_id=<list_id>] [--lot_slug=<lot_slug>]
 
 Example:
     send_dos_opportunities_email.py
-        preview b7g5r7e6gv876tv6 user@gds.gov.uk 7483crh87h34c3 --number_of_days=3 --list_id=988972hse
+        preview b7g5r7e6gv876tv6 user@gds.gov.uk 7483crh87h34c3
+        --number_of_days=3 --list_id=988972hse --lot_slug=digital-outcomes
 """
 
 import sys
@@ -80,6 +85,10 @@ if __name__ == "__main__":
     if arguments.get("--list_id"):
         for lot in lots:
             lot.update({"list_id": arguments["--list_id"]})
+
+    # Override lot
+    if arguments.get("--lot_slug"):
+        lots = [lot for lot in lots if lot["lot_slug"] == arguments["--lot_slug"]]
 
     api_url = get_api_endpoint_from_stage(arguments['<stage>'])
     data_api_client = DataAPIClient(api_url, arguments['<api_token>'])
