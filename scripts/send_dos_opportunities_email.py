@@ -15,20 +15,25 @@ Description:
                     then it will only include briefs from Tuesday (preceding day).
         example2: if you run it on Wednesday and set number of days=3,
                     then it will include all briefs published on Sunday, Monday and Tuesday.
+    By default, the script will send 3 days of briefs on a Monday (briefs from Fri, Sat, Sun) and 1 day on all other
+    days. This can be overrriden as described above.
 
     For testing purposes, you can override the list ID so you can send it to yourself only as
     we have set up a testing list with ID "096e52cebb"
 
 Usage:
     send_dos_opportunities_email.py
-        <stage> <api_token> <mailchimp_username> <mailchimp_api_key> <number_of_days> --list_id=<list_id>
+        <stage> <api_token> <mailchimp_username> <mailchimp_api_key>
+        [--number_of_days=<number_of_days>] [--list_id=<list_id>]
 
 Example:
     send_dos_opportunities_email.py
-        preview b7g5r7e6gv876tv6 user@gds.gov.uk 7483crh87h34c3 3 --list_id=988972hse
+        preview b7g5r7e6gv876tv6 user@gds.gov.uk 7483crh87h34c3 --number_of_days=3 --list_id=988972hse
 """
 
 import sys
+
+from datetime import date
 
 from docopt import docopt
 from mailchimp3 import MailChimp
@@ -61,6 +66,17 @@ lots = [
 if __name__ == "__main__":
     arguments = docopt(__doc__)
 
+    # Override number of days
+    if arguments.get("--number_of_days"):
+        number_of_days = int(arguments['--number_of_days'])
+    else:
+        day_of_week = date.today().weekday()
+        if day_of_week == 0:
+            number_of_days = 3  # If Monday, then 3 days of briefs
+        else:
+            number_of_days = 1
+
+    # Override list id
     if arguments.get("--list_id"):
         for lot in lots:
             lot.update({"list_id": arguments["--list_id"]})
@@ -75,7 +91,7 @@ if __name__ == "__main__":
             data_api_client=data_api_client,
             mailchimp_client=mailchimp_client,
             lot_data=lot_data,
-            number_of_days=int(arguments['<number_of_days>'])
+            number_of_days=number_of_days
         )
 
     if not ok:
