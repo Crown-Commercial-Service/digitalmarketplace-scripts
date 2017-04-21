@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from collections import OrderedDict
 from itertools import chain
 import jsonschema
 import os
@@ -163,12 +164,12 @@ class DiscretionaryHandler(object):
 
 def get_questions_numbers_from_framework(framework_slug, content_loader):
     content_loader.load_manifest(framework_slug, 'declaration', 'declaration')
-    return {
-        question.id: question.number
-        for question in chain.from_iterable(
+    return OrderedDict(
+        (question.id, question.number,)
+        for question in sorted(chain.from_iterable(
             section.questions for section in content_loader.get_manifest(framework_slug, 'declaration').sections
-        )
-    }
+        ), key=lambda question: question.number)
+    )
 
 
 def export_suppliers(
