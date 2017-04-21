@@ -102,6 +102,5 @@ if __name__ == "__main__":
             lot_data=lot_data,
             number_of_days=number_of_days
         )
-
-    if not ok:
-        sys.exit(1)
+        if not ok:
+            sys.exit(1)
