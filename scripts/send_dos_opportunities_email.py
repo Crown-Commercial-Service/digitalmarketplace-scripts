@@ -53,17 +53,17 @@ lots = [
     {
         "lot_slug": "digital-specialists",
         "lot_name": "Digital specialists",
-        "list_id": "TO BE FILLED IN"
+        "list_id": "30ba9fdf39"
     },
     {
         "lot_slug": "digital-outcomes",
         "lot_name": "Digital outcomes",
-        "list_id": "TO BE FILLED IN"
+        "list_id": "97952fee38"
     },
     {
         "lot_slug": "user-research-participants",
         "lot_name": "User research participants",
-        "list_id": "TO BE FILLED IN"
+        "list_id": "e6b93a3bce"
     }
 ]
 
