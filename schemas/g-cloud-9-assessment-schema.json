@@ -1,0 +1,234 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "allOf": [
+    {
+      "$ref": "#/definitions/baseline"
+    },
+    {
+      "properties": {
+        "GAAR": {
+          "enum": [
+            false
+          ]
+        },
+        "bankrupt": {
+          "enum": [
+            false
+          ]
+        },
+        "confidentialInformation": {
+          "enum": [
+            false
+          ]
+        },
+        "conflictOfInterest": {
+          "enum": [
+            false
+          ]
+        },
+        "distortedCompetition": {
+          "enum": [
+            false
+          ]
+        },
+        "distortingCompetition": {
+          "enum": [
+            false
+          ]
+        },
+        "environmentalSocialLabourLaw": {
+          "enum": [
+            false
+          ]
+        },
+        "graveProfessionalMisconduct": {
+          "enum": [
+            false
+          ]
+        },
+        "influencedContractingAuthority": {
+          "enum": [
+            false
+          ]
+        },
+        "misleadingInformation": {
+          "enum": [
+            false
+          ]
+        },
+        "seriousMisrepresentation": {
+          "enum": [
+            false
+          ]
+        },
+        "significantOrPersistentDeficiencies": {
+          "enum": [
+            false
+          ]
+        },
+        "taxEvasion": {
+          "enum": [
+            false
+          ]
+        },
+        "unspentTaxConvictions": {
+          "enum": [
+            false
+          ]
+        },
+        "witheldSupportingDocuments": {
+          "enum": [
+            false
+          ]
+        }
+      }
+    }
+  ],
+  "definitions": {
+    "baseline": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "properties": {
+        "10WorkingDays": {
+          "enum": [
+            true
+          ]
+        },
+        "MI": {
+          "enum": [
+            true
+          ]
+        },
+        "accurateInformation": {
+          "enum": [
+            true
+          ]
+        },
+        "accuratelyDescribed": {
+          "enum": [
+            true
+          ]
+        },
+        "canProvideFromDayOne": {
+          "enum": [
+            true
+          ]
+        },
+        "conspiracy": {
+          "enum": [
+            false
+          ]
+        },
+        "corruptionBribery": {
+          "enum": [
+            false
+          ]
+        },
+        "employersInsurance": {
+          "enum": [
+            "Yes \u2013 your organisation has, or will have in place, employer\u2019s liability insurance of at least \u00a35 million and you will provide certification before the framework is awarded.",
+            "Not applicable - your organisation does not need employer\u2019s liability insurance because your organisation employs only the owner or close family members."
+          ]
+        },
+        "environmentallyFriendly": {
+          "enum": [
+            true
+          ]
+        },
+        "equalityAndDiversity": {
+          "enum": [
+            true
+          ]
+        },
+        "fraudAndTheft": {
+          "enum": [
+            false
+          ]
+        },
+        "fullAccountability": {
+          "enum": [
+            true
+          ]
+        },
+        "helpBuyersComplyTechnologyCodesOfPractice": {
+          "enum": [
+            true
+          ]
+        },
+        "informationChanges": {
+          "enum": [
+            true
+          ]
+        },
+        "offerServicesYourselves": {
+          "enum": [
+            true
+          ]
+        },
+        "organisedCrime": {
+          "enum": [
+            false
+          ]
+        },
+        "proofOfClaims": {
+          "enum": [
+            true
+          ]
+        },
+        "publishContracts": {
+          "enum": [
+            true
+          ]
+        },
+        "readUnderstoodGuidance": {
+          "enum": [
+            true
+          ]
+        },
+        "servicesDoNotInclude": {
+          "enum": [
+            true
+          ]
+        },
+        "servicesHaveOrSupport": {
+          "enum": [
+            true
+          ]
+        },
+        "termsAndConditions": {
+          "enum": [
+            true
+          ]
+        },
+        "termsOfParticipation": {
+          "enum": [
+            true
+          ]
+        },
+        "terrorism": {
+          "enum": [
+            false
+          ]
+        },
+        "understandHowToAskQuestions": {
+          "enum": [
+            true
+          ]
+        },
+        "understandTool": {
+          "enum": [
+            true
+          ]
+        },
+        "unfairCompetition": {
+          "enum": [
+            true
+          ]
+        }
+      },
+      "title": "g-cloud-9 Declaration Assessment Schema (Baseline Schema)",
+      "type": "object"
+    }
+  },
+  "title": "g-cloud-9 Declaration Assessment Schema (Definite Pass Schema)",
+  "type": "object"
+}

@@ -7,7 +7,7 @@ dmscripts/export_framework_applicant_details.py, though in the (far) future it w
 be pulled from the frameworks themselves provided the frameworks repo knew which fields classed as "about you".
 
 Usage:
-    scripts/export-framework-applicant-details.py <stage> <api_token> <framework_slug> [<output_dir>]
+    scripts/export-framework-applicant-details.py <stage> <api_token> <framework_slug> <output_dir>
 
 Example:
     scripts/export-framework-applicant-details.py dev myToken g-cloud-8 SCRIPT_OUTPUTS
@@ -37,15 +37,15 @@ if __name__ == '__main__':
     client = DataAPIClient(get_api_endpoint_from_stage(STAGE), API_TOKEN)
     now = datetime.datetime.now()
 
-    filename = OUTPUT_DIR + os.sep if OUTPUT_DIR else ""
-    filename = filename + FRAMEWORK + "-applicant_details-" + now.strftime("%Y-%m-%d_%H.%M-") + STAGE + ".csv"
+    filename = FRAMEWORK + "-applicant_details-" + now.strftime("%Y-%m-%d_%H.%M-") + STAGE + ".csv"
+    filepath = OUTPUT_DIR + os.sep + filename
 
     # Create output directory if it doesn't already exist
-    if not os.path.exists(os.path.dirname(filename)):
+    if not os.path.exists(os.path.dirname(filepath)):
         try:
-            os.makedirs(os.path.dirname(filename))
+            os.makedirs(os.path.dirname(filepath))
         except OSError as exc:  # Guard against race condition
             if exc.errno != errno.EEXIST:
                 raise
 
-    export_supplier_details(client, FRAMEWORK, filename)
+    export_supplier_details(client, FRAMEWORK, filepath)

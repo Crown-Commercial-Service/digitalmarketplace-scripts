@@ -11,6 +11,7 @@ LOTS = {
         "user-research-participants",
         "user-research-studios",
     ),
+    "g-cloud-9": ("cloud-hosting", "cloud-software", "cloud-support",),
 }
 
 DECLARATION_FIELDS = {
@@ -68,6 +69,31 @@ DECLARATION_FIELDS = {
         "cyberEssentials",
         "cyberEssentialsPlus",
     ),
+    "g-cloud-9": (
+        "primaryContact",
+        "primaryContactEmail",
+        "nameOfOrganisation",
+        "registeredAddressBuilding",
+        "registeredAddressTown",
+        "registeredAddressPostcode",
+        "tradingStatus",
+        "tradingStatusOther",
+        "tradingNames",
+        "firstRegistered",
+        "currentRegisteredCountry",
+        "companyRegistrationNumber",
+        "dunsNumber",
+        "registeredVATNumber",
+        "establishedInTheUK",
+        "appropriateTradeRegisters",
+        "appropriateTradeRegistersNumber",
+        "licenceOrMemberRequired",
+        "licenceOrMemberRequiredDetails",
+        "organisationSize",
+        "subcontracting",
+        "contactNameContractNotice",
+        "contactEmailContractNotice",
+    ),
 }
 
 
@@ -79,7 +105,9 @@ def get_csv_rows(records, framework_slug, count_statuses=("submitted", "failed",
     rows_iter = (
         _create_row(framework_slug, record, count_statuses)
         for record in records
-        if record['declaration'].get('status') == 'complete' and record['counts']  # i.e. has submitted any services
+        if record['declaration'].get('status') == 'complete'
+        # only include the record if it has at least one count with a required status
+        and any(status in count_statuses for (lot, status) in record['counts'])
     )
     headers = tuple(chain(
         (
