@@ -4,6 +4,8 @@ import shutil
 import re
 import subprocess
 
+from datetime import datetime
+
 from dmscripts.helpers.html_helpers import render_html
 from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.logging_helpers import logging
@@ -47,6 +49,9 @@ def render_html_for_suppliers_awaiting_countersignature(rows, framework_kwargs, 
             continue
         data.update(framework_kwargs)
         data['awardedLots'] = filter(lambda lot: int(data[lot]) > 0, framework_kwargs['lotOrder'])
+        data['countersigned_at'] = datetime.strptime(
+            data['countersigned_at'], '%Y-%m-%dT%H:%M:%S.%fZ'
+        ).strftime('%d %B %Y')
         html = render_html(template_path, data)
         save_page(html, data['supplier_id'], output_dir, "agreement-countersignature")
     shutil.copyfile(template_css_path, os.path.join(output_dir, 'framework-agreement-signature-page.css'))
