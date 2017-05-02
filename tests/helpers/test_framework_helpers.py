@@ -120,14 +120,14 @@ def test_find_suppliers_with_details_and_draft_services(mock_data_client):
 
     mock_data_client.find_draft_services.return_value = {
         "services": [
-            {'status': 'submitted', 'lot': 'saas'},
-            {'status': 'submitted', 'lot': 'saas'},
-            {'status': 'submitted', 'lot': 'saas'},
-            {'status': 'submitted', 'lot': 'paas'},
-            {'status': 'failed', 'lot': 'iaas'},
-            {'status': 'not-submitted', 'lot': 'saas'},
-            {'status': 'not-submitted', 'lot': 'paas'},
-            {'status': 'not-submitted', 'lot': 'paas'},
+            {'status': 'submitted', 'lotSlug': 'saas'},
+            {'status': 'submitted', 'lotSlug': 'saas'},
+            {'status': 'submitted', 'lotSlug': 'saas'},
+            {'status': 'submitted', 'lotSlug': 'paas'},
+            {'status': 'failed', 'lotSlug': 'iaas'},
+            {'status': 'not-submitted', 'lotSlug': 'saas'},
+            {'status': 'not-submitted', 'lotSlug': 'paas'},
+            {'status': 'not-submitted', 'lotSlug': 'paas'},
         ]
     }
 
@@ -140,14 +140,14 @@ def test_find_suppliers_with_details_and_draft_services(mock_data_client):
                 'supplier': 'supplier 4',
                 'supplier_id': 4,
                 'services': [
-                    {'status': 'submitted', 'lot': 'saas'},
-                    {'status': 'submitted', 'lot': 'saas'},
-                    {'status': 'submitted', 'lot': 'saas'},
-                    {'status': 'submitted', 'lot': 'paas'},
-                    {'status': 'failed', 'lot': 'iaas'},
-                    {'status': 'not-submitted', 'lot': 'saas'},
-                    {'status': 'not-submitted', 'lot': 'paas'},
-                    {'status': 'not-submitted', 'lot': 'paas'}
+                    {'status': 'submitted', 'lotSlug': 'saas'},
+                    {'status': 'submitted', 'lotSlug': 'saas'},
+                    {'status': 'submitted', 'lotSlug': 'saas'},
+                    {'status': 'submitted', 'lotSlug': 'paas'},
+                    {'status': 'failed', 'lotSlug': 'iaas'},
+                    {'status': 'not-submitted', 'lotSlug': 'saas'},
+                    {'status': 'not-submitted', 'lotSlug': 'paas'},
+                    {'status': 'not-submitted', 'lotSlug': 'paas'}
                 ],
                 'declaration': {'status': 'complete'},
                 'countersignedPath': '',
@@ -158,14 +158,14 @@ def test_find_suppliers_with_details_and_draft_services(mock_data_client):
                 'supplier': 'supplier 3',
                 'supplier_id': 3,
                 'services': [
-                    {'status': 'submitted', 'lot': 'saas'},
-                    {'status': 'submitted', 'lot': 'saas'},
-                    {'status': 'submitted', 'lot': 'saas'},
-                    {'status': 'submitted', 'lot': 'paas'},
-                    {'status': 'failed', 'lot': 'iaas'},
-                    {'status': 'not-submitted', 'lot': 'saas'},
-                    {'status': 'not-submitted', 'lot': 'paas'},
-                    {'status': 'not-submitted', 'lot': 'paas'}
+                    {'status': 'submitted', 'lotSlug': 'saas'},
+                    {'status': 'submitted', 'lotSlug': 'saas'},
+                    {'status': 'submitted', 'lotSlug': 'saas'},
+                    {'status': 'submitted', 'lotSlug': 'paas'},
+                    {'status': 'failed', 'lotSlug': 'iaas'},
+                    {'status': 'not-submitted', 'lotSlug': 'saas'},
+                    {'status': 'not-submitted', 'lotSlug': 'paas'},
+                    {'status': 'not-submitted', 'lotSlug': 'paas'}
                 ],
                 'declaration': {'status': 'started'},
                 'countersignedPath': '',
@@ -176,14 +176,14 @@ def test_find_suppliers_with_details_and_draft_services(mock_data_client):
                 'supplier': 'supplier 2',
                 'supplier_id': 2,
                 'services': [
-                    {'status': 'submitted', 'lot': 'saas'},
-                    {'status': 'submitted', 'lot': 'saas'},
-                    {'status': 'submitted', 'lot': 'saas'},
-                    {'status': 'submitted', 'lot': 'paas'},
-                    {'status': 'failed', 'lot': 'iaas'},
-                    {'status': 'not-submitted', 'lot': 'saas'},
-                    {'status': 'not-submitted', 'lot': 'paas'},
-                    {'status': 'not-submitted', 'lot': 'paas'}
+                    {'status': 'submitted', 'lotSlug': 'saas'},
+                    {'status': 'submitted', 'lotSlug': 'saas'},
+                    {'status': 'submitted', 'lotSlug': 'saas'},
+                    {'status': 'submitted', 'lotSlug': 'paas'},
+                    {'status': 'failed', 'lotSlug': 'iaas'},
+                    {'status': 'not-submitted', 'lotSlug': 'saas'},
+                    {'status': 'not-submitted', 'lotSlug': 'paas'},
+                    {'status': 'not-submitted', 'lotSlug': 'paas'}
                 ],
                 'declaration': {'status': 'complete'},
                 'countersignedPath': 'some/path',
@@ -226,14 +226,14 @@ def test_find_suppliers_with_details_and_draft_service_counts(mock_data_client):
     }[args]
 
     mock_data_client.find_draft_services_iter.return_value = [
-        {'status': 'submitted', 'lot': 'saas'},
-        {'status': 'submitted', 'lot': 'saas'},
-        {'status': 'submitted', 'lot': 'saas'},
-        {'status': 'submitted', 'lot': 'paas'},
-        {'status': 'failed', 'lot': 'iaas'},
-        {'status': 'not-submitted', 'lot': 'saas'},
-        {'status': 'not-submitted', 'lot': 'paas'},
-        {'status': 'not-submitted', 'lot': 'paas'},
+        {'status': 'submitted', 'lotSlug': 'saas'},
+        {'status': 'submitted', 'lotSlug': 'saas'},
+        {'status': 'submitted', 'lotSlug': 'saas'},
+        {'status': 'submitted', 'lotSlug': 'paas'},
+        {'status': 'failed', 'lotSlug': 'iaas'},
+        {'status': 'not-submitted', 'lotSlug': 'saas'},
+        {'status': 'not-submitted', 'lotSlug': 'paas'},
+        {'status': 'not-submitted', 'lotSlug': 'paas'},
     ]
 
     records = framework_helpers.find_suppliers_with_details_and_draft_service_counts(mock_data_client, 'framework-slug')
@@ -360,14 +360,14 @@ def test_add_framework_info_fails_on_non_404_error(mock_data_client):
 
 def test_add_draft_counts(mock_data_client):
     mock_data_client.find_draft_services_iter.return_value = [
-        {'status': 'submitted', 'lot': 'saas'},
-        {'status': 'submitted', 'lot': 'saas'},
-        {'status': 'submitted', 'lot': 'saas'},
-        {'status': 'submitted', 'lot': 'paas'},
-        {'status': 'failed', 'lot': 'iaas'},
-        {'status': 'not-submitted', 'lot': 'saas'},
-        {'status': 'not-submitted', 'lot': 'paas'},
-        {'status': 'not-submitted', 'lot': 'paas'},
+        {'status': 'submitted', 'lotSlug': 'saas'},
+        {'status': 'submitted', 'lotSlug': 'saas'},
+        {'status': 'submitted', 'lotSlug': 'saas'},
+        {'status': 'submitted', 'lotSlug': 'paas'},
+        {'status': 'failed', 'lotSlug': 'iaas'},
+        {'status': 'not-submitted', 'lotSlug': 'saas'},
+        {'status': 'not-submitted', 'lotSlug': 'paas'},
+        {'status': 'not-submitted', 'lotSlug': 'paas'},
     ]
 
     record = framework_helpers.add_draft_counts(
