@@ -2,11 +2,12 @@
 """Read services from the API endpoint and write to search-api for indexing.
 
 Usage:
-    index-services.py <stage> --api-token=<api_access_token> --search-api-token=<search_api_access_token> [options]
+    index-services.py <stage> --frameworks=<frameworks> --api-token=<api_access_token> \
+--search-api-token=<search_api_access_token> [options]
 
-    --serial        Do not run in parallel (useful for debugging)
-    --index=<index>  Search API index name [default: g-cloud]
-    --frameworks=<frameworks> Optional comma-separated list of framework slugs that should be indexed
+    --serial                  Do not run in parallel (useful for debugging)
+    --index=<index>           Search API index name [default: g-cloud]
+    --frameworks=<frameworks> Comma-separated list of framework slugs that should be indexed
 
 Example:
     ./index-services.py dev --api-token=myToken --search-api-token=myToken --frameworks=g-cloud-6,g-cloud-7"
@@ -113,9 +114,6 @@ def do_index(search_api_url, search_api_access_token, data_api_url, data_api_acc
 
 if __name__ == "__main__":
     arguments = docopt(__doc__)
-    chosen_frameworks = arguments['--frameworks']
-    if not isinstance(chosen_frameworks, six.string_types):
-        chosen_frameworks = None
     ok = do_index(
         data_api_url=get_api_endpoint_from_stage(arguments['<stage>'], 'api'),
         data_api_access_token=arguments['--api-token'],
@@ -123,7 +121,7 @@ if __name__ == "__main__":
         search_api_access_token=arguments['--search-api-token'],
         serial=arguments['--serial'],
         index=arguments['--index'],
-        frameworks=chosen_frameworks
+        frameworks=arguments['--frameworks']
     )
 
     if not ok:
