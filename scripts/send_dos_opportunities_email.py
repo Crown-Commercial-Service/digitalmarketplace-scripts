@@ -47,6 +47,10 @@ from dmapiclient import DataAPIClient
 sys.path.insert(0, '.')
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.send_dos_opportunities_email import main
+from dmscripts.helpers import logging_helpers
+
+
+logger = logging_helpers.configure_logger()
 
 
 lots = [
@@ -80,6 +84,14 @@ if __name__ == "__main__":
             number_of_days = 3  # If Monday, then 3 days of briefs
         else:
             number_of_days = 1
+
+    # Override list for non-production environment
+    if arguments['<stage>'] != "production":
+        logger.info(
+            "The environment is not production. Emails will be sent to test list unless you set the list id manually."
+        )
+        for lot in lots:
+            lot.update({"list_id": "096e52cebb"})
 
     # Override list id
     if arguments.get("--list_id"):
