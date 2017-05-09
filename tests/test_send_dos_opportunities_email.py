@@ -1,20 +1,17 @@
-import pytest
 import mock
 from freezegun import freeze_time
-from requests.exceptions import RequestException
 
-from datetime import datetime, date
+from datetime import date
 from lxml import html
 
 from dmscripts.send_dos_opportunities_email import (
     main,
     get_campaign_data,
-    create_campaign,
-    set_campaign_content,
-    send_campaign,
     get_live_briefs_between_two_dates,
     get_html_content
 )
+from dmutils.email.dm_mailchimp import DMMailChimpClient
+
 
 LOT_DATA = {
     "lot_slug": "digital-specialists",
@@ -93,6 +90,7 @@ def test_get_html_content_renders_brief_information():
     with freeze_time('2017-04-19 08:00:00'):
         html_content = get_html_content(ONE_BRIEF, 1)["html"]
         doc = html.fromstring(html_content)
+
         assert doc.xpath('//*[@class="opportunity-title"]')[0].text_content() == ONE_BRIEF[0]["title"]
         assert doc.xpath('//*[@class="opportunity-organisation"]')[0].text_content() == ONE_BRIEF[0]["organisation"]
         assert doc.xpath('//*[@class="opportunity-location"]')[0].text_content() == ONE_BRIEF[0]["location"]
@@ -102,11 +100,12 @@ def test_get_html_content_renders_brief_information():
 
 def test_get_html_content_renders_multiple_briefs():
     html_content = get_html_content(MANY_BRIEFS, 1)["html"]
+    doc = html.fromstring(html_content)
+    brief_titles = doc.xpath('//*[@class="opportunity-title"]')
+
     assert "2 new digital specialists opportunities were published" in html_content
     assert "View and apply for these opportunities:" in html_content
 
-    doc = html.fromstring(html_content)
-    brief_titles = doc.xpath('//*[@class="opportunity-title"]')
     assert len(brief_titles) == 2
     assert brief_titles[0].text_content() == "Brief 1"
     assert brief_titles[1].text_content() == "Brief 2"
@@ -114,11 +113,12 @@ def test_get_html_content_renders_multiple_briefs():
 
 def test_get_html_content_renders_singular_for_single_brief():
     html_content = get_html_content(ONE_BRIEF, 1)["html"]
+    doc = html.fromstring(html_content)
+    brief_titles = doc.xpath('//*[@class="opportunity-title"]')
+
     assert "1 new digital specialists opportunity was published" in html_content
     assert "View and apply for this opportunity:" in html_content
 
-    doc = html.fromstring(html_content)
-    brief_titles = doc.xpath('//*[@class="opportunity-title"]')
     assert len(brief_titles) == 1
     assert brief_titles[0].text_content() == "Brief 1"
 
@@ -148,102 +148,30 @@ def test_get_campaign_data():
         assert campaign_data["settings"]["reply_to"] == "do-not-reply@digitalmarketplace.service.gov.uk"
 
 
-def test_create_campaign():
-    mailchimp_client = mock.MagicMock()
-    mailchimp_client.campaigns.create.return_value = {"id": "100"}
-
-    res = create_campaign(mailchimp_client, {"example": "data"})
-    assert res == "100"
-    mailchimp_client.campaigns.create.assert_called_once_with({"example": "data"})
-
-
-@mock.patch('dmscripts.send_dos_opportunities_email.logger', autospec=True)
-def test_log_error_message_if_error_creating_campaign(logger):
-    mailchimp_client = mock.MagicMock()
-    mailchimp_client.campaigns.create.side_effect = RequestException("error message")
-    campaign_data = {
-        "example": "data",
-        "settings": {
-            "title": "campaign title"
-        }
-    }
-
-    assert create_campaign(mailchimp_client, campaign_data) is False
-    logger.error.assert_called_once_with(
-        "Mailchimp failed to create campaign for 'campaign title'", extra={"error": "error message"}
-    )
-
-
-def test_set_campaign_content():
-    campaign_id = "1"
-    html_content = {"html": "<p>One or two words</p>"}
-    mailchimp_client = mock.MagicMock()
-    mailchimp_client.campaigns.content.update.return_value = html_content
-
-    res = set_campaign_content(mailchimp_client, campaign_id, html_content)
-    assert res == html_content
-    mailchimp_client.campaigns.content.update.assert_called_once_with(campaign_id, html_content)
-
-
-@mock.patch('dmscripts.send_dos_opportunities_email.logger', autospec=True)
-def test_log_error_message_if_error_setting_campaign_content(logger):
-    mailchimp_client = mock.MagicMock()
-    mailchimp_client.campaigns.content.update.side_effect = RequestException("error message")
-    content_data = {
-        "html": "some html"
-    }
-
-    assert set_campaign_content(mailchimp_client, "1", content_data) is False
-    logger.error.assert_called_once_with(
-        "Mailchimp failed to set content for campaign id '1'", extra={"error": "error message"}
-    )
-
-
-def test_send_campaign():
-    campaign_id = "1"
-    mailchimp_client = mock.MagicMock()
-    res = send_campaign(mailchimp_client, campaign_id)
-    assert res is True
-    mailchimp_client.campaigns.actions.send.assert_called_once_with(campaign_id)
-
-
-@mock.patch('dmscripts.send_dos_opportunities_email.logger', autospec=True)
-def test_log_error_message_if_error_sending_campaign(logger):
-    mailchimp_client = mock.MagicMock()
-    mailchimp_client.campaigns.actions.send.side_effect = RequestException("error sending")
-    assert send_campaign(mailchimp_client, "1") is False
-    logger.error.assert_called_once_with(
-        "Mailchimp failed to send campaign id '1'", extra={"error": "error sending"}
-    )
-
-
 @mock.patch('dmscripts.send_dos_opportunities_email.get_html_content', autospec=True)
-@mock.patch('dmscripts.send_dos_opportunities_email.send_campaign', autospec=True)
-@mock.patch('dmscripts.send_dos_opportunities_email.set_campaign_content', autospec=True)
 @mock.patch('dmscripts.send_dos_opportunities_email.get_live_briefs_between_two_dates', autospec=True)
 @mock.patch('dmscripts.send_dos_opportunities_email.get_campaign_data', autospec=True)
-@mock.patch('dmscripts.send_dos_opportunities_email.create_campaign', autospec=True)
 def test_main_creates_campaign_sets_content_and_sends_campaign(
-    create_campaign, get_campaign_data, get_live_briefs_between_two_dates,
-    set_campaign_content, send_campaign, get_html_content
+    get_campaign_data, get_live_briefs_between_two_dates, get_html_content
 ):
     get_live_briefs_between_two_dates.return_value = [{"brief": "yaytest"}]
     get_campaign_data.return_value = {"created": "campaign"}
     get_html_content.return_value = {"first": "content"}
-    create_campaign.return_value = "1"
 
-    main(mock.MagicMock(), mock.MagicMock(), LOT_DATA, 1)
+    dm_mailchimp_client = mock.MagicMock(spec=DMMailChimpClient)
+    dm_mailchimp_client.create_campaign.return_value = "1"
+    main(mock.MagicMock(), dm_mailchimp_client, LOT_DATA, 1)
 
     # Creates campaign
     get_campaign_data.assert_called_once_with("Digital specialists", "096e52cebb")
-    create_campaign.assert_called_once_with(mock.ANY, {"created": "campaign"})
+    dm_mailchimp_client.create_campaign.assert_called_once_with({"created": "campaign"})
 
     # Sets campaign content
     get_html_content.assert_called_once_with([{"brief": "yaytest"}], 1)
-    set_campaign_content.assert_called_once_with(mock.ANY, "1", {"first": "content"})
+    dm_mailchimp_client.set_campaign_content.assert_called_once_with("1", {"first": "content"})
 
     # Sends campaign
-    send_campaign.assert_called_once_with(mock.ANY, "1")
+    dm_mailchimp_client.send_campaign.assert_called_once_with("1")
 
 
 @mock.patch('dmscripts.send_dos_opportunities_email.get_live_briefs_between_two_dates', autospec=True)
@@ -265,19 +193,17 @@ def test_main_gets_live_briefs_for_three_days(get_live_briefs_between_two_dates)
 
 
 @mock.patch('dmscripts.send_dos_opportunities_email.logger', autospec=True)
-@mock.patch('dmscripts.send_dos_opportunities_email.send_campaign', autospec=True)
-@mock.patch('dmscripts.send_dos_opportunities_email.set_campaign_content', autospec=True)
-@mock.patch('dmscripts.send_dos_opportunities_email.create_campaign', autospec=True)
 @mock.patch('dmscripts.send_dos_opportunities_email.get_live_briefs_between_two_dates', autospec=True)
-def test_if_no_briefs_then_no_campaign_created_nor_sent(
-    get_live_briefs_between_two_dates, create_campaign, set_campaign_content, send_campaign, logger
-):
+def test_if_no_briefs_then_no_campaign_created_nor_sent(get_live_briefs_between_two_dates, logger):
     get_live_briefs_between_two_dates.return_value = []
-    result = main(mock.MagicMock(), mock.MagicMock(), LOT_DATA, 3)
+
+    dm_mailchimp_client = mock.MagicMock(DMMailChimpClient)
+    result = main(mock.MagicMock(), dm_mailchimp_client, LOT_DATA, 3)
+
     assert result is True
-    assert create_campaign.call_count == 0
-    assert set_campaign_content.call_count == 0
-    assert send_campaign.call_count == 0
+    assert dm_mailchimp_client.create_campaign.call_count == 0
+    assert dm_mailchimp_client.set_campaign_content.call_count == 0
+    assert dm_mailchimp_client.send_campaign.call_count == 0
 
     logger.info.assert_called_with(
         "No new briefs found for 'digital-specialists' lot", extra={"number_of_days": 3}
