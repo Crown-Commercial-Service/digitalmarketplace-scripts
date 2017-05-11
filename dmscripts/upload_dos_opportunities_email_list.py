@@ -10,10 +10,11 @@ def find_user_emails(supplier_users, services):
     return email_addresses
 
 
-def main(data_client, lot_data):
-    data_helper = SupplierFrameworkData(data_client, lot_data["framework_slug"])
+def main(data_api_client, lot_data):
+    data_helper = SupplierFrameworkData(data_api_client, lot_data["framework_slug"])
     supplier_users = data_helper.get_supplier_users()
 
-    framework_services = data_client.find_services_iter(lot_data["framework_slug"], lot_data["lot_slug"])
-    find_user_emails(supplier_users, framework_services)
+    framework_services = data_api_client.find_services_iter(lot_data["framework_slug"], lot_data["lot_slug"])
+    emails = find_user_emails(supplier_users, framework_services)
+    print emails
     return True
