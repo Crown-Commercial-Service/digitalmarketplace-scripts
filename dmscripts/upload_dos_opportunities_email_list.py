@@ -10,11 +10,14 @@ def find_user_emails(supplier_users, services):
     return email_addresses
 
 
-def main(data_api_client, lot_data):
+def main(data_api_client, mailchimp_client, lot_data):
     data_helper = SupplierFrameworkData(data_api_client, lot_data["framework_slug"])
     supplier_users = data_helper.get_supplier_users()
 
-    framework_services = data_api_client.find_services_iter(framework=lot_data["framework_slug"], lot=lot_data["lot_slug"])
+    framework_services = data_api_client.find_services_iter(
+        framework=lot_data["framework_slug"], lot=lot_data["lot_slug"]
+    )
     emails = find_user_emails(supplier_users, framework_services)
     print emails
+    mailchimp_client.subscribe_new_emails_to_list(lot_data["list_id"], emails)
     return True

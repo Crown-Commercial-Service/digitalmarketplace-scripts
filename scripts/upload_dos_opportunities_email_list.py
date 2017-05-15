@@ -38,4 +38,4 @@ if __name__ == '__main__':
     data_api_client = DataAPIClient(api_url, arguments['<api_token>'])
 
     for lot_data in lots:
-    	main(data_api_client, lot_data)
+        main(data_api_client, lot_data)
