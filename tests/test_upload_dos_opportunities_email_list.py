@@ -42,7 +42,7 @@ def test_main(get_supplier_users, find_user_emails):
 
     assert main(data_api_client, lot_data) is True
     data_api_client.find_services_iter.assert_called_once_with(
-        "digital-outcomes-and-specialists-2", "digital-specialists"
+        framework="digital-outcomes-and-specialists-2", lot="digital-specialists"
     )
     get_supplier_users.assert_called_once()
     find_user_emails.assert_called_once_with(supplier_users, framework_services)
