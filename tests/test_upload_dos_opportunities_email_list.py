@@ -43,8 +43,9 @@ def test_main(get_supplier_users, find_user_emails):
     get_supplier_users.return_value = supplier_users
     find_user_emails.return_value = list_of_emails
     dm_mailchimp_client = mock.MagicMock(spec=DMMailChimpClient)
+    logger = mock.MagicMock()
 
-    assert main(data_api_client, dm_mailchimp_client, lot_data) is True
+    assert main(data_api_client, dm_mailchimp_client, lot_data, logger) is True
     data_api_client.find_services_iter.assert_called_once_with(
         framework="digital-outcomes-and-specialists-2", lot="digital-specialists"
     )

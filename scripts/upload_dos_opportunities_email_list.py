@@ -22,9 +22,10 @@ sys.path.insert(0, '.')
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.upload_dos_opportunities_email_list import main
 from dmscripts.helpers import logging_helpers
+from dmscripts.helpers.logging_helpers import logging
 
 
-logger = logging_helpers.configure_logger()
+logger = logging_helpers.configure_logger({'dmapiclient': logging.INFO})
 
 
 lots = [
@@ -44,4 +45,4 @@ if __name__ == '__main__':
     dm_mailchimp_client = DMMailChimpClient(arguments['<mailchimp_username>'], arguments['<mailchimp_api_key>'], logger)
 
     for lot_data in lots:
-        main(data_api_client, dm_mailchimp_client, lot_data)
+        main(data_api_client, dm_mailchimp_client, lot_data, logger)
