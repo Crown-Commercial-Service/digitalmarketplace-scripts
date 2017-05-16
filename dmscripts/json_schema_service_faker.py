@@ -1,13 +1,13 @@
 import copy
 import json
-import logging
 import lorem
 import random
 import re
 import xeger
+from dmscripts.helpers import logging_helpers
 from jsonschema import validate, ValidationError
 
-logger = logging.configure_logger()
+logger = logging_helpers.configure_logger()
 
 
 class JsonSchemaDataFaker(object):
