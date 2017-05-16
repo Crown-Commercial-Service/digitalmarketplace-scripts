@@ -90,10 +90,9 @@ The `scripts` folder in this repository contains scripts that interact with the 
   Email suppliers who have at least one successful lot entry on the given framework. Should be run once per framework,
   at the beginning of the standstill period when results from CCS are delivered to suppliers.
 
-* `scan-g-cloud-drafts-for-bad-words.py`
+* `scan-g-cloud-services-for-bad-words.py`
 
-  Checks all free-text fields in submitted G-Cloud draft services for "bad words" and generates a CSV report of any bad
-  words found.
+  Checks all free-text fields in G-Cloud services for "bad words" and generates a CSV report of any bad words found.
 
 * `send-stats-to-performance-platform.py`
 

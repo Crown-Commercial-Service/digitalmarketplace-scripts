@@ -1,10 +1,10 @@
 """
-This script will check all free-text fields in submitted G-Cloud draft services for "bad words", as defined in
+This script will check all free-text fields in submitted G-Cloud services for "bad words", as defined in
 the file at <bad_words_path> (typically blacklist.txt in https://github.gds/gds/digitalmarketplace-bad-words),
 and generate a CSV report of any bad word found.
 
 Usage:
-    scripts/scan-g-cloud-drafts-for-bad-words.py <stage> <api_token> <bad_words_path> <framework_slug> <output_dir>
+    scripts/scan-g-cloud-services-for-bad-words.py <stage> <api_token> <bad_words_path> <framework_slug> <output_dir>
 """
 
 import sys
@@ -17,13 +17,43 @@ else:
 import six
 import re
 from docopt import docopt
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmapiclient import DataAPIClient
+from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
+from dmscripts.helpers import logging_helpers
+from dmscripts.helpers.logging_helpers import logging
 
+logger = logging_helpers.configure_logger({"dmapiclient": logging.WARNING})
 
 # These are all the free-text boxes in G-Cloud service submissions
-KEYS_TO_CHECK = ['apiType', 'deprovisioningTime', 'provisioningTime', 'serviceBenefits', 'serviceFeatures',
-                 'serviceName', 'serviceSummary', 'supportAvailability', 'supportResponseTime', 'vendorCertifications']
+KEYS_TO_CHECK = {
+    "g-cloud-7": [
+        'apiType', 'deprovisioningTime', 'provisioningTime', 'serviceBenefits', 'serviceFeatures', 'serviceName',
+        'serviceSummary', 'supportAvailability', 'supportResponseTime', 'vendorCertifications'],
+    "g-cloud-8": [
+        'apiType', 'deprovisioningTime', 'provisioningTime', 'serviceBenefits', 'serviceFeatures', 'serviceName',
+        'serviceSummary', 'supportAvailability', 'supportResponseTime', 'vendorCertifications'],
+    "g-cloud-9": ['accessRestrictionManagementAndSupport', 'APIUsage', 'approachToResilience', 'backupControls',
+                  'commandLineUsage', 'configurationAndChangeManagementProcesses', 'customisationDescription',
+                  'dataExportHow', 'dataProtectionBetweenNetworksOther', 'dataProtectionWithinNetworkOther',
+                  'emailOrTicketingSupportResponseTimes', 'endOfContractDataExtraction', 'endOfContractProcess',
+                  'freeVersionDescription', 'freeVersionLink', 'gettingStarted', 'guaranteedAvailability',
+                  'incidentManagementApproach', 'independenceOfResources', 'informationSecurityPoliciesAndProcesses',
+                  'managementAccessAuthenticationDescription', 'metricsSoftwareDescription', 'mobileDifferences',
+                  'ongoingSupportDescription', 'outageReporting', 'planningServiceDescription',
+                  'protectionOfDataAtRestOther', 'protectiveMonitoringApproach', 'QAAndTestingDescription',
+                  'resellingOrganisations', 'securityGovernanceApproach', 'securityGovernanceStandardsOther',
+                  'serviceAddOnDetails', 'serviceCategoriesSoftware', 'serviceConstraintsHostingAndSoftware',
+                  'serviceConstraintsSupport', 'serviceDescription', 'serviceInterfaceAccessibilityDescription',
+                  'serviceInterfaceTesting', 'serviceName', 'setupAndMigrationServiceDescription',
+                  'standardsCSASTARExclusions', 'standardsCSASTARWhen', 'standardsISO28000Exclusions',
+                  'standardsISO28000When', 'standardsISO28000Who', 'standardsISOIEC27001Exclusions',
+                  'standardsISOIEC27001When', 'standardsISOIEC27001Who', 'standardsPCIExclusions',
+                  'standardsPCIWhen', 'standardsPCIWho', 'supportLevels', 'trainingDescription',
+                  'userAuthenticationDescription', 'virtualisationSeparation', 'virtualisationTechnologiesUsedOther',
+                  'virtualisationThirdPartyProvider', 'vulnerabilityManagementApproach',
+                  'webChatSupportAccessibilityDescription', 'webChatSupportAccessibilityTesting',
+                  'webInterfaceAccessibilityDescription', 'webInterfaceAccessibilityTesting', 'webInterfaceUsage'],
+}
 
 
 def main(stage, data_api_token, bad_words_path, framework_slug, output_dir):
@@ -42,13 +72,6 @@ def get_suppliers(client, framework_slug):
     else:
         suppliers_on_framework = [supplier for supplier in suppliers if supplier["onFramework"]]
     return suppliers_on_framework
-
-
-def get_draft_services(client, supplier_id, framework_slug):
-    services = client.find_draft_services(supplier_id, framework=framework_slug)
-    services = services["services"]
-    submitted_services = [service for service in services if service["status"] == "submitted"]
-    return submitted_services
 
 
 def get_services(client, supplier_id, framework_slug):
@@ -87,7 +110,7 @@ def check_services_with_bad_words(output_dir, framework_slug, client, suppliers,
                 # Retry once; will fail the script if retry fails.
                 services = get_services(client, supplier["supplierId"], framework_slug)
             for service in services:
-                for key in KEYS_TO_CHECK:
+                for key in KEYS_TO_CHECK[framework_slug]:
                     if isinstance(service.get(key), six.string_types):
                         for word in bad_words:
                             if get_bad_words_in_value(word, service.get(key)):
@@ -124,6 +147,7 @@ def output_bad_words(
         'Blacklisted Word Context': blacklisted_word_context,
         'Blacklisted Word': blacklisted_word,
         }
+    logger.info("{} - {}".format(blacklisted_word, service_id))
     writer.writerow(row)
 
 if __name__ == '__main__':
