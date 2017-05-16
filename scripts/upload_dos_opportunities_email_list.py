@@ -2,7 +2,17 @@
 
 """
 Description:
-    upload_dos_opportunities_email_list
+    For every lot the script will:
+    - find a list of emails for all suppliers and their users from the API
+    - add new emails to mailchimp list if they're not there. If the user previously unsubscribed themselves
+    from the list, they will not be subscribed when the script runs.
+
+    Please be aware that sometimes there can be a delay (up to a few minutes) in adding new addresses
+    to a mailchimp user list after an API call has been made. Unfortunately we couldn't find mailchimp documentation
+    regarding this.
+
+    If in the command line you provide an environment other than production the script will run on test lists
+    that we have setup on mailchimp.
 
 Usage:
     upload_dos_opportunities_email_list.py <stage> <api_token> <mailchimp_username> <mailchimp_api_key>
