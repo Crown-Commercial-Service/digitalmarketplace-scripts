@@ -28,17 +28,26 @@ from dmscripts.helpers.logging_helpers import logging
 logger = logging_helpers.configure_logger({'dmapiclient': logging.INFO})
 
 
-lots = [
-    {
-        "lot_slug": "digital-specialists",
-        "list_id": "07c21f0451",
-        "framework_slug": "digital-outcomes-and-specialists-2"
-    }
-]
-
-
 if __name__ == '__main__':
     arguments = docopt(__doc__)
+
+    lots = [
+        {
+            "lot_slug": "digital-specialists",
+            "list_id": "prod_list_id" if arguments['<stage>'] == "production" else "07c21f0451",
+            "framework_slug": "digital-outcomes-and-specialists-2"
+        },
+        {
+            "lot_slug": "digital-outcomes",
+            "list_id": "prod_list_id2" if arguments['<stage>'] == "production" else "f0077c516d",
+            "framework_slug": "digital-outcomes-and-specialists-2"
+        },
+        {
+            "lot_slug": "user-research-participants",
+            "list_id": "prod_list_id3" if arguments['<stage>'] == "production" else "d35601203b",
+            "framework_slug": "digital-outcomes-and-specialists-2"
+        }
+    ]
 
     api_url = get_api_endpoint_from_stage(arguments['<stage>'])
     data_api_client = DataAPIClient(api_url, arguments['<api_token>'])
