@@ -24,32 +24,44 @@ def test_find_user_emails():
 
 @mock.patch("dmscripts.upload_dos_opportunities_email_list.find_user_emails", autospec=True)
 @mock.patch.object(SupplierFrameworkData, 'get_supplier_users', spec=SupplierFrameworkData.get_supplier_users)
-def test_main(get_supplier_users, find_user_emails):
-    supplier_users = {
-        100: [{'supplier_id': 100, 'email address': 'email1@email.com'}]
-    }
-    framework_services = iter([
-        {'supplierId': 100}
-    ])
-    lot_data = {
+class TestMain(object):
+    LOT_DATA = {
         "lot_slug": "digital-specialists",
         "list_id": "my list id",
         "framework_slug": "digital-outcomes-and-specialists-2"
     }
-    list_of_emails = ['email1@email.com', 'email2@email.com']
 
-    data_api_client = mock.MagicMock(spec=DataAPIClient)
-    data_api_client.find_services_iter.return_value = framework_services
-    get_supplier_users.return_value = supplier_users
-    find_user_emails.return_value = list_of_emails
-    dm_mailchimp_client = mock.MagicMock(spec=DMMailChimpClient)
-    logger = mock.MagicMock()
+    LIST_OF_EMAILS = ['email1@email.com', 'email2@email.com']
 
-    assert main(data_api_client, dm_mailchimp_client, lot_data, logger) is True
-    data_api_client.find_services_iter.assert_called_once_with(
-        framework="digital-outcomes-and-specialists-2", lot="digital-specialists"
-    )
-    get_supplier_users.assert_called_once()
-    find_user_emails.assert_called_once_with(supplier_users, framework_services)
+    def setup_method(self, method):
+        self.data_api_client = mock.MagicMock(spec=DataAPIClient)
+        self.dm_mailchimp_client = mock.MagicMock(spec=DMMailChimpClient)
+        self.logger = mock.MagicMock()
 
-    dm_mailchimp_client.subscribe_new_emails_to_list.assert_called_once_with("my list id", list_of_emails)
+    def test_main(self, get_supplier_users, find_user_emails):
+        supplier_users = {
+            100: [{'supplier_id': 100, 'email address': 'email1@email.com'}]
+        }
+        framework_services = iter([
+            {'supplierId': 100}
+        ])
+
+        self.data_api_client.find_services_iter.return_value = framework_services
+        get_supplier_users.return_value = supplier_users
+        find_user_emails.return_value = self.LIST_OF_EMAILS
+
+        assert main(self.data_api_client, self.dm_mailchimp_client, self.LOT_DATA, self.logger) is True
+        self.data_api_client.find_services_iter.assert_called_once_with(
+            framework="digital-outcomes-and-specialists-2", lot="digital-specialists"
+        )
+        get_supplier_users.assert_called_once()
+        find_user_emails.assert_called_once_with(supplier_users, framework_services)
+
+        self.dm_mailchimp_client.subscribe_new_emails_to_list.assert_called_once_with("my list id", self.LIST_OF_EMAILS)
+
+    def test_main_returns_false_if_subscribing_emails_fails(self, get_supplier_users, find_user_emails):
+        find_user_emails.return_value = self.LIST_OF_EMAILS
+        self.dm_mailchimp_client.subscribe_new_emails_to_list.return_value = False
+
+        assert main(self.data_api_client, self.dm_mailchimp_client, self.LOT_DATA, self.logger) is False
+        self.dm_mailchimp_client.subscribe_new_emails_to_list.assert_called_once_with("my list id", self.LIST_OF_EMAILS)

@@ -30,5 +30,7 @@ def main(data_api_client, mailchimp_client, lot_data, logger):
     logger.info(
         "Subscribing new emails to mailchimp list {}".format(lot_data["list_id"])
     )
-    mailchimp_client.subscribe_new_emails_to_list(lot_data["list_id"], emails)
+    if not mailchimp_client.subscribe_new_emails_to_list(lot_data["list_id"], emails):
+        return False
+
     return True
