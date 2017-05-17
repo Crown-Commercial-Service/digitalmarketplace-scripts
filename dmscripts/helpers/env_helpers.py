@@ -8,11 +8,9 @@ def get_api_endpoint_from_stage(stage, app='api'):
     """
 
     stage_domains = {
-        'preview_paas': 'https://{}.preview.marketplace.team'.format(app),
-        'staging_paas': 'https://{}.staging.marketplace.team'.format(app),
+        'preview': 'https://{}.preview.marketplace.team'.format(app),
+        'staging': 'https://{}.staging.marketplace.team'.format(app),
         'production': 'https://{}.digitalmarketplace.service.gov.uk'.format(app),
-        'preview': 'https://preview-{}.development.digitalmarketplace.service.gov.uk'.format(app),
-        'staging': 'https://staging-{}.digitalmarketplace.service.gov.uk'.format(app),
     }
 
     dev_ports = {
