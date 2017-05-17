@@ -98,7 +98,7 @@ def document_copier(draft_bucket, documents_bucket, dry_run):
 
 @backoff.on_exception(backoff.expo, (dmapiclient.HTTPError, boto.exception.S3ResponseError, ), max_tries=5)
 def make_draft_service_live(client, copy_document, draft_service, framework_slug, dry_run):
-    print(u"  > Migrating draft {} - {}".format(draft_service['id'], draft_service['serviceName']))
+    print(u"  > Migrating draft {}".format(draft_service['id']))
     if dry_run:
         service_id = random.randint(1000, 10000)
         print(u"    > dry run: generating random test service ID: {}".format(service_id))
@@ -144,7 +144,7 @@ if __name__ == '__main__':
     results = collections.Counter({'success': 0, 'fail': 0})
 
     for supplier in suppliers:
-        print(u"Migrating drafts for supplier {} - {}".format(supplier['supplierId'], supplier['supplierName']))
+        print(u"Migrating drafts for supplier {}".format(supplier['supplierId']))
         draft_services = get_submitted_drafts(client, FRAMEWORK_SLUG, supplier['supplierId'])
         for draft_service in draft_services:
             try:
