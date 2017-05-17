@@ -10,6 +10,10 @@ def find_user_emails(supplier_users, services):
     return email_addresses
 
 
+def lowercase_list(x):
+    return [item.lower() for item in x]
+
+
 def main(data_api_client, mailchimp_client, lot_data, logger):
     logger.info(
         "Begin mailchimp email list updating process for {} lot".format(lot_data["lot_slug"]),
@@ -32,7 +36,9 @@ def main(data_api_client, mailchimp_client, lot_data, logger):
         "{} existing emails found on list {}".format(len(existing_mailchimp_emails), lot_data["list_id"])
     )
 
-    new_emails = list(set(emails) - set(existing_mailchimp_emails))
+    # lowercase required because mailchimp may capatalise emails addresses returned from the mailchimp API based on it's
+    # on how it stores both the lowercase hash but also the original (potentially capatilised) email address
+    new_emails = list(set(lowercase_list(emails)) - set(lowercase_list(existing_mailchimp_emails)))
     logger.info(
         "Subscribing {} new emails to mailchimp list {}".format(len(new_emails), lot_data["list_id"])
     )

@@ -52,7 +52,7 @@ class TestMain(object):
         self.data_api_client.find_services_iter.return_value = framework_services
         get_supplier_users.return_value = supplier_users
         find_user_emails.return_value = self.LIST_OF_EMAILS
-        self.dm_mailchimp_client.get_email_addresses_from_list.return_value = ['email1@email.com']
+        self.dm_mailchimp_client.get_email_addresses_from_list.return_value = ['EMAIL1@email.com']
 
         assert main(self.data_api_client, self.dm_mailchimp_client, self.LOT_DATA, self.logger) is True
         self.data_api_client.find_services_iter.assert_called_once_with(
