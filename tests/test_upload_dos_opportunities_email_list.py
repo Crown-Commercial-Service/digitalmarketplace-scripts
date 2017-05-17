@@ -40,7 +40,10 @@ class TestMain(object):
 
     def test_main(self, get_supplier_users, find_user_emails):
         supplier_users = {
-            100: [{'supplier_id': 100, 'email address': 'email1@email.com'}]
+            100: [
+                {'supplier_id': 100, 'email address': 'email1@email.com'},
+                {'supplier_id': 100, 'email address': 'email2@email.com'}
+            ]
         }
         framework_services = iter([
             {'supplierId': 100}
@@ -49,6 +52,7 @@ class TestMain(object):
         self.data_api_client.find_services_iter.return_value = framework_services
         get_supplier_users.return_value = supplier_users
         find_user_emails.return_value = self.LIST_OF_EMAILS
+        self.dm_mailchimp_client.get_email_addresses_from_list.return_value = ['email1@email.com']
 
         assert main(self.data_api_client, self.dm_mailchimp_client, self.LOT_DATA, self.logger) is True
         self.data_api_client.find_services_iter.assert_called_once_with(
@@ -56,8 +60,10 @@ class TestMain(object):
         )
         get_supplier_users.assert_called_once()
         find_user_emails.assert_called_once_with(supplier_users, framework_services)
-
-        self.dm_mailchimp_client.subscribe_new_emails_to_list.assert_called_once_with("my list id", self.LIST_OF_EMAILS)
+        self.dm_mailchimp_client.get_email_addresses_from_list.assert_called_once_with("my list id")
+        self.dm_mailchimp_client.subscribe_new_emails_to_list.assert_called_once_with(
+            "my list id", ['email2@email.com']
+        )
 
     def test_main_returns_false_if_subscribing_emails_fails(self, get_supplier_users, find_user_emails):
         find_user_emails.return_value = self.LIST_OF_EMAILS

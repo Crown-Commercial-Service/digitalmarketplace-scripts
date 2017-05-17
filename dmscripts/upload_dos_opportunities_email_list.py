@@ -27,10 +27,16 @@ def main(data_api_client, mailchimp_client, lot_data, logger):
         "{} emails have been found for lot {}".format(len(emails), lot_data["lot_slug"])
     )
 
+    existing_mailchimp_emails = mailchimp_client.get_email_addresses_from_list(lot_data["list_id"])
     logger.info(
-        "Subscribing new emails to mailchimp list {}".format(lot_data["list_id"])
+        "{} existing emails found on list {}".format(len(existing_mailchimp_emails), lot_data["list_id"])
     )
-    if not mailchimp_client.subscribe_new_emails_to_list(lot_data["list_id"], emails):
+
+    new_emails = list(set(emails) - set(existing_mailchimp_emails))
+    logger.info(
+        "Subscribing {} new emails to mailchimp list {}".format(len(new_emails), lot_data["list_id"])
+    )
+    if not mailchimp_client.subscribe_new_emails_to_list(lot_data["list_id"], new_emails):
         return False
 
     return True
