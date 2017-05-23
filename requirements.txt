@@ -11,4 +11,4 @@ jsonschema==2.5.1
 pandas==0.19.1
 xeger==0.3.1
 lorem==0.1.1
-mailchimp3==2.0.8
+mailchimp3==2.0.11
