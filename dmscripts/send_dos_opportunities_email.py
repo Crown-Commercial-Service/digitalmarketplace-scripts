@@ -1,18 +1,16 @@
 from datetime import datetime, date, timedelta
 
-from requests.exceptions import RequestException
-
 from dmscripts.helpers.html_helpers import render_html
 from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.logging_helpers import logging
 from dmutils.formats import DATETIME_FORMAT, DISPLAY_DATE_FORMAT
 
-import dmapiclient
 
 logger = logging_helpers.configure_logger({'dmapiclient': logging.INFO})
 
 
 def get_live_briefs_between_two_dates(data_api_client, lot_slug, start_date, end_date):
+    """Get all briefs for a lot which were published between 2 dates."""
     return [
         brief for brief in data_api_client.find_briefs_iter(status="live", lot=lot_slug, human=True)
         if datetime.strptime(brief['publishedAt'], DATETIME_FORMAT).date() >= start_date
@@ -66,43 +64,6 @@ def get_html_content(briefs, number_of_days):
     return {"html": html_content}
 
 
-def create_campaign(mailchimp_client, campaign_data):
-    try:
-        campaign = mailchimp_client.campaigns.create(campaign_data)
-        return campaign['id']
-    except RequestException as e:
-        logger.error(
-            "Mailchimp failed to create campaign for '{0}'".format(
-                campaign_data.get("settings").get("title")
-            ),
-            extra={"error": str(e)}
-        )
-    return False
-
-
-def set_campaign_content(mailchimp_client, campaign_id, content_data):
-    try:
-        return mailchimp_client.campaigns.content.update(campaign_id, content_data)
-    except RequestException as e:
-        logger.error(
-            "Mailchimp failed to set content for campaign id '{0}'".format(campaign_id),
-            extra={"error": str(e)}
-        )
-    return False
-
-
-def send_campaign(mailchimp_client, campaign_id):
-    try:
-        mailchimp_client.campaigns.actions.send(campaign_id)
-        return True
-    except RequestException as e:
-        logger.error(
-            "Mailchimp failed to send campaign id '{0}'".format(campaign_id),
-            extra={"error": str(e)}
-        )
-    return False
-
-
 def main(data_api_client, mailchimp_client, lot_data, number_of_days):
     logger.info(
         "Begin process to send DOS notification emails for '{0}' lot".format(lot_data["lot_slug"]),
@@ -127,7 +88,7 @@ def main(data_api_client, mailchimp_client, lot_data, number_of_days):
     logger.info(
         "Creating campaign for '{0}' lot".format(lot_data["lot_slug"])
     )
-    campaign_id = create_campaign(mailchimp_client, campaign_data)
+    campaign_id = mailchimp_client.create_campaign(campaign_data)
     if not campaign_id:
         return False
 
@@ -135,13 +96,13 @@ def main(data_api_client, mailchimp_client, lot_data, number_of_days):
     logger.info(
         "Setting campaign data for '{0}' lot and '{1}' campaign id".format(lot_data["lot_slug"], campaign_id)
     )
-    if not set_campaign_content(mailchimp_client, campaign_id, content_data):
+    if not mailchimp_client.set_campaign_content(campaign_id, content_data):
         return False
 
     logger.info(
         "Sending campaign for '{0}' lot and '{1}' campaign id".format(lot_data["lot_slug"], campaign_id)
     )
-    if not send_campaign(mailchimp_client, campaign_id):
+    if not mailchimp_client.send_campaign(campaign_id):
         return False
 
     return True

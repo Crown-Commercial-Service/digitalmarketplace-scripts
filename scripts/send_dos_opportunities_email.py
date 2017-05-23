@@ -41,12 +41,16 @@ import sys
 from datetime import date
 
 from docopt import docopt
-from mailchimp3 import MailChimp
 from dmapiclient import DataAPIClient
 
 sys.path.insert(0, '.')
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.send_dos_opportunities_email import main
+from dmscripts.helpers import logging_helpers
+from dmutils.email.dm_mailchimp import DMMailChimpClient
+
+
+logger = logging_helpers.configure_logger()
 
 
 lots = [
@@ -81,6 +85,14 @@ if __name__ == "__main__":
         else:
             number_of_days = 1
 
+    # Override list for non-production environment
+    if arguments['<stage>'] != "production":
+        logger.info(
+            "The environment is not production. Emails will be sent to test list unless you set the list id manually."
+        )
+        for lot in lots:
+            lot.update({"list_id": "096e52cebb"})
+
     # Override list id
     if arguments.get("--list_id"):
         for lot in lots:
@@ -93,12 +105,12 @@ if __name__ == "__main__":
     api_url = get_api_endpoint_from_stage(arguments['<stage>'])
     data_api_client = DataAPIClient(api_url, arguments['<api_token>'])
 
-    mailchimp_client = MailChimp(arguments['<mailchimp_username>'], arguments['<mailchimp_api_key>'])
+    dm_mailchimp_client = DMMailChimpClient(arguments['<mailchimp_username>'], arguments['<mailchimp_api_key>'], logger)
 
     for lot_data in lots:
         ok = main(
             data_api_client=data_api_client,
-            mailchimp_client=mailchimp_client,
+            mailchimp_client=dm_mailchimp_client,
             lot_data=lot_data,
             number_of_days=number_of_days
         )
