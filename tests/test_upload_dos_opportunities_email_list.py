@@ -70,4 +70,8 @@ class TestMain(object):
         self.dm_mailchimp_client.subscribe_new_emails_to_list.return_value = False
 
         assert main(self.data_api_client, self.dm_mailchimp_client, self.LOT_DATA, self.logger) is False
-        self.dm_mailchimp_client.subscribe_new_emails_to_list.assert_called_once_with("my list id", self.LIST_OF_EMAILS)
+        self.dm_mailchimp_client.subscribe_new_emails_to_list.assert_called_once()
+        subscribe_new_emails_to_list_call_args = self.dm_mailchimp_client.subscribe_new_emails_to_list.call_args[0]
+        assert subscribe_new_emails_to_list_call_args[0] == "my list id"
+        assert sorted(subscribe_new_emails_to_list_call_args[1]) == sorted(self.LIST_OF_EMAILS)
+        assert len(subscribe_new_emails_to_list_call_args) == 2
