@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
 This script will check all free-text fields in submitted G-Cloud services for "bad words", as defined in
 the file at <bad_words_path> (typically blacklist.txt in https://github.gds/gds/digitalmarketplace-bad-words),
@@ -123,7 +125,7 @@ def check_services_with_bad_words(output_dir, framework_slug, client, suppliers,
                                     framework_slug,
                                     service["id"],
                                     service["serviceName"],
-                                    service.get("serviceSummary", service["serviceDescription"]),
+                                    service.get("serviceSummary", service.get("serviceDescription")),
                                     key,
                                     service.get(key),
                                     word,
@@ -138,7 +140,7 @@ def check_services_with_bad_words(output_dir, framework_slug, client, suppliers,
                                         framework_slug,
                                         service["id"],
                                         service["serviceName"],
-                                        service.get("serviceSummary", service["serviceDescription"]),
+                                        service.get("serviceSummary", service.get("serviceDescription")),
                                         key,
                                         contents,
                                         word,
