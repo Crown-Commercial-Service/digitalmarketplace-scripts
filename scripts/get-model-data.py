@@ -127,7 +127,8 @@ CONFIGS = [
             'frameworkSlug',
             'budgetRange',
             'startDate',
-            'contractLength'
+            'contractLength',
+            'isACopy'
         ),
         'get_data_kwargs': {'with_users': 'true'},
         'process_fields': {
