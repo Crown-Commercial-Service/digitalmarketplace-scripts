@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
 This script will check all free-text fields in submitted G-Cloud services for "bad words", as defined in
 the file at <bad_words_path> (typically blacklist.txt in https://github.gds/gds/digitalmarketplace-bad-words),
@@ -8,6 +10,8 @@ Usage:
 """
 
 import sys
+from collections import Counter
+
 sys.path.insert(0, '.')
 import os
 if sys.version_info > (3, 0):
@@ -55,6 +59,8 @@ KEYS_TO_CHECK = {
                   'webInterfaceAccessibilityDescription', 'webInterfaceAccessibilityTesting', 'webInterfaceUsage'],
 }
 
+BAD_WORDS_COUNTER = Counter()
+
 
 def main(stage, data_api_token, bad_words_path, framework_slug, output_dir):
     api_url = get_api_endpoint_from_stage(stage)
@@ -67,7 +73,7 @@ def main(stage, data_api_token, bad_words_path, framework_slug, output_dir):
 def get_suppliers(client, framework_slug):
     suppliers = client.find_framework_suppliers(framework_slug)
     suppliers = suppliers["supplierFrameworks"]
-    if (framework_slug == "g-cloud-6"):
+    if framework_slug == "g-cloud-6":
         suppliers_on_framework = suppliers
     else:
         suppliers_on_framework = [supplier for supplier in suppliers if supplier["onFramework"]]
@@ -115,17 +121,31 @@ def check_services_with_bad_words(output_dir, framework_slug, client, suppliers,
                         for word in bad_words:
                             if get_bad_words_in_value(word, service.get(key)):
                                 output_bad_words(
-                                    supplier["supplierId"], framework_slug, service["id"],
-                                    service["serviceName"], service["serviceSummary"], key,
-                                    service.get(key), word, writer)
+                                    supplier["supplierId"],
+                                    framework_slug,
+                                    service["id"],
+                                    service["serviceName"],
+                                    service.get("serviceSummary", service.get("serviceDescription")),
+                                    key,
+                                    service.get(key),
+                                    word,
+                                    writer)
+                                BAD_WORDS_COUNTER.update({word: 1})
                     elif isinstance(service.get(key), list):
                         for contents in service.get(key):
                             for word in bad_words:
                                 if get_bad_words_in_value(word, contents):
                                     output_bad_words(
-                                        supplier["supplierId"], framework_slug, service["id"],
-                                        service["serviceName"], service["serviceSummary"], key,
-                                        contents, word, writer)
+                                        supplier["supplierId"],
+                                        framework_slug,
+                                        service["id"],
+                                        service["serviceName"],
+                                        service.get("serviceSummary", service.get("serviceDescription")),
+                                        key,
+                                        contents,
+                                        word,
+                                        writer)
+                                    BAD_WORDS_COUNTER.update({word: 1})
 
 
 def get_bad_words_in_value(bad_word, value):
@@ -155,3 +175,4 @@ if __name__ == '__main__':
     main(
         arguments['<stage>'], arguments['<api_token>'], arguments['<bad_words_path>'],
         arguments['<framework_slug>'], arguments['<output_dir>'])
+    logger.info("BAD WORD COUNTS: {}".format(BAD_WORDS_COUNTER))
