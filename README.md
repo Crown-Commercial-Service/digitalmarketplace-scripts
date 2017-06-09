@@ -37,7 +37,7 @@ The `scripts` folder in this repository contains scripts that interact with the 
 * `generate-framework-agreement-signature-pages.py` and `generate-framework-agreement-counterpart-signature-pages.py`
 
   Scripts used to generate framework agreement page PDF files from the template in
-  https://github.gds/gds/digitalmarketplace-agreements
+  https://github.com/alphagov/digitalmarketplace-agreements
 
 * `generate-framework-master-csv.py`
 
@@ -48,7 +48,7 @@ The `scripts` folder in this repository contains scripts that interact with the 
 * `generate-g8-agreement-signature-pages.py` and `generate-g8-counterpart-signature-pages.py`
 
   **LEGACY** scripts used to generate framework agreement page PDF files for G-Cloud 8 from the template in
-  https://github.gds/gds/digitalmarketplace-agreements - saved for now because we may still need to re-generate some of
+  https://github.com/alphagov/digitalmarketplace-agreements - saved for now because we may still need to re-generate some of
   these.
 
 * `generate-questions-csv.py`
