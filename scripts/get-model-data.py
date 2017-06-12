@@ -109,6 +109,23 @@ CONFIGS = [
         'sort_by': ['frameworkSlug', 'supplierId', 'lotSlug']
     },
     {
+        'name': 'g_cloud_services',
+        'base_model': 'services',
+        'get_data_kwargs': {'framework': 'g-cloud-8, g-cloud-9'},
+        'keys': (
+            [
+                'id',
+                'frameworkSlug',
+                'lotSlug',
+                'serviceName',
+                'status',
+                'supplierId',
+                'supplierName'
+            ]
+        ),
+        'sort_by': ['frameworkSlug', 'supplierId', 'lotSlug']
+    },
+    {
         'name': 'briefs',
         'base_model': 'briefs',
         'keys': (
