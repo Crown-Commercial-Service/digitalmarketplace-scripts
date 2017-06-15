@@ -2,7 +2,7 @@
 
 """
 This script will check all free-text fields in submitted G-Cloud services for "bad words", as defined in
-the file at <bad_words_path> (typically blacklist.txt in https://github.gds/gds/digitalmarketplace-bad-words),
+the file at <bad_words_path> (typically blacklist.txt in https://github.com/alphagov/digitalmarketplace-bad-words),
 and generate a CSV report of any bad word found.
 
 Usage:
