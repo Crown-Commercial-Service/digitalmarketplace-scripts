@@ -21,27 +21,28 @@ def get_live_briefs_with_new_questions_and_answers_between_two_dates(data_api_cl
     )]
 
 
-def get_ids_of_suppliers_who_started_applying(data_api_client, briefs):
-    suppliers_who_started_applying_by_brief = {}
+def get_ids_of_suppliers_who_started_applying(data_api_client, brief):
+    responses = data_api_client.find_brief_responses(brief_id=brief["id"])
+    return [response["supplierId"] for response in responses["briefResponses"]]
+
+
+def get_ids_of_suppliers_who_asked_a_clarification_question(data_api_client, brief):
+    audit_events = data_api_client.find_audit_events(
+        audit_type=dmapiclient.audit.AuditTypes.send_clarification_question,
+        object_type='briefs',
+        object_id=brief['id']
+    )
+    return [audit_event['data']['supplierId'] for audit_event in audit_events['auditEvents']]
+
+
+def get_ids_of_interested_suppliers_for_briefs(data_api_client, briefs):
+    interested_suppliers = {}
     for brief in briefs:
-        responses = data_api_client.find_brief_responses(brief_id=brief["id"])
-        supplier_ids = [response["supplierId"] for response in responses["briefResponses"]]
-        suppliers_who_started_applying_by_brief[brief["id"]] = supplier_ids
-    return suppliers_who_started_applying_by_brief
+        suppliers_who_applied = get_ids_of_suppliers_who_started_applying(data_api_client, brief)
+        suppliers_who_asked_a_question = get_ids_of_suppliers_who_asked_a_clarification_question(data_api_client, brief)
+        interested_suppliers[brief['id']] = list(set(suppliers_who_applied + suppliers_who_asked_a_question))
 
-
-def get_ids_of_suppliers_who_asked_a_clarification_question(data_api_client, briefs):
-    suppliers_who_asked_a_clarification_question = {}
-    for brief in briefs:
-        audit_events = data_api_client.find_audit_events(
-            audit_type=dmapiclient.audit.AuditTypes.send_clarification_question,
-            object_type='briefs',
-            object_id=brief['id']
-        )
-        supplier_ids = [audit_event['data']['supplierId'] for audit_event in audit_events['auditEvents']]
-        suppliers_who_asked_a_clarification_question[brief['id']] = supplier_ids
-
-    return suppliers_who_asked_a_clarification_question
+    return interested_suppliers
 
 
 def main(data_api_client, number_of_days):
