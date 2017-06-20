@@ -21,6 +21,15 @@ def get_live_briefs_with_new_questions_and_answers_between_two_dates(data_api_cl
     )]
 
 
+def get_id_of_suppliers_who_started_applying(data_api_client, list_of_briefs):
+    suppliers_who_started_applying_by_brief = {}
+    for brief in list_of_briefs:
+        responses = data_api_client.find_brief_responses(brief_id=brief["id"])
+        supplier_ids = [response["supplierId"] for response in responses["briefResponses"]]
+        suppliers_who_started_applying_by_brief[brief["id"]] = supplier_ids
+    return suppliers_who_started_applying_by_brief
+
+
 def main(data_api_client, number_of_days):
     logger.info("Begin to send brief update notification emails")
 
