@@ -7,7 +7,8 @@ from datetime import datetime
 from dmscripts.send_questions_and_answers_email import (
     main,
     get_live_briefs_with_new_questions_and_answers_between_two_dates,
-    get_id_of_suppliers_who_started_applying
+    get_ids_of_suppliers_who_started_applying,
+    get_ids_of_suppliers_who_asked_a_clarification_question
 )
 
 
@@ -68,9 +69,9 @@ def test_get_live_briefs_with_new_questions_and_answers_between_two_dates():
     ]
 
 
-def test_get_id_of_suppliers_who_started_applying():
+def test_get_ids_of_suppliers_who_started_applying():
     data_api_client = mock.Mock()
-    list_of_briefs = [
+    briefs = [
         {
             "id": 1,
             "clarificationQuestions": [{"publishedAt": "2017-03-23T06:00:00.669156Z"}]
@@ -92,13 +93,53 @@ def test_get_id_of_suppliers_who_started_applying():
     ]
 
     data_api_client.find_brief_responses.side_effect = (
-        {"briefResponses": [{"briefId": 1, "supplierId": 42}]},
-        {"briefResponses": [{"briefId": 2, "supplierId": 42}, {"briefId": 2, "supplierId": 44}]},
+        {"briefResponses": [{"briefId": 1, "supplierId": 11111}]},
+        {"briefResponses": [{"briefId": 2, "supplierId": 11111}, {"briefId": 2, "supplierId": 11112}]},
         {"briefResponses": []}
     )
 
-    assert get_id_of_suppliers_who_started_applying(data_api_client, list_of_briefs) == {1: [42], 2: [42, 44], 3: []}
+    assert get_ids_of_suppliers_who_started_applying(data_api_client, briefs) == {1: [11111], 2: [11111, 11112], 3: []}
 
+
+def test_get_ids_of_suppliers_who_asked_a_clarification_question():
+    data_api_client = mock.Mock()
+    briefs = [
+        {
+            "id": 1,
+            "clarificationQuestions": [{"publishedAt": "2017-03-23T06:00:00.669156Z"}]
+        },
+        {
+            "id": 2,
+            "clarificationQuestions": [
+                {"publishedAt": "2017-03-22T18:00:00.669156Z"},
+                {"publishedAt": "2017-03-23T06:00:00.669156Z"}
+            ]
+        },
+        {
+            "id": 3,
+            "clarificationQuestions": [
+                {"publishedAt": "2017-03-22T06:00:00.669156Z"},
+                {"publishedAt": "2017-03-23T06:00:00.669156Z"}
+            ]
+        },
+    ]
+
+    # we're going to have a list of audit events for clarification questions for each brief
+
+    data_api_client.find_audit_events.side_effect = (
+        # three questions (but only two unique suppliers)
+        {"auditEvents": [
+            {"data": {"briefId": 1, "question": "can you help me?", "supplierId": 11111}},
+            {"data": {"briefId": 1, "question": "please can you help me?", "supplierId": 11111}},
+            {"data": {"briefId": 1, "question": "can you help me?", "supplierId": 11112}}
+        ]},
+        # one question
+        {"auditEvents": [{"data": {"briefId": 2, "question": "can you help me?", "supplierId": 11111}}]},
+        # no questions
+        {"auditEvents": []}
+    )
+
+    assert get_ids_of_suppliers_who_asked_a_clarification_question(data_api_client, briefs) == {1: [11111, 11111, 11112], 2: [11111], 3: []}
 
 @pytest.mark.parametrize("number_of_days,start_date,end_date", [
     (1, datetime(2017, 4, 18, hour=8), datetime(2017, 4, 19, hour=8)),
