@@ -9,7 +9,8 @@ from dmscripts.send_questions_and_answers_email import (
     get_live_briefs_with_new_questions_and_answers_between_two_dates,
     get_ids_of_suppliers_who_started_applying,
     get_ids_of_suppliers_who_asked_a_clarification_question,
-    get_ids_of_interested_suppliers_for_briefs
+    get_ids_of_interested_suppliers_for_briefs,
+    invert_a_dictionary_so_supplier_id_is_key_and_brief_id_is_value
 )
 
 ALL_BRIEFS = [
@@ -146,6 +147,22 @@ def test_get_ids_of_interested_suppliers_for_briefs(
     for brief_id, supplier_ids in briefs_and_suppliers.items():
         assert brief_id in expected_result.keys()
         assert sorted(supplier_ids) == expected_result[brief_id]
+
+
+def test_invert_a_dictionary_so_supplier_id_is_key_and_brief_id_is_value():
+    dictionary_to_invert = {
+        FILTERED_BRIEFS[0]["id"]: [11111, 11112, 11113],
+        FILTERED_BRIEFS[1]["id"]: [11111],
+        FILTERED_BRIEFS[2]["id"]: [11111, 11112]
+    }
+
+    expected_result = {
+        11111: [FILTERED_BRIEFS[0]["id"], FILTERED_BRIEFS[1]["id"], FILTERED_BRIEFS[2]["id"]],
+        11112: [FILTERED_BRIEFS[0]["id"], FILTERED_BRIEFS[2]["id"]],
+        11113: [FILTERED_BRIEFS[0]["id"]]
+    }
+
+    assert invert_a_dictionary_so_supplier_id_is_key_and_brief_id_is_value(dictionary_to_invert) == expected_result
 
 
 @pytest.mark.parametrize("number_of_days,start_date,end_date", [
