@@ -10,15 +10,16 @@
       pythonPackages.virtualenv
       pkgs.libffi
       pkgs.libyaml
-      pkgs.wkhtmltopdf
       # for `cryptography`
       pkgs.openssl_1_1_0
-    ] ++ pkgs.stdenv.lib.optionals forTest ([
-        # for lxml
-        pkgs.libxml2
-        pkgs.libxslt
-      ]
-    );
+    ] ++ pkgs.stdenv.lib.optionals (!pkgs.stdenv.isDarwin) [
+      # package not available on darwin for now - sorry you're on your own...
+      pkgs.wkhtmltopdf
+    ] ++ pkgs.stdenv.lib.optionals forTest [
+      # for lxml
+      pkgs.libxml2
+      pkgs.libxslt
+    ];
 
     hardeningDisable = pkgs.stdenv.lib.optionals pkgs.stdenv.isDarwin [ "format" ];
 
