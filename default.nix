@@ -11,7 +11,7 @@
       pkgs.libffi
       pkgs.libyaml
       # for `cryptography`
-      pkgs.openssl_1_1_0
+      pkgs.openssl
     ] ++ pkgs.stdenv.lib.optionals (!pkgs.stdenv.isDarwin) [
       # package not available on darwin for now - sorry you're on your own...
       pkgs.wkhtmltopdf
