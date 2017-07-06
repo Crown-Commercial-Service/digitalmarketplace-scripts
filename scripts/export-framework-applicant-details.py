@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 """Export supplier "about you" information for suppliers who applied to a framework
 
-Currently will only work for g-cloud-8 and digital-outcomes-and-specialists-2 framework_slugs. Support for specific
-frameworks needs to be explicitly added to the LOTS and DECLARATION_FIELDS in
+Currently will only work for g-cloud-8, g-cloud-9 and digital-outcomes-and-specialists-2 framework_slugs.
+Support for new frameworks needs to be explicitly added to the LOTS and DECLARATION_FIELDS in
 dmscripts/export_framework_applicant_details.py, though in the (far) future it would be nice if this information could
 be pulled from the frameworks themselves provided the frameworks repo knew which fields classed as "about you".
 
