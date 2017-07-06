@@ -42,7 +42,7 @@ def get_ids_of_interested_suppliers_for_briefs(data_api_client, briefs):
         suppliers_who_asked_a_question = get_ids_of_suppliers_who_asked_a_clarification_question(data_api_client, brief)
         interested_suppliers[brief['id']] = list(set(suppliers_who_applied + suppliers_who_asked_a_question))
 
-    return interested_suppliers
+    return invert_a_dictionary_so_supplier_id_is_key_and_brief_id_is_value(interested_suppliers)
 
 
 def invert_a_dictionary_so_supplier_id_is_key_and_brief_id_is_value(dictionary_to_invert):
@@ -59,6 +59,10 @@ def get_supplier_email_addresses_by_supplier_id(data_api_client, supplier_id):
     return [user['emailAddress'] for user in response['users']]
 
 
+def create_context_for_supplier(list_of_brief_ids):
+    pass
+
+
 def main(data_api_client, number_of_days):
     logger.info("Begin to send brief update notification emails")
 
@@ -67,11 +71,14 @@ def main(data_api_client, number_of_days):
     # get yesterday at 8 in the morning
     start_date = end_date - timedelta(days=number_of_days)
 
-    # we need to find the briefs
+    # we want to find all questions and answers that were submitted between start and end dates
     briefs = get_live_briefs_with_new_questions_and_answers_between_two_dates(data_api_client, start_date, end_date)
 
-    # we want to find all questions and answers that were submitted between start and end dates
+    # find the IDs of interested suppliers {supplier_id: [briefid1, briefid2]}
+    interested_suppliers = get_ids_of_interested_suppliers_for_briefs(data_api_client, briefs)
 
-    # look for people who have asked clarification questions
-    # data_api_client.find_audit_events(
-    # audit_type=dmapiclient.audit.AuditTypes.send_clarification_question, audit_date=start_date.strftime('%Y-%m-%d'))
+    for supplier_id, brief_ids in interested_suppliers.items():
+        # get a context for each supplier email
+        for email_address in get_supplier_email_addresses_by_supplier_id(data_api_client, supplier_id):
+            # use notify client to send email with email address, template id and context
+            pass

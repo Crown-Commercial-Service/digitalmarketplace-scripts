@@ -11,7 +11,8 @@ from dmscripts.notify_suppliers_of_new_questions_answers import (
     get_ids_of_suppliers_who_asked_a_clarification_question,
     get_ids_of_interested_suppliers_for_briefs,
     get_supplier_email_addresses_by_supplier_id,
-    invert_a_dictionary_so_supplier_id_is_key_and_brief_id_is_value
+    invert_a_dictionary_so_supplier_id_is_key_and_brief_id_is_value,
+    create_context_for_supplier
 )
 
 ALL_BRIEFS = [
@@ -140,9 +141,9 @@ def test_get_ids_of_interested_suppliers_for_briefs(
     briefs_and_suppliers = get_ids_of_interested_suppliers_for_briefs(mock.Mock(), briefs)
 
     expected_result = {
-        FILTERED_BRIEFS[0]["id"]: [11111, 11112, 11113],
-        FILTERED_BRIEFS[1]["id"]: [11111],
-        FILTERED_BRIEFS[2]["id"]: [11111, 11112]
+        11111: [FILTERED_BRIEFS[0]["id"], FILTERED_BRIEFS[1]["id"], FILTERED_BRIEFS[2]["id"]],
+        11112: [FILTERED_BRIEFS[0]["id"], FILTERED_BRIEFS[2]["id"]],
+        11113: [FILTERED_BRIEFS[0]["id"]]
     }
 
     for brief_id, supplier_ids in briefs_and_suppliers.items():
@@ -182,22 +183,35 @@ def test_get_supplier_email_addresses_by_supplier_id():
     assert data_api_client.find_users.call_args == mock.call(supplier_id=1)
 
 
+def test_create_context_for_supplier():
+    list_of_brief_ids = [FILTERED_BRIEFS[0]["id"], FILTERED_BRIEFS[1]["id"], FILTERED_BRIEFS[2]["id"]]
+
+    expected_result = {}
+    assert create_context_for_supplier(list_of_brief_ids) == None
+
+
 @pytest.mark.parametrize("number_of_days,start_date,end_date", [
     (1, datetime(2017, 4, 18, hour=8), datetime(2017, 4, 19, hour=8)),
     (3, datetime(2017, 4, 16, hour=8), datetime(2017, 4, 19, hour=8))
 ])
 @mock.patch(
+    'dmscripts.notify_suppliers_of_new_questions_answers.get_ids_of_interested_suppliers_for_briefs',
+    autospec=True
+)
+@mock.patch(
     'dmscripts.notify_suppliers_of_new_questions_answers.get_live_briefs_with_new_questions_and_answers_between_two_dates',
     autospec=True
 )
-def test_main_gets_live_briefs_correct_number_of_days(
+def test_main_calls_functions(
     get_live_briefs_with_new_questions_and_answers_between_two_dates,
+    get_ids_of_interested_suppliers_for_briefs,
     number_of_days,
     start_date,
     end_date
 ):
     with freeze_time('2017-04-19 08:00:00'):
-        main(mock.MagicMock(), number_of_days)
-        get_live_briefs_with_new_questions_and_answers_between_two_dates.assert_called_once_with(
-            mock.ANY, start_date, end_date
-        )
+        api_client = mock.MagicMock()
+        main(api_client, number_of_days)
+        assert get_live_briefs_with_new_questions_and_answers_between_two_dates.call_args_list == [
+            mock.call(api_client, start_date, end_date)
+        ]
