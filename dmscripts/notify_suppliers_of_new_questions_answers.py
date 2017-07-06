@@ -46,17 +46,17 @@ def get_ids_of_interested_suppliers_for_briefs(data_api_client, briefs):
 
 
 def invert_a_dictionary_so_supplier_id_is_key_and_brief_id_is_value(dictionary_to_invert):
-    inverted_dict = {
-        supplier_id: [brief_id]
-        for brief_id, list_of_supplier_ids in dictionary_to_invert.items()
-        for supplier_id in list_of_supplier_ids
-    }
-    for brief_id, list_of_supplier_ids in dictionary_to_invert.iteritems():
+    inverted_dic = {}
+    for brief_id, list_of_supplier_ids in dictionary_to_invert.items():
         for supplier_id in list_of_supplier_ids:
-            if supplier_id in inverted_dict and brief_id not in inverted_dict[supplier_id]:
-                inverted_dict[supplier_id].append(brief_id)
-                inverted_dict[supplier_id].sort()
-    return inverted_dict
+            inverted_dic.setdefault(supplier_id, []).append(brief_id)
+
+    return inverted_dic
+
+
+def get_supplier_email_addresses_by_supplier_id(data_api_client, supplier_id):
+    response = data_api_client.find_users(supplier_id=supplier_id)
+    return [user['emailAddress'] for user in response['users']]
 
 
 def main(data_api_client, number_of_days):

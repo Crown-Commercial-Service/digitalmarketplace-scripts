@@ -4,12 +4,13 @@ from freezegun import freeze_time
 
 from datetime import datetime
 
-from dmscripts.send_questions_and_answers_email import (
+from dmscripts.notify_suppliers_of_new_questions_answers import (
     main,
     get_live_briefs_with_new_questions_and_answers_between_two_dates,
     get_ids_of_suppliers_who_started_applying,
     get_ids_of_suppliers_who_asked_a_clarification_question,
     get_ids_of_interested_suppliers_for_briefs,
+    get_supplier_email_addresses_by_supplier_id,
     invert_a_dictionary_so_supplier_id_is_key_and_brief_id_is_value
 )
 
@@ -114,10 +115,10 @@ def test_get_ids_of_suppliers_who_asked_a_clarification_question(brief, audit_ev
 
 
 @mock.patch(
-    'dmscripts.send_questions_and_answers_email.get_ids_of_suppliers_who_asked_a_clarification_question',
+    'dmscripts.notify_suppliers_of_new_questions_answers.get_ids_of_suppliers_who_asked_a_clarification_question',
     autospec=True
 )
-@mock.patch('dmscripts.send_questions_and_answers_email.get_ids_of_suppliers_who_started_applying', autospec=True)
+@mock.patch('dmscripts.notify_suppliers_of_new_questions_answers.get_ids_of_suppliers_who_started_applying', autospec=True)
 def test_get_ids_of_interested_suppliers_for_briefs(
     get_ids_of_suppliers_who_started_applying,
     get_ids_of_suppliers_who_asked_a_clarification_question
@@ -165,12 +166,28 @@ def test_invert_a_dictionary_so_supplier_id_is_key_and_brief_id_is_value():
     assert invert_a_dictionary_so_supplier_id_is_key_and_brief_id_is_value(dictionary_to_invert) == expected_result
 
 
+def test_get_supplier_email_addresses_by_supplier_id():
+    data_api_client = mock.Mock()
+    data_api_client.find_users.return_value = {
+        'users': [
+            {'id': 1, 'emailAddress': 'bananas@example.com'},
+            {'id': 2, 'emailAddress': 'mangoes@example.com'},
+            {'id': 3, 'emailAddress': 'guava@example.com'}
+        ]
+    }
+
+    assert get_supplier_email_addresses_by_supplier_id(data_api_client, 1) == [
+        'bananas@example.com', 'mangoes@example.com', 'guava@example.com'
+    ]
+    assert data_api_client.find_users.call_args == mock.call(supplier_id=1)
+
+
 @pytest.mark.parametrize("number_of_days,start_date,end_date", [
     (1, datetime(2017, 4, 18, hour=8), datetime(2017, 4, 19, hour=8)),
     (3, datetime(2017, 4, 16, hour=8), datetime(2017, 4, 19, hour=8))
 ])
 @mock.patch(
-    'dmscripts.send_questions_and_answers_email.get_live_briefs_with_new_questions_and_answers_between_two_dates',
+    'dmscripts.notify_suppliers_of_new_questions_answers.get_live_briefs_with_new_questions_and_answers_between_two_dates',
     autospec=True
 )
 def test_main_gets_live_briefs_correct_number_of_days(
