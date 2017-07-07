@@ -207,18 +207,35 @@ def test_create_context_for_supplier():
     (1, datetime(2017, 4, 18, hour=8), datetime(2017, 4, 19, hour=8)),
     (3, datetime(2017, 4, 16, hour=8), datetime(2017, 4, 19, hour=8))
 ])
+@mock.patch(MODULE_UNDER_TEST + '.get_supplier_email_addresses_by_supplier_id', autospec=True)
 @mock.patch(MODULE_UNDER_TEST + '.get_ids_of_interested_suppliers_for_briefs', autospec=True)
 @mock.patch(MODULE_UNDER_TEST + '.get_live_briefs_with_new_questions_and_answers_between_two_dates', autospec=True)
+@mock.patch(MODULE_UNDER_TEST + '.dmapiclient.DataAPIClient')
 def test_main_calls_functions(
+    data_api_client,
     get_live_briefs_with_new_questions_and_answers_between_two_dates,
     get_ids_of_interested_suppliers_for_briefs,
+    get_supplier_email_addresses_by_supplier_id,
     number_of_days,
     start_date,
     end_date
 ):
+    get_ids_of_interested_suppliers_for_briefs.return_value = {3: [], 4: [], 5: []}
+
     with freeze_time('2017-04-19 08:00:00'):
-        api_client = mock.MagicMock()
-        main(api_client, 'preview', number_of_days)
-        assert get_live_briefs_with_new_questions_and_answers_between_two_dates.call_args_list == [
-            mock.call(api_client, start_date, end_date)
-        ]
+        main('api_url', 'api_token', 'email_api_key', 'preview', number_of_days, dry_run=False)
+
+    assert data_api_client.call_args == mock.call('api_url', 'api_token')
+    assert get_live_briefs_with_new_questions_and_answers_between_two_dates.call_args_list == [
+        mock.call(data_api_client.return_value, start_date, end_date)
+    ]
+    assert get_ids_of_interested_suppliers_for_briefs.call_args == \
+        mock.call(
+            data_api_client.return_value,
+            get_live_briefs_with_new_questions_and_answers_between_two_dates.return_value
+        )
+    assert get_supplier_email_addresses_by_supplier_id.call_args_list == [
+        mock.call(data_api_client.return_value, 3),
+        mock.call(data_api_client.return_value, 4),
+        mock.call(data_api_client.return_value, 5)
+    ]

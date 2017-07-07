@@ -77,13 +77,16 @@ def create_context_for_supplier(stage, supplier_briefs):
     }
 
 
-def main(data_api_client, stage, number_of_days):
+def main(data_api_url, data_api_token, email_api_key, stage, number_of_days, dry_run):
     logger.info("Begin to send brief update notification emails")
 
     # get today at 8 in the morning
     end_date = datetime.utcnow().replace(hour=8, minute=0, second=0, microsecond=0)
     # get yesterday at 8 in the morning
     start_date = end_date - timedelta(days=number_of_days)
+
+    # Initialise data API client
+    data_api_client = dmapiclient.DataAPIClient(data_api_url, data_api_token)
 
     # we want to find all questions and answers that were submitted between start and end dates
     briefs = get_live_briefs_with_new_questions_and_answers_between_two_dates(data_api_client, start_date, end_date)
@@ -97,5 +100,16 @@ def main(data_api_client, stage, number_of_days):
         # get a context for each supplier email
         supplier_context = create_context_for_supplier(stage, supplier_briefs)
         for email_address in get_supplier_email_addresses_by_supplier_id(data_api_client, supplier_id):
-            # use notify client to send email with email address, template id and context
-            pass
+            if dry_run:
+                logger.info(
+                    "Would notify supplier ID {supplier_id} for brief IDs {}",
+                    extra={
+                        'supplier_id': supplier_id,
+                        'brief_ids_list': ", ".join(brief_ids)
+                    }
+                )
+            else:
+                # use notify client to send email with email address, template id and context
+                pass
+
+    return True
