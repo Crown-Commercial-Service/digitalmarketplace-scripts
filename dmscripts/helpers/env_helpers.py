@@ -1,9 +1,9 @@
 def get_api_endpoint_from_stage(stage, app='api'):
-    """Return the full URL of given API or Search API environment.
+    """Return the full URL of given API, Search API or web URL environment.
 
     :param stage: environment name. Can be one of 'preview', 'staging',
                   'production' or 'dev' (aliases: 'local', 'development').
-    :param app: should be either 'api' or 'search-api'
+    :param app: should be either 'api', 'search-api' or 'www'
 
     """
 
@@ -16,6 +16,7 @@ def get_api_endpoint_from_stage(stage, app='api'):
     dev_ports = {
         'api': 5000,
         'search-api': 5001,
+        'www': 80
     }
 
     if stage in ['local', 'dev', 'development']:
