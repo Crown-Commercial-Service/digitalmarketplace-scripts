@@ -2,7 +2,7 @@ import dmapiclient
 
 from datetime import datetime, date, timedelta
 
-from dmscripts.helpers import logging_helpers
+from dmscripts.helpers import env_helpers, logging_helpers
 from dmscripts.helpers.logging_helpers import logging
 from dmutils.formats import DATETIME_FORMAT
 
@@ -59,11 +59,25 @@ def get_supplier_email_addresses_by_supplier_id(data_api_client, supplier_id):
     return [user['emailAddress'] for user in response['users']]
 
 
-def create_context_for_supplier(list_of_brief_ids):
-    pass
+def _get_link_domain(stage):
+    return env_helpers.get_api_endpoint_from_stage(stage, app='www')
 
 
-def main(data_api_client, number_of_days):
+def create_context_for_supplier(stage, supplier_briefs):
+    return {
+        'briefs': [
+            {
+                'brief_title': brief['title'],
+                'brief_link': '{0}/{1}/opportunities/{2}'.format(
+                    _get_link_domain(stage),
+                    brief['frameworkFramework'], brief['id']
+                )
+            } for brief in supplier_briefs
+        ]
+    }
+
+
+def main(data_api_client, stage, number_of_days):
     logger.info("Begin to send brief update notification emails")
 
     # get today at 8 in the morning
@@ -78,7 +92,10 @@ def main(data_api_client, number_of_days):
     interested_suppliers = get_ids_of_interested_suppliers_for_briefs(data_api_client, briefs)
 
     for supplier_id, brief_ids in interested_suppliers.items():
+        # Get the brief objects for this supplier
+        supplier_briefs = filter(lambda b: b.id in brief_ids, briefs)
         # get a context for each supplier email
+        supplier_context = create_context_for_supplier(stage, supplier_briefs)
         for email_address in get_supplier_email_addresses_by_supplier_id(data_api_client, supplier_id):
             # use notify client to send email with email address, template id and context
             pass

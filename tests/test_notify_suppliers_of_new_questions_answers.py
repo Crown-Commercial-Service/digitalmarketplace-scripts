@@ -29,19 +29,20 @@ ALL_BRIEFS = [
     ]},
 
     # a brief with a question inside of the date range
-    {"id": 3, "clarificationQuestions": [{"publishedAt": "2017-03-23T06:00:00.669156Z"}]},
+    {"id": 3, "clarificationQuestions": [{"publishedAt": "2017-03-23T06:00:00.669156Z"}
+    ], 'title': 'Amazing Title', 'frameworkFramework': 'digital-outcomes-and-specialists'},
 
     # a brief with two questions inside of the date range
     {"id": 4, "clarificationQuestions": [
         {"publishedAt": "2017-03-22T18:00:00.669156Z"},
         {"publishedAt": "2017-03-23T06:00:00.669156Z"}
-    ]},
+    ], 'title': 'Brilliant Title', 'frameworkFramework': 'digital-outcomes-and-specialists'},
 
     # a brief with two questions, one of them outside the range and one inside the range
     {"id": 5, "clarificationQuestions": [
         {"publishedAt": "2017-03-22T06:00:00.669156Z"},
         {"publishedAt": "2017-03-23T06:00:00.669156Z"}
-    ]},
+    ], 'title': 'Confounded Title', 'frameworkFramework': 'digital-outcomes-and-specialists'},
 
     # a brief with questions over the weekend
     {"id": 6, "clarificationQuestions": [
@@ -54,6 +55,8 @@ ALL_BRIEFS = [
 
 FILTERED_BRIEFS = [ALL_BRIEFS[3], ALL_BRIEFS[4], ALL_BRIEFS[5]]
 
+
+MODULE_UNDER_TEST = 'dmscripts.notify_suppliers_of_new_questions_answers'
 
 def test_get_live_briefs_with_new_questions_and_answers_between_two_dates():
     data_api_client = mock.Mock()
@@ -115,11 +118,8 @@ def test_get_ids_of_suppliers_who_asked_a_clarification_question(brief, audit_ev
     assert get_ids_of_suppliers_who_asked_a_clarification_question(data_api_client, brief) == expected_result
 
 
-@mock.patch(
-    'dmscripts.notify_suppliers_of_new_questions_answers.get_ids_of_suppliers_who_asked_a_clarification_question',
-    autospec=True
-)
-@mock.patch('dmscripts.notify_suppliers_of_new_questions_answers.get_ids_of_suppliers_who_started_applying', autospec=True)
+@mock.patch(MODULE_UNDER_TEST + '.get_ids_of_suppliers_who_asked_a_clarification_question', autospec=True)
+@mock.patch(MODULE_UNDER_TEST + '.get_ids_of_suppliers_who_started_applying', autospec=True)
 def test_get_ids_of_interested_suppliers_for_briefs(
     get_ids_of_suppliers_who_started_applying,
     get_ids_of_suppliers_who_asked_a_clarification_question
@@ -184,24 +184,31 @@ def test_get_supplier_email_addresses_by_supplier_id():
 
 
 def test_create_context_for_supplier():
-    list_of_brief_ids = [FILTERED_BRIEFS[0]["id"], FILTERED_BRIEFS[1]["id"], FILTERED_BRIEFS[2]["id"]]
+    briefs = [FILTERED_BRIEFS[0], FILTERED_BRIEFS[1], FILTERED_BRIEFS[2]]
 
-    expected_result = {}
-    assert create_context_for_supplier(list_of_brief_ids) == None
-
+    assert create_context_for_supplier('preview', briefs) == {
+        'briefs': [
+            {
+                'brief_title': 'Amazing Title',
+                'brief_link': 'https://www.preview.marketplace.team/digital-outcomes-and-specialists/opportunities/3'
+            },
+            {
+                'brief_title': 'Brilliant Title',
+                'brief_link': 'https://www.preview.marketplace.team/digital-outcomes-and-specialists/opportunities/4'
+            },
+            {
+                'brief_title': 'Confounded Title',
+                'brief_link': 'https://www.preview.marketplace.team/digital-outcomes-and-specialists/opportunities/5'
+            },
+        ]
+    }
 
 @pytest.mark.parametrize("number_of_days,start_date,end_date", [
     (1, datetime(2017, 4, 18, hour=8), datetime(2017, 4, 19, hour=8)),
     (3, datetime(2017, 4, 16, hour=8), datetime(2017, 4, 19, hour=8))
 ])
-@mock.patch(
-    'dmscripts.notify_suppliers_of_new_questions_answers.get_ids_of_interested_suppliers_for_briefs',
-    autospec=True
-)
-@mock.patch(
-    'dmscripts.notify_suppliers_of_new_questions_answers.get_live_briefs_with_new_questions_and_answers_between_two_dates',
-    autospec=True
-)
+@mock.patch(MODULE_UNDER_TEST + '.get_ids_of_interested_suppliers_for_briefs', autospec=True)
+@mock.patch(MODULE_UNDER_TEST + '.get_live_briefs_with_new_questions_and_answers_between_two_dates', autospec=True)
 def test_main_calls_functions(
     get_live_briefs_with_new_questions_and_answers_between_two_dates,
     get_ids_of_interested_suppliers_for_briefs,
@@ -211,7 +218,7 @@ def test_main_calls_functions(
 ):
     with freeze_time('2017-04-19 08:00:00'):
         api_client = mock.MagicMock()
-        main(api_client, number_of_days)
+        main(api_client, 'preview', number_of_days)
         assert get_live_briefs_with_new_questions_and_answers_between_two_dates.call_args_list == [
             mock.call(api_client, start_date, end_date)
         ]
