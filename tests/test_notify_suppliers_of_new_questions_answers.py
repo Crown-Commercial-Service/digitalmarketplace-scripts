@@ -136,7 +136,7 @@ def test_get_ids_of_interested_suppliers_for_briefs(
 
     get_ids_of_suppliers_who_asked_a_clarification_question.side_effect = (
         [11111, 11111, 11113],
-        [],
+        [11111],
         [11111, 11112]
     )
 
@@ -206,6 +206,18 @@ def test_create_context_for_supplier():
     }
 
 
+def test_create_context_for_supplier_returns_correct_production_url():
+    assert create_context_for_supplier('production', [FILTERED_BRIEFS[0]]) == {
+        'briefs': [
+            {
+                'brief_title': 'Amazing Title',
+                'brief_link': 'https://www.digitalmarketplace.service.gov.uk/'
+                              'digital-outcomes-and-specialists/opportunities/3'
+            }
+        ]
+    }
+
+
 @pytest.mark.parametrize("number_of_days,start_date,end_date", [
     (1, datetime(2017, 4, 18, hour=8), datetime(2017, 4, 19, hour=8)),
     (3, datetime(2017, 4, 16, hour=8), datetime(2017, 4, 19, hour=8))
@@ -231,11 +243,10 @@ def test_main_calls_functions(
     ]
     get_ids_of_interested_suppliers_for_briefs.return_value = {
         3: [brief0['id'], brief1['id']],
-        4: [brief2['id']],
-        5: []
+        4: [brief2['id']]
     }
     get_supplier_email_addresses_by_supplier_id.side_effect = [
-        ['a@example.com'], ['b@example.com'], ['c@example.com']
+        ['a@example.com'], ['b@example.com']
     ]
 
     with freeze_time('2017-04-19 08:00:00'):
@@ -253,7 +264,6 @@ def test_main_calls_functions(
     assert get_supplier_email_addresses_by_supplier_id.call_args_list == [
         mock.call(data_api_client.return_value, 3),
         mock.call(data_api_client.return_value, 4),
-        mock.call(data_api_client.return_value, 5)
     ]
     assert send_emails.call_args_list == [
         mock.call(
@@ -278,5 +288,4 @@ def test_main_calls_functions(
                                   'digital-outcomes-and-specialists/opportunities/5'}
             ]}
         ),
-        mock.call('c@example.com', {'briefs': []})
     ]
