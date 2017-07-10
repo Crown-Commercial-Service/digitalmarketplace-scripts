@@ -9,6 +9,11 @@ from dmutils.email.dm_mandrill import send_email
 from dmutils.formats import DATETIME_FORMAT
 
 
+EMAIL_SUBJECT = "New question and answer responses on the Digital Marketplace"
+EMAIL_FROM_ADDRESS = "do-not-reply@digitalmarketplace.service.gov.uk"
+EMAIL_FROM_NAME = "Digital Marketplace Team"
+
+
 logger = logging_helpers.configure_logger({'dmapiclient': logging.INFO})
 
 
@@ -86,17 +91,16 @@ def get_html_content(context):
     })
 
 
-def send_supplier_emails(email_addresses, supplier_context, email_api_key):
+def send_supplier_emails(email_api_key, email_addresses, supplier_context):
 
     send_email(
         email_addresses,
-        "Some content here",
+        get_html_content(supplier_context),
         email_api_key,
-        "New question and answer responses on the Digital Marketplace",
-        "from_change_me@example.com",
-        "Digital Marketplace Bananas",
-        ["supplier-new-brief-questions-answers"],
-        reply_to="do-not-reply@digitalmarketplace.service.gov.uk"
+        EMAIL_SUBJECT,
+        EMAIL_FROM_ADDRESS,
+        EMAIL_FROM_NAME,
+        ["supplier-new-brief-questions-answers"]
     )
 
 
@@ -132,6 +136,6 @@ def main(data_api_url, data_api_token, email_api_key, stage, number_of_days, dry
                 }
             )
         else:
-            send_supplier_emails(email_addresses, supplier_context, email_api_key)
+            send_supplier_emails(email_api_key, email_addresses, supplier_context)
 
     return True

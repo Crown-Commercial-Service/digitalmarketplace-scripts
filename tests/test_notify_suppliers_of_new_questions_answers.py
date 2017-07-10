@@ -15,7 +15,10 @@ from dmscripts.notify_suppliers_of_new_questions_answers import (
     invert_a_dictionary_so_supplier_id_is_key_and_brief_id_is_value,
     create_context_for_supplier,
     send_supplier_emails,
-    get_html_content
+    get_html_content,
+    EMAIL_SUBJECT,
+    EMAIL_FROM_ADDRESS,
+    EMAIL_FROM_NAME
 )
 
 ALL_BRIEFS = [
@@ -252,9 +255,12 @@ def test_get_html_content_renders_multiple_briefs():
         'digital-outcomes-and-specialists/opportunities/4'
 
 
+@mock.patch(MODULE_UNDER_TEST + '.get_html_content')
 @mock.patch(MODULE_UNDER_TEST + '.send_email')
-def test_send_emails_calls_mandrill_api_client(send_email):
+def test_send_emails_calls_mandrill_api_client(send_email, get_html_content):
+    get_html_content.return_value = "my content is bananas"
     send_supplier_emails(
+        'MANDRILL_API_KEY',
         ['a@example.com', 'a2@example.com'],
         {'briefs': [
             {
@@ -267,18 +273,16 @@ def test_send_emails_calls_mandrill_api_client(send_email):
                 'brief_link': 'https://www.digitalmarketplace.service.gov.uk/'
                               'digital-outcomes-and-specialists/opportunities/4'
             },
-        ]},
-        'MANDRILL_API_KEY'
+        ]}
     )
     send_email.assert_called_once_with(
         ['a@example.com', 'a2@example.com'],
-        "Some content here",
+        "my content is bananas",
         "MANDRILL_API_KEY",
-        "New question and answer responses on the Digital Marketplace",
-        "from_change_me@example.com",
-        "Digital Marketplace Bananas",
-        ["supplier-new-brief-questions-answers"],
-        reply_to="do-not-reply@digitalmarketplace.service.gov.uk"
+        EMAIL_SUBJECT,
+        EMAIL_FROM_ADDRESS,
+        EMAIL_FROM_NAME,
+        ["supplier-new-brief-questions-answers"]
     )
 
 
@@ -331,6 +335,7 @@ def test_main_calls_functions(
     ]
     assert send_supplier_emails.call_args_list == [
         mock.call(
+            'MANDRILL_API_KEY',
             ['a@example.com', 'a2@example.com'],
             {'briefs': [
                 {
@@ -341,17 +346,16 @@ def test_main_calls_functions(
                     'brief_title': 'Brilliant Title',
                     'brief_link': 'https://www.preview.marketplace.team/'
                                   'digital-outcomes-and-specialists/opportunities/4'}
-            ]},
-            'MANDRILL_API_KEY'
+            ]}
         ),
         mock.call(
+            'MANDRILL_API_KEY',
             ['b@example.com'],
             {'briefs': [
                 {
                     'brief_title': 'Confounded Title',
                     'brief_link': 'https://www.preview.marketplace.team/'
                                   'digital-outcomes-and-specialists/opportunities/5'}
-            ]},
-            'MANDRILL_API_KEY'
+            ]}
         ),
     ]
