@@ -3,7 +3,9 @@ import dmapiclient
 from datetime import datetime, date, timedelta
 
 from dmscripts.helpers import env_helpers, logging_helpers
+from dmscripts.helpers.html_helpers import render_html
 from dmscripts.helpers.logging_helpers import logging
+from dmutils.email.dm_mandrill import send_email
 from dmutils.formats import DATETIME_FORMAT
 
 
@@ -77,8 +79,25 @@ def create_context_for_supplier(stage, supplier_briefs):
     }
 
 
-def send_emails(email_address, supplier_context):
-    pass
+def get_html_content(context):
+
+    return render_html("email_templates/suppliers_new_briefs_questions_answers.html", data={
+        "briefs": context['briefs']
+    })
+
+
+def send_supplier_emails(email_addresses, supplier_context, email_api_key):
+
+    send_email(
+        email_addresses,
+        "Some content here",
+        email_api_key,
+        "New question and answer responses on the Digital Marketplace",
+        "from_change_me@example.com",
+        "Digital Marketplace Bananas",
+        ["supplier-new-brief-questions-answers"],
+        reply_to="do-not-reply@digitalmarketplace.service.gov.uk"
+    )
 
 
 def main(data_api_url, data_api_token, email_api_key, stage, number_of_days, dry_run):
@@ -103,17 +122,16 @@ def main(data_api_url, data_api_token, email_api_key, stage, number_of_days, dry
         supplier_briefs = filter(lambda b: b['id'] in brief_ids, briefs)
         # get a context for each supplier email
         supplier_context = create_context_for_supplier(stage, supplier_briefs)
-        for email_address in get_supplier_email_addresses_by_supplier_id(data_api_client, supplier_id):
-            if dry_run:
-                logger.info(
-                    "Would notify supplier ID {supplier_id} for brief IDs {}",
-                    extra={
-                        'supplier_id': supplier_id,
-                        'brief_ids_list': ", ".join(brief_ids)
-                    }
-                )
-            else:
-                # use notify client to send email with email address, template id and context
-                send_emails(email_address, supplier_context)
+        email_addresses = get_supplier_email_addresses_by_supplier_id(data_api_client, supplier_id)
+        if dry_run:
+            logger.info(
+                "Would notify supplier ID {supplier_id} for brief IDs {}",
+                extra={
+                    'supplier_id': supplier_id,
+                    'brief_ids_list': ", ".join(brief_ids)
+                }
+            )
+        else:
+            send_supplier_emails(email_addresses, supplier_context, email_api_key)
 
     return True

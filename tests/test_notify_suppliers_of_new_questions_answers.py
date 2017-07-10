@@ -3,6 +3,7 @@ import pytest
 from freezegun import freeze_time
 
 from datetime import datetime
+from lxml import html
 
 from dmscripts.notify_suppliers_of_new_questions_answers import (
     main,
@@ -12,7 +13,9 @@ from dmscripts.notify_suppliers_of_new_questions_answers import (
     get_ids_of_interested_suppliers_for_briefs,
     get_supplier_email_addresses_by_supplier_id,
     invert_a_dictionary_so_supplier_id_is_key_and_brief_id_is_value,
-    create_context_for_supplier
+    create_context_for_supplier,
+    send_supplier_emails,
+    get_html_content
 )
 
 ALL_BRIEFS = [
@@ -218,11 +221,70 @@ def test_create_context_for_supplier_returns_correct_production_url():
     }
 
 
+def test_get_html_content_renders_multiple_briefs():
+    context = {
+        'briefs': [
+            {
+                'brief_title': 'Amazing Title',
+                'brief_link': 'https://www.digitalmarketplace.service.gov.uk/'
+                              'digital-outcomes-and-specialists/opportunities/3'
+            },
+            {
+                'brief_title': 'Brilliant Title',
+                'brief_link': 'https://www.digitalmarketplace.service.gov.uk/'
+                              'digital-outcomes-and-specialists/opportunities/4'
+            }
+        ]
+    }
+
+    html_content = get_html_content(context)
+    doc = html.fromstring(html_content)
+    brief_titles = doc.xpath('//*[@class="opportunity-title"]')
+    brief_links = doc.xpath('//*[@class="opportunity-link"]')
+
+    assert len(brief_titles) == 2
+    assert brief_titles[0].text_content() == "Brief 1"
+    assert brief_titles[1].text_content() == "Brief 2"
+    assert len(brief_links) == 2
+    assert brief_links[0].text_content() == "Brief 1"
+    assert brief_links[1].text_content() == "Brief 2"
+
+
+@mock.patch(MODULE_UNDER_TEST + '.send_email')
+def test_send_emails_calls_mandrill_api_client(send_email):
+    send_supplier_emails(
+        ['a@example.com', 'a2@example.com'],
+        {'briefs': [
+            {
+                'brief_title': 'Amazing Title',
+                'brief_link': 'https://www.digitalmarketplace.service.gov.uk/'
+                              'digital-outcomes-and-specialists/opportunities/3'
+            },
+            {
+                'brief_title': 'Brilliant Title',
+                'brief_link': 'https://www.digitalmarketplace.service.gov.uk/'
+                              'digital-outcomes-and-specialists/opportunities/4'
+            },
+        ]},
+        'MANDRILL_API_KEY'
+    )
+    send_email.assert_called_once_with(
+        ['a@example.com', 'a2@example.com'],
+        "Some content here",
+        "MANDRILL_API_KEY",
+        "New question and answer responses on the Digital Marketplace",
+        "from_change_me@example.com",
+        "Digital Marketplace Bananas",
+        ["supplier-new-brief-questions-answers"],
+        reply_to="do-not-reply@digitalmarketplace.service.gov.uk"
+    )
+
+
 @pytest.mark.parametrize("number_of_days,start_date,end_date", [
     (1, datetime(2017, 4, 18, hour=8), datetime(2017, 4, 19, hour=8)),
     (3, datetime(2017, 4, 16, hour=8), datetime(2017, 4, 19, hour=8))
 ])
-@mock.patch(MODULE_UNDER_TEST + '.send_emails', autospec=True)
+@mock.patch(MODULE_UNDER_TEST + '.send_supplier_emails', autospec=True)
 @mock.patch(MODULE_UNDER_TEST + '.get_supplier_email_addresses_by_supplier_id', autospec=True)
 @mock.patch(MODULE_UNDER_TEST + '.get_ids_of_interested_suppliers_for_briefs', autospec=True)
 @mock.patch(MODULE_UNDER_TEST + '.get_live_briefs_with_new_questions_and_answers_between_two_dates', autospec=True)
@@ -232,7 +294,7 @@ def test_main_calls_functions(
     get_live_briefs_with_new_questions_and_answers_between_two_dates,
     get_ids_of_interested_suppliers_for_briefs,
     get_supplier_email_addresses_by_supplier_id,
-    send_emails,
+    send_supplier_emails,
     number_of_days,
     start_date,
     end_date
@@ -246,11 +308,11 @@ def test_main_calls_functions(
         4: [brief2['id']]
     }
     get_supplier_email_addresses_by_supplier_id.side_effect = [
-        ['a@example.com'], ['b@example.com']
+        ['a@example.com', 'a2@example.com'], ['b@example.com']
     ]
 
     with freeze_time('2017-04-19 08:00:00'):
-        main('api_url', 'api_token', 'email_api_key', 'preview', number_of_days, dry_run=False)
+        main('api_url', 'api_token', 'MANDRILL_API_KEY', 'preview', number_of_days, dry_run=False)
 
     assert data_api_client.call_args == mock.call('api_url', 'api_token')
     assert get_live_briefs_with_new_questions_and_answers_between_two_dates.call_args_list == [
@@ -265,9 +327,9 @@ def test_main_calls_functions(
         mock.call(data_api_client.return_value, 3),
         mock.call(data_api_client.return_value, 4),
     ]
-    assert send_emails.call_args_list == [
+    assert send_supplier_emails.call_args_list == [
         mock.call(
-            'a@example.com',
+            ['a@example.com', 'a2@example.com'],
             {'briefs': [
                 {
                     'brief_title': 'Amazing Title',
@@ -277,15 +339,17 @@ def test_main_calls_functions(
                     'brief_title': 'Brilliant Title',
                     'brief_link': 'https://www.preview.marketplace.team/'
                                   'digital-outcomes-and-specialists/opportunities/4'}
-            ]}
+            ]},
+            'MANDRILL_API_KEY'
         ),
         mock.call(
-            'b@example.com',
+            ['b@example.com'],
             {'briefs': [
                 {
                     'brief_title': 'Confounded Title',
                     'brief_link': 'https://www.preview.marketplace.team/'
                                   'digital-outcomes-and-specialists/opportunities/5'}
-            ]}
+            ]},
+            'MANDRILL_API_KEY'
         ),
     ]
