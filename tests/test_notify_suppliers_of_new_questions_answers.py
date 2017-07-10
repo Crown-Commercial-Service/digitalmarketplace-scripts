@@ -29,7 +29,8 @@ ALL_BRIEFS = [
     ]},
 
     # a brief with a question inside of the date range
-    {"id": 3, "clarificationQuestions": [{"publishedAt": "2017-03-23T06:00:00.669156Z"}
+    {"id": 3, "clarificationQuestions": [
+        {"publishedAt": "2017-03-23T06:00:00.669156Z"}
     ], 'title': 'Amazing Title', 'frameworkFramework': 'digital-outcomes-and-specialists'},
 
     # a brief with two questions inside of the date range
@@ -57,6 +58,7 @@ FILTERED_BRIEFS = [ALL_BRIEFS[3], ALL_BRIEFS[4], ALL_BRIEFS[5]]
 
 
 MODULE_UNDER_TEST = 'dmscripts.notify_suppliers_of_new_questions_answers'
+
 
 def test_get_live_briefs_with_new_questions_and_answers_between_two_dates():
     data_api_client = mock.Mock()
@@ -203,10 +205,12 @@ def test_create_context_for_supplier():
         ]
     }
 
+
 @pytest.mark.parametrize("number_of_days,start_date,end_date", [
     (1, datetime(2017, 4, 18, hour=8), datetime(2017, 4, 19, hour=8)),
     (3, datetime(2017, 4, 16, hour=8), datetime(2017, 4, 19, hour=8))
 ])
+@mock.patch(MODULE_UNDER_TEST + '.send_emails', autospec=True)
 @mock.patch(MODULE_UNDER_TEST + '.get_supplier_email_addresses_by_supplier_id', autospec=True)
 @mock.patch(MODULE_UNDER_TEST + '.get_ids_of_interested_suppliers_for_briefs', autospec=True)
 @mock.patch(MODULE_UNDER_TEST + '.get_live_briefs_with_new_questions_and_answers_between_two_dates', autospec=True)
@@ -216,11 +220,23 @@ def test_main_calls_functions(
     get_live_briefs_with_new_questions_and_answers_between_two_dates,
     get_ids_of_interested_suppliers_for_briefs,
     get_supplier_email_addresses_by_supplier_id,
+    send_emails,
     number_of_days,
     start_date,
     end_date
 ):
-    get_ids_of_interested_suppliers_for_briefs.return_value = {3: [], 4: [], 5: []}
+    brief0, brief1, brief2 = FILTERED_BRIEFS[0], FILTERED_BRIEFS[1], FILTERED_BRIEFS[2]
+    get_live_briefs_with_new_questions_and_answers_between_two_dates.return_value = [
+        brief0, brief1, brief2
+    ]
+    get_ids_of_interested_suppliers_for_briefs.return_value = {
+        3: [brief0['id'], brief1['id']],
+        4: [brief2['id']],
+        5: []
+    }
+    get_supplier_email_addresses_by_supplier_id.side_effect = [
+        ['a@example.com'], ['b@example.com'], ['c@example.com']
+    ]
 
     with freeze_time('2017-04-19 08:00:00'):
         main('api_url', 'api_token', 'email_api_key', 'preview', number_of_days, dry_run=False)
@@ -238,4 +254,29 @@ def test_main_calls_functions(
         mock.call(data_api_client.return_value, 3),
         mock.call(data_api_client.return_value, 4),
         mock.call(data_api_client.return_value, 5)
+    ]
+    assert send_emails.call_args_list == [
+        mock.call(
+            'a@example.com',
+            {'briefs': [
+                {
+                    'brief_title': 'Amazing Title',
+                    'brief_link': 'https://www.preview.marketplace.team/'
+                                  'digital-outcomes-and-specialists/opportunities/3'},
+                {
+                    'brief_title': 'Brilliant Title',
+                    'brief_link': 'https://www.preview.marketplace.team/'
+                                  'digital-outcomes-and-specialists/opportunities/4'}
+            ]}
+        ),
+        mock.call(
+            'b@example.com',
+            {'briefs': [
+                {
+                    'brief_title': 'Confounded Title',
+                    'brief_link': 'https://www.preview.marketplace.team/'
+                                  'digital-outcomes-and-specialists/opportunities/5'}
+            ]}
+        ),
+        mock.call('c@example.com', {'briefs': []})
     ]

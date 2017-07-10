@@ -77,6 +77,10 @@ def create_context_for_supplier(stage, supplier_briefs):
     }
 
 
+def send_emails(email_address, supplier_context):
+    pass
+
+
 def main(data_api_url, data_api_token, email_api_key, stage, number_of_days, dry_run):
     logger.info("Begin to send brief update notification emails")
 
@@ -96,7 +100,7 @@ def main(data_api_url, data_api_token, email_api_key, stage, number_of_days, dry
 
     for supplier_id, brief_ids in interested_suppliers.items():
         # Get the brief objects for this supplier
-        supplier_briefs = filter(lambda b: b.id in brief_ids, briefs)
+        supplier_briefs = filter(lambda b: b['id'] in brief_ids, briefs)
         # get a context for each supplier email
         supplier_context = create_context_for_supplier(stage, supplier_briefs)
         for email_address in get_supplier_email_addresses_by_supplier_id(data_api_client, supplier_id):
@@ -110,6 +114,6 @@ def main(data_api_url, data_api_token, email_api_key, stage, number_of_days, dry
                 )
             else:
                 # use notify client to send email with email address, template id and context
-                pass
+                send_emails(email_address, supplier_context)
 
     return True
