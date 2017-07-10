@@ -4,26 +4,30 @@
     <meta charset="UTF-8">
 </head>
 <body>
-Dear buyer,
+Dear supplier,
 <br /><br />
-Your '{{ brief_title }}' requirements are now closed for applications.
+In the last day, buyers answered questions about:
 <br /><br />
-You can see a list of the suppliers that met all your essential skills and experience at: <a href="https://www.digitalmarketplace.service.gov.uk/buyers/frameworks/{{ framework_slug }}/requirements/{{ lot_slug }}/{{ brief_id }}/responses">https://www.digitalmarketplace.service.gov.uk/buyers/frameworks/{{ framework_slug }}/requirements/{{ lot_slug }}/{{ brief_id }}/responses</a>
-<br /><br />
-Next, you'll need to shortlist and evaluate them.
-<br /><br />
-Read about:
+{% for brief in briefs %}
+<strong class="opportunity-title">{{ brief.brief_title }}</strong>
+<br />
+<a class="opportunity-link" href="{{ brief.brief_link }}">{{ brief.brief_link }}</a>
+<br />
+<br />
+{% endfor %}
+Buyers will answer all questions at least one working day before the opportunity closes.
+<br />
+<br />
+We’re emailing you because you, or someone at your company, either:
+<br />
 <ul>
-  <li>how to shortlist suppliers at: <a href="https://www.gov.uk/guidance/how-to-shortlist-digital-outcomes-and-specialists-suppliers">https://www.gov.uk/guidance/how-to-shortlist-digital-outcomes-and-specialists-suppliers</a></li>
-  <li>how to evaluate suppliers at: <a href="https://www.gov.uk/guidance/how-to-evaluate-digital-outcomes-and-specialists-suppliers">https://www.gov.uk/guidance/how-to-evaluate-digital-outcomes-and-specialists-suppliers</a></li>
-  <li>ways to assess suppliers at: <a href="https://www.gov.uk/guidance/ways-to-assess-digital-outcomes-and-specialists-suppliers">https://www.gov.uk/guidance/ways-to-assess-digital-outcomes-and-specialists-suppliers</a></li>
-  <li>how to score suppliers at: <a href="https://www.gov.uk/guidance/how-to-score-digital-outcomes-and-specialists-suppliers">https://www.gov.uk/guidance/how-to-score-digital-outcomes-and-specialists-suppliers</a></li>
+  <li>asked a question</li>
+  <li>started an application</li>
+  <li>completed an application</li>
 </ul>
-You can find templates to help you at: <a href="https://www.gov.uk/guidance/digital-outcomes-and-specialists-templates-and-legal-documents">https://www.gov.uk/guidance/digital-outcomes-and-specialists-templates-and-legal-documents</a>
-<br /><br />
-Make sure you notify any unsuccessful suppliers who don't make it through to the next stage.
-<br /><br />
-Thanks, <br />
+Thanks,
+<br />
+<br />
 The Digital Marketplace team
 </body>
 </html>

@@ -243,11 +243,13 @@ def test_get_html_content_renders_multiple_briefs():
     brief_links = doc.xpath('//*[@class="opportunity-link"]')
 
     assert len(brief_titles) == 2
-    assert brief_titles[0].text_content() == "Brief 1"
-    assert brief_titles[1].text_content() == "Brief 2"
+    assert brief_titles[0].text_content() == "Amazing Title"
+    assert brief_titles[1].text_content() == 'Brilliant Title'
     assert len(brief_links) == 2
-    assert brief_links[0].text_content() == "Brief 1"
-    assert brief_links[1].text_content() == "Brief 2"
+    assert brief_links[0].text_content() == 'https://www.digitalmarketplace.service.gov.uk/' \
+        'digital-outcomes-and-specialists/opportunities/3'
+    assert brief_links[1].text_content() == 'https://www.digitalmarketplace.service.gov.uk/' \
+        'digital-outcomes-and-specialists/opportunities/4'
 
 
 @mock.patch(MODULE_UNDER_TEST + '.send_email')
