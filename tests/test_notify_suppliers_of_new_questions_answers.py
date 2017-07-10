@@ -240,7 +240,9 @@ def test_get_html_content_renders_multiple_briefs():
         ]
     }
 
-    html_content = get_html_content(context)
+    with freeze_time('1999-04-20 08:00:00'):
+        html_content = get_html_content(context)
+
     doc = html.fromstring(html_content)
     brief_titles = doc.xpath('//*[@class="opportunity-title"]')
     brief_links = doc.xpath('//*[@class="opportunity-link"]')
@@ -250,9 +252,9 @@ def test_get_html_content_renders_multiple_briefs():
     assert brief_titles[1].text_content() == 'Brilliant Title'
     assert len(brief_links) == 2
     assert brief_links[0].text_content() == 'https://www.digitalmarketplace.service.gov.uk/' \
-        'digital-outcomes-and-specialists/opportunities/3'
+        'digital-outcomes-and-specialists/opportunities/3?utm_id=19990420qa'
     assert brief_links[1].text_content() == 'https://www.digitalmarketplace.service.gov.uk/' \
-        'digital-outcomes-and-specialists/opportunities/4'
+        'digital-outcomes-and-specialists/opportunities/4?utm_id=19990420qa'
 
 
 @mock.patch(MODULE_UNDER_TEST + '.get_html_content')
@@ -286,10 +288,6 @@ def test_send_emails_calls_mandrill_api_client(send_email, get_html_content):
     )
 
 
-@pytest.mark.parametrize("number_of_days,start_date,end_date", [
-    (1, datetime(2017, 4, 18, hour=8), datetime(2017, 4, 19, hour=8)),
-    (3, datetime(2017, 4, 16, hour=8), datetime(2017, 4, 19, hour=8))
-])
 @mock.patch(MODULE_UNDER_TEST + '.send_supplier_emails', autospec=True)
 @mock.patch(MODULE_UNDER_TEST + '.get_supplier_email_addresses_by_supplier_id', autospec=True)
 @mock.patch(MODULE_UNDER_TEST + '.get_ids_of_interested_suppliers_for_briefs', autospec=True)
@@ -300,10 +298,7 @@ def test_main_calls_functions(
     get_live_briefs_with_new_questions_and_answers_between_two_dates,
     get_ids_of_interested_suppliers_for_briefs,
     get_supplier_email_addresses_by_supplier_id,
-    send_supplier_emails,
-    number_of_days,
-    start_date,
-    end_date
+    send_supplier_emails
 ):
     brief0, brief1, brief2 = FILTERED_BRIEFS[0], FILTERED_BRIEFS[1], FILTERED_BRIEFS[2]
     get_live_briefs_with_new_questions_and_answers_between_two_dates.return_value = [
@@ -318,11 +313,11 @@ def test_main_calls_functions(
     ]
 
     with freeze_time('2017-04-19 08:00:00'):
-        main('api_url', 'api_token', 'MANDRILL_API_KEY', 'preview', number_of_days, dry_run=False)
+        main('api_url', 'api_token', 'MANDRILL_API_KEY', 'preview', dry_run=False)
 
     assert data_api_client.call_args == mock.call('api_url', 'api_token')
     assert get_live_briefs_with_new_questions_and_answers_between_two_dates.call_args_list == [
-        mock.call(data_api_client.return_value, start_date, end_date)
+        mock.call(data_api_client.return_value, datetime(2017, 4, 18, hour=8), datetime(2017, 4, 19, hour=8))
     ]
     assert get_ids_of_interested_suppliers_for_briefs.call_args == \
         mock.call(

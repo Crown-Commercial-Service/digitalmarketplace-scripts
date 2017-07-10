@@ -87,7 +87,7 @@ def create_context_for_supplier(stage, supplier_briefs):
 def get_html_content(context):
 
     return render_html("email_templates/suppliers_new_briefs_questions_answers.html", data={
-        "briefs": context['briefs']
+        "briefs": context['briefs'], "today": datetime.utcnow()
     })
 
 
@@ -104,13 +104,13 @@ def send_supplier_emails(email_api_key, email_addresses, supplier_context):
     )
 
 
-def main(data_api_url, data_api_token, email_api_key, stage, number_of_days, dry_run):
+def main(data_api_url, data_api_token, email_api_key, stage, dry_run):
     logger.info("Begin to send brief update notification emails")
 
     # get today at 8 in the morning
     end_date = datetime.utcnow().replace(hour=8, minute=0, second=0, microsecond=0)
     # get yesterday at 8 in the morning
-    start_date = end_date - timedelta(days=number_of_days)
+    start_date = end_date - timedelta(days=1)
 
     # Initialise data API client
     data_api_client = dmapiclient.DataAPIClient(data_api_url, data_api_token)

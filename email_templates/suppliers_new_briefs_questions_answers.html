@@ -11,7 +11,7 @@ In the last day, buyers answered questions about:
 {% for brief in briefs %}
 <strong class="opportunity-title">{{ brief.brief_title }}</strong>
 <br />
-<a class="opportunity-link" href="{{ brief.brief_link }}">{{ brief.brief_link }}</a>
+<a class="opportunity-link" href="{{ brief.brief_link }}?utm_id={{ today.strftime('%Y%m%d') }}qa">{{ brief.brief_link }}?utm_id={{ today.strftime('%Y%m%d') }}qa</a>
 <br />
 <br />
 {% endfor %}

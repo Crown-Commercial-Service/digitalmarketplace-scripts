@@ -2,11 +2,10 @@
 
 """Send email notifications to supplier users when a question has been answered
 
+
 Usage:
     notify-suppliers-of-new-questions-answers.py <stage> --api-token=<api_access_token>
                                                      --email-api-key=<email_api_key> [options]
-
-    --number-of-days=<days>  Length of window for recent questions/answers
     --dry-run  List notifications that would be sent without sending the emails
 """
 
@@ -26,7 +25,6 @@ if __name__ == "__main__":
         data_api_token=arguments['--api-token'],
         email_api_key=arguments['--email-api-key'],
         stage=arguments['<stage>'],
-        number_of_days=arguments['--number-of-days'],
         dry_run=arguments['--dry-run']
     )
 
