@@ -6,6 +6,7 @@
 Usage:
     notify-suppliers-of-new-questions-answers.py <stage> --api-token=<api_access_token>
                                                      --email-api-key=<email_api_key> [options]
+
     --dry-run  List notifications that would be sent without sending the emails
 """
 

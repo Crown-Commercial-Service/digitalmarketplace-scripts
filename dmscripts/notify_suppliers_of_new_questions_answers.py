@@ -21,7 +21,7 @@ def get_live_briefs_with_new_questions_and_answers_between_two_dates(data_api_cl
     briefs = data_api_client.find_briefs_iter(status='live', human=True)
 
     # return a list of briefs that contain clarification questions published between the start data and the end date
-    return [brief for brief in briefs if len(brief['clarificationQuestions']) and any(
+    return [brief for brief in briefs if brief.get('clarificationQuestions') and any(
         datetime.strptime(question['publishedAt'], DATETIME_FORMAT) >= start_date
         and datetime.strptime(question['publishedAt'], DATETIME_FORMAT) <= end_date
         for question in brief['clarificationQuestions']
@@ -129,13 +129,20 @@ def main(data_api_url, data_api_token, email_api_key, stage, dry_run):
         email_addresses = get_supplier_email_addresses_by_supplier_id(data_api_client, supplier_id)
         if dry_run:
             logger.info(
-                "Would notify supplier ID {supplier_id} for brief IDs {}",
+                "Would notify supplier ID {supplier_id} for brief IDs {brief_ids_list}",
                 extra={
                     'supplier_id': supplier_id,
-                    'brief_ids_list': ", ".join(brief_ids)
+                    'brief_ids_list': ", ".join(map(str, brief_ids))
                 }
             )
         else:
+            logger.info(
+                "Notifying supplier ID {supplier_id} of new questions/answers for brief IDs {brief_ids_list}",
+                extra={
+                    'supplier_id': supplier_id,
+                    'brief_ids_list': ", ".join(map(str, brief_ids))
+                }
+            )
             send_supplier_emails(email_api_key, email_addresses, supplier_context)
 
     return True
