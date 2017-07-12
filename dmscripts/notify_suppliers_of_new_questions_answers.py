@@ -91,7 +91,7 @@ def get_html_content(context):
     })
 
 
-def send_supplier_emails(email_api_key, email_addresses, supplier_context):
+def send_supplier_emails(email_api_key, email_addresses, supplier_context, logger):
 
     send_email(
         email_addresses,
@@ -100,7 +100,8 @@ def send_supplier_emails(email_api_key, email_addresses, supplier_context):
         EMAIL_SUBJECT,
         EMAIL_FROM_ADDRESS,
         EMAIL_FROM_NAME,
-        ["supplier-new-brief-questions-answers"]
+        ["supplier-new-brief-questions-answers"],
+        logger=logger
     )
 
 
@@ -117,9 +118,15 @@ def main(data_api_url, data_api_token, email_api_key, stage, dry_run):
 
     # we want to find all questions and answers that were submitted between start and end dates
     briefs = get_live_briefs_with_new_questions_and_answers_between_two_dates(data_api_client, start_date, end_date)
+    logger.info(
+        "{} briefs with new question and answers found between {} and {}".format(len(briefs), start_date, end_date)
+    )
 
     # find the IDs of interested suppliers {supplier_id: [briefid1, briefid2]}
     interested_suppliers = get_ids_of_interested_suppliers_for_briefs(data_api_client, briefs)
+    logger.info(
+        "{} suppliers found interested in these briefs".format(len(interested_suppliers))
+    )
 
     for supplier_id, brief_ids in interested_suppliers.items():
         # Get the brief objects for this supplier
@@ -143,6 +150,6 @@ def main(data_api_url, data_api_token, email_api_key, stage, dry_run):
                     'brief_ids_list': ", ".join(map(str, brief_ids))
                 }
             )
-            send_supplier_emails(email_api_key, email_addresses, supplier_context)
+            send_supplier_emails(email_api_key, email_addresses, supplier_context, logger)
 
     return True

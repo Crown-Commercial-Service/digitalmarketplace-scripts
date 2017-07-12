@@ -262,7 +262,9 @@ def test_get_html_content_renders_multiple_briefs():
 @mock.patch(MODULE_UNDER_TEST + '.get_html_content')
 @mock.patch(MODULE_UNDER_TEST + '.send_email')
 def test_send_emails_calls_mandrill_api_client(send_email, get_html_content):
+    logger = mock.Mock()
     get_html_content.return_value = "my content is bananas"
+
     send_supplier_emails(
         'MANDRILL_API_KEY',
         ['a@example.com', 'a2@example.com'],
@@ -277,8 +279,10 @@ def test_send_emails_calls_mandrill_api_client(send_email, get_html_content):
                 'brief_link': 'https://www.digitalmarketplace.service.gov.uk/'
                               'digital-outcomes-and-specialists/opportunities/4'
             },
-        ]}
+        ]},
+        logger
     )
+
     send_email.assert_called_once_with(
         ['a@example.com', 'a2@example.com'],
         "my content is bananas",
@@ -286,7 +290,8 @@ def test_send_emails_calls_mandrill_api_client(send_email, get_html_content):
         EMAIL_SUBJECT,
         EMAIL_FROM_ADDRESS,
         EMAIL_FROM_NAME,
-        ["supplier-new-brief-questions-answers"]
+        ["supplier-new-brief-questions-answers"],
+        logger=logger
     )
 
 
@@ -343,7 +348,8 @@ def test_main_calls_functions(
                     'brief_title': 'Brilliant Title',
                     'brief_link': 'https://www.preview.marketplace.team/'
                                   'digital-outcomes-and-specialists/opportunities/4'}
-            ]}
+            ]},
+            mock.ANY
         ),
         mock.call(
             'MANDRILL_API_KEY',
@@ -353,6 +359,7 @@ def test_main_calls_functions(
                     'brief_title': 'Confounded Title',
                     'brief_link': 'https://www.preview.marketplace.team/'
                                   'digital-outcomes-and-specialists/opportunities/5'}
-            ]}
+            ]},
+            mock.ANY
         ),
     ]
