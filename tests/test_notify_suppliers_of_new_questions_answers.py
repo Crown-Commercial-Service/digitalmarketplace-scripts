@@ -363,3 +363,46 @@ def test_main_calls_functions(
             mock.ANY
         ),
     ]
+
+
+@mock.patch(MODULE_UNDER_TEST + '.send_supplier_emails', autospec=True)
+@mock.patch(MODULE_UNDER_TEST + '.get_supplier_email_addresses_by_supplier_id', autospec=True)
+@mock.patch(MODULE_UNDER_TEST + '.get_ids_of_interested_suppliers_for_briefs', autospec=True)
+@mock.patch(MODULE_UNDER_TEST + '.get_live_briefs_with_new_questions_and_answers_between_two_dates', autospec=True)
+@mock.patch(MODULE_UNDER_TEST + '.dmapiclient.DataAPIClient')
+def test_main_can_exclude_suppliers(
+    data_api_client,
+    get_live_briefs_with_new_questions_and_answers_between_two_dates,
+    get_ids_of_interested_suppliers_for_briefs,
+    get_supplier_email_addresses_by_supplier_id,
+    send_supplier_emails
+):
+    get_live_briefs_with_new_questions_and_answers_between_two_dates.return_value = [
+        FILTERED_BRIEFS[0]
+    ]
+    get_ids_of_interested_suppliers_for_briefs.return_value = {
+        3: [FILTERED_BRIEFS[0]["id"]],
+        4: [FILTERED_BRIEFS[0]["id"]],
+    }
+    get_supplier_email_addresses_by_supplier_id.return_value = ['a@example.com']
+
+    with freeze_time('2017-04-19 08:00:00'):
+        main('api_url', 'api_token', 'MANDRILL_API_KEY', 'preview', dry_run=False, exclude_supplier_ids=[3])
+
+    assert data_api_client.call_args == mock.call('api_url', 'api_token')
+    assert get_supplier_email_addresses_by_supplier_id.call_args_list == [
+        mock.call(data_api_client.return_value, 4),
+    ]
+    assert send_supplier_emails.call_args_list == [
+        mock.call(
+            'MANDRILL_API_KEY',
+            ['a@example.com'],
+            {'briefs': [
+                {
+                    'brief_title': 'Amazing Title',
+                    'brief_link': 'https://www.preview.marketplace.team/'
+                                  'digital-outcomes-and-specialists/opportunities/3'}
+            ]},
+            mock.ANY
+        ),
+    ]

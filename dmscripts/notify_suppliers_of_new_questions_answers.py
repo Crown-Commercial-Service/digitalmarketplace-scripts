@@ -105,7 +105,7 @@ def send_supplier_emails(email_api_key, email_addresses, supplier_context, logge
     )
 
 
-def main(data_api_url, data_api_token, email_api_key, stage, dry_run):
+def main(data_api_url, data_api_token, email_api_key, stage, dry_run, exclude_supplier_ids=[]):
     logger.info("Begin to send brief update notification emails")
 
     # get today at 8 in the morning
@@ -124,6 +124,10 @@ def main(data_api_url, data_api_token, email_api_key, stage, dry_run):
 
     # find the IDs of interested suppliers {supplier_id: [briefid1, briefid2]}
     interested_suppliers = get_ids_of_interested_suppliers_for_briefs(data_api_client, briefs)
+    interested_suppliers = dict(
+        (supplier_id, briefs) for supplier_id, briefs in interested_suppliers.iteritems()
+        if supplier_id not in exclude_supplier_ids
+    )
     logger.info(
         "{} suppliers found interested in these briefs".format(len(interested_suppliers))
     )
