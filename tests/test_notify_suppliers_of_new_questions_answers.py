@@ -73,7 +73,9 @@ def test_get_live_briefs_with_new_questions_and_answers_between_two_dates():
     briefs = get_live_briefs_with_new_questions_and_answers_between_two_dates(
         data_api_client, datetime(2017, 3, 22, hour=8), datetime(2017, 3, 23, hour=8)
     )
-    data_api_client.find_briefs_iter.assert_called_once_with(status="live", human=True)
+    data_api_client.find_briefs_iter.assert_called_once_with(
+        status="live", human=True, with_clarification_questions=True
+    )
     assert briefs == FILTERED_BRIEFS
 
 

@@ -18,7 +18,7 @@ logger = logging_helpers.configure_logger({'dmapiclient': logging.INFO})
 
 
 def get_live_briefs_with_new_questions_and_answers_between_two_dates(data_api_client, start_date, end_date):
-    briefs = data_api_client.find_briefs_iter(status='live', human=True)
+    briefs = data_api_client.find_briefs_iter(status='live', human=True, with_clarification_questions=True)
 
     # return a list of briefs that contain clarification questions published between the start data and the end date
     return [brief for brief in briefs if brief.get('clarificationQuestions') and any(
