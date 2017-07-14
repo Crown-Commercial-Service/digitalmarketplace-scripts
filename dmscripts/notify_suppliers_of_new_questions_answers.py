@@ -125,7 +125,7 @@ def main(data_api_url, data_api_token, email_api_key, stage, dry_run, exclude_su
     # find the IDs of interested suppliers {supplier_id: [briefid1, briefid2]}
     interested_suppliers = get_ids_of_interested_suppliers_for_briefs(data_api_client, briefs)
     interested_suppliers = dict(
-        (supplier_id, briefs) for supplier_id, briefs in interested_suppliers.iteritems()
+        (supplier_id, briefs) for supplier_id, briefs in interested_suppliers.items()
         if supplier_id not in exclude_supplier_ids
     )
     logger.info(
