@@ -203,34 +203,36 @@ def test_get_supplier_email_addresses_by_supplier_id():
 def test_create_context_for_supplier():
     briefs = [FILTERED_BRIEFS[0], FILTERED_BRIEFS[1], FILTERED_BRIEFS[2]]
 
-    assert create_context_for_supplier('preview', briefs) == {
-        'briefs': [
-            {
-                'brief_title': 'Amazing Title',
-                'brief_link': 'https://www.preview.marketplace.team/digital-outcomes-and-specialists/opportunities/3'
-            },
-            {
-                'brief_title': 'Brilliant Title',
-                'brief_link': 'https://www.preview.marketplace.team/digital-outcomes-and-specialists/opportunities/4'
-            },
-            {
-                'brief_title': 'Confounded Title',
-                'brief_link': 'https://www.preview.marketplace.team/digital-outcomes-and-specialists/opportunities/5'
-            },
-        ]
-    }
+    with freeze_time('2017-04-19 08:00:00'):
+        assert create_context_for_supplier('preview', briefs) == {
+            'briefs': [
+                {
+                    'brief_title': 'Amazing Title',
+                    'brief_link': 'https://www.preview.marketplace.team/digital-outcomes-and-specialists/opportunities/3?utm_id=20170419qa'  # noqa
+                },
+                {
+                    'brief_title': 'Brilliant Title',
+                    'brief_link': 'https://www.preview.marketplace.team/digital-outcomes-and-specialists/opportunities/4?utm_id=20170419qa'  # noqa
+                },
+                {
+                    'brief_title': 'Confounded Title',
+                    'brief_link': 'https://www.preview.marketplace.team/digital-outcomes-and-specialists/opportunities/5?utm_id=20170419qa'  # noqa
+                },
+            ]
+        }
 
 
 def test_create_context_for_supplier_returns_correct_production_url():
-    assert create_context_for_supplier('production', [FILTERED_BRIEFS[0]]) == {
-        'briefs': [
-            {
-                'brief_title': 'Amazing Title',
-                'brief_link': 'https://www.digitalmarketplace.service.gov.uk/'
-                              'digital-outcomes-and-specialists/opportunities/3'
-            }
-        ]
-    }
+    with freeze_time('2017-04-19 08:00:00'):
+        assert create_context_for_supplier('production', [FILTERED_BRIEFS[0]]) == {
+            'briefs': [
+                {
+                    'brief_title': 'Amazing Title',
+                    'brief_link': 'https://www.digitalmarketplace.service.gov.uk/'
+                                  'digital-outcomes-and-specialists/opportunities/3?utm_id=20170419qa'
+                }
+            ]
+        }
 
 
 def test_get_html_content_renders_multiple_briefs():
@@ -239,12 +241,12 @@ def test_get_html_content_renders_multiple_briefs():
             {
                 'brief_title': 'Amazing Title',
                 'brief_link': 'https://www.digitalmarketplace.service.gov.uk/'
-                              'digital-outcomes-and-specialists/opportunities/3'
+                              'digital-outcomes-and-specialists/opportunities/3?utm_id=19990420qa'
             },
             {
                 'brief_title': 'Brilliant Title',
                 'brief_link': 'https://www.digitalmarketplace.service.gov.uk/'
-                              'digital-outcomes-and-specialists/opportunities/4'
+                              'digital-outcomes-and-specialists/opportunities/4?utm_id=19990420qa'
             }
         ]
     }
@@ -279,12 +281,12 @@ def test_send_emails_calls_mandrill_api_client(send_email, get_html_content):
             {
                 'brief_title': 'Amazing Title',
                 'brief_link': 'https://www.digitalmarketplace.service.gov.uk/'
-                              'digital-outcomes-and-specialists/opportunities/3'
+                              'digital-outcomes-and-specialists/opportunities/3?utm_id=20170419qa'
             },
             {
                 'brief_title': 'Brilliant Title',
                 'brief_link': 'https://www.digitalmarketplace.service.gov.uk/'
-                              'digital-outcomes-and-specialists/opportunities/4'
+                              'digital-outcomes-and-specialists/opportunities/4?utm_id=20170419qa'
             },
         ]},
         logger
@@ -350,11 +352,11 @@ def test_main_calls_functions(
                 {
                     'brief_title': 'Amazing Title',
                     'brief_link': 'https://www.preview.marketplace.team/'
-                                  'digital-outcomes-and-specialists/opportunities/3'},
+                                  'digital-outcomes-and-specialists/opportunities/3?utm_id=20170419qa'},
                 {
                     'brief_title': 'Brilliant Title',
                     'brief_link': 'https://www.preview.marketplace.team/'
-                                  'digital-outcomes-and-specialists/opportunities/4'}
+                                  'digital-outcomes-and-specialists/opportunities/4?utm_id=20170419qa'}
             ]},
             mock.ANY
         ),
@@ -365,7 +367,7 @@ def test_main_calls_functions(
                 {
                     'brief_title': 'Confounded Title',
                     'brief_link': 'https://www.preview.marketplace.team/'
-                                  'digital-outcomes-and-specialists/opportunities/5'}
+                                  'digital-outcomes-and-specialists/opportunities/5?utm_id=20170419qa'}
             ]},
             mock.ANY
         ),
@@ -408,7 +410,7 @@ def test_main_can_exclude_suppliers(
                 {
                     'brief_title': 'Amazing Title',
                     'brief_link': 'https://www.preview.marketplace.team/'
-                                  'digital-outcomes-and-specialists/opportunities/3'}
+                                  'digital-outcomes-and-specialists/opportunities/3?utm_id=20170419qa'}
             ]},
             mock.ANY
         ),

@@ -71,9 +71,10 @@ def create_context_for_supplier(stage, supplier_briefs):
         'briefs': [
             {
                 'brief_title': brief['title'],
-                'brief_link': '{0}/{1}/opportunities/{2}'.format(
+                'brief_link': '{0}/{1}/opportunities/{2}?utm_id={3}qa'.format(
                     env_helpers.get_web_url_from_stage(stage),
-                    brief['frameworkFramework'], brief['id']
+                    brief['frameworkFramework'], brief['id'],
+                    datetime.utcnow().strftime("%Y%m%d")
                 )
             } for brief in supplier_briefs
         ]
@@ -83,7 +84,7 @@ def create_context_for_supplier(stage, supplier_briefs):
 def get_html_content(context):
 
     return render_html("email_templates/suppliers_new_briefs_questions_answers.html", data={
-        "briefs": context['briefs'], "today": datetime.utcnow()
+        "briefs": context['briefs']
     })
 
 
