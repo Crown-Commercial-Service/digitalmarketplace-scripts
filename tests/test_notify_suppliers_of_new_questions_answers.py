@@ -8,7 +8,7 @@ from lxml import html
 from dmscripts.notify_suppliers_of_new_questions_answers import (
     main,
     get_live_briefs_with_new_questions_and_answers_between_two_dates,
-    get_ids_of_suppliers_who_started_applying,
+    get_ids_of_suppliers_who_started_or_finished_applying,
     get_ids_of_suppliers_who_asked_a_clarification_question,
     get_ids_of_interested_suppliers_for_briefs,
     get_supplier_email_addresses_by_supplier_id,
@@ -96,11 +96,14 @@ def test_get_live_briefs_with_new_questions_and_answers_between_two_dates():
     ),
     (FILTERED_BRIEFS[2], {"briefResponses": []}, []),
 ])
-def test_get_ids_of_suppliers_who_started_applying(brief, brief_responses, expected_result):
+def test_get_ids_of_suppliers_who_started_or_finished_applying(brief, brief_responses, expected_result):
     data_api_client = mock.Mock()
     data_api_client.find_brief_responses.return_value = brief_responses
 
-    assert get_ids_of_suppliers_who_started_applying(data_api_client, brief) == expected_result
+    assert get_ids_of_suppliers_who_started_or_finished_applying(data_api_client, brief) == expected_result
+    assert data_api_client.find_brief_responses.call_args_list == [
+        mock.call(brief_id=brief['id'], status='draft,submitted')
+    ]
 
 
 @pytest.mark.parametrize("brief,audit_events,expected_result", [
@@ -133,7 +136,7 @@ def test_get_ids_of_suppliers_who_asked_a_clarification_question(brief, audit_ev
 
 
 @mock.patch(MODULE_UNDER_TEST + '.get_ids_of_suppliers_who_asked_a_clarification_question', autospec=True)
-@mock.patch(MODULE_UNDER_TEST + '.get_ids_of_suppliers_who_started_applying', autospec=True)
+@mock.patch(MODULE_UNDER_TEST + '.get_ids_of_suppliers_who_started_or_finished_applying', autospec=True)
 def test_get_ids_of_interested_suppliers_for_briefs(
     get_ids_of_suppliers_who_started_applying,
     get_ids_of_suppliers_who_asked_a_clarification_question

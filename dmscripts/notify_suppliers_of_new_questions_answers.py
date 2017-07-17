@@ -28,8 +28,8 @@ def get_live_briefs_with_new_questions_and_answers_between_two_dates(data_api_cl
     )]
 
 
-def get_ids_of_suppliers_who_started_applying(data_api_client, brief):
-    responses = data_api_client.find_brief_responses(brief_id=brief["id"])
+def get_ids_of_suppliers_who_started_or_finished_applying(data_api_client, brief):
+    responses = data_api_client.find_brief_responses(brief_id=brief["id"], status="draft,submitted")
     return [response["supplierId"] for response in responses["briefResponses"]]
 
 
@@ -45,7 +45,7 @@ def get_ids_of_suppliers_who_asked_a_clarification_question(data_api_client, bri
 def get_ids_of_interested_suppliers_for_briefs(data_api_client, briefs):
     interested_suppliers = {}
     for brief in briefs:
-        suppliers_who_applied = get_ids_of_suppliers_who_started_applying(data_api_client, brief)
+        suppliers_who_applied = get_ids_of_suppliers_who_started_or_finished_applying(data_api_client, brief)
         suppliers_who_asked_a_question = get_ids_of_suppliers_who_asked_a_clarification_question(data_api_client, brief)
         interested_suppliers[brief['id']] = list(set(suppliers_who_applied + suppliers_who_asked_a_question))
 
