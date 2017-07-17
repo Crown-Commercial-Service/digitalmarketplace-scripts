@@ -66,17 +66,13 @@ def get_supplier_email_addresses_by_supplier_id(data_api_client, supplier_id):
     return [user['emailAddress'] for user in response['users']]
 
 
-def _get_link_domain(stage):
-    return env_helpers.get_api_endpoint_from_stage(stage, app='www')
-
-
 def create_context_for_supplier(stage, supplier_briefs):
     return {
         'briefs': [
             {
                 'brief_title': brief['title'],
                 'brief_link': '{0}/{1}/opportunities/{2}'.format(
-                    _get_link_domain(stage),
+                    env_helpers.get_web_url_from_stage(stage),
                     brief['frameworkFramework'], brief['id']
                 )
             } for brief in supplier_briefs
@@ -129,7 +125,7 @@ def main(data_api_url, data_api_token, email_api_key, stage, dry_run, exclude_su
         if supplier_id not in exclude_supplier_ids
     )
     logger.info(
-        "{} suppliers found interested in these briefs".format(len(interested_suppliers))
+        "{} suppliers found interested in these briefs who are not excluded".format(len(interested_suppliers))
     )
 
     for supplier_id, brief_ids in interested_suppliers.items():
