@@ -26,7 +26,11 @@ from dmscripts.notify_suppliers_of_new_questions_answers import main
 
 if __name__ == "__main__":
     arguments = docopt(__doc__)
-    list_of_excluded_supplier_ids = map(int, arguments['--exclude-supplier-ids'].split(','))
+
+    list_of_excluded_supplier_ids = []
+    if arguments['--exclude-supplier-ids']:
+        list_of_excluded_supplier_ids = map(int, arguments['--exclude-supplier-ids'].split(','))
+
     ok = main(
         data_api_url=get_api_endpoint_from_stage(arguments['<stage>'], 'api'),
         data_api_token=arguments['<api_token>'],
