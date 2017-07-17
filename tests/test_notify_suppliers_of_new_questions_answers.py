@@ -57,6 +57,10 @@ ALL_BRIEFS = [
         {"publishedAt": "2017-03-18T06:00:00.669156Z"},
         {"publishedAt": "2017-03-19T06:00:00.669156Z"},  # Sunday
         {"publishedAt": "2017-03-20T06:00:00.669156Z"},
+    ]},
+    # a brief with questions on exactly the start date
+    {"id": 7, "clarificationQuestions": [
+        {"publishedAt": "2017-03-22T08:00:00.000000Z"}
     ]}
 ]
 

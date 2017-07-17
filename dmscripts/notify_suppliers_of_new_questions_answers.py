@@ -22,7 +22,7 @@ def get_live_briefs_with_new_questions_and_answers_between_two_dates(data_api_cl
 
     # return a list of briefs that contain clarification questions published between the start data and the end date
     return [brief for brief in briefs if brief.get('clarificationQuestions') and any(
-        datetime.strptime(question['publishedAt'], DATETIME_FORMAT) >= start_date
+        datetime.strptime(question['publishedAt'], DATETIME_FORMAT) > start_date
         and datetime.strptime(question['publishedAt'], DATETIME_FORMAT) <= end_date
         for question in brief['clarificationQuestions']
     )]
