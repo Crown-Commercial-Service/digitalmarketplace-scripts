@@ -9,7 +9,7 @@ from dmutils.email.dm_mandrill import send_email
 from dmutils.formats import DATETIME_FORMAT
 
 
-EMAIL_SUBJECT = "New question and answer responses on the Digital Marketplace"
+EMAIL_SUBJECT = "New answers to supplier questions on the Digital Marketplace"
 EMAIL_FROM_ADDRESS = "do-not-reply@digitalmarketplace.service.gov.uk"
 EMAIL_FROM_NAME = "Digital Marketplace Team"
 
