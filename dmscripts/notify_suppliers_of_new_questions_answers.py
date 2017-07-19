@@ -82,14 +82,12 @@ def create_context_for_supplier(stage, supplier_briefs):
 
 
 def get_html_content(context):
-
     return render_html("email_templates/suppliers_new_briefs_questions_answers.html", data={
         "briefs": context['briefs']
     })
 
 
 def send_supplier_emails(email_api_key, email_addresses, supplier_context, logger):
-
     send_email(
         email_addresses,
         get_html_content(supplier_context),
