@@ -5,6 +5,7 @@ from datetime import datetime, date, timedelta
 from dmscripts.helpers import env_helpers, logging_helpers
 from dmscripts.helpers.html_helpers import render_html
 from dmscripts.helpers.logging_helpers import logging
+from dmutils.email.exceptions import EmailError
 from dmutils.email.dm_mandrill import send_email
 from dmutils.formats import DATETIME_FORMAT
 
@@ -100,7 +101,7 @@ def send_supplier_emails(email_api_key, email_addresses, supplier_context, logge
     )
 
 
-def main(data_api_url, data_api_token, email_api_key, stage, dry_run, exclude_supplier_ids=[]):
+def main(data_api_url, data_api_token, email_api_key, stage, dry_run, supplier_ids=[]):
     logger.info("Begin to send brief update notification emails")
 
     # get today at 8 in the morning
@@ -119,13 +120,18 @@ def main(data_api_url, data_api_token, email_api_key, stage, dry_run, exclude_su
 
     # find the IDs of interested suppliers {supplier_id: [briefid1, briefid2]}
     interested_suppliers = get_ids_of_interested_suppliers_for_briefs(data_api_client, briefs)
-    interested_suppliers = dict(
-        (supplier_id, briefs) for supplier_id, briefs in interested_suppliers.items()
-        if supplier_id not in exclude_supplier_ids
-    )
+
+    # Restrict suppliers to ones specified in the argument
+    if supplier_ids:
+        interested_suppliers = dict(
+            (supplier_id, briefs) for supplier_id, briefs in interested_suppliers.items()
+            if supplier_id in supplier_ids
+        )
     logger.info(
-        "{} suppliers found interested in these briefs who are not excluded".format(len(interested_suppliers))
+        "{} suppliers found interested in these briefs".format(len(interested_suppliers))
     )
+
+    failed_supplier_ids = []
 
     for supplier_id, brief_ids in interested_suppliers.items():
         # Get the brief objects for this supplier
@@ -149,6 +155,15 @@ def main(data_api_url, data_api_token, email_api_key, stage, dry_run, exclude_su
                     'brief_ids_list': ", ".join(map(str, brief_ids))
                 }
             )
-            send_supplier_emails(email_api_key, email_addresses, supplier_context, logger)
+            try:
+                send_supplier_emails(email_api_key, email_addresses, supplier_context, logger)
+            except EmailError:
+                failed_supplier_ids.append(supplier_id)
 
+    if failed_supplier_ids:
+        logger.error(
+            'Email sending failed for the following supplier IDs: {supplier_ids}',
+            extra={"supplier_ids": ",".join(map(str, failed_supplier_ids))}
+        )
+        return False
     return True

@@ -1,6 +1,7 @@
 import mock
 import pytest
 from freezegun import freeze_time
+from dmutils.email.exceptions import EmailError
 
 from datetime import datetime
 from lxml import html
@@ -329,8 +330,9 @@ def test_main_calls_functions(
     ]
 
     with freeze_time('2017-04-19 08:00:00'):
-        main('api_url', 'api_token', 'MANDRILL_API_KEY', 'preview', dry_run=False)
+        result = main('api_url', 'api_token', 'MANDRILL_API_KEY', 'preview', dry_run=False)
 
+    assert result
     assert data_api_client.call_args == mock.call('api_url', 'api_token')
     assert get_live_briefs_with_new_questions_and_answers_between_two_dates.call_args_list == [
         mock.call(data_api_client.return_value, datetime(2017, 4, 18, hour=8), datetime(2017, 4, 19, hour=8))
@@ -379,7 +381,7 @@ def test_main_calls_functions(
 @mock.patch(MODULE_UNDER_TEST + '.get_ids_of_interested_suppliers_for_briefs', autospec=True)
 @mock.patch(MODULE_UNDER_TEST + '.get_live_briefs_with_new_questions_and_answers_between_two_dates', autospec=True)
 @mock.patch(MODULE_UNDER_TEST + '.dmapiclient.DataAPIClient')
-def test_main_can_exclude_suppliers(
+def test_main_can_restrict_to_custom_list_of_suppliers(
     data_api_client,
     get_live_briefs_with_new_questions_and_answers_between_two_dates,
     get_ids_of_interested_suppliers_for_briefs,
@@ -396,7 +398,7 @@ def test_main_can_exclude_suppliers(
     get_supplier_email_addresses_by_supplier_id.return_value = ['a@example.com']
 
     with freeze_time('2017-04-19 08:00:00'):
-        main('api_url', 'api_token', 'MANDRILL_API_KEY', 'preview', dry_run=False, exclude_supplier_ids=[3])
+        main('api_url', 'api_token', 'MANDRILL_API_KEY', 'preview', dry_run=False, supplier_ids=[4])
 
     assert data_api_client.call_args == mock.call('api_url', 'api_token')
     assert get_supplier_email_addresses_by_supplier_id.call_args_list == [
@@ -415,3 +417,48 @@ def test_main_can_exclude_suppliers(
             mock.ANY
         ),
     ]
+
+
+@mock.patch(MODULE_UNDER_TEST + '.logger', autospec=True)
+@mock.patch(MODULE_UNDER_TEST + '.send_supplier_emails', autospec=True)
+@mock.patch(MODULE_UNDER_TEST + '.get_supplier_email_addresses_by_supplier_id', autospec=True)
+@mock.patch(MODULE_UNDER_TEST + '.get_ids_of_interested_suppliers_for_briefs', autospec=True)
+@mock.patch(MODULE_UNDER_TEST + '.get_live_briefs_with_new_questions_and_answers_between_two_dates', autospec=True)
+@mock.patch(MODULE_UNDER_TEST + '.dmapiclient.DataAPIClient')
+def test_main_catches_and_logs_email_errors_returns_false(
+    data_api_client,
+    get_live_briefs_with_new_questions_and_answers_between_two_dates,
+    get_ids_of_interested_suppliers_for_briefs,
+    get_supplier_email_addresses_by_supplier_id,
+    send_supplier_emails,
+    logger
+):
+    get_live_briefs_with_new_questions_and_answers_between_two_dates.return_value = [
+        FILTERED_BRIEFS[0]
+    ]
+    get_ids_of_interested_suppliers_for_briefs.return_value = {
+        3: [FILTERED_BRIEFS[0]["id"]],
+        4: [FILTERED_BRIEFS[0]["id"]],
+        5: [FILTERED_BRIEFS[0]["id"]],
+    }
+    get_supplier_email_addresses_by_supplier_id.side_effect = [
+        ['a@example.com'], ['b@example.com'], ['c@example.com']
+    ]
+    send_supplier_emails.side_effect = [
+        EmailError,
+        True,
+        EmailError
+    ]
+
+    result = main('api_url', 'api_token', 'M', 'preview', dry_run=False)
+
+    assert result is False
+    assert send_supplier_emails.call_args_list == [
+        mock.call('M', ['a@example.com'], mock.ANY, mock.ANY),
+        mock.call('M', ['b@example.com'], mock.ANY, mock.ANY),
+        mock.call('M', ['c@example.com'], mock.ANY, mock.ANY),
+    ]
+    assert logger.error.call_args == mock.call(
+        'Email sending failed for the following supplier IDs: {supplier_ids}',
+        extra={"supplier_ids": "3,5"}
+    )
