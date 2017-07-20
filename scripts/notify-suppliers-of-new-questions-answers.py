@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 """
-Send email notifications to supplier users when a question has been answered
+If a buyer has posted a new question/answer on a brief in the last 24 hours, send an email to any
+suppliers who have started an application, completed an application or asked a question about the
+opportunity. If a supplier is interested in more than one brief that has had a question or answer posted,
+then these are grouped into a single email.
 
 Usage: notify-suppliers-of-new-questions-answers.py <stage> <api_token> <mandrill_api_key> [options]
 
