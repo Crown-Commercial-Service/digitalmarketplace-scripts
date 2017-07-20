@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+</head>
+<body>
+Dear supplier,
+<br /><br />
+In the last day, buyers answered questions about:
+<br /><br />
+{% for brief in briefs %}
+<strong class="opportunity-title">{{ brief.brief_title }}</strong>
+<br />
+<a class="opportunity-link" href="{{ brief.brief_link }}">{{ brief.brief_link }}</a>
+<br />
+<br />
+{% endfor %}
+Buyers will answer all questions at least one working day before the opportunity closes.
+<br />
+<br />
+We’re emailing you because you, or someone at your company, either:
+<br />
+<ul>
+  <li>asked a question</li>
+  <li>started an application</li>
+  <li>completed an application</li>
+</ul>
+Thanks,
+<br />
+The Digital Marketplace team
+</body>
+</html>
