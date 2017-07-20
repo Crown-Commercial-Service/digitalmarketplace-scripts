@@ -185,18 +185,18 @@ def test_invert_a_dictionary_so_supplier_id_is_key_and_brief_id_is_value():
     assert invert_a_dictionary_so_supplier_id_is_key_and_brief_id_is_value(dictionary_to_invert) == expected_result
 
 
-def test_get_supplier_email_addresses_by_supplier_id():
+def test_get_supplier_email_addresses_by_supplier_id_filters_out_inactive_users():
     data_api_client = mock.Mock()
     data_api_client.find_users.return_value = {
         'users': [
-            {'id': 1, 'emailAddress': 'bananas@example.com'},
-            {'id': 2, 'emailAddress': 'mangoes@example.com'},
-            {'id': 3, 'emailAddress': 'guava@example.com'}
+            {'id': 1, 'emailAddress': 'bananas@example.com', 'active': False},
+            {'id': 2, 'emailAddress': 'mangoes@example.com', 'active': True},
+            {'id': 3, 'emailAddress': 'guava@example.com', 'active': True}
         ]
     }
 
     assert get_supplier_email_addresses_by_supplier_id(data_api_client, 1) == [
-        'bananas@example.com', 'mangoes@example.com', 'guava@example.com'
+        'mangoes@example.com', 'guava@example.com'
     ]
     assert data_api_client.find_users.call_args == mock.call(supplier_id=1)
 

@@ -64,7 +64,7 @@ def invert_a_dictionary_so_supplier_id_is_key_and_brief_id_is_value(dictionary_t
 
 def get_supplier_email_addresses_by_supplier_id(data_api_client, supplier_id):
     response = data_api_client.find_users(supplier_id=supplier_id)
-    return [user['emailAddress'] for user in response['users']]
+    return [user['emailAddress'] for user in response['users'] if user['active']]
 
 
 def create_context_for_supplier(stage, supplier_briefs):
