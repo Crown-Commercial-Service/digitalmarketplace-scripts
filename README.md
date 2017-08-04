@@ -123,6 +123,10 @@ The `scripts` folder in this repository contains scripts that interact with the 
   `bulk-upload-documents.py` because the "countersigned agreement path" needs to be set in the DB at the same time as
   the file is uploaded.
 
+* `update-index-alias.py`
+
+  Makes it easier for humans and computers (namely Jenkins) to update the alias of an elasticsearch index. It was written to assist with indexing services after migrating data between environments periodically with Jenkins.
+
 ## A general approach to writing new scripts
 
 Historically (and currently), this respository has been filled with small files that slightly diverge from one another. The idea has been that scripts are written for things that happen once (slash infrequently) in the lifecycle of a framework -- so we write our script, run it once, and then walk away.
