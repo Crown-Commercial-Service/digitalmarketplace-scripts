@@ -53,7 +53,9 @@ def _get_auth_token(stage):
         "-d",
         "{}/vars/{}.yaml".format(DM_CREDENTIALS_REPO, stage)
     ])
-    return yaml.load(creds)['search_api']['auth_tokens'][2]
+    auth_tokens = yaml.load(creds)['search_api']['auth_tokens']
+    dev_token = [token for token in auth_tokens if token[0] == 'D']
+    return dev_token[0]
 
 
 def _delete_old_indexes(endpoint, auth_token):
