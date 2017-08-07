@@ -21,26 +21,19 @@ from docopt import docopt
 
 
 def update_index_alias(alias, target, stage, endpoint, delete_old_indexes):
-    url = "https://{}/{}".format(endpoint, alias)
     auth_token = _get_auth_token(stage)
     headers = {
         'Authorization': "Bearer {}".format(auth_token),
         'Content-type': 'application/json'
     }
+
+    _rename_current_alias_to_old(alias, endpoint, headers)
+
+    url = "https://{}/{}".format(endpoint, alias)
     data = {'type': 'alias', 'target': "{}".format(target)}
 
     response = requests.put(url, headers=headers, json=data)
-
-    try:
-        response.raise_for_status()
-    except HTTPError as e:
-        print("HTTPError updating alias: {}".format(e.args[0]))
-        sys.exit(1)
-    except Exception as e:
-        print("Error updating alias: {}".format(e))
-        sys.exit(2)
-
-    print('Successfully updated alias')
+    _check_response_status(response, 'updating alias')
 
     if delete_old_indexes == 'yes':
         _delete_old_indexes(endpoint, auth_token)
@@ -58,45 +51,54 @@ def _get_auth_token(stage):
     return dev_token[0]
 
 
+def _rename_current_alias_to_old(alias, endpoint, headers):
+    old_alias = "old-{}".format(alias)
+    url = "https://{}/{}".format(endpoint, old_alias)
+    data = {'type': 'alias', 'target': "{}".format(alias)}
+
+    response = requests.put(url, headers=headers, json=data)
+
+    _check_response_status(response, 'renaming old alias')
+
+
 def _delete_old_indexes(endpoint, auth_token):
     status_url = "https://{}/_status".format(endpoint.replace('search-api', 'www'))
-    response = requests.get(status_url)
 
-    try:
-        response.raise_for_status()
-    except HTTPError as e:
-        print("HTTPError fetching indexes: {}".format(e.args[0]))
-        sys.exit(1)
-    except Exception as e:
-        print("Error fetching indexes: {}".format(e))
-        sys.exit(2)
+    response = requests.get(status_url)
+    _check_response_status(response, 'fetching indexes')
 
     current_indexes = json.loads(response.content)['search_api_status']['es_status']
     indexes_to_delete = [
         index for index in current_indexes.keys() if not current_indexes[index]['aliases']
     ]
 
-    if len(indexes_to_delete) >= len(current_indexes):
-        print('Error: Can not delete all indexes')
+    if len(current_indexes) - len(indexes_to_delete) < 2:
+        print('Error: Deleting too many indexes')
         sys.exit(3)
 
     base_url = "https://{}/{}"
     headers = {
         'Authorization': "Bearer {}".format(auth_token),
     }
+
     for index in indexes_to_delete:
         response = requests.delete(base_url.format(endpoint, index), headers=headers)
+        _check_response_status(response, "deleting unaliased index {}".format(index))
 
-        try:
-            response.raise_for_status()
-        except HTTPError as e:
-            print("HTTPError deleting index {}: {}".format(index, e.args[0]))
-            sys.exit(1)
-        except Exception as e:
-            print("Error deleting index {}: {}".format(index, e))
-            sys.exit(2)
+    print('Completed deleting unaliased indexes')
 
-    print('Completed deleting indexes')
+
+def _check_response_status(response, action):
+    try:
+        response.raise_for_status()
+    except HTTPError as e:
+        print("HTTPError {}: {}".format(e.args[0], action))
+        sys.exit(1)
+    except Exception as e:
+        print("Error {}: {}".format(e), action)
+        sys.exit(2)
+
+    print("Success {}".format(action))
 
 
 if __name__ == "__main__":
