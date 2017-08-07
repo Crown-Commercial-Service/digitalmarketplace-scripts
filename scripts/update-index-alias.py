@@ -8,7 +8,7 @@ Usage:
 scripts/update-index-alias.py <alias> <target> <stage> <search-api-endpoint> [options]
 
 Options:
-    --delete-old-indexes=<delete-old-indexes>  [default: ]
+    --delete-old-indexes=<delete-old-indexes>  [default: no]
 """
 import os
 import sys
