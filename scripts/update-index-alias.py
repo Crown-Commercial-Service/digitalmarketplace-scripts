@@ -36,7 +36,7 @@ def update_index_alias(alias, target, stage, endpoint, delete_old_index):
     if delete_old_index:
         _delete_old_index(old_index_to_delete, endpoint, auth_token)
 
-    url = "https://{}/{}".format(endpoint, alias)
+    url = "{}/{}".format(endpoint, alias)
     data = {'type': 'alias', 'target': "{}".format(target)}
 
     response = requests.put(url, headers=headers, json=data)
@@ -57,7 +57,7 @@ def _get_auth_token(stage):
 
 def _rename_current_alias_to_old(alias, endpoint, headers):
     old_alias = "{}-old".format(alias)
-    url = "https://{}/{}".format(endpoint, old_alias)
+    url = "{}/{}".format(endpoint, old_alias)
     data = {'type': 'alias', 'target': "{}".format(alias)}
 
     response = requests.put(url, headers=headers, json=data)
@@ -66,7 +66,7 @@ def _rename_current_alias_to_old(alias, endpoint, headers):
 
 
 def _get_old_index_to_delete(alias, endpoint):
-    status_url = "https://{}/_status".format(endpoint.replace('search-api', 'www'))
+    status_url = "{}/_status".format(endpoint.replace('search-api', 'www'))
 
     response = requests.get(status_url)
     _check_response_status(response, 'fetching indexes')
@@ -84,7 +84,7 @@ def _delete_old_index(old_index_to_delete, endpoint, auth_token):
         'Authorization': "Bearer {}".format(auth_token),
     }
 
-    response = requests.delete("https://{}/{}".format(endpoint, old_index_to_delete), headers=headers)
+    response = requests.delete("{}/{}".format(endpoint, old_index_to_delete), headers=headers)
     _check_response_status(response, "deleting {} index".format(old_index_to_delete))
 
 
