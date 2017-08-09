@@ -60,6 +60,10 @@ The `scripts` folder in this repository contains scripts that interact with the 
 
   Iterate through one or more models and dump the data into a CSV according to supplied config.
 
+* `get-user.py`
+
+  Outputs details of a random active unlocked user with a given role.
+
 * `index-services.py`
   **Runs nightly on Jenkins**. Reads services from the API endpoint and writes to search-api for indexing.
 
