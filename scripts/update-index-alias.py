@@ -27,15 +27,31 @@ def update_index_alias(alias, target, stage, endpoint, delete_old_index):
         'Authorization': "Bearer {}".format(auth_token),
         'Content-type': 'application/json'
     }
+    alias_old = "{}-old".format(alias)
+
+    current_aliased_index = _get_index_from_alias(alias, endpoint)
+    old_aliased_index = _get_index_from_alias(alias_old, endpoint)
+
+    _apply_alias_to_index(alias, target, endpoint, headers)
+    _apply_alias_to_index(alias_old, current_aliased_index, endpoint, headers)
 
     if delete_old_index:
-        old_index_to_delete = _get_old_index_to_delete(alias, endpoint)
+        _delete_index(old_aliased_index, endpoint, auth_token)
 
-    _rename_current_alias_to_old(alias, endpoint, headers)
 
-    if delete_old_index:
-        _delete_old_index(old_index_to_delete, endpoint, auth_token)
+def _get_index_from_alias(alias, endpoint):
+    status_url = "{}/_status".format(endpoint.replace('search-api', 'www'))
 
+    response = requests.get(status_url)
+    _check_response_status(response, 'fetching indexes')
+
+    all_indexes = json.loads(response.content)['search_api_status']['es_status']
+    index_name = [index for index in all_indexes.keys() if alias in all_indexes[index]['aliases']][0]
+
+    return index_name
+
+
+def _apply_alias_to_index(alias, target, endpoint, headers):
     url = "{}/{}".format(endpoint, alias)
     data = {'type': 'alias', 'target': "{}".format(target)}
 
@@ -43,49 +59,13 @@ def update_index_alias(alias, target, stage, endpoint, delete_old_index):
     _check_response_status(response, 'updating alias')
 
 
-def _get_auth_token(stage):
-    DM_CREDENTIALS_REPO = os.environ.get('DM_CREDENTIALS_REPO')
-    creds = subprocess.check_output([
-        "{}/sops-wrapper".format(DM_CREDENTIALS_REPO),
-        "-d",
-        "{}/vars/{}.yaml".format(DM_CREDENTIALS_REPO, stage)
-    ])
-    auth_tokens = yaml.load(creds)['search_api']['auth_tokens']
-    dev_token = [token for token in auth_tokens if token[0] == 'D']
-    return dev_token[0]
-
-
-def _rename_current_alias_to_old(alias, endpoint, headers):
-    old_alias = "{}-old".format(alias)
-    url = "{}/{}".format(endpoint, old_alias)
-    data = {'type': 'alias', 'target': "{}".format(alias)}
-
-    response = requests.put(url, headers=headers, json=data)
-
-    _check_response_status(response, 'renaming old alias')
-
-
-def _get_old_index_to_delete(alias, endpoint):
-    status_url = "{}/_status".format(endpoint.replace('search-api', 'www'))
-
-    response = requests.get(status_url)
-    _check_response_status(response, 'fetching indexes')
-
-    current_indexes = json.loads(response.content)['search_api_status']['es_status']
-    old_index_to_delete = [
-        index for index in current_indexes.keys() if "{}-old".format(alias) in current_indexes[index]['aliases']
-    ][0]
-
-    return old_index_to_delete
-
-
-def _delete_old_index(old_index_to_delete, endpoint, auth_token):
+def _delete_index(index, endpoint, auth_token):
     headers = {
         'Authorization': "Bearer {}".format(auth_token),
     }
 
-    response = requests.delete("{}/{}".format(endpoint, old_index_to_delete), headers=headers)
-    _check_response_status(response, "deleting {} index".format(old_index_to_delete))
+    response = requests.delete("{}/{}".format(endpoint, index), headers=headers)
+    _check_response_status(response, "deleting {} index".format(index))
 
 
 def _check_response_status(response, action):
@@ -99,6 +79,18 @@ def _check_response_status(response, action):
         sys.exit(2)
 
     print("Success {}".format(action))
+
+
+def _get_auth_token(stage):
+    DM_CREDENTIALS_REPO = os.environ.get('DM_CREDENTIALS_REPO')
+    creds = subprocess.check_output([
+    "{}/sops-wrapper".format(DM_CREDENTIALS_REPO),
+    "-d",
+    "{}/vars/{}.yaml".format(DM_CREDENTIALS_REPO, stage)
+    ])
+    auth_tokens = yaml.load(creds)['search_api']['auth_tokens']
+    dev_token = [token for token in auth_tokens if token.startswith('D')]
+    return dev_token[0]
 
 
 if __name__ == "__main__":
