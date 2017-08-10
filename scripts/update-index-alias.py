@@ -1,13 +1,17 @@
 #!/usr/bin/env python
 """
-A script to update the search index an alias is assoiciated with.
+A script to update the elasticsearch index an alias is assoiciated with.
+
+Stage is an optional argument. If left as its default, 'development', the auth tokens will be set without needing to
+access the credentials repo.
 
 To delete the old index (the index losing the '<alias>-old' alias), set --delete-old-index=yes
 
 Usage:
-scripts/update-index-alias.py <alias> <target> <stage> <search-api-endpoint> [options]
+scripts/update-index-alias.py <alias> <target> <search-api-endpoint> [--stage=<stage> --delete-old-index=<value>]
 
 Options:
+    --stage=<stage> [default: development]
     --delete-old-index=<delete-old-index>  [default: no]
 """
 import os
@@ -22,7 +26,7 @@ from docopt import docopt
 
 
 def update_index_alias(alias, target, stage, endpoint, delete_old_index):
-    auth_token = _get_auth_token(stage)
+    auth_token = 'myToken' if stage == 'development' else _get_auth_token(stage)
     headers = {
         'Authorization': "Bearer {}".format(auth_token),
         'Content-type': 'application/json'
@@ -84,9 +88,9 @@ def _check_response_status(response, action):
 def _get_auth_token(stage):
     DM_CREDENTIALS_REPO = os.environ.get('DM_CREDENTIALS_REPO')
     creds = subprocess.check_output([
-    "{}/sops-wrapper".format(DM_CREDENTIALS_REPO),
-    "-d",
-    "{}/vars/{}.yaml".format(DM_CREDENTIALS_REPO, stage)
+        "{}/sops-wrapper".format(DM_CREDENTIALS_REPO),
+        "-d",
+        "{}/vars/{}.yaml".format(DM_CREDENTIALS_REPO, stage)
     ])
     auth_tokens = yaml.load(creds)['search_api']['auth_tokens']
     dev_token = [token for token in auth_tokens if token.startswith('D')]
@@ -97,7 +101,7 @@ if __name__ == "__main__":
     arguments = docopt(__doc__)
     alias = arguments['<alias>']
     target = arguments['<target>']
-    stage = arguments['<stage>']
     endpoint = arguments['<search-api-endpoint>']
+    stage = arguments['--stage']
     delete_old_index = strtobool(arguments['--delete-old-index'])
     update_index_alias(alias, target, stage, endpoint, delete_old_index)
