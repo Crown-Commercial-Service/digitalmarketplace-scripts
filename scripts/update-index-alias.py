@@ -14,19 +14,19 @@ Options:
     --stage=<stage> [default: development]
     --delete-old-index=<delete-old-index>  [default: no]
 """
-import os
 import sys
-import subprocess
-import yaml
 import json
 from distutils.util import strtobool
 import requests
 from requests.exceptions import HTTPError
 from docopt import docopt
 
+sys.path.insert(0, '.')
+from dmscripts.helpers.auth_helpers import get_auth_token
+
 
 def update_index_alias(alias, target, stage, endpoint, delete_old_index):
-    auth_token = 'myToken' if stage == 'development' else _get_auth_token(stage)
+    auth_token = 'myToken' if stage == 'development' else get_auth_token('search_api', stage)
     headers = {
         'Authorization': "Bearer {}".format(auth_token),
         'Content-type': 'application/json'
@@ -35,7 +35,6 @@ def update_index_alias(alias, target, stage, endpoint, delete_old_index):
 
     current_aliased_index = _get_index_from_alias(alias, endpoint)
     old_aliased_index = _get_index_from_alias(alias_old, endpoint)
-
     _apply_alias_to_index(alias, target, endpoint, headers)
     _apply_alias_to_index(alias_old, current_aliased_index, endpoint, headers)
 
@@ -83,18 +82,6 @@ def _check_response_status(response, action):
         sys.exit(2)
 
     print("Success {}".format(action))
-
-
-def _get_auth_token(stage):
-    DM_CREDENTIALS_REPO = os.environ.get('DM_CREDENTIALS_REPO')
-    creds = subprocess.check_output([
-        "{}/sops-wrapper".format(DM_CREDENTIALS_REPO),
-        "-d",
-        "{}/vars/{}.yaml".format(DM_CREDENTIALS_REPO, stage)
-    ])
-    auth_tokens = yaml.load(creds)['search_api']['auth_tokens']
-    dev_token = [token for token in auth_tokens if token.startswith('D')]
-    return dev_token[0]
 
 
 if __name__ == "__main__":
