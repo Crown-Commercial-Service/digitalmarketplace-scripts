@@ -44,12 +44,12 @@ def update_index_alias(alias, target, stage, endpoint, delete_old_index):
 
 
 def _get_index_from_alias(alias, endpoint):
-    status_url = "{}/_status".format(endpoint.replace('search-api', 'www'))
+    status_url = "{}/_status".format(endpoint)
 
     response = requests.get(status_url)
     _check_response_status(response, 'fetching indexes')
 
-    all_indexes = json.loads(response.content)['search_api_status']['es_status']
+    all_indexes = json.loads(response.content)['es_status']
     index_name = [index for index in all_indexes.keys() if alias in all_indexes[index]['aliases']][0]
 
     return index_name
