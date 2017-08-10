@@ -105,6 +105,10 @@ The `scripts` folder in this repository contains scripts that interact with the 
 
   Checks all free-text fields in G-Cloud services for "bad words" and generates a CSV report of any bad words found.
 
+* `send_dos_opportunities_email.py`
+
+  **Runs Mon-Fri 8:00am on Jenkins**. Send emails with new opportunities on a lot to suppliers who are on this lot.
+
 * `send-stats-to-performance-platform.py`
 
   Fetches application statistics for a framework from the API and pushes them to the Performance Platform.
