@@ -6,7 +6,6 @@ python:
 install:
   - make requirements-dev
 script:
-  - pep8 .
-  - py.test
+  - make test
 notifications:
   email: false
