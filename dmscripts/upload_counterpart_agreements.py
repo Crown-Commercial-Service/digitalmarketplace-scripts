@@ -1,7 +1,7 @@
 import getpass
 from itertools import chain
 
-from boto.exception import S3ResponseError
+from dmutils.s3 import S3ResponseError
 from dmapiclient import APIError
 from dmutils.documents import generate_timestamped_document_upload_path, generate_download_filename, \
     COUNTERPART_FILENAME
@@ -51,7 +51,7 @@ def upload_counterpart_file(
         if not dry_run:
             # Upload file
             with open(file_path) as source_file:
-                bucket.save(upload_path, source_file, acl='private', move_prefix=None,
+                bucket.save(upload_path, source_file, acl='private',
                             download_filename=download_filename)
                 logger.info("UPLOADED: '{}' to '{}'".format(file_path, upload_path))
 
