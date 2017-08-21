@@ -79,8 +79,7 @@ def test_upload_file():
             'g-cloud-7/agreements/92877/92877-countersigned_agreement.pdf',
             mock.ANY,
             acl='private',
-            download_filename=None,
-            move_prefix=None)
+            download_filename=None)
 
 
 def test_upload_file_dry_run_doesnt_upload():
@@ -102,7 +101,6 @@ def test_upload_file_without_document_category():
             'g-cloud-7/agreements/92877/92877-framework-agreement.pdf',
             mock.ANY,
             acl='private',
-            move_prefix=None,
             download_filename=None)
 
 
@@ -117,5 +115,4 @@ def test_upload_file_with_supplier_name_dictionary():
             'g-cloud-7/agreements/35435/35435-framework-agreement.pdf',
             mock.ANY,
             acl='private',
-            download_filename='Something-35435-framework-agreement.pdf',
-            move_prefix=None)
+            download_filename='Something-35435-framework-agreement.pdf')

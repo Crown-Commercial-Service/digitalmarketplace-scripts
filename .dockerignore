@@ -1,0 +1,7 @@
+*
+
+!dmscripts/
+!email_templates/
+!requirements.txt
+!schemas/
+!scripts/

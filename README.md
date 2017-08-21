@@ -127,6 +127,33 @@ The `scripts` folder in this repository contains scripts that interact with the 
 
   Makes it easier for humans and computers (namely Jenkins) to update the alias of an elasticsearch index. It was written to assist with indexing services after migrating data between environments periodically with Jenkins.
 
+## Running scripts with Docker
+
+One way to run common scripts locally without setting up dependencies is to use the pre-built
+Docker image. If you have Docker set up, you can use `docker pull digitalmarketplace/scripts` to
+download the latest image version. Then you can run any of the scripts with:
+
+```
+docker run digitalmarketplace/scripts scripts/... [options]
+```
+
+`docker run digitalmarketplace/scripts` without an explicit command will display the Python version,
+release tag the container was built from and a list of available scripts.
+
+If the script is connecting to any local apps/services you need to forward the ports to the docker
+container. The easiest way to do this is to use `--net=host` argument for `docker run`:
+
+```
+docker run --net=host digitalmarketplace/scripts scripts/index-services.py dev ...
+```
+
+If the script is generating output files you need to map a local directory to the output directory
+in the container using a volume:
+
+```
+docker run --user $(id -u) --volume $(pwd)/data:/app/data digitalmarketplace/scripts scripts/get-model-data.py ...
+```
+
 ## A general approach to writing new scripts
 
 Historically (and currently), this respository has been filled with small files that slightly diverge from one another. The idea has been that scripts are written for things that happen once (slash infrequently) in the lifecycle of a framework -- so we write our script, run it once, and then walk away.

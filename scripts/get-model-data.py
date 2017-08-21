@@ -266,7 +266,11 @@ if __name__ == '__main__':
             )
 
         # Only keep requested keys in the output CSV
-        keys = [k[len(k)-1] if isinstance(k, (tuple, list)) else k for k in config['keys']]
+        keys = [
+            k[-1] if isinstance(k, (tuple, list)) else k
+            for k in config['keys']
+            if (k[-1] if isinstance(k, (tuple, list)) else k) in data
+        ]
         data = data[keys]
 
         if 'rename_fields' in config:
