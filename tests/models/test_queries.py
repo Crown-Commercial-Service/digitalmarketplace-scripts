@@ -1,5 +1,6 @@
 import mock
 import pytest
+from collections import OrderedDict
 
 from pandas import DataFrame
 from dmscripts.models import queries
@@ -107,3 +108,28 @@ def test_add_counts(csv_reader):
         [2, 'two', 2.0, 0.0],
         [3, 'three', 0.0, 0.0]
     ]
+
+
+def test_assign_json_subfields():
+    """Test fields are attributed at data level by assign_json_subfields"""
+    od1 = OrderedDict([('field1', '111'), ('field2', '222'), ('field3', '333')])
+    od2 = OrderedDict([('field1', '444'), ('field2', '555'), ('field3', '{555: 666}')])
+    od3 = OrderedDict([('field2', '777'), ('field3', '888')])
+
+    data = DataFrame([
+        {'id': 1, 'json_field': od1},
+        {'id': 2, 'json_field': od2},
+        {'id': 3, 'json_field': od3},
+        {'id': 4, 'json_field': {'field2': '999'}},
+        {'id': 5, 'json_field': {}},
+    ])
+    assert list(data.columns) == ['id', 'json_field']
+
+    data = queries.assign_json_subfields('json_field', ['field1', 'field3'], data)
+
+    assert list(data.columns) == ['id', 'json_field', 'field1', 'field3']
+    assert data.values.tolist()[0] == [1, od1, '111', '333']
+    assert data.values.tolist()[1] == [2, od2, '444', '{555: 666}']
+    assert data.values.tolist()[2] == [3, od3, '', '888']
+    assert data.values.tolist()[3] == [4, {'field2': '999'}, '', '']
+    assert data.values.tolist()[4] == [5, {}, '', '']

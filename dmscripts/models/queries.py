@@ -64,3 +64,10 @@ def add_counts(join, group_by, model, data, directory):
         )['_count'].fillna(0)
 
     return data
+
+
+def assign_json_subfields(field, subfields, data):
+    """Apply subfields from field to data."""
+    for subfield in subfields:
+        data[subfield] = data.apply(lambda row: row[field].get(subfield, '') if row[field] else '', axis=1)
+    return data
