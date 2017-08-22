@@ -1,6 +1,7 @@
 import time
 import itertools
 import re
+import collections
 
 
 class ModelTrawler():
@@ -11,7 +12,7 @@ class ModelTrawler():
         self.model = model
 
         model_iter_method = "find_{}_iter".format(self.model)
-        if not callable(getattr(self.client, model_iter_method, None)):
+        if not isinstance(getattr(self.client, model_iter_method, None), collections.Callable):
             raise AttributeError(
                 "No model called '{}'. Allowed models are: {}".format(
                     self.model, list(self._get_allowed_models())
