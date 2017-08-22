@@ -17,8 +17,6 @@ Example:
     ./get-user.py --api-url=localhost:5000 --api-token=myToken supplier dos2 digital-outcomes
 """
 
-from __future__ import print_function
-
 import random
 import re
 import sys

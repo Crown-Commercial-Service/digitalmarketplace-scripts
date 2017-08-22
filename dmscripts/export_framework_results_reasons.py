@@ -43,7 +43,7 @@ def add_failed_questions(questions_numbers,
             "Q{} - {}".format(question_number, question_id)
             for question_id, question_number in questions_numbers.items()
             if question_id in baseline_only_failed_keys
-            ]
+        ]
         discretionary = [
             ("Q{} - {}".format(question_number, question_id), record['declaration'].get(question_id, ""))
             for question_id, question_number in questions_numbers.items()
@@ -65,9 +65,9 @@ def find_suppliers_with_details(client,
                                 supplier_ids=None
                                 ):
     records = find_suppliers_with_details_and_draft_service_counts(client, framework_slug, supplier_ids)
-    records = map(add_failed_questions(questions_numbers,
-                                       declaration_definite_pass_schema,
-                                       declaration_baseline_schema), records)
+    records = list(map(add_failed_questions(questions_numbers,
+                                            declaration_definite_pass_schema,
+                                            declaration_baseline_schema), records))
 
     return records
 

@@ -26,7 +26,7 @@ def render_html_for_successful_suppliers(rows, framework, template_dir, output_d
         if data['pass_fail'] == 'fail':
             logger.info("FAILED: {}".format(data['supplier_id']))
             continue
-        data['awardedLots'] = filter(lambda lot: int(data[lot]) > 0, ['saas', 'paas', 'iaas', 'scs'])
+        data['awardedLots'] = [lot for lot in ['saas', 'paas', 'iaas', 'scs'] if int(data[lot]) > 0]
         html = render_html(template_path, data)
         save_page(html, data['supplier_id'], output_dir, "signature-page")
     shutil.copyfile(template_css_path, os.path.join(output_dir, '{}-signature-page.css'.format(framework)))
@@ -45,7 +45,7 @@ def render_html_for_suppliers_awaiting_countersignature(rows, framework, templat
                 data['countersigned_path'])
             )
             continue
-        data['awardedLots'] = filter(lambda lot: int(data[lot]) > 0, ['saas', 'paas', 'iaas', 'scs'])
+        data['awardedLots'] = [lot for lot in ['saas', 'paas', 'iaas', 'scs'] if int(data[lot]) > 0]
         html = render_html(template_path, data)
         save_page(html, data['supplier_id'], output_dir, "agreement-countersignature")
     shutil.copyfile(template_css_path, os.path.join(output_dir, '{}-signature-page.css'.format(framework)))

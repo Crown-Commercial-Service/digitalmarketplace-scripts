@@ -135,7 +135,7 @@ def main(data_api_url, data_api_token, email_api_key, stage, dry_run, supplier_i
 
     for supplier_id, brief_ids in interested_suppliers.items():
         # Get the brief objects for this supplier
-        supplier_briefs = filter(lambda b: b['id'] in brief_ids, briefs)
+        supplier_briefs = [b for b in briefs if b['id'] in brief_ids]
         # get a context for each supplier email
         supplier_context = create_context_for_supplier(stage, supplier_briefs)
         email_addresses = get_supplier_email_addresses_by_supplier_id(data_api_client, supplier_id)

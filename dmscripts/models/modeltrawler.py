@@ -79,7 +79,7 @@ class ModelTrawler():
         if limit is not None:
             models = itertools.islice(models, limit)
 
-        return map(self._filter_keys(keys), models)
+        return list(map(self._filter_keys(keys), models))
 
     def get_time_running(self):
         return time.time() - self.start

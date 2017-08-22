@@ -22,11 +22,6 @@ import dmapiclient
 
 sys.path.insert(0, '.')
 
-try:
-    import urlparse
-except ImportError:
-    import urllib.parse as urlparse
-
 import random
 import re
 

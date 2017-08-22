@@ -45,7 +45,7 @@ def find_suppliers_with_details_and_draft_services(client, framework_slug, suppl
     records = pool.imap(partial(add_supplier_info, client), records)
     records = pool.imap(partial(add_framework_info, client, framework_slug), records)
     records = pool.imap(partial(add_draft_services, client, framework_slug, lot=lot, statuses=statuses), records)
-    records = filter(lambda record: len(record["services"]) > 0, records)
+    records = [record for record in records if len(record["services"]) > 0]
     return records
 
 

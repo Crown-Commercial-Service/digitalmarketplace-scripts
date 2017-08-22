@@ -38,8 +38,7 @@ if __name__ == '__main__':
     content_loader = ContentLoader(args['<content_path>'])
 
     declaration_definite_pass_schema = json.load(open(args["<declaration_schema_path>"], "r"))
-    declaration_baseline_schema = \
-        (declaration_definite_pass_schema.get("definitions") or {}).get("baseline")
+    declaration_baseline_schema = (declaration_definite_pass_schema.get("definitions") or {}).get("baseline")
 
     supplier_id_file = args['<supplier_id_file>']
     supplier_ids = get_supplier_ids_from_file(supplier_id_file)
