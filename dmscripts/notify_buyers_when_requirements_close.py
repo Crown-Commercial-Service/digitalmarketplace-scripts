@@ -36,7 +36,7 @@ def notify_users(email_api_key, brief):
                 [user['emailAddress'] for user in brief['users'] if user['active']],
                 email_body,
                 email_api_key,
-                u'Next steps for your ‘{}’ requirements'.format(brief['title']),
+                u"Next steps for your '{}' requirements".format(brief['title']),
                 'enquiries@digitalmarketplace.service.gov.uk',
                 'Digital Marketplace Admin',
                 ['requirements-closed'],
