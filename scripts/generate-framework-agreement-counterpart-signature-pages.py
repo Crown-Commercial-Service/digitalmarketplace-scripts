@@ -51,6 +51,7 @@ from docopt import docopt
 from dmscripts.export_framework_applicant_details import get_csv_rows
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.helpers.framework_helpers import find_suppliers_with_details_and_draft_service_counts
+from dmscripts.helpers.supplier_data_helpers import get_supplier_ids_from_file
 from dmscripts.generate_framework_agreement_signature_pages import (
     render_html_for_suppliers_awaiting_countersignature, render_pdf_for_each_html_page
 )
@@ -67,11 +68,7 @@ if __name__ == '__main__':
     framework_kwargs['frameworkName'] = framework['name']
 
     supplier_id_file = args['<supplier_id_file>']
-    if supplier_id_file:
-        with open(supplier_id_file, 'r') as f:
-            supplier_ids = map(int, filter(None, [l.strip() for l in f.readlines()]))
-    else:
-        supplier_ids = None
+    supplier_ids = get_supplier_ids_from_file(supplier_id_file)
     html_dir = tempfile.mkdtemp()
 
     records = find_suppliers_with_details_and_draft_service_counts(client, framework_slug, supplier_ids)
