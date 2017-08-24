@@ -85,7 +85,7 @@ class GenerateMasterCSV(GenerateCSVFromAPI):
             ]
             # This creates placeholders for the dynamic lot fieldnames.
             lot_placeholders = [0 for i in self._get_dynamic_field_names()]
-            supplier_dict = dict(list(zip(field_names, supplier_info + lot_placeholders)))
+            supplier_dict = dict(zip(field_names, supplier_info + lot_placeholders))
             # Get service data and process dynamic lot values
             service_data = self.get_supplier_service_data(supplier_id)
             for service in service_data:

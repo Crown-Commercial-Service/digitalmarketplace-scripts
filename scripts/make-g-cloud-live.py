@@ -150,6 +150,6 @@ if __name__ == '__main__':
                 results.update({'fail': 1})
 
     print("Successfully published {} G-Cloud services".format(results.get('success')))
-    if(results.get('fail')):
+    if results.get('fail'):
         print("Failed to publish {} services because of errors".format(results.get('fail')))
     exit(results.get('fail'))

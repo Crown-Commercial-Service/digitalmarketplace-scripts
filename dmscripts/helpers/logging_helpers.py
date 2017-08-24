@@ -1,3 +1,5 @@
+from __future__ import absolute_import
+
 import sys
 import logging
 from logging import DEBUG, INFO, WARNING, ERROR, CRITICAL, getLogger  # noqa
