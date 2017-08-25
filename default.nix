@@ -4,7 +4,7 @@ let
   args = rec {
     pkgs = import <nixpkgs> {};
     pythonPackages = pkgs.python36Packages;
-    forTest = true;
+    forDev = true;
     localOverridesPath = ./local.nix;
   } // argsOuter;
 in (with args; {
@@ -22,7 +22,7 @@ in (with args; {
     ] ++ pkgs.stdenv.lib.optionals (!pkgs.stdenv.isDarwin) [
       # package not available on darwin for now - sorry you're on your own...
       pkgs.wkhtmltopdf
-    ] ++ pkgs.stdenv.lib.optionals forTest [
+    ] ++ pkgs.stdenv.lib.optionals forDev [
       # for lxml
       pkgs.libxml2
       pkgs.libxslt
@@ -44,7 +44,7 @@ in (with args; {
         ${pythonPackages.virtualenv}/bin/virtualenv $VIRTUALENV_ROOT
       fi
       source $VIRTUALENV_ROOT/bin/activate
-      pip install -r requirements${pkgs.stdenv.lib.optionalString forTest "_for_test"}.txt
+      pip install -r requirements${pkgs.stdenv.lib.optionalString forDev "-dev"}.txt
     '';
   }).overrideAttrs (if builtins.pathExists localOverridesPath then (import localOverridesPath args) else (x: x));
 })
