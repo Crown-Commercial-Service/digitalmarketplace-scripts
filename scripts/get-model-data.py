@@ -198,7 +198,7 @@ CONFIGS = [
             'join': ('id', 'briefId'),
             'group_by': 'essentialRequirements'
         },
-        'filter_query': "status in ['live', 'closed', 'awarded', 'withdrawn']",
+        'filter_query': "status in ['live', 'closed', 'awarded', 'withdrawn', 'cancelled', 'unsuccessful']",
         'keys': (
             'id',
             'lot',
