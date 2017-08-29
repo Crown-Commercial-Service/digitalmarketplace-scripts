@@ -98,7 +98,7 @@ def test_notify_users(send_email):
             '/buyers/frameworks/framework-slug/requirements/lot-slug/100/responses'
         ),
         'KEY',
-        "Next steps for your 'My brief title' requirements",
+        u'Next steps for your \u2018My brief title\u2019 requirements',
         'enquiries@digitalmarketplace.service.gov.uk',
         'Digital Marketplace Admin',
         ['requirements-closed'],
