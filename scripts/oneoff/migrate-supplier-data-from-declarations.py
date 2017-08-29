@@ -124,7 +124,6 @@ if __name__ == '__main__':
         if supplier_framework:
             supplier_update.update({
                 "registeredName": supplier_framework["declaration"]["nameOfOrganisation"],
-                "registrationCountry": supplier_framework["declaration"]["currentRegisteredCountry"],
                 "vatNumber": supplier_framework["declaration"]["registeredVATNumber"],
                 "tradingStatus": (
                     supplier_framework["declaration"]["tradingStatus"]
@@ -148,6 +147,11 @@ if __name__ == '__main__':
                     supplier["id"],
                     repr(supplier_framework["declaration"]["firstRegistered"]),
                 )
+
+        supplier_update["registrationCountry"] = (
+            # ISO 3166-1 alpha-2 code
+            "gb" if supplier_framework and supplier_framework["declaration"].get("establishedInTheUK") else ""
+        )
 
         try:
             supplier_update["companiesHouseNumber"] = next(
