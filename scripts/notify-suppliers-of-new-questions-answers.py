@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     list_of_supplier_ids = []
     if arguments['--supplier-ids']:
-        list_of_supplier_ids = map(int, arguments['--supplier-ids'].split(','))
+        list_of_supplier_ids = list(map(int, arguments['--supplier-ids'].split(',')))
 
     ok = main(
         data_api_url=get_api_endpoint_from_stage(arguments['<stage>'], 'api'),

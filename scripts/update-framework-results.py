@@ -37,7 +37,7 @@ if __name__ == '__main__':
     result = True if arguments['--pass'] else False
 
     with open(arguments['<ids_file>'], 'r') as f:
-        supplier_ids = filter(None, [l.strip() for l in f.readlines()])
+        supplier_ids = [_f for _f in [l.strip() for l in f.readlines()] if _f]
 
     for supplier_id in supplier_ids:
         logger.info(set_framework_result(client, framework_slug, supplier_id, result, user))

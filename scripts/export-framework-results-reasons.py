@@ -25,6 +25,7 @@ sys.path.insert(0, '.')
 
 from docopt import docopt
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
+from dmscripts.helpers.supplier_data_helpers import get_supplier_ids_from_file
 from dmscripts.export_framework_results_reasons import export_suppliers
 from dmapiclient import DataAPIClient
 from dmcontent.content_loader import ContentLoader
@@ -37,15 +38,10 @@ if __name__ == '__main__':
     content_loader = ContentLoader(args['<content_path>'])
 
     declaration_definite_pass_schema = json.load(open(args["<declaration_schema_path>"], "r"))
-    declaration_baseline_schema = \
-        (declaration_definite_pass_schema.get("definitions") or {}).get("baseline")
+    declaration_baseline_schema = (declaration_definite_pass_schema.get("definitions") or {}).get("baseline")
 
     supplier_id_file = args['<supplier_id_file>']
-    if supplier_id_file:
-        with open(supplier_id_file, 'r') as f:
-            supplier_ids = map(int, filter(None, [l.strip() for l in f.readlines()]))
-    else:
-        supplier_ids = None
+    supplier_ids = get_supplier_ids_from_file(supplier_id_file)
 
     export_suppliers(
         client,

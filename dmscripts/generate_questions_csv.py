@@ -54,18 +54,18 @@ def return_rows_for_sections(sections):
 
             parent = question.get('parent')
             page_title = parent.get_source('question') if parent else None
-            section_and_page_title = ' / '.join(filter(None, [section.name, page_title]))
+            section_and_page_title = ' / '.join([_f for _f in [section.name, page_title] if _f])
 
             # section.description is no longer expected to be used
             multiquestion_description = parent.get_source('description') if parent else None
             multiquestion_hint = parent.get_source('hint') if parent else None
 
-            page_description = ' '.join(filter(None, [multiquestion_description, multiquestion_hint]))
+            page_description = ' '.join([_f for _f in [multiquestion_description, multiquestion_hint] if _f])
 
-            question_description = ' '.join(filter(None, [
+            question_description = ' '.join([_f for _f in [
                 question.get_source('description'),
                 question.get_source('hint')
-            ]))
+            ] if _f])
 
             row = [
                 section_and_page_title,

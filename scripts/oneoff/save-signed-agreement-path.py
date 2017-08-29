@@ -52,15 +52,15 @@ if __name__ == '__main__':
 
         for supplier_framework in supplier_frameworks:
             print("======================")
-            print "Supplier ID: {}, Agreement ID: {}".format(
-                supplier_framework['supplierId'], supplier_framework['agreementId'])
+            print("Supplier ID: {}, Agreement ID: {}".format(
+                supplier_framework['supplierId'], supplier_framework['agreementId']))
 
             # Get their framework agreement
             framework_agreement = client.get_framework_agreement(supplier_framework['agreementId'])['agreement']
 
             # Skip if they already have a path
             if framework_agreement.get('signedAgreementPath'):
-                print "PATH ALREADY EXISTS: {}".format(framework_agreement['signedAgreementPath'])
+                print("PATH ALREADY EXISTS: {}".format(framework_agreement['signedAgreementPath']))
                 continue
 
             # Find file path from s3
@@ -69,18 +69,18 @@ if __name__ == '__main__':
 
             # Check file path is found
             if not file or not file.get("path"):
-                print "FILE NOT FOUND FOR SUPPLIER ID: {}".format(supplier_framework['supplierId'])
+                print("FILE NOT FOUND FOR SUPPLIER ID: {}".format(supplier_framework['supplierId']))
                 continue
             else:
-                print "S3 FILEPATH: {}".format(file["path"])
+                print("S3 FILEPATH: {}".format(file["path"]))
 
             # Save filepath to framework agreement
             if arguments['--dry-run']:
-                print "Would update {} filepath to agreement ID {}".format(
-                    file["path"], supplier_framework['agreementId'])
+                print("Would update {} filepath to agreement ID {}".format(
+                    file["path"], supplier_framework['agreementId']))
             else:
-                print "Updating {} filepath to agreement ID {}".format(
-                    file["path"], supplier_framework['agreementId'])
+                print("Updating {} filepath to agreement ID {}".format(
+                    file["path"], supplier_framework['agreementId']))
                 client.update_framework_agreement(
                     supplier_framework['agreementId'],
                     {"signedAgreementPath": file["path"]},

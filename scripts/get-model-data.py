@@ -105,7 +105,7 @@ CONFIGS = [
         'process_fields': {
             role: bool for role in DOS_SPECIALIST_ROLES_PRICE_MAX
         },
-        'rename_fields': dict(zip(DOS_SPECIALIST_ROLES_PRICE_MAX, DOS_SPECIALIST_ROLES)),
+        'rename_fields': dict(list(zip(DOS_SPECIALIST_ROLES_PRICE_MAX, DOS_SPECIALIST_ROLES))),
         'sort_by': ['frameworkSlug', 'supplierId', 'lotSlug']
     },
     {

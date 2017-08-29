@@ -98,11 +98,11 @@ class SuccessfulSupplierContextForNotify(SupplierFrameworkData):
         lot_dict = self.get_lot_dict(supplier_framework)
         if not lot_dict:
             return {}
-        lot_dict = dict(zip(
+        lot_dict = dict(list(zip(
             ['lot_%d' % i for i in range(1, len(self.framework_lots) + 1)],
             [' - '.join([k, v]) for k, v in lot_dict.items()]
 
-        ))
+        )))
         personalisation = {
             'date': self.date_today,
             'company_name': supplier_framework['supplierName'],
@@ -145,3 +145,10 @@ class AppliedToFrameworkSupplierContextForNotify(SupplierFrameworkData):
             'applied': user['application_status'] == 'application'
         }
         return {user['email address']: personalisation}
+
+
+def get_supplier_ids_from_file(supplier_id_file):
+    if not supplier_id_file:
+        return None
+    with open(supplier_id_file, 'r') as f:
+        return list(map(int, [_f for _f in [l.strip() for l in f.readlines()] if _f]))

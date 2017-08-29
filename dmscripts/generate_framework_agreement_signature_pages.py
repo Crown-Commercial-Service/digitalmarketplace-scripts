@@ -28,7 +28,7 @@ def render_html_for_successful_suppliers(rows, framework_kwargs, template_dir, o
         if data['pass_fail'] == 'fail':
             continue
         data.update(framework_kwargs)
-        data['awardedLots'] = filter(lambda lot: int(data[lot]) > 0, framework_kwargs['lotOrder'])
+        data['awardedLots'] = [lot for lot in framework_kwargs['lotOrder'] if int(data[lot]) > 0]
         data['include_countersignature'] = False
         html = render_html(template_path, data)
         save_page(html, data['supplier_id'], output_dir, "signature-page")
@@ -49,7 +49,7 @@ def render_html_for_suppliers_awaiting_countersignature(rows, framework_kwargs, 
             )
             continue
         data.update(framework_kwargs)
-        data['awardedLots'] = filter(lambda lot: int(data[lot]) > 0, framework_kwargs['lotOrder'])
+        data['awardedLots'] = [lot for lot in framework_kwargs['lotOrder'] if int(data[lot]) > 0]
         data['countersigned_at'] = datetime.strptime(
             data['countersigned_at'], '%Y-%m-%dT%H:%M:%S.%fZ'
         ).strftime('%d %B %Y')
