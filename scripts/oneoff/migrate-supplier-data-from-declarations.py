@@ -2,17 +2,18 @@
 """Selectively migrate supplier information from a recent framework declaration to new fields on supplier itself
 
 Usage:
-    scripts/oneoff/migrate-supplier-data-from-declarations.py <stage> <data_api_token> <ch_api_token>
-        [<user>] [--frameworks <framework_slugs>] [--dry-run]
+    scripts/oneoff/migrate-supplier-data-from-declarations.py <stage> <data_api_token> <ch_api_token> <framework_slugs>
+        [<user>] [--dry-run]
 
 Positional arguments:
     <stage>                                 API stage to perform operation on
     <data_api_token>                        appropriate API token for <stage>
     <ch_api_token>                          API token for companies house API
+    <framework_slugs>                       comma-separated whitelist of framework slugs to inspect for source data
+                                            (in order specified)
 
 Optional arguments:
     -h, --help                              show this help message and exit
-    --frameworks=<framework_slugs>          comma-separated whitelist of framework slugs to inspect for source data
     --dry-run                               skip upload of modifications
 """
 import sys
@@ -90,17 +91,10 @@ if __name__ == '__main__':
 
     client = DataAPIClient(get_api_endpoint_from_stage(arguments['<stage>']), arguments['<data_api_token>'])
     user = arguments['<user>'] or getpass.getuser()
-    framework_slugs = arguments.get("--frameworks") and arguments["--frameworks"].split(",")
+    framework_slugs = arguments.get("<framework_slugs>") and arguments["<framework_slugs>"].split(",")
     dry_run = bool(arguments.get("--dry-run"))
 
-    frameworks = tuple(
-        fw for fw in sorted(
-            client.find_frameworks()["frameworks"],
-            key=lambda fw: (fw["applicationCloseDate"] or "2001-01-01"),
-            reverse=True,
-        )
-        if (fw["slug"] in framework_slugs if framework_slugs else fw["status"] in ("live", "expired",))
-    )
+    frameworks = tuple(client.get_framework(framework_slug)["frameworks"] for framework_slug in framework_slugs)
 
     logger.info("Inspecting framework declarations in this order: %s", ", ".join(fw["slug"] for fw in frameworks))
 
