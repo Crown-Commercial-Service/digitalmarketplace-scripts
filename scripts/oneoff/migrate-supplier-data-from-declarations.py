@@ -186,7 +186,16 @@ if __name__ == '__main__':
         # after decoration
         logger.info("supplier_update = %s", pformat(supplier_update))
         if not dry_run:
-            _backoff_wrap(lambda: client.update_supplier(supplier["id"], supplier_update, user=user))()
+            try:
+                _backoff_wrap(lambda: client.update_supplier(supplier["id"], supplier_update, user=user))()
+            except HTTPError as hte:
+                if 'duplicate key value violates unique constraint "ix_suppliers_duns_number"' in hte.message:
+                    logger.info("DUNS clash {} for supplier {}".format(supplier_update['dunsNumber'], supplier['id']))
+                    supplier_update.pop('dunsNumber', None)
+                    logger.info("revised supplier_update = %s", pformat(supplier_update))
+                    _backoff_wrap(lambda: client.update_supplier(supplier["id"], supplier_update, user=user))()
+                else:
+                    logger.info("HTTP ERROR UPDATING SUPPLIER {}".format(supplier['id']))
 
         logger.info("contact_update = %s", pformat(contact_update))
         if not dry_run:
