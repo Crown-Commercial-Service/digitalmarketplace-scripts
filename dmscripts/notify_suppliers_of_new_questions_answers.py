@@ -128,7 +128,10 @@ def main(data_api_url, data_api_token, email_api_key, stage, dry_run, supplier_i
             if supplier_id in supplier_ids
         )
     logger.info(
-        "{} suppliers found interested in these briefs".format(len(interested_suppliers))
+        "{} suppliers found interested in these briefs with the following IDs: {}".format(
+            len(interested_suppliers),
+            ",".join(map(str, interested_suppliers.keys()))
+        )
     )
 
     failed_supplier_ids = []
