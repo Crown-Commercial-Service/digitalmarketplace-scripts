@@ -145,7 +145,8 @@ CONFIGS = [
             'budgetRange',
             'startDate',
             'contractLength',
-            'isACopy'
+            'isACopy',
+            'awardedBriefResponseId'
         ),
         'get_data_kwargs': {'with_users': 'true'},
         'process_fields': {
@@ -165,8 +166,13 @@ CONFIGS = [
             'createdAt',
             'supplierName',
             'submittedAt',
-            'essentialRequirements'
+            'essentialRequirements',
+            'id',
+            'awardedContractStartDate',
+            'awardedContractValue',
+            'supplierOrganisationSize'
         ),
+        'assign_json_subfields': {'awardDetails': ['awardedContractStartDate', 'awardedContractValue']},
         'get_data_kwargs': {},
         'process_fields': {
             'createdAt': format_datetime_string_as_date,
@@ -187,6 +193,10 @@ CONFIGS = [
             'supplierName',
             'submittedAt',
             'status',
+            'awardedBriefResponseId',
+            'awardedContractStartDate',
+            'awardedContractValue',
+            'supplierOrganisationSize'
         ),
         'sort_by': ['briefId', 'submittedAt']
     },
@@ -208,7 +218,8 @@ CONFIGS = [
             'essentialRequirements-True',
             'clarificationQuestions',
             'frameworkSlug',
-            'specialistRole'
+            'specialistRole',
+            'awardedBriefResponseId'
         ),
         'sort_by': ['id']
     }
@@ -240,11 +251,11 @@ if __name__ == '__main__':
         # Skip CSVs that weren't requested
         if config['name'] not in MODELS:
             continue
-
         logger.info('Processing {} data'.format(config['name']))
 
         if 'base_model' in config:
-            data = queries.base_model(config['base_model'], config['keys'], config['get_data_kwargs'],
+            required_keys = list(config['keys']) + config.get('assign_json_subfields', {}).keys()
+            data = queries.base_model(config['base_model'], required_keys, config['get_data_kwargs'],
                                       client=client, logger=logger, limit=limit)
         elif 'model' in config:
             data = queries.model(config['model'], directory=OUTPUT_DIR)
@@ -252,9 +263,12 @@ if __name__ == '__main__':
             data = queries.join(config['join'], directory=OUTPUT_DIR)
 
         # transform values that we want to transform
+        if 'assign_json_subfields' in config:
+            for field, subfields in config['assign_json_subfields'].items():
+                data = queries.assign_json_subfields(field, subfields, data)
+
         if 'process_fields' in config:
             data = queries.process_fields(config['process_fields'], data)
-
         if 'add_counts' in config:
             data = queries.add_counts(data=data, directory=OUTPUT_DIR, **config['add_counts'])
 
