@@ -462,3 +462,35 @@ def test_main_catches_and_logs_email_errors_returns_false(
         'Email sending failed for the following supplier IDs: {supplier_ids}',
         extra={"supplier_ids": "3,5"}
     )
+
+
+@mock.patch(MODULE_UNDER_TEST + '.logger', autospec=True)
+@mock.patch(MODULE_UNDER_TEST + '.send_supplier_emails', autospec=True)
+@mock.patch(MODULE_UNDER_TEST + '.get_supplier_email_addresses_by_supplier_id', autospec=True)
+@mock.patch(MODULE_UNDER_TEST + '.get_ids_of_interested_suppliers_for_briefs', autospec=True)
+@mock.patch(MODULE_UNDER_TEST + '.get_live_briefs_with_new_questions_and_answers_between_two_dates', autospec=True)
+@mock.patch(MODULE_UNDER_TEST + '.dmapiclient.DataAPIClient')
+def test_main_does_not_try_to_send_email_if_no_active_users_for_supplier(
+    data_api_client,
+    get_live_briefs_with_new_questions_and_answers_between_two_dates,
+    get_ids_of_interested_suppliers_for_briefs,
+    get_supplier_email_addresses_by_supplier_id,
+    send_supplier_emails,
+    logger
+):
+    get_live_briefs_with_new_questions_and_answers_between_two_dates.return_value = [
+        FILTERED_BRIEFS[0]
+    ]
+    get_ids_of_interested_suppliers_for_briefs.return_value = {
+        3: [FILTERED_BRIEFS[0]["id"]]
+    }
+    get_supplier_email_addresses_by_supplier_id.return_value = []
+
+    result = main('api_url', 'api_token', 'M', 'preview', dry_run=False)
+
+    assert result is True
+    assert not send_supplier_emails.called
+    assert logger.info.call_args == mock.call(
+        'Email not sent for the following supplier ID due to no active users: {supplier_id}',
+        extra={"supplier_id": 3, "brief_ids_list": "3"}
+    )
