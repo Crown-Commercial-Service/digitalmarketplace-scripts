@@ -6,7 +6,7 @@ Usage:
 --search-api-token=<search_api_access_token> [options]
 
     --serial                  Do not run in parallel (useful for debugging)
-    --index=<index>           Search API index name [default: g-cloud]
+    --index=<index>           Search API index name [default: g-cloud-9]
     --frameworks=<frameworks> Comma-separated list of framework slugs that should be indexed
 
 Example:
