@@ -8,13 +8,13 @@ Usage:
     get-user.py <role> [<framework>] [<lot>] [options]
 
     --api-url=<api_url>  API URL [default: http://localhost:5000]
-    --api-token=<api_token>  API token [default: myToken]
+    --stage=<stage>  Stage to target [default: development]
 
 Example:
     ./get-user.py supplier g9 cloud-hosting
-    ./get-user.py --api-url=localhost:5000 --api-token=myToken admin
-    ./get-user.py --api-url=localhost:5000 --api-token=myToken supplier g-cloud-9
-    ./get-user.py --api-url=localhost:5000 --api-token=myToken supplier dos2 digital-outcomes
+    ./get-user.py admin
+    ./get-user.py --stage=preview supplier g-cloud-9
+    ./get-user.py --stage=staging supplier dos2 digital-outcomes
 """
 
 import random
@@ -25,6 +25,7 @@ import dmapiclient
 from docopt import docopt
 
 sys.path.insert(0, '.')  # noqa
+from dmscripts.helpers.auth_helpers import get_auth_token
 
 
 def get_full_framework_slug(framework):
@@ -64,7 +65,8 @@ def get_random_user(api_client, role, supplier_id=None):
     ])
 
 
-def get_user(api_url, api_token, role, framework, lot):
+def get_user(api_url, stage, role, framework, lot):
+    api_token = 'myToken' if stage == 'development' else get_auth_token('api', stage)
     api_client = dmapiclient.DataAPIClient(api_url, api_token)
 
     if role == 'supplier' and framework is not None:
@@ -83,7 +85,7 @@ if __name__ == "__main__":
     arguments = docopt(__doc__)
     user = get_user(
         api_url=arguments['--api-url'],
-        api_token=arguments['--api-token'],
+        stage=arguments['--stage'],
         role=arguments['<role>'].lower(),
         framework=arguments['<framework>'].lower() if arguments['<framework>'] else None,
         lot=arguments['<lot>'].lower() if arguments['<lot>'] else None,
