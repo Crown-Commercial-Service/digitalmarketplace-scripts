@@ -41,7 +41,7 @@ logger = logging.getLogger("script")
 
 _backoff_wrap = backoff.on_exception(
     backoff.expo,
-    (HTTPTemporaryError, requests.exceptions.ConnectionError),
+    (HTTPTemporaryError, requests.exceptions.ConnectionError, RuntimeError),
     max_tries=5,
 )
 
@@ -100,6 +100,9 @@ if __name__ == '__main__':
 
     for supplier in client.find_suppliers_iter():
         logger.info("Processing supplier %s", supplier["id"])
+        if supplier.get("tradingStatus") and (supplier["contactInformation"][0]).get("address2") == "":
+            logger.info("  already done: {}".format(supplier["id"]))
+            continue
         try:
             supplier_framework = next(
                 sfr["frameworkInterest"] for sfr in (
