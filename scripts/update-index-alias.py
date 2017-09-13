@@ -54,7 +54,7 @@ def _get_index_from_alias(alias, endpoint):
     all_indexes = json.loads(response.content)['es_status']
     index_name = [index for index in all_indexes.keys() if alias in all_indexes[index]['aliases']]
 
-    current_indexes_and_aliases = {k: {"aliases": v['aliases']} for k, v in all_indexes['es_status'].items()}
+    current_indexes_and_aliases = {k: {"aliases": v['aliases']} for k, v in all_indexes.items()}
     print("Current indexes and aliases:")
     print('\n'.join('{} has aliases {}'.format(k, v['aliases']) for k, v in current_indexes_and_aliases.items()))
 
