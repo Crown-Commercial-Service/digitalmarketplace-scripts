@@ -128,7 +128,10 @@ def main(data_api_url, data_api_token, email_api_key, stage, dry_run, supplier_i
             if supplier_id in supplier_ids
         )
     logger.info(
-        "{} suppliers found interested in these briefs".format(len(interested_suppliers))
+        "{} suppliers found interested in these briefs with the following IDs: {}".format(
+            len(interested_suppliers),
+            ",".join(map(str, interested_suppliers.keys()))
+        )
     )
 
     failed_supplier_ids = []
@@ -139,7 +142,15 @@ def main(data_api_url, data_api_token, email_api_key, stage, dry_run, supplier_i
         # get a context for each supplier email
         supplier_context = create_context_for_supplier(stage, supplier_briefs)
         email_addresses = get_supplier_email_addresses_by_supplier_id(data_api_client, supplier_id)
-        if dry_run:
+        if not email_addresses:
+            logger.info(
+                "Email not sent for the following supplier ID due to no active users: {supplier_id}",
+                extra={
+                    'supplier_id': supplier_id,
+                    'brief_ids_list': ", ".join(map(str, brief_ids))
+                }
+            )
+        elif dry_run:
             logger.info(
                 "Would notify supplier ID {supplier_id} for brief IDs {brief_ids_list}",
                 extra={

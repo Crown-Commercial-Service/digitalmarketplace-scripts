@@ -54,8 +54,12 @@ def _get_index_from_alias(alias, endpoint):
     all_indexes = json.loads(response.content)['es_status']
     index_name = [index for index in all_indexes.keys() if alias in all_indexes[index]['aliases']]
 
+    current_indexes_and_aliases = {k: {"aliases": v['aliases']} for k, v in all_indexes.items()}
+    print("Current indexes and aliases:")
+    print('\n'.join('{} has aliases {}'.format(k, v['aliases']) for k, v in current_indexes_and_aliases.items()))
+
     if not index_name:
-        print("No index found with {} alias".format(alias))
+        print("No index found with the '{}' alias".format(alias))
         return None
 
     return index_name[0]
@@ -66,7 +70,7 @@ def _apply_alias_to_index(alias, target, endpoint, headers):
     data = {'type': 'alias', 'target': "{}".format(target)}
 
     response = requests.put(url, headers=headers, json=data)
-    _check_response_status(response, 'updating alias')
+    _check_response_status(response, "updating alias '{}' to point at the '{}' index.".format(alias, target))
 
 
 def _delete_index(index, endpoint, auth_token):
@@ -75,7 +79,7 @@ def _delete_index(index, endpoint, auth_token):
     }
 
     response = requests.delete("{}/{}".format(endpoint, index), headers=headers)
-    _check_response_status(response, "deleting {} index".format(index))
+    _check_response_status(response, "deleting the '{}' index".format(index))
 
 
 def _check_response_status(response, action):

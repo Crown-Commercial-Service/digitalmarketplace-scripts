@@ -254,7 +254,7 @@ if __name__ == '__main__':
         logger.info('Processing {} data'.format(config['name']))
 
         if 'base_model' in config:
-            required_keys = list(config['keys']) + config.get('assign_json_subfields', {}).keys()
+            required_keys = list(config['keys']) + list(config.get('assign_json_subfields', {}).keys())
             data = queries.base_model(config['base_model'], required_keys, config['get_data_kwargs'],
                                       client=client, logger=logger, limit=limit)
         elif 'model' in config:
