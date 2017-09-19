@@ -6,12 +6,13 @@ Usage:
         <govuk_notify_api_key> <govuk_notify_template_id> [options]
 
 Example:
-    notify-buyers-to-award-closed-briefs.py local myToken myNotifyToken myNotifyTemplateId --dry-run=True
+    notify-buyers-to-award-closed-briefs.py local myToken myNotifyToken myNotifyTemplateId --dry-run=True --buyer-ids=1
 
 Options:
     -h, --help  Show this screen
     --date-closed=<date> Notify users of requirements closed on that date (date format: YYYY-MM-DD)
     --dry-run List notifications that would be sent without sending actual emails
+    --buyer-ids List of buyer user IDs to be emailed
 
 """
 
@@ -27,13 +28,18 @@ from dmscripts.notify_buyers_to_award_closed_briefs import main
 if __name__ == '__main__':
     arguments = docopt(__doc__)
 
+    list_of_buyer_ids = []
+    if arguments['--buyer-ids']:
+        list_of_buyer_ids = list(map(int, arguments['--buyer-ids'].split(',')))
+
     ok = main(
         data_api_url=get_api_endpoint_from_stage(arguments['<stage>'], 'api'),
         data_api_access_token=arguments['<api_token>'],
         notify_api_key=arguments['<govuk_notify_api_key>'],
         notify_template_id=arguments['<govuk_notify_template_id>'],
         date_closed=arguments['--date-closed'],
-        dry_run=arguments['--dry-run']
+        dry_run=arguments['--dry-run'],
+        user_id_list=list_of_buyer_ids
     )
 
     if not ok:
