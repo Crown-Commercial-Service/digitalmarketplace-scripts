@@ -3,7 +3,7 @@ from freezegun import freeze_time
 import datetime
 import pytest
 
-from dmutils.email.exceptions import EmailError
+from dmutils.email import EmailError
 from dmscripts import notify_buyers_to_award_closed_briefs
 
 
@@ -110,11 +110,13 @@ class TestNotifyUsers:
         ]
 
 
-@mock.patch('dmscripts.notify_buyers_to_award_closed_briefs.DMNotifyClient')
+@mock.patch('dmscripts.notify_buyers_to_award_closed_briefs.DMNotifyClient', autospec=True)
 @mock.patch('dmscripts.notify_buyers_to_award_closed_briefs.notify_users')
-@mock.patch('dmscripts.helpers.brief_data_helpers.get_closed_briefs')
-@mock.patch('dmscripts.notify_buyers_to_award_closed_briefs.logger')
+@mock.patch('dmscripts.helpers.brief_data_helpers.get_briefs_closed_on_date')
+@mock.patch('dmscripts.notify_buyers_to_award_closed_briefs.logger', autospec=True)
 class TestMain:
+
+    OFFSET_DAYS = 28
 
     brief1 = {
         'id': 100,
@@ -139,20 +141,22 @@ class TestMain:
         ]
     }
 
-    def test_main_calls_notify_for_each_closed_brief(self, logger, get_closed_briefs, notify_users, notify_client):
-        get_closed_briefs.return_value = [self.brief1, self.brief2]
+    def test_main_calls_notify_for_each_closed_brief(
+            self, logger, get_briefs_closed_on_date, notify_users, notify_client):
+        get_briefs_closed_on_date.return_value = [self.brief1, self.brief2]
         notify_users.return_value = []
 
         with freeze_time('2016-01-29 03:04:05'):
             assert notify_buyers_to_award_closed_briefs.main(
-                'URL', 'API_KEY', 'NOTIFY_KEY', 'NOTIFY_TEMPLATE_ID', date_closed='2016-01-01', dry_run=None
+                'URL', 'API_KEY', 'NOTIFY_KEY', 'NOTIFY_TEMPLATE_ID', self.OFFSET_DAYS,
+                date_closed='2016-01-01', dry_run=None
             )
-            get_closed_briefs.assert_called_once_with(mock.ANY, datetime.date(2016, 1, 1))
+            get_briefs_closed_on_date.assert_called_once_with(mock.ANY, datetime.date(2016, 1, 1))
             notify_client.assert_called_once_with('NOTIFY_KEY', logger=mock.ANY)
-            notify_users.assert_has_calls([
+            assert notify_users.call_args_list == [
                 mock.call(notify_client.return_value, 'NOTIFY_TEMPLATE_ID', self.brief1, None),
                 mock.call(notify_client.return_value, 'NOTIFY_TEMPLATE_ID', self.brief2, None),
-            ])
+            ]
             assert logger.info.call_args_list == [
                 mock.call("Data API URL: {data_api_url}", extra={'data_api_url': 'URL'}),
                 mock.call(
@@ -178,20 +182,20 @@ class TestMain:
             ]
 
     def test_main_calls_notify_for_each_closed_brief_with_user_in_user_id_list(
-            self, logger, get_closed_briefs, notify_users, notify_client):
-        get_closed_briefs.return_value = [self.brief1, self.brief2]
+            self, logger, get_briefs_closed_on_date, notify_users, notify_client):
+        get_briefs_closed_on_date.return_value = [self.brief1, self.brief2]
         notify_users.return_value = []
 
         with freeze_time('2016-01-29 03:04:05'):
             assert notify_buyers_to_award_closed_briefs.main(
-                'URL', 'API_KEY', 'NOTIFY_KEY', 'NOTIFY_TEMPLATE_ID', date_closed='2016-01-01', dry_run=None,
-                user_id_list=[99]
+                'URL', 'API_KEY', 'NOTIFY_KEY', 'NOTIFY_TEMPLATE_ID', self.OFFSET_DAYS,
+                date_closed='2016-01-01', dry_run=None, user_id_list=[99]
             )
-            get_closed_briefs.assert_called_once_with(mock.ANY, datetime.date(2016, 1, 1))
+            get_briefs_closed_on_date.assert_called_once_with(mock.ANY, datetime.date(2016, 1, 1))
             notify_client.assert_called_once_with('NOTIFY_KEY', logger=mock.ANY)
-            notify_users.assert_has_calls([
+            assert notify_users.call_args_list == [
                 mock.call(notify_client.return_value, 'NOTIFY_TEMPLATE_ID', self.brief2, [99]),
-            ])
+            ]
             assert logger.info.call_args_list == [
                 mock.call("Data API URL: {data_api_url}", extra={'data_api_url': 'URL'}),
                 mock.call(
@@ -209,24 +213,24 @@ class TestMain:
             ]
 
     def test_main_notifies_about_briefs_closed_on_date_8_weeks_ago_using_offset_days(
-            self, logger, get_closed_briefs, notify_users, notify_client):
-        get_closed_briefs.return_value = [self.brief1, self.brief2]
+        self, logger, get_briefs_closed_on_date, notify_users, notify_client
+    ):
+        get_briefs_closed_on_date.return_value = [self.brief1, self.brief2]
         notify_users.return_value = []
 
         with freeze_time('2016-02-26 03:04:05'):
             assert notify_buyers_to_award_closed_briefs.main(
-                'URL', 'API_KEY', 'NOTIFY_KEY', 'NOTIFY_TEMPLATE_ID', date_closed=None, dry_run=None, offset_days=56
+                'URL', 'API_KEY', 'NOTIFY_KEY', 'NOTIFY_TEMPLATE_ID', offset_days=56, date_closed=None, dry_run=None
             )
-            get_closed_briefs.assert_called_once_with(mock.ANY, datetime.date(2016, 1, 1))
+            get_briefs_closed_on_date.assert_called_once_with(mock.ANY, datetime.date(2016, 1, 1))
             notify_client.assert_called_once_with('NOTIFY_KEY', logger=mock.ANY)
-            notify_users.assert_has_calls([
+            assert notify_users.call_args_list == [
                 mock.call(notify_client.return_value, 'NOTIFY_TEMPLATE_ID', self.brief1, None),
                 mock.call(notify_client.return_value, 'NOTIFY_TEMPLATE_ID', self.brief2, None),
-            ])
+            ]
 
-    def test_main_fails_when_notify_users_fails(self, logger, get_closed_briefs, notify_users, notify_client):
-
-        get_closed_briefs.return_value = [self.brief1, self.brief2, self.brief3]
+    def test_main_fails_when_notify_users_fails(self, logger, get_briefs_closed_on_date, notify_users, notify_client):
+        get_briefs_closed_on_date.return_value = [self.brief1, self.brief2, self.brief3]
         notify_users.side_effect = [
             [9],
             [],
@@ -234,14 +238,15 @@ class TestMain:
         ]
 
         assert not notify_buyers_to_award_closed_briefs.main(
-            'URL', 'API_KEY', 'NOTIFY_KEY', 'NOTIFY_TEMPLATE_ID', date_closed="2017-01-01", dry_run=None
+            'URL', 'API_KEY', 'NOTIFY_KEY', 'NOTIFY_TEMPLATE_ID', self.OFFSET_DAYS,
+            date_closed="2017-01-01", dry_run=None
         )
         notify_client.assert_called_with('NOTIFY_KEY', logger=mock.ANY)
-        notify_users.assert_has_calls([
+        assert notify_users.call_args_list == [
             mock.call(notify_client.return_value, 'NOTIFY_TEMPLATE_ID', self.brief1, None),
             mock.call(notify_client.return_value, 'NOTIFY_TEMPLATE_ID', self.brief2, None),
             mock.call(notify_client.return_value, 'NOTIFY_TEMPLATE_ID', self.brief3, None),
-        ])
+        ]
         assert logger.error.call_args_list == [
             mock.call(
                 'Email sending failed for the following buyer users of brief ID {brief_id}: {buyer_ids}',
@@ -257,28 +262,30 @@ class TestMain:
             )
         ]
 
-    def test_main_with_no_briefs_logs_and_returns_true(self, logger, get_closed_briefs, notify_users, notify_client):
-        get_closed_briefs.return_value = []
+    def test_main_with_no_briefs_logs_and_returns_true(
+            self, logger, get_briefs_closed_on_date, notify_users, notify_client):
+        get_briefs_closed_on_date.return_value = []
 
         assert notify_buyers_to_award_closed_briefs.main(
-            'URL', 'API_KEY', 'NOTIFY_KEY', 'NOTIFY_TEMPLATE_ID', date_closed='2017-01-01', dry_run=None
+            'URL', 'API_KEY', 'NOTIFY_KEY', 'NOTIFY_TEMPLATE_ID', self.OFFSET_DAYS,
+            date_closed='2017-01-01', dry_run=None
         )
-        logger.info.assert_has_calls([
+        assert logger.info.call_args_list == [
             mock.call("Data API URL: {data_api_url}", extra={'data_api_url': 'URL'}),
             mock.call("No briefs closed on {date_closed}", extra={"date_closed": datetime.date(2017, 1, 1)})
-        ])
+        ]
         notify_client.assert_called_with('NOTIFY_KEY', logger=mock.ANY)
         notify_users.assert_not_called()
 
     @pytest.mark.parametrize('offset_days, date_closed', [(28, '2016-01-02'), (56, '2015-12-05')])
     def test_main_doesnt_allow_date_closed_to_be_less_than_x_days_ago_by_default(
-            self, logger, get_closed_briefs, notify_users, notify_client, offset_days, date_closed):
-        get_closed_briefs.return_value = [self.brief1, self.brief2]
+            self, logger, get_briefs_closed_on_date, notify_users, notify_client, offset_days, date_closed):
+        get_briefs_closed_on_date.return_value = [self.brief1, self.brief2]
 
         with freeze_time('2016-01-29 08:34:05'):
             assert not notify_buyers_to_award_closed_briefs.main(
-                'URL', 'API_KEY', 'NOTIFY_KEY', 'NOTIFY_TEMPLATE_ID', date_closed=date_closed, dry_run=None,
-                offset_days=offset_days
+                'URL', 'API_KEY', 'NOTIFY_KEY', 'NOTIFY_TEMPLATE_ID', offset_days,
+                date_closed=date_closed, dry_run=None,
             )
         notify_client.assert_not_called()
         notify_users.assert_not_called()
@@ -286,18 +293,19 @@ class TestMain:
             'Not allowed to notify about briefs that closed less than {} days ago', offset_days
         )
 
-    def test_main_dry_run_does_not_call_notify_users(self, logger, get_closed_briefs, notify_users, notify_client):
-        get_closed_briefs.return_value = [self.brief1, self.brief2, self.brief3]
+    def test_main_dry_run_does_not_call_notify_users(
+            self, logger, get_briefs_closed_on_date, notify_users, notify_client):
+        get_briefs_closed_on_date.return_value = [self.brief1, self.brief2, self.brief3]
 
         assert notify_buyers_to_award_closed_briefs.main(
-            'URL', 'API_KEY', 'NOTIFY_KEY', 'NOTIFY_TEMPLATE_ID', date_closed=None, dry_run=True
+            'URL', 'API_KEY', 'NOTIFY_KEY', 'NOTIFY_TEMPLATE_ID', self.OFFSET_DAYS, date_closed=None, dry_run=True
         )
         assert logger.info.call_args_list == [
             mock.call("Data API URL: {data_api_url}", extra={'data_api_url': 'URL'}),
             mock.call("Notifying users about {briefs_count} closed brief(s)", extra={'briefs_count': 3}),
             mock.call(
                 "Would notify {no_of_users} user(s) about brief ID: {brief_id} - '{brief_title}'",
-                extra={'no_of_users': 1,  'brief_id': 100, 'brief_title': 'Extra 3 hrs sleep (for govt)'}
+                extra={'no_of_users': 1, 'brief_id': 100, 'brief_title': 'Extra 3 hrs sleep (for govt)'}
             ),
             mock.call(
                 "Would notify {no_of_users} user(s) about brief ID: {brief_id} - '{brief_title}'",
@@ -308,5 +316,5 @@ class TestMain:
                 extra={'no_of_users': 2, 'brief_id': 300, 'brief_title': 'Yet another requirement'}
             ),
         ]
-        notify_client.assert_not_called()
+        notify_client.assert_called_with('NOTIFY_KEY', logger=mock.ANY)
         notify_users.assert_not_called()

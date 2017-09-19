@@ -4,6 +4,7 @@ from dmutils.formats import DATE_FORMAT
 
 def get_date_closed(date_closed):
     """
+    Defaults to yesterday's date (used for notifying buyers when their briefs close).
     :param date_closed: YYYY-MM-DD string supplied via script argument
     :return: Python datetime object
     """

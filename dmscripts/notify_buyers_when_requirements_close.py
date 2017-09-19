@@ -7,7 +7,7 @@ from dmutils.email.exceptions import EmailError
 
 from dmscripts.helpers.date_helpers import get_date_closed
 from dmscripts.helpers.email_helpers import get_sent_emails
-from dmscripts.helpers.brief_data_helpers import get_closed_briefs
+from dmscripts.helpers.brief_data_helpers import get_briefs_closed_on_date
 from dmscripts.helpers.html_helpers import render_html
 from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.logging_helpers import logging
@@ -66,7 +66,7 @@ def main(data_api_url, data_api_access_token, email_api_key, date_closed, dry_ru
 
     data_api_client = dmapiclient.DataAPIClient(data_api_url, data_api_access_token)
 
-    closed_briefs = get_closed_briefs(data_api_client, date_closed)
+    closed_briefs = get_briefs_closed_on_date(data_api_client, date_closed)
     if not closed_briefs:
         logger.info("No briefs closed on {date_closed}", extra={"date_closed": date_closed})
         return True
