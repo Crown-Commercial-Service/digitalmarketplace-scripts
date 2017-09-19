@@ -13,6 +13,7 @@ Options:
     --date-closed=<date> Notify users of requirements closed on that date (date format: YYYY-MM-DD)
     --dry-run List notifications that would be sent without sending actual emails
     --buyer-ids List of buyer user IDs to be emailed
+    --offset-days Days between brief closing and email being sent (defaults to 28)
 
 """
 
@@ -31,6 +32,10 @@ if __name__ == '__main__':
     list_of_buyer_ids = []
     if arguments['--buyer-ids']:
         list_of_buyer_ids = list(map(int, arguments['--buyer-ids'].split(',')))
+    if arguments['--offset-days']:
+        offset_days = int(arguments['--offset-days'])
+    else:
+        offset_days = 28
 
     ok = main(
         data_api_url=get_api_endpoint_from_stage(arguments['<stage>'], 'api'),
@@ -39,7 +44,8 @@ if __name__ == '__main__':
         notify_template_id=arguments['<govuk_notify_template_id>'],
         date_closed=arguments['--date-closed'],
         dry_run=arguments['--dry-run'],
-        user_id_list=list_of_buyer_ids
+        user_id_list=list_of_buyer_ids,
+        offset_days=offset_days
     )
 
     if not ok:

@@ -36,7 +36,8 @@ def notify_users(notify_client, notify_template_id, brief, user_id_list):
 
 
 def main(
-    data_api_url, data_api_access_token, notify_api_key, notify_template_id, date_closed, dry_run, user_id_list=None
+    data_api_url, data_api_access_token, notify_api_key, notify_template_id, date_closed=None, dry_run=None,
+    user_id_list=None, offset_days=28
 ):
     """
     Send emails to buyers via Notify, reminding them to award their closed briefs
@@ -44,15 +45,14 @@ def main(
     logger.info("Data API URL: {data_api_url}", extra={'data_api_url': data_api_url})
 
     # TODO: Check that user has not already been emailed about this brief (in this timeframe)
-    # TODO: enable the script to be repeated 4 weeks later (8 weeks after closing)
 
     if date_closed:
         date_closed = date_helpers.get_date_closed(date_closed)
-        if date_closed > (datetime.utcnow() - timedelta(days=28)).date():
-            logger.error('Not allowed to notify about briefs that closed less than 4 weeks ago')
+        if date_closed > (datetime.utcnow() - timedelta(days=offset_days)).date():
+            logger.error('Not allowed to notify about briefs that closed less than {} days ago', offset_days)
             return False
     else:
-        date_closed = date.today() - timedelta(days=28)
+        date_closed = date.today() - timedelta(days=offset_days)
 
     data_api_client = dmapiclient.DataAPIClient(data_api_url, data_api_access_token)
     if not dry_run:
