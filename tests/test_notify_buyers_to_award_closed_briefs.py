@@ -44,22 +44,23 @@ class TestNotifyUsers:
         notify_client = mock.Mock()
         notify_client.send_email.return_value = self._get_notify_email_api_response()
 
-        failed_users = notify_buyers_to_award_closed_briefs.notify_users(
-            notify_client, 'NOTIFY_TEMPLATE_ID', self.brief, None
-        )
+        with freeze_time('2017-01-01'):
+            failed_users = notify_buyers_to_award_closed_briefs.notify_users(
+                notify_client, 'NOTIFY_TEMPLATE_ID', self.brief, None
+            )
 
         assert failed_users == []
         assert notify_client.send_email.call_args_list == [
             mock.call(
                 'a@example.com',
                 'NOTIFY_TEMPLATE_ID',
-                {'brief_id': 100, 'brief_title': 'My brief title'},
+                {'brief_id': 100, 'brief_title': 'My brief title', 'utm_date': '20170101'},
                 allow_resend=False
             ),
             mock.call(
                 'c@example.com',
                 'NOTIFY_TEMPLATE_ID',
-                {'brief_id': 100, 'brief_title': 'My brief title'},
+                {'brief_id': 100, 'brief_title': 'My brief title', 'utm_date': '20170101'},
                 allow_resend=False
             ),
         ]
@@ -68,16 +69,17 @@ class TestNotifyUsers:
         notify_client = mock.Mock()
         notify_client.send_email.return_value = self._get_notify_email_api_response()
 
-        failed_users = notify_buyers_to_award_closed_briefs.notify_users(
-            notify_client, 'NOTIFY_TEMPLATE_ID', self.brief, [999]
-        )
+        with freeze_time('2017-01-01'):
+            failed_users = notify_buyers_to_award_closed_briefs.notify_users(
+                notify_client, 'NOTIFY_TEMPLATE_ID', self.brief, [999]
+            )
 
         assert failed_users == []
         assert notify_client.send_email.call_args_list == [
             mock.call(
                 'c@example.com',
                 'NOTIFY_TEMPLATE_ID',
-                {'brief_id': 100, 'brief_title': 'My brief title'},
+                {'brief_id': 100, 'brief_title': 'My brief title', 'utm_date': '20170101'},
                 allow_resend=False
             ),
         ]
@@ -89,18 +91,20 @@ class TestNotifyUsers:
             EmailError  # fail on second email
         ]
 
-        failed_users = notify_buyers_to_award_closed_briefs.notify_users(
-            notify_client, 'NOTIFY_TEMPLATE_ID', self.brief, None
-        )
+        with freeze_time('2017-01-01'):
+            failed_users = notify_buyers_to_award_closed_briefs.notify_users(
+                notify_client, 'NOTIFY_TEMPLATE_ID', self.brief, None
+            )
+
         assert failed_users == [999]
         assert notify_client.send_email.call_args_list == [
             mock.call(
                 'a@example.com', 'NOTIFY_TEMPLATE_ID',
-                {'brief_id': 100, 'brief_title': 'My brief title'}, allow_resend=False
+                {'brief_id': 100, 'brief_title': 'My brief title', 'utm_date': '20170101'}, allow_resend=False
             ),
             mock.call(
                 'c@example.com', 'NOTIFY_TEMPLATE_ID',
-                {'brief_id': 100, 'brief_title': 'My brief title'}, allow_resend=False
+                {'brief_id': 100, 'brief_title': 'My brief title', 'utm_date': '20170101'}, allow_resend=False
             ),
         ]
 

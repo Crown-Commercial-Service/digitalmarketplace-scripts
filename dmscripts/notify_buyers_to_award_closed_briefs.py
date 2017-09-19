@@ -17,7 +17,8 @@ def notify_users(notify_client, notify_template_id, brief, user_id_list):
     if brief['users']:
         context_data = {
             'brief_id': brief['id'],
-            'brief_title': brief['title']
+            'brief_title': brief['title'],
+            'utm_date': date.today().strftime("%Y%m%d")
         }
         # Filter the brief's users by restricted user ID list if present
         brief_users = filter(lambda user: user['id'] in user_id_list, brief['users']) if user_id_list else brief['users']
@@ -32,11 +33,6 @@ def notify_users(notify_client, notify_template_id, brief, user_id_list):
                     failed_users.append(user['id'])
 
     return failed_users
-
-
-# TODO: make sure we definitely don't need this!
-def get_notified_briefs(email_api_key, date_closed):
-    return []
 
 
 def main(
