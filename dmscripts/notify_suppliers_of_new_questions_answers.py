@@ -158,6 +158,14 @@ def main(data_api_url, data_api_token, email_api_key, stage, dry_run, supplier_i
                     'brief_ids_list': ", ".join(map(str, brief_ids))
                 }
             )
+        elif len(email_addresses) == 0:
+            logger.info(
+                "Email not sent for the following supplier ID due to no active users: {supplier_id}",
+                extra={
+                    'supplier_id': supplier_id,
+                    'brief_ids_list': ", ".join(map(str, brief_ids))
+                }
+            )
         else:
             logger.info(
                 "Notifying supplier ID {supplier_id} of new questions/answers for brief IDs {brief_ids_list}",
