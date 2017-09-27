@@ -17,8 +17,8 @@ class TestModelTrawlerInit:
         assert mt.model_iter_method == 'find_fake_table_iter'
 
     def test_cannot_initiate_with_incorrect_model_name(self):
-        with pytest.raises(AttributeError) as excinfo:
-            mt = ModelTrawler('real_table', FakeClient())
+        with pytest.raises(AttributeError):
+            ModelTrawler('real_table', FakeClient())
 
     def test_get_allowed_models_returns_allowed_models(self):
         mt = ModelTrawler('fake_table', FakeClient())
@@ -70,9 +70,7 @@ class TestModelTrawlerMethods:
             {'id': 2, 'emailAddress': 'user2@gov.uk'}
         )
 
-        with mock.patch.object(
-            FakeClient, 'find_fake_table_iter', return_value=(m for m in self.model_data)
-        ) as mock_method:
+        with mock.patch.object(FakeClient, 'find_fake_table_iter', return_value=iter(self.model_data)):
             mt = ModelTrawler('fake_table', FakeClient())
             assert tuple(mt.get_data(keys)) == expected_model_data
 
@@ -84,9 +82,7 @@ class TestModelTrawlerMethods:
 
         expected_model_data = ({'id': 1, 'emailAddress': 'user@gov.uk'},)
 
-        with mock.patch.object(
-            FakeClient, 'find_fake_table_iter', return_value=(m for m in self.model_data)
-        ) as mock_method:
+        with mock.patch.object(FakeClient, 'find_fake_table_iter', return_value=iter(self.model_data)):
             mt = ModelTrawler('fake_table', FakeClient())
             assert tuple(mt.get_data(keys, limit=1)) == expected_model_data
 
@@ -100,6 +96,6 @@ class TestModelTrawlerMethods:
             FakeClient, 'find_fake_table_iter', return_value=(m for m in ({'id': 1}, {'id': 2}))
         ) as mock_method:
             mt = ModelTrawler('fake_table', FakeClient())
-            data = list(mt.get_data(('id',), limit=1, **_kwargs))
+            list(mt.get_data(('id',), limit=1, **_kwargs))
             # note that `limit` isn't included as a keyword argument
             mock_method.assert_called_once_with(something_true=True, something_false=False)

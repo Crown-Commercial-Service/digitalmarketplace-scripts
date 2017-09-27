@@ -185,11 +185,11 @@ def _empty_context_manager():
 @pytest.mark.parametrize("notify_fail_early", (False, True,))
 @pytest.mark.parametrize("notify_raise_email_error", (False, True,))
 def test_upload_counterpart_file_sends_correct_emails(
-        notify_raise_email_error,
-        notify_fail_early,
-        find_users_iterable,
-        expected_send_email_emails,
-        ):
+    notify_raise_email_error,
+    notify_fail_early,
+    find_users_iterable,
+    expected_send_email_emails,
+):
     bucket = mock.Mock()
     data_api_client = mock.Mock()
     data_api_client.get_supplier_framework_info.return_value = {
@@ -207,7 +207,7 @@ def test_upload_counterpart_file_sends_correct_emails(
         dm_notify_client.send_email.side_effect = EmailError("Forgot the stamp")
 
     with mock.patch.object(builtins, 'open', mock.mock_open(read_data='foo')):
-        with (pytest.raises(EmailError) if notify_raise_email_error else _empty_context_manager()) as excinfo:
+        with (pytest.raises(EmailError) if notify_raise_email_error else _empty_context_manager()):
             upload_counterpart_file(
                 bucket,
                 {

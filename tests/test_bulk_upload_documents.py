@@ -2,10 +2,9 @@ import os
 import tempfile
 import shutil
 
-from sys import version_info
-if version_info.major == 2:
+try:
     import __builtin__ as builtins
-else:
+except ImportError:
     import builtins
 
 from dmscripts.bulk_upload_documents import get_bucket_name, get_all_files_of_type, \

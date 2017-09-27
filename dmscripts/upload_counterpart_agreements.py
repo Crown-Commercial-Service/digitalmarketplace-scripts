@@ -12,16 +12,16 @@ from dmscripts.helpers import logging_helpers
 
 
 def upload_counterpart_file(
-        bucket,
-        framework,
-        file_path,
-        dry_run,
-        data_api_client,
-        dm_notify_client=None,
-        notify_template_id=None,
-        notify_fail_early=True,
-        logger=None,
-        ):
+    bucket,
+    framework,
+    file_path,
+    dry_run,
+    data_api_client,
+    dm_notify_client=None,
+    notify_template_id=None,
+    notify_fail_early=True,
+    logger=None,
+):
     if bool(dm_notify_client) != bool(notify_template_id):
         raise TypeError("Either specify both dm_notify_client and notify_template_id or neither")
 

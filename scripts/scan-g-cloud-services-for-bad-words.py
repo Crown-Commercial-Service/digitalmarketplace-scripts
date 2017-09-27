@@ -112,7 +112,7 @@ def check_services_with_bad_words(output_dir, framework_slug, client, suppliers,
         for supplier in suppliers:
             try:
                 services = get_services(client, supplier["supplierId"], framework_slug)
-            except Exception as e:
+            except Exception:
                 # Retry once; will fail the script if retry fails.
                 services = get_services(client, supplier["supplierId"], framework_slug)
             for service in services:
@@ -166,7 +166,7 @@ def output_bad_words(
         'Blacklisted Word Location': blacklisted_word_location,
         'Blacklisted Word Context': blacklisted_word_context,
         'Blacklisted Word': blacklisted_word,
-        }
+    }
     logger.info("{} - {}".format(blacklisted_word, service_id))
     writer.writerow(row)
 

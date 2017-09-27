@@ -19,7 +19,6 @@ from multiprocessing.pool import ThreadPool
 
 import backoff
 import dmapiclient
-import six
 from docopt import docopt
 from six.moves import map
 

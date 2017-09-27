@@ -34,13 +34,13 @@ class _BaseExportFrameworkResultsReasonsTest(BaseAssessmentTest):
 class _BaseExportTest(_BaseExportFrameworkResultsReasonsTest):
     # implemented as an "inner" function so it can be parametrized differently in different subclasses
     def _test_export_inner(
-            self,
-            tmpdir,
-            use_baseline_schema,
-            expected_failed,
-            expected_discretionary,
-            expected_successful,
-            ):
+        self,
+        tmpdir,
+        use_baseline_schema,
+        expected_failed,
+        expected_discretionary,
+        expected_successful,
+    ):
         export_suppliers(
             self.mock_data_client,
             self.framework_slug,

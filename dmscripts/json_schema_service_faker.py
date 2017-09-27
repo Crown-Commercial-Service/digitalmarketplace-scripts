@@ -152,7 +152,7 @@ class JsonSchemaDataFaker(object):
 
                         logger.debug('[{}]: Validation succeeded.')
 
-                    except ValidationError as e:
+                    except ValidationError:
                         logger.debug('[{}]: Validation failed'.format(prop))
 
                     else:

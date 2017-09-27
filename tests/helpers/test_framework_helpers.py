@@ -45,7 +45,7 @@ def test_set_framework_result_calls_with_correct_arguments(mock_data_client):
 
 
 def test_set_framework_result_returns_error_message_if_update_fails(mock_data_client):
-    mock_data_client.set_framework_result.side_effect = [HTTPError(),  HTTPError(Mock(status_code=400))]
+    mock_data_client.set_framework_result.side_effect = [HTTPError(), HTTPError(Mock(status_code=400))]
     assert framework_helpers.set_framework_result(mock_data_client, 'g-whizz-6', 123456, True, 'user') == \
         "  Error inserting result for 123456 (True): Request failed (status: 503)"
     assert framework_helpers.set_framework_result(mock_data_client, 'digital-stuff', 567890, False, 'script-user') == \

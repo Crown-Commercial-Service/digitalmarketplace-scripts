@@ -23,7 +23,9 @@ class SupplierFrameworkData(object):
     def get_supplier_users(self):
         """Return a dict, {supplier id: [users]}."""
         users = self.client.export_users(self.target_framework_slug).get('users', [])
-        sort_by_func = lambda i: i['supplier_id']
+
+        def sort_by_func(d):
+            return d['supplier_id']
         sorted_users = sorted(users, key=sort_by_func)
         return {k: list(g) for k, g in groupby(sorted_users, key=sort_by_func)}
 
@@ -75,7 +77,8 @@ class SuccessfulSupplierContextForNotify(SupplierFrameworkData):
 
         lot_dict = OrderedDict((lot_name, 'No application') for lot_name in self.framework_lots)
 
-        sort_by_func = lambda i: i['lotName']
+        def sort_by_func(d):
+            return d['lotName']
         sorted_draft_services = sorted(supplier_framework['draft_services'], key=sort_by_func)
         grouped_draft_services = groupby(sorted_draft_services, key=sort_by_func)
         for lotName, draft_services in grouped_draft_services:

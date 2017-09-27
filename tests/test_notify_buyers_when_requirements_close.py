@@ -1,4 +1,3 @@
-import pytest
 import mock
 from freezegun import freeze_time
 
