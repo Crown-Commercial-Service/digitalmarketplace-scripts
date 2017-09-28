@@ -4,7 +4,7 @@ from itertools import chain
 import jsonschema
 import os
 
-from dmscripts.helpers.csv_helpers import make_field_title, count_field_in_record, MultiCSVWriter
+from dmscripts.helpers.csv_helpers import MultiCSVWriter
 from dmscripts.helpers.framework_helpers import find_suppliers_with_details_and_draft_service_counts
 
 
@@ -173,14 +173,14 @@ def get_questions_numbers_from_framework(framework_slug, content_loader):
 
 
 def export_suppliers(
-        client,
-        framework_slug,
-        content_loader,
-        output_dir,
-        declaration_definite_pass_schema,
-        declaration_baseline_schema=None,
-        supplier_ids=None,
-        ):
+    client,
+    framework_slug,
+    content_loader,
+    output_dir,
+    declaration_definite_pass_schema,
+    declaration_baseline_schema=None,
+    supplier_ids=None,
+):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
 

@@ -1,6 +1,6 @@
 import dmapiclient
 
-from datetime import datetime, date, timedelta
+from datetime import datetime, timedelta
 
 from dmscripts.helpers import env_helpers, logging_helpers
 from dmscripts.helpers.html_helpers import render_html

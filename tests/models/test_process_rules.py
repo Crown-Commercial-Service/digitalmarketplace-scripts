@@ -14,8 +14,6 @@ def test_format_datetime_string_as_date_raises_error_if_initial_date_format_inco
         "2016-10-08T12:00:00",
         "2016-10-08"
     )
-    formatted_date = "2016-10-08"
-
     for date in initial_dates:
         with pytest.raises(ValueError) as excinfo:
             format_datetime_string_as_date(date)

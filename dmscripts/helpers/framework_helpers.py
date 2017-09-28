@@ -85,7 +85,7 @@ def add_draft_services(client, framework_slug, record, lot=None, statuses=None):
         drafts = [
             draft for draft in drafts["services"]
             if (not lot or draft["lotSlug"] == lot) and (not statuses or draft["status"] in statuses)
-            ]
+        ]
         return dict(record, services=drafts)
 
 

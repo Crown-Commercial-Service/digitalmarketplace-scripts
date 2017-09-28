@@ -93,7 +93,7 @@ def make_fields_from_content_questions(questions, record):
         field
         for question in questions
         for field in _make_fields_from_content_question(question, record)
-        ]
+    ]
 
 
 def _make_fields_from_content_question(question, record):

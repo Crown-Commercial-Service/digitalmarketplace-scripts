@@ -24,24 +24,28 @@ def test_insert_results(mock_data_client):
     mock_data_client.get_supplier.return_value = {'suppliers': {'name': 'Supplier Name'}}
     insert_results(mock_data_client, out_mock, 'g-cloud-7', 'tests/fixtures/framework_results.csv', 'user')
 
-    mock_data_client.set_framework_result.assert_has_calls([
-        call(123, 'g-cloud-7', True, 'user'),
-        call(234, 'g-cloud-7', False, 'user'),
-        call(345, 'g-cloud-7', True, 'user'),
-        call(456, 'g-cloud-7', False, 'user'),
-        call(678, 'g-cloud-7', True, 'user')
-        ], any_order=False
+    mock_data_client.set_framework_result.assert_has_calls(
+        [
+            call(123, 'g-cloud-7', True, 'user'),
+            call(234, 'g-cloud-7', False, 'user'),
+            call(345, 'g-cloud-7', True, 'user'),
+            call(456, 'g-cloud-7', False, 'user'),
+            call(678, 'g-cloud-7', True, 'user')
+        ],
+        any_order=False
     )
 
-    out_mock.write.assert_has_calls([
-        call("OK: 123\n"),
-        call("OK: 234\n"),
-        call("OK: 345\n"),
-        call("OK: 456\n"),
-        call("Error: Result must be 'pass' or 'fail', not 'yes'; Bad line: 5\n"),
-        call("Error: invalid literal for int() with base 10: 'Company Name'; Bad line: 6\n"),
-        call("OK: 678\n")
-        ], any_order=False
+    out_mock.write.assert_has_calls(
+        [
+            call("OK: 123\n"),
+            call("OK: 234\n"),
+            call("OK: 345\n"),
+            call("OK: 456\n"),
+            call("Error: Result must be 'pass' or 'fail', not 'yes'; Bad line: 5\n"),
+            call("Error: invalid literal for int() with base 10: 'Company Name'; Bad line: 6\n"),
+            call("OK: 678\n")
+        ],
+        any_order=False
     )
 
 

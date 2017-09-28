@@ -1,20 +1,15 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 import os
-import sys
-if sys.version_info > (3, 0):
-    import csv
-else:
+try:
     import unicodecsv as csv
-import os.path
+except ImportError:
+    import csv
 
-MANIFESTS = [{
-    'question_set': 'declaration',
-    'manifest':     'declaration'
-    }, {
-    'question_set': 'services',
-    'manifest':     'edit_submission'
-}]
+MANIFESTS = [
+    {'question_set': 'declaration', 'manifest': 'declaration'},
+    {'question_set': 'services', 'manifest': 'edit_submission'}
+]
 
 
 def get_questions(questions):
@@ -122,7 +117,7 @@ def generate_csv(output_file, framework_slug, content_loader, question_set, cont
         writer = csv.writer(csvfile, delimiter=b',', quotechar=b'"', quoting=csv.QUOTE_ALL)
         header = ["Section / page title", "Page description & hint", "Question", "Description & hint"]
         header.extend(
-            ["Answer {}".format(i) for i in range(1, max_length_options+1)]
+            ["Answer {}".format(i) for i in range(1, max_length_options + 1)]
         )
         writer.writerow(header)
         for row in rows:

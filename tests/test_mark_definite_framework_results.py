@@ -108,12 +108,12 @@ class TestNoPrevResults(_BaseMarkResultsTestMixin, BaseAssessmentTest):
         tuple(product(*repeat((False, True,), 4))),
     )
     def test_no_baseline_schema(
-            self,
-            reassess_passed,
-            reassess_failed,
-            reassess_failed_ds,
-            dry_run,
-            ):
+        self,
+        reassess_passed,
+        reassess_failed,
+        reassess_failed_ds,
+        dry_run,
+    ):
         mark_definite_framework_results(
             self.mock_data_client,
             "Blazes Boylan",
@@ -148,12 +148,12 @@ class TestNoPrevResults(_BaseMarkResultsTestMixin, BaseAssessmentTest):
         tuple(product(*repeat((False, True,), 4))),
     )
     def test_neither_optional_schema(
-            self,
-            reassess_passed,
-            reassess_failed,
-            reassess_failed_ds,
-            dry_run,
-            ):
+        self,
+        reassess_passed,
+        reassess_failed,
+        reassess_failed_ds,
+        dry_run,
+    ):
         mark_definite_framework_results(
             self.mock_data_client,
             "Blazes Boylan",

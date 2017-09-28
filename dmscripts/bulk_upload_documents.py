@@ -1,11 +1,10 @@
 import os
 import re
-import sys
-sys.path.insert(0, '.')
-if sys.version_info > (3, 0):
-    import csv
-else:
+try:
     import unicodecsv as csv
+except ImportError:
+    import csv
+
 from dmutils.documents import get_document_path, generate_download_filename
 
 
