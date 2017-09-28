@@ -61,7 +61,12 @@ if __name__ == '__main__':
 
     api_url = get_api_endpoint_from_stage(arguments['<stage>'])
     data_api_client = DataAPIClient(api_url, arguments['<api_token>'])
-    dm_mailchimp_client = DMMailChimpClient(arguments['<mailchimp_username>'], arguments['<mailchimp_api_key>'], logger)
+    dm_mailchimp_client = DMMailChimpClient(
+        arguments['<mailchimp_username>'],
+        arguments['<mailchimp_api_key>'],
+        logger,
+        retries=3
+    )
 
     for lot_data in lots:
         main(data_api_client, dm_mailchimp_client, lot_data, logger)
