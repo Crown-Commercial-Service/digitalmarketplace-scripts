@@ -7,8 +7,9 @@ filtering by suppliers who have published services on the given framewok and lot
 Usage:
     get-user.py <role> [<framework>] [<lot>] [options]
 
-    --api-url=<api_url>  API URL [default: http://localhost:5000]
-    --stage=<stage>  Stage to target [default: development]
+    --api-url=<api_url>     API URL (overrides --stage)
+    --api-token=<api_token  API Token (overrides --stage)
+    --stage=<stage>         Stage to target; automatically derive/decrypt api url and token [default: development]
 
 Example:
     ./get-user.py supplier g9 cloud-hosting
@@ -25,7 +26,7 @@ import dmapiclient
 from docopt import docopt
 
 sys.path.insert(0, '.')  # noqa
-from dmscripts.helpers.auth_helpers import get_auth_token
+from dmscripts.helpers.auth_helpers import get_auth_token, get_api_url
 
 
 def get_full_framework_slug(framework):
@@ -65,8 +66,11 @@ def get_random_user(api_client, role, supplier_id=None):
     ])
 
 
-def get_user(api_url, stage, role, framework, lot):
-    api_token = 'myToken' if stage == 'development' else get_auth_token('api', stage)
+def get_user(api_url, api_token, stage, role, framework, lot):
+    if not api_url:
+        api_url = get_api_url('api', stage)
+
+    api_token = api_token or get_auth_token('api', stage)
     api_client = dmapiclient.DataAPIClient(api_url, api_token)
 
     if role == 'supplier' and framework is not None:
@@ -85,6 +89,7 @@ if __name__ == "__main__":
     arguments = docopt(__doc__)
     user = get_user(
         api_url=arguments['--api-url'],
+        api_token=arguments['--api-token'],
         stage=arguments['--stage'],
         role=arguments['<role>'].lower(),
         framework=arguments['<framework>'].lower() if arguments['<framework>'] else None,
