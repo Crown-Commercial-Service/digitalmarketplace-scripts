@@ -11,17 +11,11 @@ from dmscripts.helpers import logging_helpers, date_helpers, brief_data_helpers
 logger = logging_helpers.configure_logger({'dmapiclient': logging_helpers.logging.INFO})
 
 
-def _filter_brief_users_by_optional_user_id_list(brief, user_id_list):
-    """Filter the brief's users by restricted user ID list if present"""
-    if user_id_list:
-        return filter(lambda user: user['id'] in user_id_list, brief['users'])
-    else:
-        return brief['users']
-
-
 def _filter_briefs_by_user_id_list(briefs, user_id_list):
     """Return a list of briefs if they have at least 1 user in the given ID list"""
-    return [brief for brief in briefs if any(_filter_brief_users_by_optional_user_id_list(brief, user_id_list))]
+    if user_id_list:
+        return [brief for brief in briefs if any(filter(lambda user: user['id'] in user_id_list, brief['users']))]
+    return briefs
 
 
 def _create_context_for_brief(brief):
@@ -32,24 +26,6 @@ def _create_context_for_brief(brief):
         'lot_slug': brief['lotSlug'],
         'utm_date': date.today().strftime("%Y%m%d")
     }
-
-
-def notify_users(notify_client, notify_template_id, brief, user_id_list):
-    failed_users = []
-
-    context_data = _create_context_for_brief(brief)
-    brief_users = _filter_brief_users_by_optional_user_id_list(brief, user_id_list)
-
-    for user in brief_users:
-        if user['active']:
-            try:
-                notify_client.send_email(
-                    user['emailAddress'], notify_template_id, context_data, allow_resend=False
-                )
-            except EmailError:
-                failed_users.append(user['id'])
-
-    return failed_users
 
 
 def _get_brief_closing_date(offset_days, closing_date_arg=None):
@@ -67,6 +43,57 @@ def _get_brief_closing_date(offset_days, closing_date_arg=None):
             return False
         return closing_date
     return date.today() - timedelta(days=offset_days)
+
+
+def send_email_to_brief_user_via_notify(notify_client, notify_template_id, user, brief, user_id_list, dry_run):
+    if user_id_list and user['id'] not in user_id_list:
+        # If a user ID list is supplied, only email users for this brief that are in the list
+        return
+
+    logging_context = {
+        'brief_title': brief['title'],
+        'brief_id': brief['id'],
+        'no_of_users': len(brief['users']),
+    }
+    email_context_data = _create_context_for_brief(brief)
+    if user['active']:
+        try:
+            if dry_run:
+                logger.info(
+                    "Would notify {no_of_users} user(s) about brief ID: {brief_id} - '{brief_title}'",
+                    extra=logging_context
+                )
+            else:
+                logger.info(
+                    "Notifying {no_of_users} user(s) about brief ID: {brief_id} - '{brief_title}'",
+                    extra=logging_context
+                )
+                notify_client.send_email(
+                    user['emailAddress'], notify_template_id, email_context_data, allow_resend=False
+                )
+        except EmailError:
+            return user['id']
+
+
+def _log_failures(failed_users_by_brief_id, date_closed):
+    all_failed_users = []
+    for brief_id, failed_brief_users in sorted(failed_users_by_brief_id.items()):
+        logger.error(
+            'Email sending failed for the following buyer users of brief ID {brief_id}: {buyer_ids}',
+            extra={
+                "brief_id": brief_id,
+                "buyer_ids": ",".join(map(str, failed_brief_users))
+            }
+        )
+        all_failed_users.extend(failed_brief_users)
+
+    logger.error(
+        'All failures for award closed briefs notification on closing date {date_closed}: {all_failed_users}',
+        extra={
+            "date_closed": date_closed.strftime(DATE_FORMAT),
+            "all_failed_users": ",".join(map(str, all_failed_users))
+        }
+    )
 
 
 def main(
@@ -100,47 +127,23 @@ def main(
     if user_id_list:
         closed_briefs = _filter_briefs_by_user_id_list(closed_briefs, user_id_list)
 
-    logger.info("Notifying users about {briefs_count} closed brief(s)", extra={'briefs_count': len(closed_briefs)})
+    logger.info("{briefs_count} closed brief(s) found with closing date {date_closed}", extra={
+        'briefs_count': len(closed_briefs), "date_closed": date_closed
+    })
 
-    failed_users_for_each_brief = {}
-    all_failed_users = []
+    failed_users_by_brief_id = {}
     for brief in closed_briefs:
-        logging_context = {
-            'brief_title': brief['title'],
-            'brief_id': brief['id'],
-            'no_of_users': len(brief['users']),
-        }
-        if dry_run:
-            logger.info(
-                "Would notify {no_of_users} user(s) about brief ID: {brief_id} - '{brief_title}'",
-                extra=logging_context
+        failed_users_for_this_brief = []
+        for user in brief['users']:
+            failed_user_id = send_email_to_brief_user_via_notify(
+                notify_client, notify_template_id, user, brief, user_id_list, dry_run
             )
-        else:
-            logger.info(
-                "Notifying {no_of_users} user(s) about brief ID: {brief_id} - '{brief_title}'",
-                extra=logging_context
-            )
-            failed_users = notify_users(notify_client, notify_template_id, brief, user_id_list)
-            if failed_users:
-                failed_users_for_each_brief[brief['id']] = failed_users
-                all_failed_users.extend(failed_users)
+            if failed_user_id:
+                failed_users_for_this_brief.append(failed_user_id)
+        if failed_users_for_this_brief:
+            failed_users_by_brief_id[brief['id']] = failed_users_for_this_brief
 
-    if failed_users_for_each_brief:
-        for brief_id, failed_brief_users in sorted(failed_users_for_each_brief.items()):
-            logger.error(
-                'Email sending failed for the following buyer users of brief ID {brief_id}: {buyer_ids}',
-                extra={
-                    "brief_id": brief_id,
-                    "buyer_ids": ",".join(map(str, failed_brief_users))
-                }
-            )
-
-        logger.error(
-            'All failures for award closed briefs notification on closing date {date_closed}: {all_failed_users}',
-            extra={
-                "date_closed": date_closed.strftime(DATE_FORMAT),
-                "all_failed_users": ",".join(map(str, all_failed_users))
-            }
-        )
+    if failed_users_by_brief_id:
+        _log_failures(failed_users_by_brief_id, date_closed)
         return False
     return True
