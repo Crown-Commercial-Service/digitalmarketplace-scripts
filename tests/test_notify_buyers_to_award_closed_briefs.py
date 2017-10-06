@@ -55,13 +55,25 @@ class TestNotifyUsers:
             mock.call(
                 'a@example.com',
                 'NOTIFY_TEMPLATE_ID',
-                {'brief_id': 100, 'brief_title': 'My brief title', 'utm_date': '20170101'},
+                {
+                    'brief_id': 100,
+                    'brief_title': 'My brief title',
+                    'framework_slug': 'framework-slug',
+                    'lot_slug': 'lot-slug',
+                    'utm_date': '20170101',
+                },
                 allow_resend=False
             ),
             mock.call(
                 'c@example.com',
                 'NOTIFY_TEMPLATE_ID',
-                {'brief_id': 100, 'brief_title': 'My brief title', 'utm_date': '20170101'},
+                {
+                    'brief_id': 100,
+                    'brief_title': 'My brief title',
+                    'framework_slug': 'framework-slug',
+                    'lot_slug': 'lot-slug',
+                    'utm_date': '20170101',
+                },
                 allow_resend=False
             ),
         ]
@@ -80,7 +92,13 @@ class TestNotifyUsers:
             mock.call(
                 'c@example.com',
                 'NOTIFY_TEMPLATE_ID',
-                {'brief_id': 100, 'brief_title': 'My brief title', 'utm_date': '20170101'},
+                {
+                    'brief_id': 100,
+                    'brief_title': 'My brief title',
+                    'framework_slug': 'framework-slug',
+                    'lot_slug': 'lot-slug',
+                    'utm_date': '20170101',
+                },
                 allow_resend=False
             ),
         ]
@@ -101,11 +119,25 @@ class TestNotifyUsers:
         assert notify_client.send_email.call_args_list == [
             mock.call(
                 'a@example.com', 'NOTIFY_TEMPLATE_ID',
-                {'brief_id': 100, 'brief_title': 'My brief title', 'utm_date': '20170101'}, allow_resend=False
+                {
+                    'brief_id': 100,
+                    'brief_title': 'My brief title',
+                    'framework_slug': 'framework-slug',
+                    'lot_slug': 'lot-slug',
+                    'utm_date': '20170101',
+                },
+                allow_resend=False
             ),
             mock.call(
                 'c@example.com', 'NOTIFY_TEMPLATE_ID',
-                {'brief_id': 100, 'brief_title': 'My brief title', 'utm_date': '20170101'}, allow_resend=False
+                {
+                    'brief_id': 100,
+                    'brief_title': 'My brief title',
+                    'framework_slug': 'framework-slug',
+                    'lot_slug': 'lot-slug',
+                    'utm_date': '20170101',
+                },
+                allow_resend=False
             ),
         ]
 

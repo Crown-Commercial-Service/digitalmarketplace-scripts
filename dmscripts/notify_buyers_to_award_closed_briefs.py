@@ -28,6 +28,8 @@ def _create_context_for_brief(brief):
     return {
         'brief_id': brief['id'],
         'brief_title': brief['title'],
+        'framework_slug': brief['frameworkSlug'],
+        'lot_slug': brief['lotSlug'],
         'utm_date': date.today().strftime("%Y%m%d")
     }
 
