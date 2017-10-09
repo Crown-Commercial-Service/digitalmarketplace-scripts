@@ -41,7 +41,8 @@ class TestSendEmailToBriefUserViaNotify:
             "completed_at": "2017-01-01"
         }
 
-    def test_notify_users_sends_emails_to_all_active_users(self):
+    @mock.patch('dmscripts.notify_buyers_to_award_closed_briefs.logger', autospec=True)
+    def test_notify_users_sends_emails_to_all_active_users(self, logger):
         notify_client = mock.Mock()
         notify_client.send_email.return_value = self._get_notify_email_api_response()
 
@@ -63,6 +64,12 @@ class TestSendEmailToBriefUserViaNotify:
                     'utm_date': '20170101',
                 },
                 allow_resend=False
+            )
+        ]
+        assert logger.info.call_args_list == [
+            mock.call(
+                "Notifying user ID {user_id} about brief ID {brief_id}: '{brief_title}'",
+                extra={'brief_title': 'My brief title', 'brief_id': 100, 'user_id': 9}
             )
         ]
 
@@ -122,8 +129,8 @@ class TestSendEmailToBriefUserViaNotify:
 
         assert failed_user is None
         assert logger.info.call_args_list == [mock.call(
-            "Would notify {no_of_users} user(s) about brief ID: {brief_id} - '{brief_title}'",
-            extra={'brief_title': 'My brief title', 'brief_id': 100, 'no_of_users': 3}
+            "Would notify user ID {user_id} about brief ID {brief_id}: '{brief_title}'",
+            extra={'brief_title': 'My brief title', 'brief_id': 100, 'user_id': 9}
         )]
         notify_client.assert_not_called()
 

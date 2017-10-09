@@ -53,19 +53,19 @@ def send_email_to_brief_user_via_notify(notify_client, notify_template_id, user,
     logging_context = {
         'brief_title': brief['title'],
         'brief_id': brief['id'],
-        'no_of_users': len(brief['users']),
+        'user_id': user['id'],
     }
     email_context_data = _create_context_for_brief(brief)
     if user['active']:
         try:
             if dry_run:
                 logger.info(
-                    "Would notify {no_of_users} user(s) about brief ID: {brief_id} - '{brief_title}'",
+                    "Would notify user ID {user_id} about brief ID {brief_id}: '{brief_title}'",
                     extra=logging_context
                 )
             else:
                 logger.info(
-                    "Notifying {no_of_users} user(s) about brief ID: {brief_id} - '{brief_title}'",
+                    "Notifying user ID {user_id} about brief ID {brief_id}: '{brief_title}'",
                     extra=logging_context
                 )
                 notify_client.send_email(
