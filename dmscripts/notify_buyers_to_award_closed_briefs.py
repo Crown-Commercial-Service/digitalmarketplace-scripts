@@ -6,7 +6,7 @@ from dmutils.email import DMNotifyClient
 from dmutils.email.exceptions import EmailError
 from dmutils.formats import DATE_FORMAT
 
-from dmscripts.helpers import logging_helpers, date_helpers, brief_data_helpers
+from dmscripts.helpers import logging_helpers, brief_data_helpers
 
 logger = logging_helpers.configure_logger({'dmapiclient': logging_helpers.logging.INFO})
 
@@ -38,7 +38,7 @@ def _get_brief_closing_date(offset_days, closing_date_arg=None):
           On the 28th Jan, closing_date_arg=2016-01-01 offset_days=28 will return False
     """
     if closing_date_arg:
-        closing_date = date_helpers.get_date_closed(closing_date_arg)
+        closing_date = datetime.strptime(closing_date_arg, DATE_FORMAT).date()
         if closing_date > (datetime.utcnow() - timedelta(days=offset_days)).date():
             return False
         return closing_date

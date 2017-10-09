@@ -4,6 +4,7 @@ from freezegun import freeze_time
 import datetime
 
 from dmscripts.notify_buyers_when_requirements_close import (
+    get_date_closed,
     get_notified_briefs,
     notify_users,
     main
@@ -25,6 +26,18 @@ class FakeMail(object):
 
     def __repr__(self):
         return "<FakeMail: {}>".format(self.substrings)
+
+
+def test_get_date_closed():
+    def check_date_closed(value, expected):
+        with freeze_time('2015-01-02 03:04:05'):
+            assert get_date_closed(value) == expected
+
+    for value, expected in [
+        (None, datetime.date(2015, 1, 1)),
+        ('2016-01-02', datetime.date(2016, 1, 2))
+    ]:
+        yield check_date_closed, value, expected
 
 
 @mock.patch('dmscripts.notify_buyers_when_requirements_close.get_sent_emails')

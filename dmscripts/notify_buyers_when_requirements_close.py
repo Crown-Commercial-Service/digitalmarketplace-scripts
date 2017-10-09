@@ -4,8 +4,8 @@ from datetime import datetime, timedelta
 import dmapiclient
 from dmutils.email import send_email
 from dmutils.email.exceptions import EmailError
+from dmutils.formats import DATE_FORMAT
 
-from dmscripts.helpers.date_helpers import get_date_closed
 from dmscripts.helpers.email_helpers import get_sent_emails
 from dmscripts.helpers.brief_data_helpers import get_briefs_closed_on_date
 from dmscripts.helpers.html_helpers import render_html
@@ -46,6 +46,13 @@ def notify_users(email_api_key, brief):
             )
 
             return False
+
+
+def get_date_closed(date_closed):
+    if date_closed is None:
+        return (datetime.utcnow() - timedelta(days=1)).date()
+    else:
+        return datetime.strptime(date_closed, DATE_FORMAT).date()
 
 
 def get_notified_briefs(email_api_key, date_closed):
