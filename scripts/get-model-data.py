@@ -170,9 +170,13 @@ CONFIGS = [
             'id',
             'awardedContractStartDate',
             'awardedContractValue',
-            'supplierOrganisationSize'
+            'supplierOrganisationSize',
+            'status',
         ),
-        'assign_json_subfields': {'awardDetails': ['awardedContractStartDate', 'awardedContractValue']},
+        'assign_json_subfields': {
+            'awardDetails': ['awardedContractStartDate', 'awardedContractValue'],
+            'brief': ['title', 'frameworkSlug'],
+        },
         'get_data_kwargs': {},
         'process_fields': {
             'createdAt': format_datetime_string_as_date,
