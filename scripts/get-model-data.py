@@ -288,6 +288,9 @@ if __name__ == '__main__':
             data = queries.process_fields(config['process_fields'], data)
         if 'add_counts' in config:
             data = queries.add_counts(data=data, directory=OUTPUT_DIR, **config['add_counts'])
+        if 'aggregation_counts' in config:
+            for count in config['aggregation_counts']:
+                data = queries.add_aggregation_counts(data=data, **count)
 
         if 'filter_query' in config:
             # filter out things we don't want
