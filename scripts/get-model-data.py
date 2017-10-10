@@ -226,7 +226,20 @@ CONFIGS = [
             'awardedBriefResponseId'
         ),
         'sort_by': ['id']
-    }
+    },
+    {
+        'name': 'awarded_brief_responses',
+        'model': 'brief_responses',
+        'filter_query': 'status == "awarded"',
+        'keys': (
+            'briefId',
+            'awardedContractStartDate',
+            'awardedContractValue',
+            'supplierOrganisationSize',
+            'supplierName'
+        ),
+        'sort_by': ['briefId']
+    },
 ]
 
 if __name__ == '__main__':
