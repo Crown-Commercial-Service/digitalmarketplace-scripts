@@ -187,7 +187,7 @@ CONFIGS = [
     },
     {
         'name': 'successful_brief_responses',
-        'join': ({'model': 'briefs', 'key': 'id'}, {'model': 'brief_responses', 'key': "briefId"}),
+        'joins': [({'model': 'briefs', 'key': 'id'}, {'model': 'brief_responses', 'key': "briefId"}),],
         'filter_query': "essentialRequirements",
         'keys': (
             'briefId',
@@ -263,9 +263,9 @@ if __name__ == '__main__':
                                       client=client, logger=logger, limit=limit)
         elif 'model' in config:
             data = queries.model(config['model'], directory=OUTPUT_DIR)
-        elif 'join' in config:
-            data = queries.join(config['join'], directory=OUTPUT_DIR)
-
+        elif 'joins' in config:
+            for join in config['joins']:
+                data = queries.join(join, directory=OUTPUT_DIR)
         # transform values that we want to transform
         if 'assign_json_subfields' in config:
             for field, subfields in config['assign_json_subfields'].items():
