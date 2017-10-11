@@ -57,7 +57,6 @@ def join(data, model, left_on, right_on, directory, data_duplicate_suffix=None):
     ).fillna('')
 
 
-
 def filter_rows(filter_query, data):
     """Filter a pandas DataFrame.
 

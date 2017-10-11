@@ -9,6 +9,7 @@ def format_datetime_string_as_date(dt):
 def remove_username_from_email_address(ea):
     return '{}'.format(ea.split('@').pop()) if ea else None
 
+
 def construct_brief_url(brief_id):
     return (
         'https://www.digitalmarketplace.service.gov.uk/'

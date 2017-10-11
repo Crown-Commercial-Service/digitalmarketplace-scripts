@@ -194,7 +194,7 @@ CONFIGS = [
             {
                 'model': 'briefs',
                 'left_on': 'briefId',
-                'right_on':'id',
+                'right_on': 'id',
                 'data_duplicate_suffix': '_briefs'
             }
         ],
@@ -263,7 +263,7 @@ CONFIGS = [
             {
                 'model': 'awarded_brief_responses',
                 'left_on': 'id',
-                'right_on':'briefId',
+                'right_on': 'briefId',
                 'data_duplicate_suffix': '_awarded_brief_responses'
             }, {
                 'model': 'brief_responses',

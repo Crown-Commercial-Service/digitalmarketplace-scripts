@@ -22,18 +22,18 @@ def test_model(csv_reader):
 
 
 def test_join(csv_reader):
-    csv_reader.side_effect = [
-        DataFrame([{'id': 1, 'val': 'one'}, {'id': 2, 'val': 'two'}, {'id': 3, 'val': 'three'}]),
-        DataFrame([{'fk': 1, 'col': 100}, {'fk': 1, 'col': 200}, {'fk': 3, 'col': 300}])
+    left_data = DataFrame([{'fk': 1, 'col': 100}, {'fk': 1, 'col': 200}, {'fk': 3, 'col': 300}])
+    right_data = DataFrame([{'id': 1, 'val': 'one'}, {'id': 2, 'val': 'two'}, {'id': 3, 'val': 'three'}])
+    config_value = {'model': 'n', 'left_on': 'fk', 'right_on': 'id'}
+    expected_result = [
+        [100, 1, 1, 'one'],
+        [200, 1, 1, 'one'],
+        [300, 3, 3, 'three']
     ]
 
-    assert queries.join(
-        ({'model': '1', 'key': 'id'}, {'model': '2', 'key': 'fk'}), 'data'
-    ).values.tolist() == [
-        [1, 'one', 100.0, 1],
-        [1, 'one', 200.0, 1],
-        [3, 'three', 300.0, 3],
-    ]
+    csv_reader.return_value = right_data
+
+    assert queries.join(left_data, directory='data', **config_value).values.tolist() == expected_result
 
 
 def test_filter_rows():
