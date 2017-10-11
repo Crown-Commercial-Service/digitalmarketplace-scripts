@@ -35,13 +35,26 @@ def model(model, directory):
     return pandas.read_csv(csv_path(directory, model))
 
 
-def join(join, directory):
-    models = [model['model'] for model in join]
-    data, joined = (pandas.read_csv(csv_path(directory, model)) for model in models)
-    left_on, right_on = (model['key'] for model in join)
+def join(data, model, left_on, right_on, directory, data_duplicate_suffix=None):
+    """Left join the model data csv denoted by 'model' to 'data'.
 
-    return data.merge(joined, left_on=left_on, right_on=right_on,
-                      suffixes=['_{}'.format(model) for model in models])
+    :param data: The current pandas DataFrame we are working with.
+    :param model: The name of a csv in the data directory. This will be joined to data.
+    :param left_on: The field in 'data' we are joining on.
+    :param right_on: The field in the model csv we are joining on.
+    :param directory: The data directory.
+    :param data_duplicate_suffix: An optional suffix for fields duplicated in both datasets.
+    :return: pandas DataFrame of model joined to data.
+    """
+    csv_to_be_joined = pandas.read_csv(csv_path(directory, model))
+
+    return data.merge(
+        csv_to_be_joined,
+        how='left',
+        left_on=left_on,
+        right_on=right_on,
+        suffixes=[data_duplicate_suffix, model]
+    ).fillna('')
 
 
 def filter_rows(filter_query, data):
@@ -84,7 +97,6 @@ def add_counts(join, group_by, model, data, directory):
 
 def add_aggregation_counts(data, group_by, join, count_name, query=None):
     left_on, right_on = join
-
     count_data = (data.query(query) if query else data).groupby(group_by)[group_by].count()
     count_data_frame = pandas.DataFrame({group_by: count_data.index, count_name: count_data})
     data = data.merge(count_data_frame, how='left', left_on=left_on, right_on=right_on)
