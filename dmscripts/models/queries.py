@@ -26,6 +26,12 @@ def base_model(base_model, keys, get_data_kwargs, client, logger=None, limit=Non
 
 
 def model(model, directory):
+    """Return a Pandas DataFrame loaded from a csv of a given DM model.
+
+    :param model: The model we are working with, used as the name of the .csv
+    :param directory: The directory in which to find the model data csv.
+    :return: Pandas DataFrame of model data loaded from csv.
+    """
     return pandas.read_csv(csv_path(directory, model))
 
 
