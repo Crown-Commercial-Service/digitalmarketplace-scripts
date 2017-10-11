@@ -53,8 +53,9 @@ def join(data, model, left_on, right_on, directory, data_duplicate_suffix=None):
         how='left',
         left_on=left_on,
         right_on=right_on,
-        suffixes=[data_duplicate_suffix, model]
+        suffixes=[data_duplicate_suffix, '_' + model]
     ).fillna('')
+
 
 
 def filter_rows(filter_query, data):
@@ -100,10 +101,11 @@ def add_counts(join, group_by, model, data, directory):
 
 def add_aggregation_counts(data, group_by, join, count_name, query=None):
     left_on, right_on = join
+
     count_data = (data.query(query) if query else data).groupby(group_by)[group_by].count()
     count_data_frame = pandas.DataFrame({group_by: count_data.index, count_name: count_data})
-    data = data.merge(count_data_frame, how='left', left_on=left_on, right_on=right_on)
 
+    data = data.merge(count_data_frame, how='left', left_on=left_on, right_on=right_on, suffixes=['', count_name])
     return data
 
 

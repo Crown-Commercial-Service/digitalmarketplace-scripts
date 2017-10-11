@@ -195,7 +195,7 @@ CONFIGS = [
                 'model': 'briefs',
                 'left_on': 'briefId',
                 'right_on':'id',
-                'data_duplicate_suffix': 'briefs'
+                'data_duplicate_suffix': '_briefs'
             }
         ],
         'filter_query': "essentialRequirements",
@@ -264,17 +264,18 @@ CONFIGS = [
                 'model': 'awarded_brief_responses',
                 'left_on': 'id',
                 'right_on':'briefId',
-                'data_duplicate_suffix': '_data'
+                'data_duplicate_suffix': '_awarded_brief_responses'
             }, {
                 'model': 'brief_responses',
                 'left_on': 'id',
-                'right_on':'briefId',
+                'right_on': 'briefId',
                 'data_duplicate_suffix': '_data'
-            }
+            },
+
         ],
         'keys': (
-            'briefId_data',
             'title',
+            'id_data',
             'frameworkSlug',
             'lotSlug',
             'specialistRole',
@@ -294,28 +295,29 @@ CONFIGS = [
         ),
         'aggregation_counts': [
             {
-                'group_by': 'briefId_data',
-                'join': ('briefId_data', 'briefId_data'),
-                'count_name': 'totalApplications'
+                'group_by': 'id_data',
+                'join': ('id_data', 'id_data'),
+                'count_name': 'totalApplications',
+                'query': 'id_brief_responses != ""',
             }, {
-                'group_by': 'briefId_data',
-                'join': ('briefId_data', 'briefId_data'),
+                'group_by': 'id_data',
+                'join': ('id_data', 'id_data'),
                 'count_name': 'applicationsFromSMEs',
-                'query': 'awarded_supplierOrganisationSize in ["micro", "small", "medium"]',
+                'query': 'supplierOrganisationSize in ["micro", "small", "medium"]',
             }, {
-                'group_by': 'briefId_data',
-                'join': ('briefId_data', 'briefId_data'),
+                'group_by': 'id_data',
+                'join': ('id_data', 'id_data'),
                 'count_name': 'applicationsFromLargeOrganisations',
-                'query': 'awarded_supplierOrganisationSize == "large"',
+                'query': 'supplierOrganisationSize == "large"',
             },
         ],
         'process_fields': {
-            'briefId_data': construct_brief_url,
+            'id_data': construct_brief_url,
             'emailAddress': remove_username_from_email_address,
         },
         'rename_fields': {
             'title': 'Opportunity',
-            'briefId_brief_responses': 'Link',
+            'id_data': 'Link',
             'frameworkSlug': 'Framework',
             'lotSlug': 'Category',
             'specialistRole': 'Specialist',
