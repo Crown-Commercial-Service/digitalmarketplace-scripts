@@ -37,7 +37,9 @@ sys.path.insert(0, '.')
 from docopt import docopt
 from dmapiclient import DataAPIClient
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
-from dmscripts.models.process_rules import format_datetime_string_as_date, remove_username_from_email_address
+from dmscripts.models.process_rules import (
+    format_datetime_string_as_date, remove_username_from_email_address, construct_brief_url
+)
 from dmscripts.models.writecsv import csv_path
 from dmscripts.models import queries
 
@@ -246,8 +248,92 @@ CONFIGS = [
             'supplierOrganisationSize',
             'supplierName'
         ),
-        'sort_by': ['briefId']
+        'sort_by': ['briefId'],
+        'rename_fields': {
+            'awardedContractStartDate': 'awarded_awardedContractStartDate',
+            'awardedContractValue': 'awarded_awardedContractValue',
+            'supplierOrganisationSize': 'awarded_supplierOrganisationSize',
+            'supplierName': 'awarded_supplierName'
+        }
     },
+    {
+        'name': 'opportunity_data',
+        'model': 'briefs',
+        'joins': [
+            {
+                'model': 'awarded_brief_responses',
+                'left_on': 'id',
+                'right_on':'briefId',
+                'data_duplicate_suffix': '_data'
+            }, {
+                'model': 'brief_responses',
+                'left_on': 'id',
+                'right_on':'briefId',
+                'data_duplicate_suffix': '_data'
+            }
+        ],
+        'keys': (
+            'briefId_brief_responses',
+            'title',
+            'frameworkSlug',
+            'lotSlug',
+            'specialistRole',
+            'organisation',
+            'emailAddress',
+            'location',
+            'publishedAt',
+            'requirementsLength',
+            'totalApplications',
+            'applicationsFromSMEs',
+            'applicationsFromLargeOrganisations',
+            'status_briefs',
+            'awarded_supplierName',
+            'awarded_supplierOrganisationSize',
+            'awarded_awardedContractValue',
+            'awarded_awardedContractStartDate',
+        ),
+        'aggregation_counts': [
+            {
+                'group_by': 'briefId_brief_responses',
+                'join': ('briefId_brief_responses', 'briefId_brief_responses'),
+                'count_name': 'totalApplications'
+            }, {
+                'group_by': 'briefId_brief_responses',
+                'join': ('briefId_brief_responses', 'briefId_brief_responses'),
+                'count_name': 'applicationsFromSMEs',
+                'query': 'awarded_supplierOrganisationSize in ["micro", "small", "medium"]',
+            }, {
+                'group_by': 'briefId_brief_responses',
+                'join': ('briefId_brief_responses', 'briefId_brief_responses'),
+                'count_name': 'applicationsFromLargeOrganisations',
+                'query': 'awarded_supplierOrganisationSize == "large"',
+            },
+        ],
+        'process_fields': {
+            'briefId_brief_responses': construct_brief_url,
+            'emailAddress': remove_username_from_email_address,
+        },
+        'rename_fields': {
+            'title': 'Opportunity',
+            'briefId_brief_responses': 'Link',
+            'frameworkSlug': 'Framework',
+            'lotSlug': 'Category',
+            'specialistRole': 'Specialist',
+            'organisation': 'Organisation Name',
+            'emailAddress': 'Buyer Domain',
+            'location': 'Location Of The Work',
+            'publishedAt': 'Published At',
+            'requirementsLength': 'Open For',
+            'applicationsFromSMEs': 'Applications from SMEs',
+            'applicationsFromLargeOrganisations': 'Applications from Large Organisations',
+            'totalApplications': 'Total Organisations',
+            'status': 'Status',
+            'awarded_supplierName': 'Winning supplier',
+            'awarded_supplierOrganisationSize': 'Size of supplier',
+            'awarded_awardedContractValue': 'Contract amount',
+            'awarded_awardedContractStartDate': 'Contract start date'
+        }
+    }
 ]
 
 if __name__ == '__main__':
