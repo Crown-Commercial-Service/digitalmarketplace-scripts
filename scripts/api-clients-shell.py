@@ -30,7 +30,7 @@ from dmscripts.helpers.auth_helpers import get_auth_token, get_api_url  # noqa
 
 def clients_in_shell(stage, api_url, api_token, search_api_url, search_api_token):
     print('Retrieving credentials...')
-    api_token = api_token or get_auth_token('api', stage),
+    api_token = api_token or get_auth_token('api', stage)
     search_api_token = search_api_token or get_auth_token('search_api', stage)
 
     print('Creating clients...')
