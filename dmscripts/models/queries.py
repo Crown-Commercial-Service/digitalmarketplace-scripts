@@ -5,6 +5,16 @@ from dmscripts.models.modeltrawler import ModelTrawler
 
 
 def base_model(base_model, keys, get_data_kwargs, client, logger=None, limit=None):
+    """Fetch all the data for a given Digital Marketplace model from the api.
+
+    :param base_model: A Digital Marketplace model (client must have a 'find_{model}_iter' method)
+    :param keys: The attributes we require of that model.
+    :param get_data_kwargs: Additional kwargs for the get request the client will make.
+    :param client: Instantiated Digital Marketplace APIClient
+    :param logger:
+    :param limit: Maximum number of requests for the client to perform.
+    :return: A pandas DataFrame of the requested data. Columns as model attributes, rows as instances.
+    """
     mt = ModelTrawler(base_model, client)
 
     data = list(mt.get_data(keys=keys, limit=limit, **get_data_kwargs))
