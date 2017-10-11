@@ -85,6 +85,10 @@ The `scripts` folder in this repository contains scripts that interact with the 
   Marks suppliers as having passed/failed a framework, where the result can be determined "automatically" not requiring
   human involvement (i.e. not "discretionary" results).
 
+* `notify-buyers-to-award-closed-briefs.py`
+
+  **Runs nightly on Jenkins**. Send email notifications to buyer users reminding them to award their closed requirements.
+
 * `notify-buyers-when-requirements-close.py`
 
   **Runs nightly on Jenkins**. Send email notifications to buyer users about closed requirements.

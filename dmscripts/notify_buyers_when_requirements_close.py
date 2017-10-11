@@ -4,21 +4,15 @@ from datetime import datetime, timedelta
 import dmapiclient
 from dmutils.email import send_email
 from dmutils.email.exceptions import EmailError
-from dmutils.formats import DATE_FORMAT, DATETIME_FORMAT
+from dmutils.formats import DATE_FORMAT
 
 from dmscripts.helpers.email_helpers import get_sent_emails
+from dmscripts.helpers.brief_data_helpers import get_briefs_closed_on_date
 from dmscripts.helpers.html_helpers import render_html
 from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.logging_helpers import logging
 
 logger = logging_helpers.configure_logger({'dmapiclient': logging.INFO})
-
-
-def get_closed_briefs(data_api_client, date_closed):
-    return [
-        brief for brief in data_api_client.find_briefs_iter(status='closed', with_users=True)
-        if datetime.strptime(brief['applicationsClosedAt'], DATETIME_FORMAT).date() == date_closed
-    ]
 
 
 def notify_users(email_api_key, brief):
@@ -79,7 +73,7 @@ def main(data_api_url, data_api_access_token, email_api_key, date_closed, dry_ru
 
     data_api_client = dmapiclient.DataAPIClient(data_api_url, data_api_access_token)
 
-    closed_briefs = get_closed_briefs(data_api_client, date_closed)
+    closed_briefs = get_briefs_closed_on_date(data_api_client, date_closed)
     if not closed_briefs:
         logger.info("No briefs closed on {date_closed}", extra={"date_closed": date_closed})
         return True

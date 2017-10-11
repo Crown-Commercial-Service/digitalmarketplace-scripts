@@ -4,7 +4,6 @@ from freezegun import freeze_time
 import datetime
 
 from dmscripts.notify_buyers_when_requirements_close import (
-    get_closed_briefs,
     get_date_closed,
     get_notified_briefs,
     notify_users,
@@ -27,27 +26,6 @@ class FakeMail(object):
 
     def __repr__(self):
         return "<FakeMail: {}>".format(self.substrings)
-
-
-def test_get_closed_briefs_filters_by_date_closed():
-    api_client = mock.Mock()
-    api_client.find_briefs_iter.return_value = iter([
-        {"applicationsClosedAt": "2016-09-03T23:59:59.000000Z", "status": "closed"},
-        {"applicationsClosedAt": "2016-09-04T23:59:59.000000Z", "status": "closed"},
-        {"applicationsClosedAt": "2016-09-05T23:59:59.000000Z", "status": "closed"},
-        {"applicationsClosedAt": "2016-09-06T23:59:59.000000Z", "status": "closed"},
-        {"applicationsClosedAt": "2016-09-07T23:59:59.000000Z", "status": "closed"},
-        {"applicationsClosedAt": "2016-09-08T23:59:59.000000Z", "status": "closed"},
-        {"applicationsClosedAt": "2016-09-05T23:59:59.000000Z", "status": "closed"},
-        {"applicationsClosedAt": "2016-09-09T23:59:59.000000Z", "status": "closed"},
-        {"applicationsClosedAt": "2016-09-05T23:59:59.000000Z", "status": "closed"},
-    ])
-
-    assert get_closed_briefs(api_client, datetime.date(2016, 9, 5)) == [
-        {"applicationsClosedAt": "2016-09-05T23:59:59.000000Z", "status": "closed"},
-        {"applicationsClosedAt": "2016-09-05T23:59:59.000000Z", "status": "closed"},
-        {"applicationsClosedAt": "2016-09-05T23:59:59.000000Z", "status": "closed"},
-    ]
 
 
 def test_get_date_closed():
@@ -124,10 +102,10 @@ def test_notify_users_returns_false_on_error(send_email):
 
 @mock.patch('dmscripts.notify_buyers_when_requirements_close.notify_users')
 @mock.patch('dmscripts.notify_buyers_when_requirements_close.get_notified_briefs')
-@mock.patch('dmscripts.notify_buyers_when_requirements_close.get_closed_briefs')
-def test_main(get_closed_briefs, get_notified_briefs, notify_users):
+@mock.patch('dmscripts.notify_buyers_when_requirements_close.get_briefs_closed_on_date')
+def test_main(get_briefs_closed_on_date, get_notified_briefs, notify_users):
     get_notified_briefs.return_value = set([200])
-    get_closed_briefs.return_value = [
+    get_briefs_closed_on_date.return_value = [
         {'id': 100},
         {'id': 200},
         {'id': 300},
@@ -137,7 +115,7 @@ def test_main(get_closed_briefs, get_notified_briefs, notify_users):
 
     with freeze_time('2016-01-02 03:04:05'):
         assert main('URL', 'API_KEY', 'KEY', '2016-01-02', False)
-    get_closed_briefs.assert_called_once_with(mock.ANY, datetime.date(2016, 1, 2))
+    get_briefs_closed_on_date.assert_called_once_with(mock.ANY, datetime.date(2016, 1, 2))
     get_notified_briefs.assert_called_once_with('KEY', datetime.date(2016, 1, 2))
     notify_users.assert_has_calls([
         mock.call('KEY', {'id': 100}),
@@ -147,9 +125,9 @@ def test_main(get_closed_briefs, get_notified_briefs, notify_users):
 
 @mock.patch('dmscripts.notify_buyers_when_requirements_close.notify_users')
 @mock.patch('dmscripts.notify_buyers_when_requirements_close.get_notified_briefs')
-@mock.patch('dmscripts.notify_buyers_when_requirements_close.get_closed_briefs')
-def test_main_fails_when_notify_users_fails(get_closed_briefs, get_notified_briefs, notify_users):
-    get_closed_briefs.return_value = [
+@mock.patch('dmscripts.notify_buyers_when_requirements_close.get_briefs_closed_on_date')
+def test_main_fails_when_notify_users_fails(get_briefs_closed_on_date, get_notified_briefs, notify_users):
+    get_briefs_closed_on_date.return_value = [
         {'id': 100},
         {'id': 200},
     ]
@@ -161,9 +139,9 @@ def test_main_fails_when_notify_users_fails(get_closed_briefs, get_notified_brie
 
 @mock.patch('dmscripts.notify_buyers_when_requirements_close.notify_users')
 @mock.patch('dmscripts.notify_buyers_when_requirements_close.get_notified_briefs')
-@mock.patch('dmscripts.notify_buyers_when_requirements_close.get_closed_briefs')
-def test_main_with_no_briefs(get_closed_briefs, get_notified_briefs, notify_users):
-    get_closed_briefs.return_value = []
+@mock.patch('dmscripts.notify_buyers_when_requirements_close.get_briefs_closed_on_date')
+def test_main_with_no_briefs(get_briefs_closed_on_date, get_notified_briefs, notify_users):
+    get_briefs_closed_on_date.return_value = []
 
     assert main('URL', 'API_KEY', 'KEY', None, False)
     get_notified_briefs.assert_not_called()
@@ -172,9 +150,9 @@ def test_main_with_no_briefs(get_closed_briefs, get_notified_briefs, notify_user
 
 @mock.patch('dmscripts.notify_buyers_when_requirements_close.notify_users')
 @mock.patch('dmscripts.notify_buyers_when_requirements_close.get_notified_briefs')
-@mock.patch('dmscripts.notify_buyers_when_requirements_close.get_closed_briefs')
-def test_main_doesnt_allow_old_date_closed(get_closed_briefs, get_notified_briefs, notify_users):
-    get_closed_briefs.return_value = [
+@mock.patch('dmscripts.notify_buyers_when_requirements_close.get_briefs_closed_on_date')
+def test_main_doesnt_allow_old_date_closed(get_briefs_closed_on_date, get_notified_briefs, notify_users):
+    get_briefs_closed_on_date.return_value = [
         {'id': 100},
         {'id': 200},
     ]
@@ -188,9 +166,9 @@ def test_main_doesnt_allow_old_date_closed(get_closed_briefs, get_notified_brief
 
 @mock.patch('dmscripts.notify_buyers_when_requirements_close.notify_users')
 @mock.patch('dmscripts.notify_buyers_when_requirements_close.get_notified_briefs')
-@mock.patch('dmscripts.notify_buyers_when_requirements_close.get_closed_briefs')
-def test_main_dry_run(get_closed_briefs, get_notified_briefs, notify_users):
-    get_closed_briefs.return_value = [
+@mock.patch('dmscripts.notify_buyers_when_requirements_close.get_briefs_closed_on_date')
+def test_main_dry_run(get_briefs_closed_on_date, get_notified_briefs, notify_users):
+    get_briefs_closed_on_date.return_value = [
         {'id': 100},
         {'id': 200},
     ]
