@@ -75,7 +75,7 @@ def process_fields(rules, data):
 
 
 def rename_fields(columns, data):
-    """ Replace any column names using a dict of 'old column name': 'new column name' """
+    """Replace any column names using a dict of 'old column name': 'new column name' """
     return data.rename(columns=columns)
 
 
