@@ -293,8 +293,6 @@ if __name__ == '__main__':
             for field, subfields in config['assign_json_subfields'].items():
                 data = queries.assign_json_subfields(field, subfields, data)
 
-        if 'process_fields' in config:
-            data = queries.process_fields(config['process_fields'], data)
         if 'add_counts' in config:
             data = queries.add_counts(data=data, directory=OUTPUT_DIR, **config['add_counts'])
         if 'aggregation_counts' in config:
@@ -315,7 +313,8 @@ if __name__ == '__main__':
             if (k[-1] if isinstance(k, (tuple, list)) else k) in data
         ]
         data = data[keys]
-
+        if 'process_fields' in config:
+            data = queries.process_fields(config['process_fields'], data)
         if 'rename_fields' in config:
             data = queries.rename_fields(config['rename_fields'], data)
 
