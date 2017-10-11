@@ -322,6 +322,7 @@ if __name__ == '__main__':
         if 'sort_by' in config:
             data = queries.sort_by(config['sort_by'], data)
 
+        data = data.drop_duplicates()
         # write up your CSV
         filename = csv_path(OUTPUT_DIR, config['name'])
         data.to_csv(filename, index=False, encoding='utf-8')
