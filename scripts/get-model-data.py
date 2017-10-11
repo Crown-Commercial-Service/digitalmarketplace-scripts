@@ -273,7 +273,7 @@ CONFIGS = [
             }
         ],
         'keys': (
-            'briefId_brief_responses',
+            'briefId_data',
             'title',
             'frameworkSlug',
             'lotSlug',
@@ -294,23 +294,23 @@ CONFIGS = [
         ),
         'aggregation_counts': [
             {
-                'group_by': 'briefId_brief_responses',
-                'join': ('briefId_brief_responses', 'briefId_brief_responses'),
+                'group_by': 'briefId_data',
+                'join': ('briefId_data', 'briefId_data'),
                 'count_name': 'totalApplications'
             }, {
-                'group_by': 'briefId_brief_responses',
-                'join': ('briefId_brief_responses', 'briefId_brief_responses'),
+                'group_by': 'briefId_data',
+                'join': ('briefId_data', 'briefId_data'),
                 'count_name': 'applicationsFromSMEs',
                 'query': 'awarded_supplierOrganisationSize in ["micro", "small", "medium"]',
             }, {
-                'group_by': 'briefId_brief_responses',
-                'join': ('briefId_brief_responses', 'briefId_brief_responses'),
+                'group_by': 'briefId_data',
+                'join': ('briefId_data', 'briefId_data'),
                 'count_name': 'applicationsFromLargeOrganisations',
                 'query': 'awarded_supplierOrganisationSize == "large"',
             },
         ],
         'process_fields': {
-            'briefId_brief_responses': construct_brief_url,
+            'briefId_data': construct_brief_url,
             'emailAddress': remove_username_from_email_address,
         },
         'rename_fields': {
