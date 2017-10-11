@@ -58,10 +58,13 @@ def join(data, model, left_on, right_on, directory, data_duplicate_suffix=None):
 
 
 def filter_rows(filter_query, data):
-    if not filter_query:
-        return data
+    """Filter a pandas DataFrame.
 
-    return data.query(filter_query)
+    :param filter_query: The query to apply.
+    :param data: The DataFrame to apply the query to.
+    :return: pandas DataFrame filtered.
+    """
+    return data.query(filter_query) if filter_query else data
 
 
 def process_fields(rules, data):
