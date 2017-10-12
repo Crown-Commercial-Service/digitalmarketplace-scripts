@@ -35,7 +35,7 @@ def model(model, directory):
     return pandas.read_csv(csv_path(directory, model))
 
 
-def join(data, model, left_on, right_on, directory, data_duplicate_suffix=None):
+def join(data, model_name, left_on, right_on, directory, data_duplicate_suffix=None):
     """Left join the model data csv denoted by 'model' to 'data'.
 
     :param data: The current pandas DataFrame we are working with.
@@ -46,14 +46,14 @@ def join(data, model, left_on, right_on, directory, data_duplicate_suffix=None):
     :param data_duplicate_suffix: An optional suffix for fields duplicated in both datasets.
     :return: pandas DataFrame of model joined to data.
     """
-    csv_to_be_joined = pandas.read_csv(csv_path(directory, model))
+    csv_to_be_joined = model(model_name, directory)
 
     return data.merge(
         csv_to_be_joined,
         how='left',
         left_on=left_on,
         right_on=right_on,
-        suffixes=[data_duplicate_suffix, '_' + model]
+        suffixes=[data_duplicate_suffix, '_' + model_name]
     ).fillna('')
 
 
@@ -83,9 +83,9 @@ def sort_by(columns, data):
     return data.sort_values(by=columns)
 
 
-def add_counts(join, group_by, model, data, directory):
+def add_counts(join, group_by, model_name, data, directory):
     left_on, right_on = join
-    count_data = pandas.read_csv(csv_path(directory, model)).groupby(
+    count_data = model(model, directory).groupby(
         [right_on, group_by]
     ).size().reset_index(name='_count')
 
@@ -99,6 +99,15 @@ def add_counts(join, group_by, model, data, directory):
 
 
 def add_aggregation_counts(data, group_by, join, count_name, query=None):
+    """Add aggregated counts to a pandas DataFrame as new columns
+
+    :param data: The DataFrame to apply the new columns to.
+    :param group_by: The column whose rows you want to count.
+    :param join: How to join the counts back to your data.
+    :param count_name: A name for the new column.
+    :param query: An optional query to filter counts.
+    :return: pandas DataFrame with new count column.
+    """
     left_on, right_on = join
 
     count_data = (data.query(query) if query else data).groupby(group_by)[group_by].count()

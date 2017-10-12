@@ -29,21 +29,23 @@ Arguments:
         brief_responses_summary
 
 """
-
 import os
 import sys
 sys.path.insert(0, '.')
 
 from docopt import docopt
+
 from dmapiclient import DataAPIClient
+
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
+from dmscripts.helpers.logging_helpers import logging, configure_logger
+from dmscripts.models import queries
 from dmscripts.models.process_rules import (
     format_datetime_string_as_date, remove_username_from_email_address, construct_brief_url
 )
 from dmscripts.models.writecsv import csv_path
-from dmscripts.models import queries
 
-from dmscripts.helpers.logging_helpers import logging, configure_logger
+
 
 DOS_SPECIALIST_ROLES = [
     "agileCoach",
@@ -192,7 +194,7 @@ CONFIGS = [
         'model': 'brief_responses',
         'joins': [
             {
-                'model': 'briefs',
+                'model_name': 'briefs',
                 'left_on': 'briefId',
                 'right_on': 'id',
                 'data_duplicate_suffix': '_briefs'
@@ -218,7 +220,7 @@ CONFIGS = [
         'name': 'brief_responses_summary',
         'model': 'briefs',
         'add_counts': {
-            'model': 'brief_responses',
+            'model_name': 'brief_responses',
             'join': ('id', 'briefId'),
             'group_by': 'essentialRequirements'
         },
@@ -257,16 +259,16 @@ CONFIGS = [
         }
     },
     {
-        'name': 'opportunity_data',
+        'name': 'opportunity-data',
         'model': 'briefs',
         'joins': [
             {
-                'model': 'awarded_brief_responses',
+                'model_name': 'awarded_brief_responses',
                 'left_on': 'id',
                 'right_on': 'briefId',
                 'data_duplicate_suffix': '_awarded_brief_responses'
             }, {
-                'model': 'brief_responses',
+                'model_name': 'brief_responses',
                 'left_on': 'id',
                 'right_on': 'briefId',
                 'data_duplicate_suffix': '_data'
@@ -313,7 +315,7 @@ CONFIGS = [
         ],
         'process_fields': {
             'id_data': construct_brief_url,
-            'emailAddress': remove_username_from_email_address,
+            'emailAddress': remove_username_from_email_address
         },
         'rename_fields': {
             'title': 'Opportunity',
