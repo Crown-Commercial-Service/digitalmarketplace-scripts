@@ -32,7 +32,7 @@ def test_join(csv_reader):
         {'id': 2, 'val': 'two'},
         {'id': 3, 'val': 'three'}
     ])
-    config_value = {'model': 'n', 'left_on': 'fk', 'right_on': 'id'}
+    config_value = {'model_name': 'n', 'left_on': 'fk', 'right_on': 'id'}
     expected_result = [
         [100, 1, 1, 'one'],
         [200, 1, 1, 'one'],
@@ -208,4 +208,28 @@ def test_add_aggregation_counts_filter():
     ]
 
     data = queries.add_aggregation_counts(data, **config_value)
+    assert data.values.tolist() == expected_result
+
+
+def test_drop_duplicates():
+    data = DataFrame([
+        OrderedDict([('id', 1), ('fk', 1)]),
+        OrderedDict([('id', 1), ('fk', 2)]),
+        OrderedDict([('id', 1), ('fk', 3)]),
+        OrderedDict([('id', 2), ('fk', 2)]),
+        OrderedDict([('id', 2), ('fk', 2)]),
+        OrderedDict([('id', 2), ('fk', 3)]),
+        OrderedDict([('id', 3), ('fk', 3)]),
+        OrderedDict([('id', 3), ('fk', 3)]),
+        OrderedDict([('id', 3), ('fk', 3)]),
+    ])
+    expected_result = [
+        [1, 1],
+        [1, 2],
+        [1, 3],
+        [2, 2],
+        [2, 3],
+        [3, 3],
+    ]
+    data = queries.drop_duplicates(data)
     assert data.values.tolist() == expected_result

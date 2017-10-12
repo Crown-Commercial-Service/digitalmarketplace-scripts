@@ -122,3 +122,7 @@ def assign_json_subfields(field, subfields, data):
     for subfield in subfields:
         data[subfield] = data.apply(lambda row: row[field].get(subfield, '') if row[field] else '', axis=1)
     return data
+
+
+def drop_duplicates(data):
+    return data.drop_duplicates()

@@ -46,7 +46,6 @@ from dmscripts.models.process_rules import (
 from dmscripts.models.writecsv import csv_path
 
 
-
 DOS_SPECIALIST_ROLES = [
     "agileCoach",
     "businessAnalyst",
@@ -336,7 +335,8 @@ CONFIGS = [
             'awarded_supplierOrganisationSize': 'Size of supplier',
             'awarded_awardedContractValue': 'Contract amount',
             'awarded_awardedContractStartDate': 'Contract start date'
-        }
+        },
+        'drop_duplicates': True,
     }
 ]
 
@@ -411,8 +411,8 @@ if __name__ == '__main__':
         # sort list by some dict value
         if 'sort_by' in config:
             data = queries.sort_by(config['sort_by'], data)
-
-        data = data.drop_duplicates()
+        if 'drop_duplicates' in config and config['drop_duplicates']:
+            queries.drop_duplicates(data)
         # write up your CSV
         filename = csv_path(OUTPUT_DIR, config['name'])
         data.to_csv(filename, index=False, encoding='utf-8')
