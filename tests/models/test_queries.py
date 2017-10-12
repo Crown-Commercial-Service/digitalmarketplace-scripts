@@ -22,18 +22,26 @@ def test_model(csv_reader):
 
 
 def test_join(csv_reader):
-    csv_reader.side_effect = [
-        DataFrame([{'id': 1, 'val': 'one'}, {'id': 2, 'val': 'two'}, {'id': 3, 'val': 'three'}]),
-        DataFrame([{'fk': 1, 'col': 100}, {'fk': 1, 'col': 200}, {'fk': 3, 'col': 300}])
+    left_data = DataFrame([
+        {'fk': 1, 'col': 100},
+        {'fk': 1, 'col': 200},
+        {'fk': 3, 'col': 300}
+    ])
+    right_data = DataFrame([
+        {'id': 1, 'val': 'one'},
+        {'id': 2, 'val': 'two'},
+        {'id': 3, 'val': 'three'}
+    ])
+    config_value = {'model_name': 'n', 'left_on': 'fk', 'right_on': 'id'}
+    expected_result = [
+        [100, 1, 1, 'one'],
+        [200, 1, 1, 'one'],
+        [300, 3, 3, 'three']
     ]
 
-    assert queries.join(
-        ({'model': '1', 'key': 'id'}, {'model': '2', 'key': 'fk'}), 'data'
-    ).values.tolist() == [
-        [1, 'one', 100.0, 1],
-        [1, 'one', 200.0, 1],
-        [3, 'three', 300.0, 3],
-    ]
+    csv_reader.return_value = right_data
+
+    assert queries.join(left_data, directory='data', **config_value).values.tolist() == expected_result
 
 
 def test_filter_rows():
@@ -133,3 +141,95 @@ def test_assign_json_subfields():
     assert data.values.tolist()[2] == [3, od3, '', '888']
     assert data.values.tolist()[3] == [4, {'field2': '999'}, '', '']
     assert data.values.tolist()[4] == [5, {}, '', '']
+
+
+def test_add_aggregation_counts():
+    data = DataFrame([
+        {'id': 1, 'fk': 1},
+        {'id': 2, 'fk': 1},
+        {'id': 3, 'fk': 1},
+        {'id': 4, 'fk': 1},
+        {'id': 5, 'fk': 1},
+        {'id': 6, 'fk': 2},
+        {'id': 7, 'fk': 2},
+        {'id': 8, 'fk': 2},
+        {'id': 9, 'fk': 2},
+    ])
+    config_value = {
+        'group_by': 'fk',
+        'join': ('fk', 'fk'),
+        'count_name': 'a_name',
+    }
+    expected_result = [
+        [1, 1, 5],
+        [1, 2, 5],
+        [1, 3, 5],
+        [1, 4, 5],
+        [1, 5, 5],
+        [2, 6, 4],
+        [2, 7, 4],
+        [2, 8, 4],
+        [2, 9, 4],
+    ]
+
+    data = queries.add_aggregation_counts(data, **config_value)
+    assert data.values.tolist() == expected_result
+
+
+def test_add_aggregation_counts_filter():
+    data = DataFrame([
+        {'id': 1, 'fk': 1, 'some_field': 'good'},
+        {'id': 2, 'fk': 1, 'some_field': 'good'},
+        {'id': 3, 'fk': 1, 'some_field': 'bad'},
+        {'id': 4, 'fk': 1, 'some_field': 'bad'},
+        {'id': 5, 'fk': 1, 'some_field': 'bad'},
+        {'id': 6, 'fk': 2, 'some_field': 'good'},
+        {'id': 7, 'fk': 2, 'some_field': 'good'},
+        {'id': 8, 'fk': 2, 'some_field': 'good'},
+        {'id': 9, 'fk': 2, 'some_field': 'bad'},
+    ])
+    config_value = {
+        'group_by': 'fk',
+        'join': ('fk', 'fk'),
+        'count_name': 'a_name',
+        'query': 'some_field == "good"',
+
+    }
+    expected_result = [
+        [1, 1, 'good', 2],
+        [1, 2, 'good', 2],
+        [1, 3, 'bad', 2],
+        [1, 4, 'bad', 2],
+        [1, 5, 'bad', 2],
+        [2, 6, 'good', 3],
+        [2, 7, 'good', 3],
+        [2, 8, 'good', 3],
+        [2, 9, 'bad', 3]
+    ]
+
+    data = queries.add_aggregation_counts(data, **config_value)
+    assert data.values.tolist() == expected_result
+
+
+def test_drop_duplicates():
+    data = DataFrame([
+        OrderedDict([('id', 1), ('fk', 1)]),
+        OrderedDict([('id', 1), ('fk', 2)]),
+        OrderedDict([('id', 1), ('fk', 3)]),
+        OrderedDict([('id', 2), ('fk', 2)]),
+        OrderedDict([('id', 2), ('fk', 2)]),
+        OrderedDict([('id', 2), ('fk', 3)]),
+        OrderedDict([('id', 3), ('fk', 3)]),
+        OrderedDict([('id', 3), ('fk', 3)]),
+        OrderedDict([('id', 3), ('fk', 3)]),
+    ])
+    expected_result = [
+        [1, 1],
+        [1, 2],
+        [1, 3],
+        [2, 2],
+        [2, 3],
+        [3, 3],
+    ]
+    data = queries.drop_duplicates(data)
+    assert data.values.tolist() == expected_result

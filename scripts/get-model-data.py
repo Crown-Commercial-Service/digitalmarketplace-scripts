@@ -29,19 +29,22 @@ Arguments:
         brief_responses_summary
 
 """
-
 import os
 import sys
 sys.path.insert(0, '.')
 
 from docopt import docopt
-from dmapiclient import DataAPIClient
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
-from dmscripts.models.process_rules import format_datetime_string_as_date, remove_username_from_email_address
-from dmscripts.models.writecsv import csv_path
-from dmscripts.models import queries
 
+from dmapiclient import DataAPIClient
+
+from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.helpers.logging_helpers import logging, configure_logger
+from dmscripts.models import queries
+from dmscripts.models.process_rules import (
+    format_datetime_string_as_date, remove_username_from_email_address, construct_brief_url
+)
+from dmscripts.models.writecsv import csv_path
+
 
 DOS_SPECIALIST_ROLES = [
     "agileCoach",
@@ -170,9 +173,13 @@ CONFIGS = [
             'id',
             'awardedContractStartDate',
             'awardedContractValue',
-            'supplierOrganisationSize'
+            'supplierOrganisationSize',
+            'status',
         ),
-        'assign_json_subfields': {'awardDetails': ['awardedContractStartDate', 'awardedContractValue']},
+        'assign_json_subfields': {
+            'awardDetails': ['awardedContractStartDate', 'awardedContractValue'],
+            'brief': ['title', 'frameworkSlug'],
+        },
         'get_data_kwargs': {},
         'process_fields': {
             'createdAt': format_datetime_string_as_date,
@@ -183,7 +190,15 @@ CONFIGS = [
     },
     {
         'name': 'successful_brief_responses',
-        'join': ({'model': 'briefs', 'key': 'id'}, {'model': 'brief_responses', 'key': "briefId"}),
+        'model': 'brief_responses',
+        'joins': [
+            {
+                'model_name': 'briefs',
+                'left_on': 'briefId',
+                'right_on': 'id',
+                'data_duplicate_suffix': '_briefs'
+            }
+        ],
         'filter_query': "essentialRequirements",
         'keys': (
             'briefId',
@@ -204,7 +219,7 @@ CONFIGS = [
         'name': 'brief_responses_summary',
         'model': 'briefs',
         'add_counts': {
-            'model': 'brief_responses',
+            'model_name': 'brief_responses',
             'join': ('id', 'briefId'),
             'group_by': 'essentialRequirements'
         },
@@ -222,6 +237,106 @@ CONFIGS = [
             'awardedBriefResponseId'
         ),
         'sort_by': ['id']
+    },
+    {
+        'name': 'awarded_brief_responses',
+        'model': 'brief_responses',
+        'filter_query': 'status == "awarded"',
+        'keys': (
+            'briefId',
+            'awardedContractStartDate',
+            'awardedContractValue',
+            'supplierOrganisationSize',
+            'supplierName'
+        ),
+        'sort_by': ['briefId'],
+        'rename_fields': {
+            'awardedContractStartDate': 'awarded_awardedContractStartDate',
+            'awardedContractValue': 'awarded_awardedContractValue',
+            'supplierOrganisationSize': 'awarded_supplierOrganisationSize',
+            'supplierName': 'awarded_supplierName'
+        }
+    },
+    {
+        'name': 'opportunity-data',
+        'model': 'briefs',
+        'joins': [
+            {
+                'model_name': 'awarded_brief_responses',
+                'left_on': 'id',
+                'right_on': 'briefId',
+                'data_duplicate_suffix': '_awarded_brief_responses'
+            }, {
+                'model_name': 'brief_responses',
+                'left_on': 'id',
+                'right_on': 'briefId',
+                'data_duplicate_suffix': '_data'
+            },
+
+        ],
+        'keys': (
+            'title',
+            'id_data',
+            'frameworkSlug',
+            'lotSlug',
+            'specialistRole',
+            'organisation',
+            'emailAddress',
+            'location',
+            'publishedAt',
+            'requirementsLength',
+            'totalApplications',
+            'applicationsFromSMEs',
+            'applicationsFromLargeOrganisations',
+            'status_briefs',
+            'awarded_supplierName',
+            'awarded_supplierOrganisationSize',
+            'awarded_awardedContractValue',
+            'awarded_awardedContractStartDate',
+        ),
+        'aggregation_counts': [
+            {
+                'group_by': 'id_data',
+                'join': ('id_data', 'id_data'),
+                'count_name': 'totalApplications',
+                'query': 'id_brief_responses != ""',
+            }, {
+                'group_by': 'id_data',
+                'join': ('id_data', 'id_data'),
+                'count_name': 'applicationsFromSMEs',
+                'query': 'supplierOrganisationSize in ["micro", "small", "medium"]',
+            }, {
+                'group_by': 'id_data',
+                'join': ('id_data', 'id_data'),
+                'count_name': 'applicationsFromLargeOrganisations',
+                'query': 'supplierOrganisationSize == "large"',
+            },
+        ],
+        'process_fields': {
+            'id_data': construct_brief_url,
+            'emailAddress': remove_username_from_email_address
+        },
+        'rename_fields': {
+            'title': 'Opportunity',
+            'id_data': 'Link',
+            'frameworkSlug': 'Framework',
+            'lotSlug': 'Category',
+            'specialistRole': 'Specialist',
+            'organisation': 'Organisation Name',
+            'emailAddress': 'Buyer Domain',
+            'location': 'Location Of The Work',
+            'publishedAt': 'Published At',
+            'requirementsLength': 'Open For',
+            'applicationsFromSMEs': 'Applications from SMEs',
+            'applicationsFromLargeOrganisations': 'Applications from Large Organisations',
+            'totalApplications': 'Total Organisations',
+            'status': 'Status',
+            'awarded_supplierName': 'Winning supplier',
+            'awarded_supplierOrganisationSize': 'Size of supplier',
+            'awarded_awardedContractValue': 'Contract amount',
+            'awarded_awardedContractStartDate': 'Contract start date'
+        },
+        'drop_duplicates': True,
     }
 ]
 
@@ -259,18 +374,20 @@ if __name__ == '__main__':
                                       client=client, logger=logger, limit=limit)
         elif 'model' in config:
             data = queries.model(config['model'], directory=OUTPUT_DIR)
-        elif 'join' in config:
-            data = queries.join(config['join'], directory=OUTPUT_DIR)
+        if 'joins' in config:
+            for join in config['joins']:
+                data = queries.join(data, directory=OUTPUT_DIR, **join)
 
         # transform values that we want to transform
         if 'assign_json_subfields' in config:
             for field, subfields in config['assign_json_subfields'].items():
                 data = queries.assign_json_subfields(field, subfields, data)
 
-        if 'process_fields' in config:
-            data = queries.process_fields(config['process_fields'], data)
         if 'add_counts' in config:
             data = queries.add_counts(data=data, directory=OUTPUT_DIR, **config['add_counts'])
+        if 'aggregation_counts' in config:
+            for count in config['aggregation_counts']:
+                data = queries.add_aggregation_counts(data=data, **count)
 
         if 'filter_query' in config:
             # filter out things we don't want
@@ -286,14 +403,16 @@ if __name__ == '__main__':
             if (k[-1] if isinstance(k, (tuple, list)) else k) in data
         ]
         data = data[keys]
-
+        if 'process_fields' in config:
+            data = queries.process_fields(config['process_fields'], data)
         if 'rename_fields' in config:
             data = queries.rename_fields(config['rename_fields'], data)
 
         # sort list by some dict value
         if 'sort_by' in config:
             data = queries.sort_by(config['sort_by'], data)
-
+        if 'drop_duplicates' in config and config['drop_duplicates']:
+            queries.drop_duplicates(data)
         # write up your CSV
         filename = csv_path(OUTPUT_DIR, config['name'])
         data.to_csv(filename, index=False, encoding='utf-8')
