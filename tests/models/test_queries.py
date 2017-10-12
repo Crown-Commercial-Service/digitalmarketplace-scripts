@@ -22,8 +22,16 @@ def test_model(csv_reader):
 
 
 def test_join(csv_reader):
-    left_data = DataFrame([{'fk': 1, 'col': 100}, {'fk': 1, 'col': 200}, {'fk': 3, 'col': 300}])
-    right_data = DataFrame([{'id': 1, 'val': 'one'}, {'id': 2, 'val': 'two'}, {'id': 3, 'val': 'three'}])
+    left_data = DataFrame([
+        {'fk': 1, 'col': 100},
+        {'fk': 1, 'col': 200},
+        {'fk': 3, 'col': 300}
+    ])
+    right_data = DataFrame([
+        {'id': 1, 'val': 'one'},
+        {'id': 2, 'val': 'two'},
+        {'id': 3, 'val': 'three'}
+    ])
     config_value = {'model': 'n', 'left_on': 'fk', 'right_on': 'id'}
     expected_result = [
         [100, 1, 1, 'one'],
