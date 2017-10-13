@@ -2,12 +2,15 @@
 """Read services from the API endpoint and write to search-api for indexing.
 
 Usage:
-    index-services.py <stage> --frameworks=<frameworks> --api-token=<api_access_token> \
---search-api-token=<search_api_access_token> [options]
+    index-services.py <stage> --frameworks=<frameworks> [options]
 
-    --serial                  Do not run in parallel (useful for debugging)
-    --index=<index>           Search API index name [default: g-cloud-9]
-    --frameworks=<frameworks> Comma-separated list of framework slugs that should be indexed
+    --serial                                      Do not run in parallel (useful for debugging)
+    --index=<index>                               Search API index name [default: g-cloud-9]
+    --frameworks=<frameworks>                     Comma-separated list of framework slugs that should be indexed
+    --api-url=<api-url>                           Override API URL
+    --api-token=<api_access_token>                Override API token (otherwise automatically populated)
+    --search-api-url=<search-api-url>             Override search API URL
+    --search-api-token=<search_api_access_token>  Override search API token (otherwise automatically populated)
 
 Example:
     ./index-services.py dev --api-token=myToken --search-api-token=myToken --frameworks=g-cloud-6,g-cloud-7"
@@ -23,6 +26,7 @@ from docopt import docopt
 from six.moves import map
 
 sys.path.insert(0, '.')
+from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.logging_helpers import logging
@@ -79,7 +83,7 @@ class ServiceIndexer(object):
             result = client.create_index(self.index)
             logger.info("Index creation response: {response}", extra={'response': result})
         except dmapiclient.HTTPError as e:
-            if 'already exists as alias' in e.message:
+            if 'already exists as alias' in str(e.message):
                 logger.info("Skipping index creation for alias {index}", extra={'index': self.index})
             else:
                 raise
@@ -114,10 +118,10 @@ def do_index(search_api_url, search_api_access_token, data_api_url, data_api_acc
 if __name__ == "__main__":
     arguments = docopt(__doc__)
     ok = do_index(
-        data_api_url=get_api_endpoint_from_stage(arguments['<stage>'], 'api'),
-        data_api_access_token=arguments['--api-token'],
-        search_api_url=get_api_endpoint_from_stage(arguments['<stage>'], 'search-api'),
-        search_api_access_token=arguments['--search-api-token'],
+        data_api_url=arguments['--api-url'] or get_api_endpoint_from_stage(arguments['<stage>'], 'api'),
+        data_api_access_token=arguments['--api-token'] or get_auth_token('api', arguments['<stage>']),
+        search_api_url=arguments['--search-api-url'] or get_api_endpoint_from_stage(arguments['<stage>'], 'search-api'),
+        search_api_access_token=arguments['--search-api-token'] or get_auth_token('search_api', arguments['<stage>']),
         serial=arguments['--serial'],
         index=arguments['--index'],
         frameworks=arguments['--frameworks']
