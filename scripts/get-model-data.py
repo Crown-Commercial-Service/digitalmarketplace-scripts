@@ -260,6 +260,7 @@ CONFIGS = [
     {
         'name': 'opportunity-data',
         'model': 'briefs',
+        'filter_query': 'frameworkSlug == "digital-outcomes-and-specialists-2"',
         'joins': [
             {
                 'model_name': 'awarded_brief_responses',
@@ -412,7 +413,7 @@ if __name__ == '__main__':
         if 'sort_by' in config:
             data = queries.sort_by(config['sort_by'], data)
         if 'drop_duplicates' in config and config['drop_duplicates']:
-            queries.drop_duplicates(data)
+            data = queries.drop_duplicates(data)
         # write up your CSV
         filename = csv_path(OUTPUT_DIR, config['name'])
         data.to_csv(filename, index=False, encoding='utf-8')
