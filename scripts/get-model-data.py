@@ -196,7 +196,7 @@ CONFIGS = [
                 'model_name': 'briefs',
                 'left_on': 'briefId',
                 'right_on': 'id',
-                'data_duplicate_suffix': '_briefs'
+                'data_duplicate_suffix': '_brief_responses'
             }
         ],
         'filter_query': "essentialRequirements",
@@ -207,12 +207,13 @@ CONFIGS = [
             'supplierId',
             'supplierName',
             'submittedAt',
-            'status',
+            'status_briefs',
             'awardedBriefResponseId',
             'awardedContractStartDate',
             'awardedContractValue',
             'supplierOrganisationSize'
         ),
+        'rename_fields': {'status_briefs': 'status'},
         'sort_by': ['briefId', 'submittedAt']
     },
     {
