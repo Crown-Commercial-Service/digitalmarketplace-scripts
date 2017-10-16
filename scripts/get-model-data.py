@@ -321,7 +321,7 @@ CONFIGS = [
             'emailAddress': remove_username_from_email_address
         },
         'rename_fields': {
-            'brief_id': 'ID',
+            'brief_id_copy': 'ID',
             'title': 'Opportunity',
             'id_data': 'Link',
             'frameworkSlug': 'Framework',
