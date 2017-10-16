@@ -261,7 +261,6 @@ CONFIGS = [
     {
         'name': 'opportunity-data',
         'model': 'briefs',
-        'filter_query': 'frameworkSlug == "digital-outcomes-and-specialists-2"',
         'joins': [
             {
                 'model_name': 'awarded_brief_responses',
@@ -318,7 +317,8 @@ CONFIGS = [
         'duplicate_fields': [('id_data', 'brief_id_copy')],
         'process_fields': {
             'id_data': construct_brief_url,
-            'emailAddress': remove_username_from_email_address
+            'emailAddress': remove_username_from_email_address,
+            'requirementsLength': lambda i: i or '2 weeks',
         },
         'rename_fields': {
             'brief_id_copy': 'ID',
