@@ -233,3 +233,32 @@ def test_drop_duplicates():
     ]
     data = queries.drop_duplicates(data)
     assert data.values.tolist() == expected_result
+
+
+def test_duplicate_fields():
+    data = DataFrame([
+        OrderedDict([('id', 1), ('fk', 1)]),
+        OrderedDict([('id', 1), ('fk', 2)]),
+        OrderedDict([('id', 1), ('fk', 3)]),
+        OrderedDict([('id', 2), ('fk', 2)]),
+        OrderedDict([('id', 2), ('fk', 2)]),
+        OrderedDict([('id', 2), ('fk', 3)]),
+        OrderedDict([('id', 3), ('fk', 3)]),
+        OrderedDict([('id', 3), ('fk', 3)]),
+        OrderedDict([('id', 3), ('fk', 3)]),
+    ])
+    expected_result = [
+        [1, 1, 1],
+        [1, 2, 1],
+        [1, 3, 1],
+        [2, 2, 2],
+        [2, 2, 2],
+        [2, 3, 2],
+        [3, 3, 3],
+        [3, 3, 3],
+        [3, 3, 3],
+    ]
+    config_entry = ('id', 'duplicate_id')
+    data = queries.duplicate_fields(data, *config_entry)
+    assert list(data.columns) == ['id', 'fk', 'duplicate_id']
+    assert data.values.tolist() == expected_result

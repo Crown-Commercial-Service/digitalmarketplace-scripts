@@ -277,6 +277,7 @@ CONFIGS = [
 
         ],
         'keys': (
+            'brief_id_copy',
             'title',
             'id_data',
             'frameworkSlug',
@@ -314,11 +315,13 @@ CONFIGS = [
                 'query': 'supplierOrganisationSize == "large"',
             },
         ],
+        'duplicate_fields': [('id_data', 'brief_id_copy')],
         'process_fields': {
             'id_data': construct_brief_url,
             'emailAddress': remove_username_from_email_address
         },
         'rename_fields': {
+            'brief_id_copy': 'ID',
             'title': 'Opportunity',
             'id_data': 'Link',
             'frameworkSlug': 'Framework',
@@ -379,11 +382,13 @@ if __name__ == '__main__':
         if 'joins' in config:
             for join in config['joins']:
                 data = queries.join(data, directory=OUTPUT_DIR, **join)
-
         # transform values that we want to transform
         if 'assign_json_subfields' in config:
             for field, subfields in config['assign_json_subfields'].items():
                 data = queries.assign_json_subfields(field, subfields, data)
+        if 'duplicate_fields' in config:
+            for field, new_name in config['duplicate_fields']:
+                data = queries.duplicate_fields(data, field, new_name)
 
         if 'add_counts' in config:
             data = queries.add_counts(data=data, directory=OUTPUT_DIR, **config['add_counts'])

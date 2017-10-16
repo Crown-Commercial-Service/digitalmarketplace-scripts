@@ -126,3 +126,8 @@ def assign_json_subfields(field, subfields, data):
 
 def drop_duplicates(data):
     return data.drop_duplicates()
+
+
+def duplicate_fields(data, field, new_field_name):
+    data[new_field_name] = data[field]
+    return data
