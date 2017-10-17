@@ -2,9 +2,11 @@ import os
 import subprocess
 import yaml
 
+DEV_ALIASES = ('dev', 'development', 'local')
+
 
 def get_auth_token(api, stage):
-    if stage == 'development':
+    if stage.lower() in DEV_ALIASES:
         return 'myToken'
 
     DM_CREDENTIALS_REPO = os.environ.get('DM_CREDENTIALS_REPO', '../digitalmarketplace-credentials')
@@ -21,7 +23,7 @@ def get_auth_token(api, stage):
 
 
 def get_api_url(api, stage):
-    if stage == 'development':
+    if stage in DEV_ALIASES:
         url = 'http://localhost:{}'.format(5001 if api == 'search-api' else 5000)
     elif stage == 'production':
         url = 'https://{}.digitalmarketplace.service.gov.uk'
