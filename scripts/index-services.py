@@ -2,18 +2,21 @@
 """Read services from the API endpoint and write to search-api for indexing.
 
 Usage:
-    index-services.py <stage> --frameworks=<frameworks> [options]
+    index-services.py <stage> --index=<index> --frameworks=<frameworks> [options]
 
-    --serial                                      Do not run in parallel (useful for debugging)
-    --index=<index>                               Search API index name [default: g-cloud-9]
+    <stage>                                       One of dev, preview, staging or production
+    --index=<index>                               Search API index name, usually of the form <framework>-YYYY-MM-DD
     --frameworks=<frameworks>                     Comma-separated list of framework slugs that should be indexed
-    --api-url=<api-url>                           Override API URL
+
+Options:
+    --serial                                      Do not run in parallel (useful for debugging)
+    --api-url=<api-url>                           Override API URL (otherwise automatically populated)
     --api-token=<api_access_token>                Override API token (otherwise automatically populated)
-    --search-api-url=<search-api-url>             Override search API URL
+    --search-api-url=<search-api-url>             Override search API URL (otherwise automatically populated)
     --search-api-token=<search_api_access_token>  Override search API token (otherwise automatically populated)
 
 Example:
-    ./index-services.py dev --api-token=myToken --search-api-token=myToken --frameworks=g-cloud-6,g-cloud-7"
+    ./index-services.py dev --index=g-cloud-9-2017-10-17 --frameworks=g-cloud-9
 """
 
 import sys
