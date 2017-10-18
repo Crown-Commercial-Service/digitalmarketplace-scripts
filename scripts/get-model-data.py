@@ -261,6 +261,7 @@ CONFIGS = [
     {
         'name': 'opportunity-data',
         'model': 'briefs',
+        'filter_query': 'status_data in ["closed", "cancelled", "unsuccessful", "awarded"]',
         'joins': [
             {
                 'model_name': 'awarded_brief_responses',
