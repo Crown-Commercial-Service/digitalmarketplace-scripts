@@ -15,3 +15,11 @@ def construct_brief_url(brief_id):
         'https://www.digitalmarketplace.service.gov.uk/'
         'digital-outcomes-and-specialists/opportunities/{}'.format(brief_id)
     )
+
+
+def extract_id_from_user_info(user_data):
+    return ','.join([str(user['id']) for user in user_data])
+
+
+def convert_none_to_zero(el):
+    return 0 if not el else el
