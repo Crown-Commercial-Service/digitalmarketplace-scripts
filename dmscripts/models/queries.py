@@ -84,6 +84,10 @@ def sort_by(columns, data):
     return data.sort_values(by=columns)
 
 
+def group_by(columns, data):
+    return data.groupby(columns).size().reset_index(name='count')
+
+
 def add_counts(join, group_by, model_name, data, directory):
     left_on, right_on = join
     count_data = model(model_name, directory).groupby(

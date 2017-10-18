@@ -80,6 +80,32 @@ def test_sort_by():
     ]
 
 
+def test_group_by():
+    data = DataFrame([
+        {'id': 1, 'val': 1},
+        {'id': 2, 'val': 4},
+        {'id': 3, 'val': 2},
+        {'id': 1, 'val': 3},
+        {'id': 2, 'val': 2},
+        {'id': 1, 'val': 3},
+        {'id': 2, 'val': 4},
+        {'id': 3, 'val': 2},
+        {'id': 1, 'val': 5},
+        {'id': 2, 'val': 2},
+    ])
+
+    expected_result = DataFrame([
+        {'val': 1, 'count': 1},
+        {'val': 2, 'count': 4},
+        {'val': 3, 'count': 2},
+        {'val': 4, 'count': 2},
+        {'val': 5, 'count': 1},
+    ])
+    expected_result.sort_index(axis=1, ascending=False, inplace=True)
+
+    assert queries.group_by('val', data).equals(expected_result)
+
+
 def test_rename_fields():
     data = queries.rename_fields({'old key': 'new key'}, DataFrame([
         {'id': 1, 'old key': 7},
