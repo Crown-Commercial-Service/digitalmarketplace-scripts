@@ -288,3 +288,131 @@ def test_duplicate_fields():
     data = queries.duplicate_fields(data, *config_entry)
     assert list(data.columns) == ['id', 'fk', 'duplicate_id']
     assert data.values.tolist() == expected_result
+
+
+@mock.patch('dmscripts.models.queries.base_model')
+def test_get_model_by_fk(base_model):
+    base_model.side_effect = [
+        DataFrame([{'key_1': 'first_item', 'key_2': 'first_item'}]),
+        DataFrame([{'key_1': 'second_item', 'key_2': 'second_item'}]),
+        DataFrame([{'key_1': 'third_item', 'key_2': 'third_item'}]),
+    ]
+
+    data = DataFrame([
+        {'id': 1},
+        {'id': 2},
+        {'id': 3},
+    ])
+
+    config_entry = {
+        'model_to_get': 'other_model',
+        'fk_column_name': 'other_model_fk',
+        'get_data_kwargs': {},
+    }
+
+    keys = ('key_1', 'key_2')
+    client = 'fake_client'
+
+    data = queries.get_by_model_fk(config_entry, keys, data, client)
+
+    expected_result = DataFrame([
+        {'key_1': 'first_item', 'key_2': 'first_item'},
+        {'key_1': 'second_item', 'key_2': 'second_item'},
+        {'key_1': 'third_item', 'key_2': 'third_item'},
+    ])
+    assert data.equals(expected_result)
+
+    base_model.assert_has_calls([
+        mock.call('other_model', ('key_1', 'key_2'), {'other_model_fk': 1}, 'fake_client'),
+        mock.call('other_model', ('key_1', 'key_2'), {'other_model_fk': 2}, 'fake_client'),
+        mock.call('other_model', ('key_1', 'key_2'), {'other_model_fk': 3}, 'fake_client'),
+    ])
+
+
+@mock.patch('dmscripts.models.queries.base_model')
+def test_get_model_by_fk_and_filter_before_request(base_model):
+    base_model.return_value = DataFrame()
+
+    data = DataFrame([
+        {'id': 1, 'biscuit_type': 'hobknob'},
+        {'id': 2, 'biscuit_type': 'bourbon'},
+        {'id': 3, 'biscuit_type': 'jaffa'},
+        {'id': 4, 'biscuit_type': 'digestive'},
+        {'id': 5, 'biscuit_type': 'jaffa'},
+    ])
+
+    config_entry = {
+        'model_to_get': 'other_model',
+        'fk_column_name': 'other_model_fk',
+        'get_data_kwargs': {},
+        'filter_before_request_query': 'biscuit_type != "jaffa"'
+    }
+
+    keys = ('key_1', 'key_2')
+    client = 'fake_client'
+
+    data = queries.get_by_model_fk(config_entry, keys, data, client)
+
+    base_model.assert_has_calls([
+        mock.call('other_model', ('key_1', 'key_2'), {'other_model_fk': 1}, 'fake_client'),
+        mock.call('other_model', ('key_1', 'key_2'), {'other_model_fk': 2}, 'fake_client'),
+        mock.call('other_model', ('key_1', 'key_2'), {'other_model_fk': 4}, 'fake_client'),
+    ])
+
+
+@mock.patch('dmscripts.models.queries.base_model')
+def test_get_model_by_fk_and_reduce_to_counts(base_model):
+    base_model.side_effect = [
+        DataFrame([
+            {'id': 1, 'biscuit': 'bourbon'},
+            {'id': 1, 'biscuit': 'digestive'},
+            {'id': 1, 'biscuit': 'hobknob'},
+        ]),
+        DataFrame([
+            {'id': 2, 'biscuit': 'bourbon'},
+            {'id': 2, 'biscuit': 'digestive'},
+        ]),
+        DataFrame([
+            {},
+        ]),
+        DataFrame([
+            {'id': 4, 'biscuit': 'bourbon'},
+            {'id': 4, 'biscuit': 'digestive'},
+            {'id': 4, 'biscuit': 'hobknob'},
+            {'id': 4, 'biscuit': 'jaffa'},
+        ]),
+    ]
+
+    data = DataFrame([
+        {'id': 1},
+        {'id': 2},
+        {'id': 3},
+        {'id': 4},
+    ])
+
+    config_entry = {
+        'model_to_get': 'other_model',
+        'fk_column_name': 'other_model_fk',
+        'get_data_kwargs': {},
+        'reduce_to_counts': 'id'
+    }
+
+    keys = ('key_1', 'key_2')
+    client = 'fake_client'
+
+    data = queries.get_by_model_fk(config_entry, keys, data, client)
+
+    expected_result = DataFrame([
+        {'id': 1, 'count': 3},
+        {'id': 2, 'count': 2},
+        {'id': 3, 'count': 0},
+        {'id': 4, 'count': 4},
+    ])
+    assert data.equals(expected_result)
+
+    base_model.assert_has_calls([
+        mock.call('other_model', ('key_1', 'key_2'), {'other_model_fk': 1}, 'fake_client'),
+        mock.call('other_model', ('key_1', 'key_2'), {'other_model_fk': 2}, 'fake_client'),
+        mock.call('other_model', ('key_1', 'key_2'), {'other_model_fk': 3}, 'fake_client'),
+        mock.call('other_model', ('key_1', 'key_2'), {'other_model_fk': 4}, 'fake_client'),
+    ])

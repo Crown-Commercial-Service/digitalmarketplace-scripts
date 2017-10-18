@@ -16,11 +16,11 @@ def base_model(base_model, keys, get_data_kwargs, client, logger=None, limit=Non
     :return: A pandas DataFrame of the requested data. Columns as model attributes, rows as instances.
     """
     mt = ModelTrawler(base_model, client)
-
     data = list(mt.get_data(keys=keys, limit=limit, **get_data_kwargs))
-    logger.info(
-        '{} {} returned after {}s'.format(len(data), base_model, mt.get_time_running())
-    )
+    if logger:
+        logger.info(
+            '{} {} returned after {}s'.format(len(data), base_model, mt.get_time_running())
+        )
 
     return pandas.DataFrame(data)
 
@@ -136,3 +136,27 @@ def drop_duplicates(data):
 def duplicate_fields(data, field, new_field_name):
     data[new_field_name] = data[field]
     return data
+
+
+def get_by_model_fk(config, keys, data, client):
+    model = config['model_to_get']
+    fk_column_name = config['fk_column_name']
+    kwargs = config['get_data_kwargs']
+
+    return_data_frame = pandas.DataFrame()
+
+    if config.get('filter_before_request_query'):
+        data = data.query(config['filter_before_request_query']).reset_index(drop=True)
+    for id_value in data['id']:
+        get_data_kwargs = kwargs.copy()
+        get_data_kwargs.update({fk_column_name: id_value})
+        return_data = base_model(model, keys, get_data_kwargs, client)
+        if config.get('reduce_to_counts'):
+            try:
+                return_data = group_by(config['reduce_to_counts'], return_data)
+            except KeyError:
+                return_data = pandas.DataFrame([{'count': 0, config['reduce_to_counts']: id_value}])
+
+        return_data_frame = return_data_frame.append(return_data, ignore_index=True)
+
+    return return_data_frame
