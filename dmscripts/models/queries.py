@@ -35,7 +35,7 @@ def model(model, directory):
     return pandas.read_csv(csv_path(directory, model))
 
 
-def join(data, model_name, left_on, right_on, directory, data_duplicate_suffix=None):
+def join(data, model_name, left_on, right_on, directory, how='left', data_duplicate_suffix=None):
     """Left join the model data csv denoted by 'model' to 'data'.
 
     :param data: The current pandas DataFrame we are working with.
@@ -43,6 +43,7 @@ def join(data, model_name, left_on, right_on, directory, data_duplicate_suffix=N
     :param left_on: The field in 'data' we are joining on.
     :param right_on: The field in the model csv we are joining on.
     :param directory: The data directory.
+    :param how: The type of merge to use. Defaults to 'left'. Can also be 'right', 'inner' or 'outer'.
     :param data_duplicate_suffix: An optional suffix for fields duplicated in both datasets.
     :return: pandas DataFrame of model joined to data.
     """
