@@ -11,26 +11,19 @@ class ModelTrawler():
         self.client = client
         self.model = model
 
-        potential_model_iter_methods = ["{}_{}_iter".format(prefix, self.model) for prefix in ('get', 'find')]
-        model_iter_method = list(
-            filter(
-                lambda x: isinstance(getattr(self.client, x, None), collections.Callable),
-                potential_model_iter_methods
-            )
-        )
-
-        if not model_iter_method:
+        model_iter_method = "find_{}_iter".format(self.model)
+        if not isinstance(getattr(self.client, model_iter_method, None), collections.Callable):
             raise AttributeError(
                 "No model called '{}'. Allowed models are: {}".format(
                     self.model, list(self._get_allowed_models())
                 )
             )
 
-        self.model_iter_method = model_iter_method[0]
+        self.model_iter_method = model_iter_method
 
     def _get_allowed_models(self):
-        r = re.compile('^(find|get)_(\w*)_iter$')
-        return (r.match(attr).group(2) for attr in dir(self.client) if r.match(attr))
+        r = re.compile('^find_(\w*)_iter$')
+        return (r.match(attr).group(1) for attr in dir(self.client) if r.match(attr))
 
     def _model_iter(self, **kwargs):
         for model in getattr(self.client, self.model_iter_method)(**kwargs):
@@ -83,6 +76,7 @@ class ModelTrawler():
 
     def get_data(self, keys=None, limit=None, **kwargs):
         models = self._model_iter(**kwargs)
+
         if limit is not None:
             models = itertools.islice(models, limit)
 

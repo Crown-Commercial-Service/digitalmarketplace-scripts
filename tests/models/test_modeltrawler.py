@@ -8,9 +8,6 @@ class FakeClient:
     def find_fake_table_iter(self):
         return True
 
-    def get_different_fake_table_iter(self):
-        return True
-
 
 class TestModelTrawlerInit:
 
@@ -25,7 +22,7 @@ class TestModelTrawlerInit:
 
     def test_get_allowed_models_returns_allowed_models(self):
         mt = ModelTrawler('fake_table', FakeClient())
-        assert set(mt._get_allowed_models()) == set(['fake_table', 'different_fake_table'])
+        assert set(mt._get_allowed_models()) == set(['fake_table'])
 
 
 class TestModelTrawlerMethods:
