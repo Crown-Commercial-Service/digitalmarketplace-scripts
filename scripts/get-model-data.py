@@ -430,7 +430,10 @@ CONFIGS = [
             'user_id',
             'count'
         },
-        'rename_fields': {'count': 'lockedProjectsCount'}
+        'rename_fields': {
+            'count': 'lockedProjectsCount',
+            'user_id': 'userId'
+        }
     },
     {
         'name': 'direct_award_saved_and_locked_searches_count_by_user',
@@ -439,7 +442,7 @@ CONFIGS = [
             {
                 'model_name': 'direct_award_locked_projects_count_by_user',
                 'left_on': 'createdBy',
-                'right_on': 'user_id',
+                'right_on': 'userId',
                 'how': 'outer',
             },
         ],
