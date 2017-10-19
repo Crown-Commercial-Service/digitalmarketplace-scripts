@@ -375,8 +375,8 @@ CONFIGS = [
             'fk_column_name': 'project_id',
             'get_data_kwargs': {},
             'filter_before_request_query': 'lockedAt == lockedAt',
-            'reduce_to_counts': 'projectId',
         },
+        'group_by': 'projectId',
         'keys': {
             'projectId',
             'count'

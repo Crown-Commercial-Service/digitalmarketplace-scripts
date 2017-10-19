@@ -150,13 +150,7 @@ def get_by_model_fk(config, keys, data, client):
     for id_value in data['id']:
         get_data_kwargs = kwargs.copy()
         get_data_kwargs.update({fk_column_name: id_value})
-        return_data = base_model(model, keys, get_data_kwargs, client)
-        if config.get('reduce_to_counts'):
-            try:
-                return_data = group_by(config['reduce_to_counts'], return_data)
-            except KeyError:
-                return_data = pandas.DataFrame([{'count': 0, config['reduce_to_counts']: id_value}])
-
-        return_data_frame = return_data_frame.append(return_data, ignore_index=True)
+        model_data = base_model(model, keys, get_data_kwargs, client)
+        return_data_frame = return_data_frame.append(model_data, ignore_index=True)
 
     return return_data_frame
