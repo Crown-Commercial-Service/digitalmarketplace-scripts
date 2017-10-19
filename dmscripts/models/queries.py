@@ -22,7 +22,7 @@ def base_model(base_model, keys, get_data_kwargs, client, logger=None, limit=Non
             '{} {} returned after {}s'.format(len(data), base_model, mt.get_time_running())
         )
 
-    return pandas.DataFrame(data)
+    return pandas.DataFrame(data) if data else pandas.DataFrame(columns=keys)
 
 
 def model(model, directory):
@@ -153,4 +153,4 @@ def get_by_model_fk(config, keys, data, client):
         model_data = base_model(model, keys, get_data_kwargs, client)
         return_data_frame = return_data_frame.append(model_data, ignore_index=True)
 
-    return return_data_frame
+    return pandas.DataFrame(columns=keys) if return_data_frame.empty else return_data_frame

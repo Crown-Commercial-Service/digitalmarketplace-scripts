@@ -358,3 +358,29 @@ def test_get_model_by_fk_and_filter_before_request(base_model):
         mock.call('other_model', ('key_1', 'key_2'), {'other_model_fk': 2}, 'fake_client'),
         mock.call('other_model', ('key_1', 'key_2'), {'other_model_fk': 4}, 'fake_client'),
     ])
+
+
+@mock.patch('dmscripts.models.queries.base_model')
+def test_get_model_by_fk_returns_empty_dataframe_with_column_headings_if_no_data(base_model):
+    base_model.return_value = DataFrame()
+
+    data = DataFrame([
+        {'id': 1, 'biscuit_type': 'hobknob'},
+    ])
+
+    config_entry = {
+        'model_to_get': 'other_model',
+        'fk_column_name': 'other_model_fk',
+        'get_data_kwargs': {},
+    }
+
+    keys = ('key_1', 'key_2')
+    client = 'fake_client'
+
+    data = queries.get_by_model_fk(config_entry, keys, data, client)
+
+    base_model.assert_has_calls([
+        mock.call('other_model', ('key_1', 'key_2'), {'other_model_fk': 1}, 'fake_client'),
+    ])
+
+    assert data.equals(DataFrame(columns=keys))
