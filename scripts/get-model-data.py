@@ -365,7 +365,7 @@ CONFIGS = [
             'downloadedAt': format_datetime_string_as_date,
             'users': extract_id_from_user_info
         },
-        'rename_fields': {'users': 'user_id'},
+        'rename_fields': {'users': 'userId'},
     },
     {
         'name': 'locked_direct_award_projects_services_count',
@@ -402,7 +402,7 @@ CONFIGS = [
             'lockedAt',
             'downloadedAt',
             'active',
-            'users',
+            'userId',
             'lockedProjectServiceCount'
         ),
     },
@@ -425,14 +425,13 @@ CONFIGS = [
         'name': 'direct_award_locked_projects_count_by_user',
         'model': 'direct_award_projects',
         'filter_query': 'lockedAt == lockedAt',
-        'group_by': 'user_id',
+        'group_by': 'userId',
         'keys': {
-            'user_id',
+            'userId',
             'count'
         },
         'rename_fields': {
             'count': 'lockedProjectsCount',
-            'user_id': 'userId'
         }
     },
     {
