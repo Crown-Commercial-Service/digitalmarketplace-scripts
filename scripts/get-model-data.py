@@ -41,8 +41,7 @@ from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.helpers.logging_helpers import logging, configure_logger
 from dmscripts.models import queries
 from dmscripts.models.process_rules import (
-    format_datetime_string_as_date, remove_username_from_email_address, construct_brief_url, extract_id_from_user_info,
-    convert_none_to_zero
+    format_datetime_string_as_date, remove_username_from_email_address, construct_brief_url, extract_id_from_user_info
 )
 from dmscripts.models.writecsv import csv_path
 
@@ -368,7 +367,7 @@ CONFIGS = [
         'rename_fields': {'users': 'userId'},
     },
     {
-        'name': 'locked_direct_award_projects_services_count',
+        'name': 'direct_award_project_locked_search_services_count',
         'model': 'direct_award_projects',
         'get_by_model_fk': {
             'model_to_get': 'direct_award_project_services',
@@ -381,19 +380,38 @@ CONFIGS = [
             'projectId',
             'count'
         },
-        'process_fields': {
-            'projectId': int
-        },
-        'rename_fields': {'count': 'lockedProjectServiceCount'}
+        'process_fields': {'projectId': int},
+        'rename_fields': {'count': 'lockedSearchServicesCount'}
     },
     {
-        'name': 'direct_award_projects_with_locked_service_count',
+        'name': 'direct_award_project_saved_searches_count',
+        'model': 'direct_award_projects',
+        'get_by_model_fk': {
+            'model_to_get': 'direct_award_project_searches',
+            'fk_column_name': 'project_id',
+            'get_data_kwargs': {}
+        },
+        'keys': {
+            'projectId',
+            'count',
+        },
+        'group_by': 'projectId',
+        'rename_fields': {'count': 'savedSearchesCount'},
+    },
+    {
+        'name': 'direct_award_projects_with_search_data',
         'model': 'direct_award_projects',
         'joins': [
             {
-                'model_name': 'locked_direct_award_projects_services_count',
+                'model_name': 'direct_award_project_locked_search_services_count',
                 'left_on': 'id',
                 'right_on': 'projectId',
+            },
+            {
+                'model_name': 'direct_award_project_saved_searches_count',
+                'left_on': 'id',
+                'right_on': 'projectId',
+                'how': 'outer',
             },
         ],
         'keys': (
@@ -403,54 +421,9 @@ CONFIGS = [
             'downloadedAt',
             'active',
             'userId',
-            'lockedProjectServiceCount'
-        ),
-    },
-    {
-        'name': 'direct_award_saved_searches_count_by_user',
-        'model': 'direct_award_projects',
-        'get_by_model_fk': {
-            'model_to_get': 'direct_award_project_searches',
-            'fk_column_name': 'project_id',
-            'get_data_kwargs': {}
-        },
-        'keys': {
-            'createdBy',
-            'count'
-        },
-        'group_by': 'createdBy',
-        'rename_fields': {'count': 'savedSearchesCount'},
-    },
-    {
-        'name': 'direct_award_locked_projects_count_by_user',
-        'model': 'direct_award_projects',
-        'filter_query': 'lockedAt == lockedAt',
-        'group_by': 'userId',
-        'keys': {
-            'userId',
-            'count'
-        },
-        'rename_fields': {
-            'count': 'lockedProjectsCount',
-        }
-    },
-    {
-        'name': 'direct_award_saved_and_locked_searches_count_by_user',
-        'model': 'direct_award_saved_searches_count_by_user',
-        'joins': [
-            {
-                'model_name': 'direct_award_locked_projects_count_by_user',
-                'left_on': 'createdBy',
-                'right_on': 'userId',
-                'how': 'outer',
-            },
-        ],
-        'keys': {
-            'createdBy',
             'savedSearchesCount',
-            'lockedProjectsCount',
-        },
-        'process_fields': {'lockedProjectsCount': convert_none_to_zero},
+            'lockedSearchServicesCount',
+        ),
     },
 ]
 
