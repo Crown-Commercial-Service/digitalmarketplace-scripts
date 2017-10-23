@@ -2,8 +2,7 @@ import pytest
 from dmscripts.models.process_rules import (
     format_datetime_string_as_date,
     remove_username_from_email_address,
-    extract_id_from_user_info,
-    convert_none_to_zero
+    extract_id_from_user_info
 )
 
 
@@ -37,8 +36,3 @@ def test_extract_id_from_user_info():
     extracted_ids = extract_id_from_user_info(user_list)
 
     assert extracted_ids == '0,1,2'
-
-
-@pytest.mark.parametrize('element, result', (('', 0), (None, 0), (1, 1)))
-def test_convert_none_to_zero(element, result):
-    assert convert_none_to_zero(element) == result
