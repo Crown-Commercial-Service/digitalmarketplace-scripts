@@ -37,7 +37,7 @@ def test_get_date_closed():
         (None, datetime.date(2015, 1, 1)),
         ('2016-01-02', datetime.date(2016, 1, 2))
     ]:
-        yield check_date_closed, value, expected
+        check_date_closed(value, expected)
 
 
 @mock.patch('dmscripts.notify_buyers_when_requirements_close.get_sent_emails')

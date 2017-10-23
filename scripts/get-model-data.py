@@ -41,7 +41,7 @@ from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.helpers.logging_helpers import logging, configure_logger
 from dmscripts.models import queries
 from dmscripts.models.process_rules import (
-    format_datetime_string_as_date, remove_username_from_email_address, construct_brief_url
+    format_datetime_string_as_date, remove_username_from_email_address, construct_brief_url, extract_id_from_user_info
 )
 from dmscripts.models.writecsv import csv_path
 
@@ -345,7 +345,86 @@ CONFIGS = [
             'awarded_awardedContractStartDate': 'Contract start date'
         },
         'drop_duplicates': True,
-    }
+    },
+    {
+        'name': 'direct_award_projects',
+        'base_model': 'direct_award_projects',
+        'keys': (
+            'id',
+            'createdAt',
+            'lockedAt',
+            'downloadedAt',
+            'active',
+            'users',
+        ),
+        'get_data_kwargs': {'with_users': True},
+        'process_fields': {
+            'createdAt': format_datetime_string_as_date,
+            'lockedAt': format_datetime_string_as_date,
+            'downloadedAt': format_datetime_string_as_date,
+            'users': extract_id_from_user_info
+        },
+        'rename_fields': {'users': 'userId'},
+    },
+    {
+        'name': 'direct_award_project_locked_search_services_count',
+        'model': 'direct_award_projects',
+        'get_by_model_fk': {
+            'model_to_get': 'direct_award_project_services',
+            'fk_column_name': 'project_id',
+            'get_data_kwargs': {},
+            'filter_before_request_query': 'lockedAt == lockedAt',
+        },
+        'group_by': 'projectId',
+        'keys': {
+            'projectId',
+            'count'
+        },
+        'process_fields': {'projectId': int},
+        'rename_fields': {'count': 'lockedSearchServicesCount'}
+    },
+    {
+        'name': 'direct_award_project_saved_searches_count',
+        'model': 'direct_award_projects',
+        'get_by_model_fk': {
+            'model_to_get': 'direct_award_project_searches',
+            'fk_column_name': 'project_id',
+            'get_data_kwargs': {}
+        },
+        'keys': {
+            'projectId',
+            'count',
+        },
+        'group_by': 'projectId',
+        'rename_fields': {'count': 'savedSearchesCount'},
+    },
+    {
+        'name': 'direct_award_projects_with_search_data',
+        'model': 'direct_award_projects',
+        'joins': [
+            {
+                'model_name': 'direct_award_project_locked_search_services_count',
+                'left_on': 'id',
+                'right_on': 'projectId',
+            },
+            {
+                'model_name': 'direct_award_project_saved_searches_count',
+                'left_on': 'id',
+                'right_on': 'projectId',
+                'how': 'outer',
+            },
+        ],
+        'keys': (
+            'id',
+            'createdAt',
+            'lockedAt',
+            'downloadedAt',
+            'active',
+            'userId',
+            'savedSearchesCount',
+            'lockedSearchServicesCount',
+        ),
+    },
 ]
 
 if __name__ == '__main__':
@@ -380,21 +459,37 @@ if __name__ == '__main__':
             required_keys = list(config['keys']) + list(config.get('assign_json_subfields', {}).keys())
             data = queries.base_model(config['base_model'], required_keys, config['get_data_kwargs'],
                                       client=client, logger=logger, limit=limit)
+
         elif 'model' in config:
             data = queries.model(config['model'], directory=OUTPUT_DIR)
+
         if 'joins' in config:
             for join in config['joins']:
                 data = queries.join(data, directory=OUTPUT_DIR, **join)
+
+        if 'get_by_model_fk' in config:
+            data = queries.get_by_model_fk(
+                config['get_by_model_fk'],
+                config['keys'],
+                data,
+                client
+            )
+
         # transform values that we want to transform
         if 'assign_json_subfields' in config:
             for field, subfields in config['assign_json_subfields'].items():
                 data = queries.assign_json_subfields(field, subfields, data)
+
         if 'duplicate_fields' in config:
             for field, new_name in config['duplicate_fields']:
                 data = queries.duplicate_fields(data, field, new_name)
 
+        if 'process_fields' in config:
+            data = queries.process_fields(config['process_fields'], data)
+
         if 'add_counts' in config:
             data = queries.add_counts(data=data, directory=OUTPUT_DIR, **config['add_counts'])
+
         if 'aggregation_counts' in config:
             for count in config['aggregation_counts']:
                 data = queries.add_aggregation_counts(data=data, **count)
@@ -406,6 +501,9 @@ if __name__ == '__main__':
                 '{} {} remaining after filtering'.format(len(data), config['name'])
             )
 
+        if 'group_by' in config:
+            data = queries.group_by(config['group_by'], data)
+
         # Only keep requested keys in the output CSV
         keys = [
             k[-1] if isinstance(k, (tuple, list)) else k
@@ -413,8 +511,7 @@ if __name__ == '__main__':
             if (k[-1] if isinstance(k, (tuple, list)) else k) in data
         ]
         data = data[keys]
-        if 'process_fields' in config:
-            data = queries.process_fields(config['process_fields'], data)
+
         if 'rename_fields' in config:
             data = queries.rename_fields(config['rename_fields'], data)
 

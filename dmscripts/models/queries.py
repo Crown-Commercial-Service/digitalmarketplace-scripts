@@ -16,13 +16,13 @@ def base_model(base_model, keys, get_data_kwargs, client, logger=None, limit=Non
     :return: A pandas DataFrame of the requested data. Columns as model attributes, rows as instances.
     """
     mt = ModelTrawler(base_model, client)
-
     data = list(mt.get_data(keys=keys, limit=limit, **get_data_kwargs))
-    logger.info(
-        '{} {} returned after {}s'.format(len(data), base_model, mt.get_time_running())
-    )
+    if logger:
+        logger.info(
+            '{} {} returned after {}s'.format(len(data), base_model, mt.get_time_running())
+        )
 
-    return pandas.DataFrame(data)
+    return pandas.DataFrame(data) if data else pandas.DataFrame(columns=keys)
 
 
 def model(model, directory):
@@ -35,7 +35,7 @@ def model(model, directory):
     return pandas.read_csv(csv_path(directory, model))
 
 
-def join(data, model_name, left_on, right_on, directory, data_duplicate_suffix=None):
+def join(data, model_name, left_on, right_on, directory, how='left', data_duplicate_suffix=None):
     """Left join the model data csv denoted by 'model' to 'data'.
 
     :param data: The current pandas DataFrame we are working with.
@@ -43,14 +43,14 @@ def join(data, model_name, left_on, right_on, directory, data_duplicate_suffix=N
     :param left_on: The field in 'data' we are joining on.
     :param right_on: The field in the model csv we are joining on.
     :param directory: The data directory.
+    :param how: The type of merge to use. Defaults to 'left'. Can also be 'right', 'inner' or 'outer'.
     :param data_duplicate_suffix: An optional suffix for fields duplicated in both datasets.
     :return: pandas DataFrame of model joined to data.
     """
     csv_to_be_joined = model(model_name, directory)
-
     return data.merge(
         csv_to_be_joined,
-        how='left',
+        how=how,
         left_on=left_on,
         right_on=right_on,
         suffixes=[data_duplicate_suffix, '_' + model_name]
@@ -81,6 +81,10 @@ def rename_fields(columns, data):
 
 def sort_by(columns, data):
     return data.sort_values(by=columns)
+
+
+def group_by(columns, data):
+    return data.groupby(columns).size().reset_index(name='count')
 
 
 def add_counts(join, group_by, model_name, data, directory):
@@ -131,3 +135,21 @@ def drop_duplicates(data):
 def duplicate_fields(data, field, new_field_name):
     data[new_field_name] = data[field]
     return data
+
+
+def get_by_model_fk(config, keys, data, client):
+    model = config['model_to_get']
+    fk_column_name = config['fk_column_name']
+    kwargs = config['get_data_kwargs']
+
+    return_data_frame = pandas.DataFrame()
+
+    if config.get('filter_before_request_query'):
+        data = data.query(config['filter_before_request_query']).reset_index(drop=True)
+    for id_value in data['id']:
+        get_data_kwargs = kwargs.copy()
+        get_data_kwargs.update({fk_column_name: id_value})
+        model_data = base_model(model, keys, get_data_kwargs, client)
+        return_data_frame = return_data_frame.append(model_data, ignore_index=True)
+
+    return pandas.DataFrame(columns=keys) if return_data_frame.empty else return_data_frame

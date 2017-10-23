@@ -80,6 +80,32 @@ def test_sort_by():
     ]
 
 
+def test_group_by():
+    data = DataFrame([
+        {'id': 1, 'val': 1},
+        {'id': 2, 'val': 4},
+        {'id': 3, 'val': 2},
+        {'id': 1, 'val': 3},
+        {'id': 2, 'val': 2},
+        {'id': 1, 'val': 3},
+        {'id': 2, 'val': 4},
+        {'id': 3, 'val': 2},
+        {'id': 1, 'val': 5},
+        {'id': 2, 'val': 2},
+    ])
+
+    expected_result = DataFrame([
+        {'val': 1, 'count': 1},
+        {'val': 2, 'count': 4},
+        {'val': 3, 'count': 2},
+        {'val': 4, 'count': 2},
+        {'val': 5, 'count': 1},
+    ])
+    expected_result.sort_index(axis=1, ascending=False, inplace=True)
+
+    assert queries.group_by('val', data).equals(expected_result)
+
+
 def test_rename_fields():
     data = queries.rename_fields({'old key': 'new key'}, DataFrame([
         {'id': 1, 'old key': 7},
@@ -262,3 +288,99 @@ def test_duplicate_fields():
     data = queries.duplicate_fields(data, *config_entry)
     assert list(data.columns) == ['id', 'fk', 'duplicate_id']
     assert data.values.tolist() == expected_result
+
+
+@mock.patch('dmscripts.models.queries.base_model')
+def test_get_model_by_fk(base_model):
+    base_model.side_effect = [
+        DataFrame([{'key_1': 'first_item', 'key_2': 'first_item'}]),
+        DataFrame([{'key_1': 'second_item', 'key_2': 'second_item'}]),
+        DataFrame([{'key_1': 'third_item', 'key_2': 'third_item'}]),
+    ]
+
+    data = DataFrame([
+        {'id': 1},
+        {'id': 2},
+        {'id': 3},
+    ])
+
+    config_entry = {
+        'model_to_get': 'other_model',
+        'fk_column_name': 'other_model_fk',
+        'get_data_kwargs': {},
+    }
+
+    keys = ('key_1', 'key_2')
+    client = 'fake_client'
+
+    data = queries.get_by_model_fk(config_entry, keys, data, client)
+
+    expected_result = DataFrame([
+        {'key_1': 'first_item', 'key_2': 'first_item'},
+        {'key_1': 'second_item', 'key_2': 'second_item'},
+        {'key_1': 'third_item', 'key_2': 'third_item'},
+    ])
+    assert data.equals(expected_result)
+
+    base_model.assert_has_calls([
+        mock.call('other_model', ('key_1', 'key_2'), {'other_model_fk': 1}, 'fake_client'),
+        mock.call('other_model', ('key_1', 'key_2'), {'other_model_fk': 2}, 'fake_client'),
+        mock.call('other_model', ('key_1', 'key_2'), {'other_model_fk': 3}, 'fake_client'),
+    ])
+
+
+@mock.patch('dmscripts.models.queries.base_model')
+def test_get_model_by_fk_and_filter_before_request(base_model):
+    base_model.return_value = DataFrame()
+
+    data = DataFrame([
+        {'id': 1, 'biscuit_type': 'hobknob'},
+        {'id': 2, 'biscuit_type': 'bourbon'},
+        {'id': 3, 'biscuit_type': 'jaffa'},
+        {'id': 4, 'biscuit_type': 'digestive'},
+        {'id': 5, 'biscuit_type': 'jaffa'},
+    ])
+
+    config_entry = {
+        'model_to_get': 'other_model',
+        'fk_column_name': 'other_model_fk',
+        'get_data_kwargs': {},
+        'filter_before_request_query': 'biscuit_type != "jaffa"'
+    }
+
+    keys = ('key_1', 'key_2')
+    client = 'fake_client'
+
+    data = queries.get_by_model_fk(config_entry, keys, data, client)
+
+    base_model.assert_has_calls([
+        mock.call('other_model', ('key_1', 'key_2'), {'other_model_fk': 1}, 'fake_client'),
+        mock.call('other_model', ('key_1', 'key_2'), {'other_model_fk': 2}, 'fake_client'),
+        mock.call('other_model', ('key_1', 'key_2'), {'other_model_fk': 4}, 'fake_client'),
+    ])
+
+
+@mock.patch('dmscripts.models.queries.base_model')
+def test_get_model_by_fk_returns_empty_dataframe_with_column_headings_if_no_data(base_model):
+    base_model.return_value = DataFrame()
+
+    data = DataFrame([
+        {'id': 1, 'biscuit_type': 'hobknob'},
+    ])
+
+    config_entry = {
+        'model_to_get': 'other_model',
+        'fk_column_name': 'other_model_fk',
+        'get_data_kwargs': {},
+    }
+
+    keys = ('key_1', 'key_2')
+    client = 'fake_client'
+
+    data = queries.get_by_model_fk(config_entry, keys, data, client)
+
+    base_model.assert_has_calls([
+        mock.call('other_model', ('key_1', 'key_2'), {'other_model_fk': 1}, 'fake_client'),
+    ])
+
+    assert data.equals(DataFrame(columns=keys))
