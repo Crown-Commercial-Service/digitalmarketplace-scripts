@@ -12,6 +12,7 @@ def get_withdrawn_briefs_with_responses(data_api_client, withdrawn_briefs):
 
 def main(data_api_client):
     withdrawn_date = date.today() - timedelta(days=1)
+    # todo: check actual Kat's method for `data_api_client.find_briefs_by_status_datestamp()`
     briefs_withdrawn_on_date = data_api_client.find_briefs_by_status_datestamp(
         "withdrawn_at",
         withdrawn_date,
