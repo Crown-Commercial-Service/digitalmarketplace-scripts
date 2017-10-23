@@ -48,10 +48,9 @@ def join(data, model_name, left_on, right_on, directory, how='left', data_duplic
     :return: pandas DataFrame of model joined to data.
     """
     csv_to_be_joined = model(model_name, directory)
-
     return data.merge(
         csv_to_be_joined,
-        how='left',
+        how=how,
         left_on=left_on,
         right_on=right_on,
         suffixes=[data_duplicate_suffix, '_' + model_name]
