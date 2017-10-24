@@ -74,9 +74,9 @@ class ServiceIndexer(object):
     @backoff.on_exception(backoff.expo, dmapiclient.HTTPError, max_tries=5)
     def index_service(self, client, service):
         if service['status'] == 'published':
-            client.index(service['id'], service, index=self.index)
+            client.index(self.index, service['id'], service)
         else:
-            client.delete(service['id'], index=self.index)
+            client.delete(self.index, service['id'])
 
     def create_index(self):
         client = dmapiclient.SearchAPIClient(self.endpoint, self.access_token)
