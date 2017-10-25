@@ -7,10 +7,6 @@ def get_brief_response_emails(data_api_client, brief):
     responses = data_api_client.find_brief_responses(brief_id=brief["id"], status="submitted").get("briefResponses")
     return [response["respondToEmailAddress"] for response in responses]
 
-
-def get_withdrawn_briefs_with_responses(data_api_client, withdrawn_briefs):
-    return [(brief, get_brief_response_emails(data_api_client, brief)) for brief in withdrawn_briefs]
-
 def create_context_for_brief(stage, brief):
     return {
         'brief_title': brief['title'],
@@ -21,12 +17,14 @@ def create_context_for_brief(stage, brief):
         )
     }
 
-def main(data_api_client):
+def main(data_api_client, stage):
     withdrawn_date = date.today() - timedelta(days=1)
     briefs_withdrawn_on_date = data_api_client.find_briefs(withdrawn_on=withdrawn_date).get("briefs")
-    withdrawn_briefs_with_responses = get_withdrawn_briefs_with_responses(data_api_client, briefs_withdrawn_on_date)
-    # for brief, email_addresses in withdrawn_briefs_with_responses:
-    #     brief_context = create_context_for_brief(stage, brief)
-    #     for email_address in email_addresses:
-    #         #send_email()
+
+    for brief in briefs_withdrawn_on_date:
+        email_addresses = get_brief_response_emails(data_api_client, brief)
+        if email_addresses:
+            brief_context = create_context_for_brief(stage, brief)
+            # for email_address in email_addresses:
+            #     #send_email()
     return True
