@@ -28,8 +28,25 @@ class TestMain:
             {"id": 123, "withdrawnAt": "2016-01-28 16:23:50.618053"},
             {"id": 235, "withdrawnAt": "2016-01-28 08:23:50.618053"}
         ]
-        briefs_with_responses = {123: ["email@me.now", "email@them.now"], 235: []}
+        briefs_with_responses = [
+            ({"id": 123, "withdrawnAt": "2016-01-28 16:23:50.618053"}, ["email@me.now", "email@them.now"]),
+            ({"id": 235, "withdrawnAt": "2016-01-28 08:23:50.618053"}, [])
+        ]
         assert tested_script.get_withdrawn_briefs_with_responses(mock.Mock(), briefs) == briefs_with_responses
+
+    def test_create_context_for_brief(self):
+        brief = {
+            "id": 123,
+            "withdrawnAt": "2016-01-28 16:23:50.618053",
+            "title": "Tea Drinker",
+            "frameworkFramework": "digital-outcomes-and-specialists"
+        }
+
+
+        assert tested_script.create_context_for_brief('preview', brief) == {
+            'brief_title': "Tea Drinker",
+            'brief_link': 'https://www.preview.marketplace.team/digital-outcomes-and-specialists/opportunities/123'  # noqa
+        }
 
     @mock.patch('dmscripts.notify_suppliers_about_withdrawn_briefs.get_withdrawn_briefs_with_responses')
     @mock.patch('dmscripts.notify_suppliers_about_withdrawn_briefs.data_api_client')
