@@ -35,13 +35,13 @@ class TestMain:
             {"id": 123, "withdrawnAt": "2016-01-28 16:23:50.618053"},
             {"id": 235, "withdrawnAt": "2016-01-28 08:23:50.618053"}
         ]
-        data_api_client.find_briefs_by_status_datestamp.return_value = {"briefs": withdrawn_briefs}
+        data_api_client.find_briefs.return_value = {"briefs": withdrawn_briefs}
         get_withdrawn_briefs_with_responses.return_value = {123: [{"id": 4321}, {"id": 4389}], 235: []}
         with freeze_time('2016-01-29 03:04:05'):
             tested_script.main(data_api_client)
             yesterday = date(2016, 1, 28)
-            expected_args = [mock.call('withdrawn_at', yesterday, yesterday, inclusive=True)]
-            assert data_api_client.find_briefs_by_status_datestamp.call_args_list == expected_args
+            expected_args = [mock.call(withdrawn_on=yesterday)]
+            assert data_api_client.find_briefs.call_args_list == expected_args
             assert tested_script.get_withdrawn_briefs_with_responses.call_args_list == [mock.call(
                 data_api_client, withdrawn_briefs
             )]
