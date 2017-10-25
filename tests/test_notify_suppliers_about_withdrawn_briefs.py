@@ -11,21 +11,24 @@ from dmscripts import notify_suppliers_about_withdrawn_briefs as tested_script
 class TestMain:
 
     @mock.patch('dmscripts.notify_suppliers_about_withdrawn_briefs.data_api_client')
-    def test_get_brief_responses(self, data_api_client):
-        data_api_client.find_brief_responses.return_value = {"briefResponses": [{"id": 4321}, {"id": 4389}]}
-        assert tested_script.get_brief_responses(data_api_client, {"id": 1234}) == [{"id": 4321}, {"id": 4389}]
+    def test_get_brief_response_emails(self, data_api_client):
+        data_api_client.find_brief_responses.return_value = {"briefResponses": [
+            {"id": 4321, "respondToEmailAddress": "email@me.now"},
+            {"id": 4389, "respondToEmailAddress": "email@them.now"}
+        ]}
+        assert tested_script.get_brief_response_emails(data_api_client, {"id": 1234}) == ["email@me.now", "email@them.now"]
 
-    @mock.patch('dmscripts.notify_suppliers_about_withdrawn_briefs.get_brief_responses')
-    def test_get_withdrawn_briefs_with_responses(self, get_brief_responses):
-        get_brief_responses.side_effect = [
-            [{"id": 4321}, {"id": 4389}],
+    @mock.patch('dmscripts.notify_suppliers_about_withdrawn_briefs.get_brief_response_emails')
+    def test_get_withdrawn_briefs_with_responses(self, get_brief_response_emails):
+        get_brief_response_emails.side_effect = [
+            ["email@me.now", "email@them.now"],
             [],
         ]
         briefs = [
             {"id": 123, "withdrawnAt": "2016-01-28 16:23:50.618053"},
             {"id": 235, "withdrawnAt": "2016-01-28 08:23:50.618053"}
         ]
-        briefs_with_responses = {123: [{"id": 4321}, {"id": 4389}], 235: []}
+        briefs_with_responses = {123: ["email@me.now", "email@them.now"], 235: []}
         assert tested_script.get_withdrawn_briefs_with_responses(mock.Mock(), briefs) == briefs_with_responses
 
     @mock.patch('dmscripts.notify_suppliers_about_withdrawn_briefs.get_withdrawn_briefs_with_responses')

@@ -2,12 +2,13 @@ from dmapiclient import DataAPIClient as data_api_client
 from datetime import datetime, date, timedelta
 
 
-def get_brief_responses(data_api_client, brief):
-    return data_api_client.find_brief_responses(brief_id=brief["id"], status="submitted").get("briefResponses")
+def get_brief_response_emails(data_api_client, brief):
+    responses = data_api_client.find_brief_responses(brief_id=brief["id"], status="submitted").get("briefResponses")
+    return [response["respondToEmailAddress"] for response in responses]
 
 
 def get_withdrawn_briefs_with_responses(data_api_client, withdrawn_briefs):
-    return {brief["id"]: get_brief_responses(data_api_client, brief) for brief in withdrawn_briefs}
+    return {brief["id"]: get_brief_response_emails(data_api_client, brief) for brief in withdrawn_briefs}
 
 
 def main(data_api_client):
