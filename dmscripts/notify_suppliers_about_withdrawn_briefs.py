@@ -17,14 +17,15 @@ def create_context_for_brief(stage, brief):
         )
     }
 
-def main(data_api_client, stage):
-    withdrawn_date = date.today() - timedelta(days=1)
+def main(data_api_client, notify_client, notify_template_id, stage, withdrawn_date):
     briefs_withdrawn_on_date = data_api_client.find_briefs(withdrawn_on=withdrawn_date).get("briefs")
 
     for brief in briefs_withdrawn_on_date:
         email_addresses = get_brief_response_emails(data_api_client, brief)
         if email_addresses:
-            brief_context = create_context_for_brief(stage, brief)
-            # for email_address in email_addresses:
-            #     #send_email()
+            brief_email_context = create_context_for_brief(stage, brief)
+            for email_address in email_addresses:
+                notify_client.send_email(
+                    email_address, notify_template_id, brief_email_context, allow_resend=False
+                )
     return True

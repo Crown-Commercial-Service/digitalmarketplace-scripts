@@ -22,10 +22,18 @@ WITHDRAWN_BRIEFS = {"briefs": [
         "frameworkFramework": "digital-outcomes-and-specialists"
     }
 ]}
+
+
 BRIEF_RESPONSES = {"briefResponses": [
     {"id": 4321, "respondToEmailAddress": "email@me.now"},
     {"id": 4389, "respondToEmailAddress": "email@them.now"}
 ]}
+
+
+EXPECTED_BRIEF_CONTEXT = {
+    'brief_title': "Tea Drinker",
+    'brief_link': 'https://www.preview.marketplace.team/digital-outcomes-and-specialists/opportunities/123'  # noqa
+}
 
 
 class TestMain:
@@ -37,20 +45,21 @@ class TestMain:
         assert tested_script.get_brief_response_emails(data_api_client, {"id": 1234}) == ["email@me.now", "email@them.now"]
 
     def test_create_context_for_brief(self):
-        assert tested_script.create_context_for_brief('preview', WITHDRAWN_BRIEFS["briefs"][0]) == {
-            'brief_title': "Tea Drinker",
-            'brief_link': 'https://www.preview.marketplace.team/digital-outcomes-and-specialists/opportunities/123'  # noqa
-        }
+        assert tested_script.create_context_for_brief('preview', WITHDRAWN_BRIEFS["briefs"][0]) == EXPECTED_BRIEF_CONTEXT
 
+    @mock.patch('dmutils.email.DMNotifyClient', autospec=True)
     @mock.patch('dmscripts.notify_suppliers_about_withdrawn_briefs.create_context_for_brief')
     @mock.patch('dmscripts.notify_suppliers_about_withdrawn_briefs.get_brief_response_emails')
-    @mock.patch('dmscripts.notify_suppliers_about_withdrawn_briefs.data_api_client')
-    def test_main(self, data_api_client, get_brief_response_emails, create_context_for_brief):
+    @mock.patch('dmapiclient.DataAPIClient', autospec=True)
+    def test_main(self, data_api_client, get_brief_response_emails, create_context_for_brief, notify_client):
         data_api_client.find_briefs.return_value = WITHDRAWN_BRIEFS
+        tested_script.create_context_for_brief.return_value = EXPECTED_BRIEF_CONTEXT
         get_brief_response_emails.side_effect = [["email@me.now", "email@them.now"], []]
-        with freeze_time('2016-01-29 03:04:05'):
-            tested_script.main(data_api_client, "preview")
-            yesterday = date(2016, 1, 28)
-            expected_args = [mock.call(withdrawn_on=yesterday)]
-            assert data_api_client.find_briefs.call_args_list == expected_args
-            assert create_context_for_brief.call_args_list == [mock.call("preview", WITHDRAWN_BRIEFS["briefs"][0])]
+        withdrawn_date = date(2016, 1, 28)
+        tested_script.main(data_api_client, notify_client, "notify_template_id", "preview", withdrawn_date)
+        assert data_api_client.find_briefs.call_args_list == [mock.call(withdrawn_on=withdrawn_date)]
+        assert create_context_for_brief.call_args_list == [mock.call("preview", WITHDRAWN_BRIEFS["briefs"][0])]
+        assert notify_client.send_email.call_args_list == [
+            mock.call("email@me.now", "notify_template_id", EXPECTED_BRIEF_CONTEXT , allow_resend=False),
+            mock.call("email@them.now", "notify_template_id", EXPECTED_BRIEF_CONTEXT , allow_resend=False)
+        ]
