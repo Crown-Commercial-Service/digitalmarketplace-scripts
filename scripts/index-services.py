@@ -15,8 +15,11 @@ Options:
     --search-api-url=<search-api-url>             Override search API URL (otherwise automatically populated)
     --search-api-token=<search_api_access_token>  Override search API token (otherwise automatically populated)
 
-Example:
+Example 1:
     ./index-services.py dev --index=g-cloud-9-2017-10-17 --frameworks=g-cloud-9
+
+Example 2:
+    ./index-services.py dev --api-token=myToken --search-api-token=myToken --frameworks=g-cloud-9 --index "g-cloud-9"
 """
 
 import sys
