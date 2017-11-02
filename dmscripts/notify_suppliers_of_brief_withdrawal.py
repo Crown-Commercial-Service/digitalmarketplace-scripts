@@ -11,7 +11,7 @@ def get_brief_response_emails(data_api_client, brief_id):
 def create_context_for_brief(stage, brief):
     return {
         'brief_title': brief['title'],
-        'brief_link': '{0}/{1}/opportunities/{2}'.format(
+        'brief_link': '{}/{}/opportunities/{}'.format(
             env_helpers.get_web_url_from_stage(stage),
             brief['frameworkFramework'],
             brief['id']
@@ -19,9 +19,9 @@ def create_context_for_brief(stage, brief):
     }
 
 
-def main(data_api_client, mail_client, template_id, stage, logger, withdrawn_date=None, brief_id=None, dry_run=False):
+def main(data_api_client, mail_client, template_id, stage, logger, withdrawn_date, brief_id=None, dry_run=False):
 
-    withdrawn_briefs = data_api_client.find_briefs(withdrawn_on=withdrawn_date).get("briefs")
+    withdrawn_briefs = data_api_client.find_briefs_iter(status='withdrawn', withdrawn_on=withdrawn_date).get("briefs")
 
     if brief_id:
         withdrawn_briefs = filter(lambda i: i['id'] == brief_id, withdrawn_briefs)
@@ -37,9 +37,10 @@ def main(data_api_client, mail_client, template_id, stage, logger, withdrawn_dat
                 mail_client.send_email(
                     email_address, template_id, brief_email_context, allow_resend=False
                 )
-            logger.info("{}EMAIL: 'Withdrawal of Brief ID: {} to {}".format(
+            logger.info(
+                "%sEMAIL: Withdrawal of Brief ID: %d to %s",
                 '[Dry-run]' if dry_run else '',
                 brief['id'],
                 hash_string(email_address),
-            ))
+            )
     return True
