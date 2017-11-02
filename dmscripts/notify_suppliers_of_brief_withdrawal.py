@@ -4,7 +4,7 @@ from dmscripts.helpers import env_helpers
 
 
 def get_brief_response_emails(data_api_client, brief_id):
-    responses = data_api_client.find_brief_responses(brief_id=brief_id, status="submitted").get("briefResponses")
+    responses = data_api_client.find_brief_responses_iter(brief_id=brief_id, status="submitted")
     return [response["respondToEmailAddress"] for response in responses]
 
 
@@ -21,7 +21,7 @@ def create_context_for_brief(stage, brief):
 
 def main(data_api_client, mail_client, template_id, stage, logger, withdrawn_date, brief_id=None, dry_run=False):
 
-    withdrawn_briefs = data_api_client.find_briefs_iter(status='withdrawn', withdrawn_on=withdrawn_date).get("briefs")
+    withdrawn_briefs = data_api_client.find_briefs_iter(status='withdrawn', withdrawn_on=withdrawn_date)
 
     if brief_id:
         withdrawn_briefs = filter(lambda i: i['id'] == brief_id, withdrawn_briefs)
