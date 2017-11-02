@@ -5,7 +5,7 @@
 # E402: module level import not at top of file
 # W503: line break before binary operator
 # C901: 'Methodname' is too complex ('n')
-exclude = venv*,__pycache__,node_modules,bower_components
+exclude = venv*,__pycache__,node_modules,bower_components,.git
 ignore = D203,W503
 max-complexity = 19
 max-line-length = 120
