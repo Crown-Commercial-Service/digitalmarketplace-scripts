@@ -4,7 +4,7 @@ from datetime import date
 from dmscripts import notify_suppliers_of_brief_withdrawal as tested_script
 
 
-WITHDRAWN_BRIEFS = {"briefs": [
+WITHDRAWN_BRIEFS = (
     {
         "id": 123,
         "withdrawnAt": "2016-01-28 16:23:50.618053",
@@ -17,13 +17,13 @@ WITHDRAWN_BRIEFS = {"briefs": [
         "title": "Cookie Muncher",
         "frameworkFramework": "digital-outcomes-and-specialists"
     }
-]}
+)
 
 
-BRIEF_RESPONSES = {"briefResponses": [
+BRIEF_RESPONSES = (
     {"id": 4321, "respondToEmailAddress": "email@me.now"},
     {"id": 4389, "respondToEmailAddress": "email@them.now"}
-]}
+)
 
 
 EXPECTED_BRIEF_CONTEXT = {
@@ -34,12 +34,12 @@ EXPECTED_BRIEF_CONTEXT = {
 
 @mock.patch('dmapiclient.DataAPIClient', autospec=True)
 def test_get_brief_response_emails(data_api_client):
-    data_api_client.find_brief_responses.return_value = BRIEF_RESPONSES
+    data_api_client.find_brief_responses_iter.return_value = BRIEF_RESPONSES
     assert tested_script.get_brief_response_emails(data_api_client, {"id": 1234}) == ["email@me.now", "email@them.now"]
 
 
 def test_create_context_for_brief():
-    assert tested_script.create_context_for_brief('preview', WITHDRAWN_BRIEFS["briefs"][0]) == EXPECTED_BRIEF_CONTEXT
+    assert tested_script.create_context_for_brief('preview', WITHDRAWN_BRIEFS[0]) == EXPECTED_BRIEF_CONTEXT
 
 
 @mock.patch('dmutils.email.DMNotifyClient', autospec=True)
@@ -63,7 +63,7 @@ def test_main_calls_correct_script_methods(
         mock.call(data_api_client, 235),
     ]
     assert data_api_client.find_briefs_iter.call_args_list == expected_call_args
-    assert create_context_for_brief.call_args_list == [mock.call("preview", WITHDRAWN_BRIEFS["briefs"][0])]
+    assert create_context_for_brief.call_args_list == [mock.call("preview", WITHDRAWN_BRIEFS[0])]
     assert notify_client.send_email.call_args_list == [
         mock.call("email@me.now", "notify_template_id", EXPECTED_BRIEF_CONTEXT, allow_resend=False),
         mock.call("email@them.now", "notify_template_id", EXPECTED_BRIEF_CONTEXT, allow_resend=False)
@@ -75,7 +75,7 @@ def test_main_calls_correct_script_methods(
 def test_main_calls_correct_external_client_methods(data_api_client, notify_client):
 
     data_api_client.find_briefs_iter.return_value = WITHDRAWN_BRIEFS
-    data_api_client.find_brief_responses.side_effect = (BRIEF_RESPONSES, {"briefResponses": []})
+    data_api_client.find_brief_responses_iter.side_effect = (BRIEF_RESPONSES, [])
     withdrawn_date = date.today()
 
     result = tested_script.main(
@@ -96,11 +96,10 @@ def test_main_calls_correct_external_client_methods(data_api_client, notify_clie
 def test_single_call_when_brief_id_specified(data_api_client, notify_client):
     """Script should only look up brief responses for given brief id when brief id is specified."""
     data_api_client.find_briefs_iter.return_value = WITHDRAWN_BRIEFS
-    data_api_client.find_briefs_iter.return_value = WITHDRAWN_BRIEFS
     brief_id = 235
     result = tested_script.main(
         data_api_client, notify_client, 'notify_template_id', 'preview', mock.Mock(), date.today(), brief_id=brief_id
     )
 
     assert result is True
-    data_api_client.find_brief_responses.assert_called_once_with(brief_id=brief_id, status='submitted')
+    data_api_client.find_brief_responses_iter.assert_called_once_with(brief_id=brief_id, status='submitted')
