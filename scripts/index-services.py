@@ -83,7 +83,7 @@ class ServiceIndexer(object):
         logger.info("Creating {index} index", extra={'index': self.index})
 
         try:
-            result = client.create_index(self.index)
+            result = client.create_index(self.index, mapping='services')
             logger.info("Index creation response: {response}", extra={'response': result})
         except dmapiclient.HTTPError as e:
             if 'already exists as alias' in str(e.message):
