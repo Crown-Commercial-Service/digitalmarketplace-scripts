@@ -9,6 +9,8 @@ Usage:
     --frameworks=<frameworks>                     Comma-separated list of framework slugs that should be indexed
 
 Options:
+    --mapping=<mapping>                           The name of the mapping to use (default: services)
+                                                  [default: services]
     --serial                                      Do not run in parallel (useful for debugging)
     --api-url=<api-url>                           Override API URL (otherwise automatically populated)
     --api-token=<api_access_token>                Override API token (otherwise automatically populated)
@@ -78,12 +80,12 @@ class ServiceIndexer(object):
         else:
             client.delete(self.index, service['id'])
 
-    def create_index(self):
+    def create_index(self, mapping):
         client = dmapiclient.SearchAPIClient(self.endpoint, self.access_token)
         logger.info("Creating {index} index", extra={'index': self.index})
 
         try:
-            result = client.create_index(self.index)
+            result = client.create_index(self.index, mapping=mapping)
             logger.info("Index creation response: {response}", extra={'response': result})
         except dmapiclient.HTTPError as e:
             if 'already exists as alias' in str(e.message):
@@ -92,7 +94,8 @@ class ServiceIndexer(object):
                 raise
 
 
-def do_index(search_api_url, search_api_access_token, data_api_url, data_api_access_token, serial, index, frameworks):
+def do_index(search_api_url, search_api_access_token, data_api_url, data_api_access_token, mapping, serial, index,
+             frameworks):
     logger.info("Search API URL: {search_api_url}", extra={'search_api_url': search_api_url})
     logger.info("Data API URL: {data_api_url}", extra={'data_api_url': data_api_url})
 
@@ -104,7 +107,7 @@ def do_index(search_api_url, search_api_access_token, data_api_url, data_api_acc
         mapper = pool.imap_unordered
 
     indexer = ServiceIndexer(search_api_url, search_api_access_token, index)
-    indexer.create_index()
+    indexer.create_index(mapping=mapping)
 
     counter = 0
     start_time = datetime.utcnow()
@@ -118,6 +121,7 @@ def do_index(search_api_url, search_api_access_token, data_api_url, data_api_acc
 
     return status
 
+
 if __name__ == "__main__":
     arguments = docopt(__doc__)
     ok = do_index(
@@ -125,6 +129,7 @@ if __name__ == "__main__":
         data_api_access_token=arguments['--api-token'] or get_auth_token('api', arguments['<stage>']),
         search_api_url=arguments['--search-api-url'] or get_api_endpoint_from_stage(arguments['<stage>'], 'search-api'),
         search_api_access_token=arguments['--search-api-token'] or get_auth_token('search_api', arguments['<stage>']),
+        mapping=arguments['--mapping'],
         serial=arguments['--serial'],
         index=arguments['--index'],
         frameworks=arguments['--frameworks']
