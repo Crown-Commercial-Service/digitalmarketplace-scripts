@@ -2,15 +2,15 @@
 """Read services from the API endpoint and write to search-api for indexing.
 
 Usage:
-    index-services.py <stage> --index=<index> --frameworks=<frameworks> [options]
+    index.py <doc-type> <stage> [--create] --index=<index> --frameworks=<frameworks> --mapping=<mapping> [options]
 
+    <doc-type>                                    One of briefs or services
     <stage>                                       One of dev, preview, staging or production
     --index=<index>                               Search API index name, usually of the form <framework>-YYYY-MM-DD
     --frameworks=<frameworks>                     Comma-separated list of framework slugs that should be indexed
+    --mapping=<mapping>                           One of the mappings supported by the Search API.
 
 Options:
-    --mapping=<mapping>                           The name of the mapping to use (default: services)
-                                                  [default: services]
     --serial                                      Do not run in parallel (useful for debugging)
     --api-url=<api-url>                           Override API URL (otherwise automatically populated)
     --api-token=<api_access_token>                Override API token (otherwise automatically populated)
@@ -18,7 +18,7 @@ Options:
     --search-api-token=<search_api_access_token>  Override search API token (otherwise automatically populated)
 
 Example:
-    ./index-services.py dev --index=g-cloud-9-2017-10-17 --frameworks=g-cloud-9
+    ./index.py services dev --index=g-cloud-9-2017-10-17 --frameworks=g-cloud-9
 """
 
 import sys
@@ -30,6 +30,7 @@ import dmapiclient
 from docopt import docopt
 from six.moves import map
 
+
 sys.path.insert(0, '.')
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
@@ -37,16 +38,6 @@ from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.logging_helpers import logging
 
 logger = logging_helpers.configure_logger({"dmapiclient": logging.WARNING})
-
-
-def request_services(api_url, api_access_token, frameworks):
-
-    data_client = dmapiclient.DataAPIClient(
-        api_url,
-        api_access_token
-    )
-
-    return data_client.find_services_iter(framework=frameworks)
 
 
 def print_progress(counter, start_time):
@@ -57,35 +48,18 @@ def print_progress(counter, start_time):
         })
 
 
-class ServiceIndexer(object):
-    def __init__(self, endpoint, access_token, index):
-        self.endpoint = endpoint
-        self.access_token = access_token
+class IndexerBase(object):
+    def __init__(self, document_type, data_client, search_client, index):
+        self.document_type = document_type
         self.index = index
-
-    def __call__(self, service):
-        client = dmapiclient.SearchAPIClient(self.endpoint, self.access_token)
-
-        try:
-            self.index_service(client, service)
-            return True
-        except dmapiclient.APIError:
-            logger.exception("{service_id} not indexed", extra={'service_id': service.get('id')})
-            return False
-
-    @backoff.on_exception(backoff.expo, dmapiclient.HTTPError, max_tries=5)
-    def index_service(self, client, service):
-        if service['status'] == 'published':
-            client.index(self.index, service['id'], service)
-        else:
-            client.delete(self.index, service['id'])
+        self.search_client = search_client
+        self.data_client = data_client
 
     def create_index(self, mapping):
-        client = dmapiclient.SearchAPIClient(self.endpoint, self.access_token)
         logger.info("Creating {index} index", extra={'index': self.index})
 
         try:
-            result = client.create_index(self.index, mapping=mapping)
+            result = self.search_client.create_index(self.index, mapping=mapping)
             logger.info("Index creation response: {response}", extra={'response': result})
         except dmapiclient.HTTPError as e:
             if 'already exists as alias' in str(e.message):
@@ -93,27 +67,76 @@ class ServiceIndexer(object):
             else:
                 raise
 
+    def request_items(self, frameworks):
+        raise NotImplementedError()
 
-def do_index(search_api_url, search_api_access_token, data_api_url, data_api_access_token, mapping, serial, index,
-             frameworks):
+    def __call__(self, item):
+        try:
+            self.index_item(item)
+            return True
+        except dmapiclient.APIError:
+            logger.exception("{id} not indexed", extra={'id': item.get('id')})
+            return False
+
+    def include_in_index(self, item):
+        raise NotImplementedError()
+
+    @backoff.on_exception(backoff.expo, dmapiclient.HTTPError, max_tries=5)
+    def index_item(self, item):
+        if self.include_in_index(item):
+            self.search_client.index(self.index, item['id'], item, self.document_type)
+        else:
+            self.search_client.delete(self.index, item['id'])
+
+
+class BriefIndexer(IndexerBase):
+    def request_items(self, frameworks):
+        # despite the name, frameworks takes a string containing a comma-separated list of framework slugs
+        return self.data_client.find_briefs_iter(framework=frameworks)
+
+    def include_in_index(self, item):
+        # Even draft briefs will be in the index, for now at least
+        return True
+
+
+class ServiceIndexer(IndexerBase):
+    def request_items(self, frameworks):
+        # despite the name, frameworks takes a string containing a comma-separated list of framework slugs
+        return self.data_client.find_services_iter(framework=frameworks)
+
+    def include_in_index(self, item):
+        return item['status'] == 'published'
+
+
+indexers = {
+    'briefs': BriefIndexer,
+    'services': ServiceIndexer,
+}
+
+
+def do_index(doc_type, search_api_url, search_api_access_token, data_api_url, data_api_access_token, mapping, serial,
+             index, frameworks, create_index):
     logger.info("Search API URL: {search_api_url}", extra={'search_api_url': search_api_url})
     logger.info("Data API URL: {data_api_url}", extra={'data_api_url': data_api_url})
 
     if serial:
-        pool = None
         mapper = map
     else:
         pool = ThreadPool(10)
         mapper = pool.imap_unordered
 
-    indexer = ServiceIndexer(search_api_url, search_api_access_token, index)
-    indexer.create_index(mapping=mapping)
+    indexer = indexers[doc_type](
+        doc_type,
+        dmapiclient.DataAPIClient(data_api_url, data_api_access_token),
+        dmapiclient.SearchAPIClient(search_api_url, search_api_access_token),
+        index)
+    if create_index:
+        indexer.create_index(mapping=mapping)
 
     counter = 0
     start_time = datetime.utcnow()
     status = True
-
-    services = request_services(data_api_url, data_api_access_token, frameworks)
+    services = indexer.request_items(frameworks)
     for result in mapper(indexer, services):
         counter += 1
         status = status and result
@@ -125,6 +148,7 @@ def do_index(search_api_url, search_api_access_token, data_api_url, data_api_acc
 if __name__ == "__main__":
     arguments = docopt(__doc__)
     ok = do_index(
+        doc_type=arguments['<doc-type>'],
         data_api_url=arguments['--api-url'] or get_api_endpoint_from_stage(arguments['<stage>'], 'api'),
         data_api_access_token=arguments['--api-token'] or get_auth_token('api', arguments['<stage>']),
         search_api_url=arguments['--search-api-url'] or get_api_endpoint_from_stage(arguments['<stage>'], 'search-api'),
@@ -132,7 +156,8 @@ if __name__ == "__main__":
         mapping=arguments['--mapping'],
         serial=arguments['--serial'],
         index=arguments['--index'],
-        frameworks=arguments['--frameworks']
+        frameworks=arguments['--frameworks'],
+        create_index=arguments['--create']
     )
 
     if not ok:
