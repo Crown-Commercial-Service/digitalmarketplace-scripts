@@ -2,7 +2,8 @@
 """Read services from the API endpoint and write to search-api for indexing.
 
 Usage:
-    index.py <doc-type> <stage> [--create] --index=<index> --frameworks=<frameworks> --mapping=<mapping> [options]
+    index-to-search-service.py <doc-type> <stage> [--create] --index=<index> --frameworks=<frameworks> \
+--mapping=<mapping> [options]
 
     <doc-type>                                    One of briefs or services
     <stage>                                       One of dev, preview, staging or production
@@ -22,7 +23,7 @@ Options:
     --search-api-token=<search_api_access_token>  Override search API token (otherwise automatically populated)
 
 Example:
-    ./index.py services dev --index=g-cloud-9-2017-10-17 --frameworks=g-cloud-9
+    ./index-to-search-service.py services dev --index=g-cloud-9-2017-10-17 --frameworks=g-cloud-9
 """
 
 import sys
