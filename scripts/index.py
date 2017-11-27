@@ -6,6 +6,10 @@ Usage:
 
     <doc-type>                                    One of briefs or services
     <stage>                                       One of dev, preview, staging or production
+    --create                                      Use this flag to create the index if it doesn't exist. If it does
+                                                  exist, the mapping for the index will be updated. Don't specify this
+                                                  option when running from a batch/Jenkins job, as both creating indexes
+                                                  and updating mappings should be done under user control.
     --index=<index>                               Search API index name, usually of the form <framework>-YYYY-MM-DD
     --frameworks=<frameworks>                     Comma-separated list of framework slugs that should be indexed
     --mapping=<mapping>                           One of the mappings supported by the Search API.
@@ -91,7 +95,7 @@ class IndexerBase(object):
 
 class BriefIndexer(IndexerBase):
     def request_items(self, frameworks):
-        # despite the name, frameworks takes a string containing a comma-separated list of framework slugs
+        # despite the name, `framework` takes a string containing a comma-separated list of framework slugs
         return self.data_client.find_briefs_iter(framework=frameworks)
 
     def include_in_index(self, item):
@@ -136,8 +140,8 @@ def do_index(doc_type, search_api_url, search_api_access_token, data_api_url, da
     counter = 0
     start_time = datetime.utcnow()
     status = True
-    services = indexer.request_items(frameworks)
-    for result in mapper(indexer, services):
+    items = indexer.request_items(frameworks)
+    for result in mapper(indexer, items):
         counter += 1
         status = status and result
         print_progress(counter, start_time)
