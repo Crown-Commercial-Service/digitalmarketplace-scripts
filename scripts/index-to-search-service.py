@@ -23,7 +23,8 @@ Options:
     --search-api-token=<search_api_access_token>  Override search API token (otherwise automatically populated)
 
 Example:
-    ./index-to-search-service.py services dev --index=g-cloud-9-2017-10-17 --frameworks=g-cloud-9
+    ./index-to-search-service.py services dev --index=g-cloud-9-2017-10-17 --frameworks=g-cloud-9 \
+--mapping=g-cloud-9-services
 """
 
 import sys
