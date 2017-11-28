@@ -2,20 +2,18 @@
 """Read services from the API endpoint and write to search-api for indexing.
 
 Usage:
-    index-to-search-service.py <doc-type> <stage> [--create] --index=<index> --frameworks=<frameworks> \
---mapping=<mapping> [options]
+    index-to-search-service.py <doc-type> <stage> --index=<index> --frameworks=<frameworks> [options]
 
     <doc-type>                                    One of briefs or services
     <stage>                                       One of dev, preview, staging or production
-    --create                                      Use this flag to create the index if it doesn't exist. If it does
+    --index=<index>                               Search API index name, usually of the form <framework>-YYYY-MM-DD
+    --frameworks=<frameworks>                     Comma-separated list of framework slugs that should be indexed
+
+Options:
+    --create-with-mapping=<mapping>               Specify a mapping to create the index if it doesn't exist. If it does
                                                   exist, the mapping for the index will be updated. Don't specify this
                                                   option when running from a batch/Jenkins job, as both creating indexes
                                                   and updating mappings should be done under user control.
-    --index=<index>                               Search API index name, usually of the form <framework>-YYYY-MM-DD
-    --frameworks=<frameworks>                     Comma-separated list of framework slugs that should be indexed
-    --mapping=<mapping>                           One of the mappings supported by the Search API.
-
-Options:
     --serial                                      Do not run in parallel (useful for debugging)
     --api-url=<api-url>                           Override API URL (otherwise automatically populated)
     --api-token=<api_access_token>                Override API token (otherwise automatically populated)
@@ -24,7 +22,7 @@ Options:
 
 Example:
     ./index-to-search-service.py services dev --index=g-cloud-9-2017-10-17 --frameworks=g-cloud-9 \
---mapping=g-cloud-9-services
+--create-with-mapping=services-g-cloud-9
 """
 
 import sys
@@ -121,7 +119,7 @@ indexers = {
 
 
 def do_index(doc_type, search_api_url, search_api_access_token, data_api_url, data_api_access_token, mapping, serial,
-             index, frameworks, create_index):
+             index, frameworks):
     logger.info("Search API URL: {search_api_url}", extra={'search_api_url': search_api_url})
     logger.info("Data API URL: {data_api_url}", extra={'data_api_url': data_api_url})
 
@@ -136,7 +134,7 @@ def do_index(doc_type, search_api_url, search_api_access_token, data_api_url, da
         dmapiclient.DataAPIClient(data_api_url, data_api_access_token),
         dmapiclient.SearchAPIClient(search_api_url, search_api_access_token),
         index)
-    if create_index:
+    if mapping:
         indexer.create_index(mapping=mapping)
 
     counter = 0
@@ -159,11 +157,10 @@ if __name__ == "__main__":
         data_api_access_token=arguments['--api-token'] or get_auth_token('api', arguments['<stage>']),
         search_api_url=arguments['--search-api-url'] or get_api_endpoint_from_stage(arguments['<stage>'], 'search-api'),
         search_api_access_token=arguments['--search-api-token'] or get_auth_token('search_api', arguments['<stage>']),
-        mapping=arguments['--mapping'],
+        mapping=arguments.get('--create-with-mapping'),
         serial=arguments['--serial'],
         index=arguments['--index'],
         frameworks=arguments['--frameworks'],
-        create_index=arguments['--create']
     )
 
     if not ok:
