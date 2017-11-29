@@ -65,7 +65,7 @@ The `scripts` folder in this repository contains scripts that interact with the 
   Outputs details of a random active unlocked user with a given role.
 
 * `index-to-search-service.py`
-  **Runs nightly on Jenkins**. Reads services from the API endpoint and writes to search-api for indexing.
+  **Runs nightly on Jenkins**. Reads services or briefs from the API endpoint and writes to search-api for indexing.
 
 * `insert-framework-results.py`
   Reads a csv file of results for suppliers who have/have not been accepted onto
