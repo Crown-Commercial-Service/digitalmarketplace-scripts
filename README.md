@@ -155,6 +155,10 @@ container. The easiest way to do this is to use `--net=host` argument for `docke
 docker run --net=host digitalmarketplace/scripts scripts/index-to-search-service.py dev ...
 ```
 
+**Note that this will use the latest image built from master, and therefore (at present) all
+merges to master have effect almost immediately in Preview, Staging and Production environments.**
+This is discussed at <https://trello.com/c/di223DXI/241-no-control-of-scripts-repo-on-jenkins>.
+
 If the script is generating output files you need to map a local directory to the output directory
 in the container using a volume:
 
