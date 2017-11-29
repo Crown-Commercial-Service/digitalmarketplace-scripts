@@ -64,8 +64,8 @@ The `scripts` folder in this repository contains scripts that interact with the 
 
   Outputs details of a random active unlocked user with a given role.
 
-* `index-services.py`
-  **Runs nightly on Jenkins**. Reads services from the API endpoint and writes to search-api for indexing.
+* `index-to-search-service.py`
+  **Runs nightly on Jenkins**. Reads services or briefs from the API endpoint and writes to search-api for indexing.
 
 * `insert-framework-results.py`
   Reads a csv file of results for suppliers who have/have not been accepted onto
@@ -152,7 +152,7 @@ If the script is connecting to any local apps/services you need to forward the p
 container. The easiest way to do this is to use `--net=host` argument for `docker run`:
 
 ```
-docker run --net=host digitalmarketplace/scripts scripts/index-services.py dev ...
+docker run --net=host digitalmarketplace/scripts scripts/index-to-search-service.py dev ...
 ```
 
 If the script is generating output files you need to map a local directory to the output directory
