@@ -212,8 +212,9 @@ if __name__ == '__main__':
 
     # 6) Runs the `index-to-search-service.py` script to index the new services
     index_name = '{}-{}'.format(args.new_slug, date.today().isoformat())
-    subprocess.call(['python', 'scripts/index-to-search-service.py services', '--index', index_name, '--frameworks', args.new_slug,
-                     '--api-token', args.data_api_token, '--search-api-token', args.search_api_token, args.env])
+    subprocess.call(['python', 'scripts/index-to-search-service.py services', '--index', index_name, '--frameworks',
+                     args.new_slug, '--api-token', args.data_api_token, '--search-api-token', args.search_api_token,
+                     args.env])
 
     # 7) Return the framework to its initial state.
     data_api_client._post_with_updated_by(url='{}/frameworks/{}'.format(data_api_url, args.new_slug),
