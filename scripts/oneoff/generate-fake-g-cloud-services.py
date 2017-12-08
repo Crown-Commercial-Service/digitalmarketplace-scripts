@@ -22,7 +22,7 @@ What this script does (semantically):
     a) Runs the `mark-definite-framework-results.py` script to mark x suppliers as on the new framework.
     b) Runs the `make-dos-live.py` script
 5) Set a given (new) framework to live
-6) Runs the `index-services.py` script to index the new services
+6) Runs the `index-to-search-service.py` script to index the new services
 7) Return the framework to its initial state.
 
 
@@ -210,10 +210,11 @@ if __name__ == '__main__':
     # b) Runs the `make-dos-live.py` script (which simply migrates draft services to 'real' services)
     subprocess.call(['python', 'scripts/make-dos-live.py', args.new_slug, args.env, args.data_api_token])
 
-    # 6) Runs the `index-services.py` script to index the new services
+    # 6) Runs the `index-to-search-service.py` script to index the new services
     index_name = '{}-{}'.format(args.new_slug, date.today().isoformat())
-    subprocess.call(['python', 'scripts/index-services.py', '--index', index_name, '--frameworks', args.new_slug,
-                     '--api-token', args.data_api_token, '--search-api-token', args.search_api_token, args.env])
+    subprocess.call(['python', 'scripts/index-to-search-service.py services', '--index', index_name, '--frameworks',
+                     args.new_slug, '--api-token', args.data_api_token, '--search-api-token', args.search_api_token,
+                     args.env])
 
     # 7) Return the framework to its initial state.
     data_api_client._post_with_updated_by(url='{}/frameworks/{}'.format(data_api_url, args.new_slug),
