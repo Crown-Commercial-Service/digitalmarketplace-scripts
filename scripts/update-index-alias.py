@@ -5,7 +5,10 @@ A script to update the elasticsearch index an alias is assoiciated with.
 Stage is an optional argument. If left as its default, 'development', the auth tokens will be set without needing to
 access the credentials repo.
 
-To delete the old index (the index losing the '<alias>-old' alias), set --delete-old-index=yes
+If an index is found to already be using the alias <alias>, that index is assigned the alias <alias>-old. If an index is
+found to exist using *that* alias (<alias>-old), it is either deleted or simply has its alias removed according to the
+--delete-old-index option. This way, routine use of this option should lead to only two copies of any particular index
+being kept at once: <alias> and <alias>-old.
 
 Usage:
 scripts/update-index-alias.py <alias> <target> <search-api-endpoint> [options]
