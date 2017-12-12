@@ -32,6 +32,7 @@ def make_draft_service_live(client, draft, dry_run):
             else:
                 print(u"    > ERROR MIGRATING DRAFT {} - {}".format(draft['id'], e.message))
 
+
 if __name__ == "__main__":
     arguments = docopt(__doc__)
 

@@ -56,6 +56,7 @@ def test_get_live_briefs_between_two_dates():
         {"publishedAt": "2017-03-18T09:52:17.669156Z"}
     ]
 
+
 ONE_BRIEF = [
     {
         "title": "Brief 1",
