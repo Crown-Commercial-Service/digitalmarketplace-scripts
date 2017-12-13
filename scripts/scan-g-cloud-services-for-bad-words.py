@@ -170,6 +170,7 @@ def output_bad_words(
     logger.info("{} - {}".format(blacklisted_word, service_id))
     writer.writerow(row)
 
+
 if __name__ == '__main__':
     arguments = docopt(__doc__)
     main(

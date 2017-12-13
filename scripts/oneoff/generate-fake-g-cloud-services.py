@@ -123,6 +123,7 @@ def get_args():
 def filepath_service_lot_schema(validation_schema_path, new_slug, chosen_lot):
     return '{}/services-{}-{}.json'.format(validation_schema_path, new_slug, chosen_lot)
 
+
 if __name__ == '__main__':
     args = get_args()
 

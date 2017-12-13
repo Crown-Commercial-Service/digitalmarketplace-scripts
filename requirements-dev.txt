@@ -1,6 +1,6 @@
 -r requirements.txt
-flake8==2.6.2
-flake8-putty==0.4.0
+flake8==3.5.0
+flake8-per-file-ignores==0.4.0
 freezegun==0.3.7
 ipython==6.2.1
 ipython-genutils==0.2.0
