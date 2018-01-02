@@ -6,7 +6,7 @@ git+https://github.com/madzak/python-json-logger.git@v0.1.5#egg=python-json-logg
 git+https://github.com/alphagov/digitalmarketplace-utils.git@28.7.0#egg=digitalmarketplace-utils==28.7.0
 git+https://github.com/alphagov/digitalmarketplace-apiclient.git@14.0.1#egg=digitalmarketplace-apiclient==14.0.1
 git+https://github.com/alphagov/digitalmarketplace-content-loader.git@2.8.0#egg=digitalmarketplace-content-loader==2.8.0
-git+https://github.com/alphagov/notifications-python-client.git@4.0.0#egg=notifications-python-client==4.0.0
+git+https://github.com/alphagov/notifications-python-client.git@4.7.1#egg=notifications-python-client==4.7.1
 
 unicodecsv==0.14.1
 python-dateutil==2.4.2
@@ -18,7 +18,7 @@ lorem==0.1.1
 mailchimp3==2.0.11
 
 ## The following requirements were added by pip freeze:
-asn1crypto==0.23.0
+asn1crypto==0.24.0
 backoff==1.0.7
 boto3==1.4.4
 botocore==1.5.95
@@ -34,6 +34,7 @@ Flask==0.12.2
 Flask-FeatureFlags==0.6
 Flask-Script==2.0.5
 Flask-WTF==0.12
+future==0.16.0
 idna==2.6
 inflection==0.2.1
 itsdangerous==0.24
@@ -44,7 +45,7 @@ MarkupSafe==1.0
 monotonic==0.3
 numpy==1.13.3
 pycparser==2.18
-PyJWT==1.4.0
+PyJWT==1.5.3
 pytz==2015.4
 PyYAML==3.11
 requests==2.18.4
