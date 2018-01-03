@@ -13,16 +13,20 @@ Options:
     --create-with-mapping=<mapping>               Specify a mapping to create the index if it doesn't exist. If it does
                                                   exist, the mapping for the index will be updated. Don't specify this
                                                   option when running from a batch/Jenkins job, as both creating indexes
-                                                  and updating mappings should be done under user control.
+                                                  and updating mappings should be done under user control. This mapping
+                                                  is a filename (sans .json suffix) found in search-api/mappings
     --serial                                      Do not run in parallel (useful for debugging)
     --api-url=<api-url>                           Override API URL (otherwise automatically populated)
     --api-token=<api_access_token>                Override API token (otherwise automatically populated)
     --search-api-url=<search-api-url>             Override search API URL (otherwise automatically populated)
     --search-api-token=<search_api_access_token>  Override search API token (otherwise automatically populated)
 
-Example:
-    ./index-to-search-service.py services dev --index=g-cloud-9-2017-10-17 --frameworks=g-cloud-9 \
---create-with-mapping=services-g-cloud-9
+Examples:
+    ./scripts/index-to-search-service.py services dev --index=g-cloud-9-2017-10-17 --frameworks=g-cloud-9 \
+--create-with-mapping=services
+
+    ./scripts/index-to-search-service.py briefs dev --index=briefs-digital-outcomes-and-specialists-2017-10-17 \
+--frameworks=digital-outcomes-and-specialists-2 --create-with-mapping=briefs-digital-outcomes-and-specialists-2
 """
 
 import sys
