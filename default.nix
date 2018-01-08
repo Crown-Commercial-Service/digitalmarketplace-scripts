@@ -19,6 +19,7 @@ in (with args; {
       pkgs.git
       # for `cryptography`
       pkgs.openssl
+      pkgs.cacert
     ] ++ pkgs.stdenv.lib.optionals (!pkgs.stdenv.isDarwin) [
       # package not available on darwin for now - sorry you're on your own...
       pkgs.wkhtmltopdf
@@ -30,6 +31,7 @@ in (with args; {
 
     hardeningDisable = pkgs.stdenv.lib.optionals pkgs.stdenv.isDarwin [ "format" ];
 
+    GIT_SSL_CAINFO="${pkgs.cacert}/etc/ssl/certs/ca-bundle.crt";
     VIRTUALENV_ROOT = "venv${pythonPackages.python.pythonVersion}";
     VIRTUAL_ENV_DISABLE_PROMPT = "1";
     SOURCE_DATE_EPOCH = "315532800";
