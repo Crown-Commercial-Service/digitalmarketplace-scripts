@@ -165,7 +165,7 @@ def test_send_by_stage_stats_per_day_calls_send_data_with_correct_data(send_data
          'dataType': 'applications-by-stage',
          'period': 'day',
          # Base 64 encoding of '2017-03-29T00:00:00+00:00-gcloud-day-applications-by-stage-interested'
-         '_id': b'MjAxNy0wMy0yOVQwMDowMDowMCswMDowMC1nY2xvdWQtZGF5LWFwcGxpY2F0aW9ucy1ieS1zdGFnZS1pbnRlcmVzdGVk',
+         '_id': 'MjAxNy0wMy0yOVQwMDowMDowMCswMDowMC1nY2xvdWQtZGF5LWFwcGxpY2F0aW9ucy1ieS1zdGFnZS1pbnRlcmVzdGVk',
          'stage': 'interested'
         },
         {'count': 97,
@@ -174,7 +174,7 @@ def test_send_by_stage_stats_per_day_calls_send_data_with_correct_data(send_data
          'dataType': 'applications-by-stage',
          'period': 'day',
          # Base 64 encoding of '2017-03-29T00:00:00+00:00-gcloud-day-applications-by-stage-made-declaration'
-         '_id': b'MjAxNy0wMy0yOVQwMDowMDowMCswMDowMC1nY2xvdWQtZGF5LWFwcGxpY2F0aW9ucy1ieS1zdGFnZS1tYWRlLWRlY2xhcmF0aW9u',  # noqa
+         '_id': 'MjAxNy0wMy0yOVQwMDowMDowMCswMDowMC1nY2xvdWQtZGF5LWFwcGxpY2F0aW9ucy1ieS1zdGFnZS1tYWRlLWRlY2xhcmF0aW9u',  # noqa
          'stage': 'made-declaration'
          },
         {'count': 79,
@@ -183,7 +183,7 @@ def test_send_by_stage_stats_per_day_calls_send_data_with_correct_data(send_data
          'dataType': 'applications-by-stage',
          'period': 'day',
          # Base 64 encoding of '2017-03-29T00:00:00+00:00-gcloud-day-applications-by-stage-completed-services'
-         '_id': b'MjAxNy0wMy0yOVQwMDowMDowMCswMDowMC1nY2xvdWQtZGF5LWFwcGxpY2F0aW9ucy1ieS1zdGFnZS1jb21wbGV0ZWQtc2VydmljZXM=',  # noqa
+         '_id': 'MjAxNy0wMy0yOVQwMDowMDowMCswMDowMC1nY2xvdWQtZGF5LWFwcGxpY2F0aW9ucy1ieS1zdGFnZS1jb21wbGV0ZWQtc2VydmljZXM=',  # noqa
          'stage': 'completed-services'
          },
         {'count': 89,
@@ -192,7 +192,7 @@ def test_send_by_stage_stats_per_day_calls_send_data_with_correct_data(send_data
          'dataType': 'applications-by-stage',
          'period': 'day',
          # Base 64 encoding of '2017-03-29T00:00:00+00:00-gcloud-day-applications-by-stage-eligible'
-         '_id': b'MjAxNy0wMy0yOVQwMDowMDowMCswMDowMC1nY2xvdWQtZGF5LWFwcGxpY2F0aW9ucy1ieS1zdGFnZS1lbGlnaWJsZQ==',
+         '_id': 'MjAxNy0wMy0yOVQwMDowMDowMCswMDowMC1nY2xvdWQtZGF5LWFwcGxpY2F0aW9ucy1ieS1zdGFnZS1lbGlnaWJsZQ==',
          'stage': 'eligible'
          }
     ]
@@ -220,7 +220,7 @@ def test_send_by_stage_stats_per_hour_calls_send_data_with_correct_data(send_dat
          'dataType': 'applications-by-stage',
          'period': 'hour',
          # Base 64 encoding of '2017-03-29T12:00:00+00:00-gcloud-hour-applications-by-stage-interested'
-         '_id': b'MjAxNy0wMy0yOVQxMjowMDowMCswMDowMC1nY2xvdWQtaG91ci1hcHBsaWNhdGlvbnMtYnktc3RhZ2UtaW50ZXJlc3RlZA==',
+         '_id': 'MjAxNy0wMy0yOVQxMjowMDowMCswMDowMC1nY2xvdWQtaG91ci1hcHBsaWNhdGlvbnMtYnktc3RhZ2UtaW50ZXJlc3RlZA==',
          'stage': 'interested'
          },
         {'count': 97,
@@ -229,7 +229,7 @@ def test_send_by_stage_stats_per_hour_calls_send_data_with_correct_data(send_dat
          'dataType': 'applications-by-stage',
          'period': 'hour',
          # Base 64 encoding of '2017-03-29T12:00:00+00:00-gcloud-hour-applications-by-stage-made-declaration'
-         '_id': b'MjAxNy0wMy0yOVQxMjowMDowMCswMDowMC1nY2xvdWQtaG91ci1hcHBsaWNhdGlvbnMtYnktc3RhZ2UtbWFkZS1kZWNsYXJhdGlvbg==',  # noqa
+         '_id': 'MjAxNy0wMy0yOVQxMjowMDowMCswMDowMC1nY2xvdWQtaG91ci1hcHBsaWNhdGlvbnMtYnktc3RhZ2UtbWFkZS1kZWNsYXJhdGlvbg==',  # noqa
          'stage': 'made-declaration'
          },
         {'count': 79,
@@ -238,7 +238,7 @@ def test_send_by_stage_stats_per_hour_calls_send_data_with_correct_data(send_dat
          'dataType': 'applications-by-stage',
          'period': 'hour',
          # Base 64 encoding of '2017-03-29T12:00:00+00:00-gcloud-hour-applications-by-stage-completed-services'
-         '_id': b'MjAxNy0wMy0yOVQxMjowMDowMCswMDowMC1nY2xvdWQtaG91ci1hcHBsaWNhdGlvbnMtYnktc3RhZ2UtY29tcGxldGVkLXNlcnZpY2Vz',  # noqa
+         '_id': 'MjAxNy0wMy0yOVQxMjowMDowMCswMDowMC1nY2xvdWQtaG91ci1hcHBsaWNhdGlvbnMtYnktc3RhZ2UtY29tcGxldGVkLXNlcnZpY2Vz',  # noqa
          'stage': 'completed-services'
          },
         {'count': 89,
@@ -247,7 +247,7 @@ def test_send_by_stage_stats_per_hour_calls_send_data_with_correct_data(send_dat
          'dataType': 'applications-by-stage',
          'period': 'hour',
          # Base 64 encoding of '2017-03-29T12:00:00+00:00-gcloud-hour-applications-by-stage-eligible'
-         '_id': b'MjAxNy0wMy0yOVQxMjowMDowMCswMDowMC1nY2xvdWQtaG91ci1hcHBsaWNhdGlvbnMtYnktc3RhZ2UtZWxpZ2libGU=',
+         '_id': 'MjAxNy0wMy0yOVQxMjowMDowMCswMDowMC1nY2xvdWQtaG91ci1hcHBsaWNhdGlvbnMtYnktc3RhZ2UtZWxpZ2libGU=',
          'stage': 'eligible'
          }
     ]
@@ -276,7 +276,7 @@ def test_send_by_lot_stats_per_day_calls_send_data_with_correct_data(send_data):
          'period': 'day',
          'lot': 'cloud-hosting',
          # Base 64 encoding of '2017-03-29T00:00:00+00:00-gcloud-day-applications-by-lot-cloud-hosting'
-         '_id': b'MjAxNy0wMy0yOVQwMDowMDowMCswMDowMC1nY2xvdWQtZGF5LWFwcGxpY2F0aW9ucy1ieS1sb3QtY2xvdWQtaG9zdGluZw=='
+         '_id': 'MjAxNy0wMy0yOVQwMDowMDowMCswMDowMC1nY2xvdWQtZGF5LWFwcGxpY2F0aW9ucy1ieS1sb3QtY2xvdWQtaG9zdGluZw=='
          },
         {'count': 102,
          '_timestamp': '2017-03-29T00:00:00+00:00',
@@ -285,7 +285,7 @@ def test_send_by_lot_stats_per_day_calls_send_data_with_correct_data(send_data):
          'period': 'day',
          'lot': 'cloud-support',
          # Base 64 encoding of '2017-03-29T00:00:00+00:00-gcloud-day-applications-by-lot-cloud-support'
-         '_id': b'MjAxNy0wMy0yOVQwMDowMDowMCswMDowMC1nY2xvdWQtZGF5LWFwcGxpY2F0aW9ucy1ieS1sb3QtY2xvdWQtc3VwcG9ydA=='
+         '_id': 'MjAxNy0wMy0yOVQwMDowMDowMCswMDowMC1nY2xvdWQtZGF5LWFwcGxpY2F0aW9ucy1ieS1sb3QtY2xvdWQtc3VwcG9ydA=='
          },
         {'count': 94,
          '_timestamp': '2017-03-29T00:00:00+00:00',
@@ -294,7 +294,7 @@ def test_send_by_lot_stats_per_day_calls_send_data_with_correct_data(send_data):
          'period': 'day',
          'lot': 'cloud-software',
          # Base 64 encoding of '2017-03-29T00:00:00+00:00-gcloud-day-applications-by-lot-cloud-software'
-         '_id': b'MjAxNy0wMy0yOVQwMDowMDowMCswMDowMC1nY2xvdWQtZGF5LWFwcGxpY2F0aW9ucy1ieS1sb3QtY2xvdWQtc29mdHdhcmU='
+         '_id': 'MjAxNy0wMy0yOVQwMDowMDowMCswMDowMC1nY2xvdWQtZGF5LWFwcGxpY2F0aW9ucy1ieS1sb3QtY2xvdWQtc29mdHdhcmU='
          }
     ]
 
@@ -323,7 +323,7 @@ def test_send_by_lot_stats_per_hour_calls_send_data_with_correct_data(send_data)
          'period': 'hour',
          'lot': 'cloud-hosting',
          # Base 64 encoding of '2017-03-29T12:00:00+00:00-gcloud-hour-applications-by-lot-cloud-hosting'
-         '_id': b'MjAxNy0wMy0yOVQxMjowMDowMCswMDowMC1nY2xvdWQtaG91ci1hcHBsaWNhdGlvbnMtYnktbG90LWNsb3VkLWhvc3Rpbmc='
+         '_id': 'MjAxNy0wMy0yOVQxMjowMDowMCswMDowMC1nY2xvdWQtaG91ci1hcHBsaWNhdGlvbnMtYnktbG90LWNsb3VkLWhvc3Rpbmc='
          },
         {'count': 102,
          '_timestamp': '2017-03-29T12:00:00+00:00',
@@ -332,7 +332,7 @@ def test_send_by_lot_stats_per_hour_calls_send_data_with_correct_data(send_data)
          'period': 'hour',
          'lot': 'cloud-support',
          # Base 64 encoding of '2017-03-29T12:00:00+00:00-gcloud-hour-applications-by-lot-cloud-support'
-         '_id': b'MjAxNy0wMy0yOVQxMjowMDowMCswMDowMC1nY2xvdWQtaG91ci1hcHBsaWNhdGlvbnMtYnktbG90LWNsb3VkLXN1cHBvcnQ='
+         '_id': 'MjAxNy0wMy0yOVQxMjowMDowMCswMDowMC1nY2xvdWQtaG91ci1hcHBsaWNhdGlvbnMtYnktbG90LWNsb3VkLXN1cHBvcnQ='
          },
         {'count': 94,
          '_timestamp': '2017-03-29T12:00:00+00:00',
@@ -341,7 +341,7 @@ def test_send_by_lot_stats_per_hour_calls_send_data_with_correct_data(send_data)
          'period': 'hour',
          'lot': 'cloud-software',
          # Base 64 encoding of '2017-03-29T12:00:00+00:00-gcloud-hour-applications-by-lot-cloud-software'
-         '_id': b'MjAxNy0wMy0yOVQxMjowMDowMCswMDowMC1nY2xvdWQtaG91ci1hcHBsaWNhdGlvbnMtYnktbG90LWNsb3VkLXNvZnR3YXJl'
+         '_id': 'MjAxNy0wMy0yOVQxMjowMDowMCswMDowMC1nY2xvdWQtaG91ci1hcHBsaWNhdGlvbnMtYnktbG90LWNsb3VkLXNvZnR3YXJl'
          }
     ]
 
