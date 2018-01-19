@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 Script to fetch application statistics for a framework from the API and push them to the Performance Platform.
 
@@ -5,14 +6,15 @@ Usage:
     scripts/send-stats-to-performance-platform.py <framework_slug> <stage> <api_token> <pp_bearer> (--day | --hour)
 """
 import sys
-sys.path.insert(0, '.')
 
 from docopt import docopt
 
 from dmapiclient import DataAPIClient
 
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
-from dmscripts.send_stats_to_performance_platform import send_framework_stats
+sys.path.insert(0, '.')
+from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage  # noqa
+from dmscripts.send_stats_to_performance_platform import send_framework_stats  # noqa
+
 
 if __name__ == "__main__":
     arguments = docopt(__doc__)

@@ -74,7 +74,7 @@ def _generate_id(timestamp, period, data_type, data_item):
     # _id should be a unique url-friendly, base64-encoded, UTF8 encoded concatenation identifier, formed from:
     # _timestamp, service (= gcloud), period (= day or hour), dataType (= applications-by-stage/lot), stage/lot
     id_bytes = '{}-gcloud-{}-{}-{}'.format(timestamp, period, data_type, data_item).encode('utf-8')
-    return base64.b64encode(id_bytes)
+    return base64.b64encode(id_bytes).decode('utf-8')
 
 
 def send_data(data, url, pp_bearer):
