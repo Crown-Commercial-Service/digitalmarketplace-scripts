@@ -10,11 +10,11 @@ Usage:
     --frameworks=<frameworks>                     Comma-separated list of framework slugs that should be indexed
 
 Options:
-    --create-with-mapping=<mapping>               Specify a mapping to create the index if it doesn't exist. If it does
-                                                  exist, the mapping for the index will be updated. Don't specify this
-                                                  option when running from a batch/Jenkins job, as both creating indexes
-                                                  and updating mappings should be done under user control. This mapping
-                                                  is a filename (sans .json suffix) found in search-api/mappings
+    --create-with-mapping=<mapping>               Create the named index using mapping <mapping>. Don't specify this
+                                                  option when running from a batch/Jenkins job, as creating indexes
+                                                  should be done under user control. This mapping is a filename (without
+                                                  .json suffix) as would be found by the search-api in its
+                                                  digitalmarketplace-search-api/mappings directory.
     --serial                                      Do not run in parallel (useful for debugging)
     --api-url=<api-url>                           Override API URL (otherwise automatically populated)
     --api-token=<api_access_token>                Override API token (otherwise automatically populated)
