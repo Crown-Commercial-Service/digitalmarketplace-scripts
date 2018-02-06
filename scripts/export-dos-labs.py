@@ -11,14 +11,18 @@ import sys
 sys.path.insert(0, '.')
 
 from docopt import docopt
+from dmapiclient import DataAPIClient
+
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.helpers.framework_helpers import find_suppliers_with_details_and_draft_services
-from dmapiclient import DataAPIClient
+from dmscripts.export_dos_labs import append_contact_information_to_services
 
 if sys.version_info[0] < 3:
     import unicodecsv as csv
 else:
     import csv
+
+REQUIRED_CONTACT_DETAILS_KEYS = ['email', 'contactName', 'phoneNumber']
 
 
 def find_all_labs(client):
@@ -27,9 +31,9 @@ def find_all_labs(client):
                                                              lot="user-research-studios",
                                                              statuses="submitted"
                                                              )
-    records = filter(lambda record: record['onFramework'], records)
+    records = list(filter(lambda record: record['onFramework'], records))
+    records = append_contact_information_to_services(records, REQUIRED_CONTACT_DETAILS_KEYS)
     services = itertools.chain.from_iterable(record['services'] for record in records)
-
     return services
 
 
