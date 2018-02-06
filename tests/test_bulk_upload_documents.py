@@ -77,7 +77,7 @@ def test_upload_file():
         bucket.save.assert_called_with(
             'g-cloud-7/agreements/92877/92877-countersigned_agreement.pdf',
             mock.ANY,
-            acl='private',
+            acl='bucket-owner-full-control',
             download_filename=None)
 
 
@@ -99,7 +99,7 @@ def test_upload_file_without_document_category():
         bucket.save.assert_called_with(
             'g-cloud-7/agreements/92877/92877-framework-agreement.pdf',
             mock.ANY,
-            acl='private',
+            acl='bucket-owner-full-control',
             download_filename=None)
 
 
@@ -113,5 +113,5 @@ def test_upload_file_with_supplier_name_dictionary():
         bucket.save.assert_called_with(
             'g-cloud-7/agreements/35435/35435-framework-agreement.pdf',
             mock.ANY,
-            acl='private',
+            acl='bucket-owner-full-control',
             download_filename='Something-35435-framework-agreement.pdf')
