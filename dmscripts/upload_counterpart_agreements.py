@@ -51,7 +51,7 @@ def upload_counterpart_file(
         if not dry_run:
             # Upload file
             with open(file_path) as source_file:
-                bucket.save(upload_path, source_file, acl='private',
+                bucket.save(upload_path, source_file, acl='bucket-owner-full-control',
                             download_filename=download_filename)
                 logger.info("UPLOADED: '{}' to '{}'".format(file_path, upload_path))
 
