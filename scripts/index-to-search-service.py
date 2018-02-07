@@ -10,6 +10,7 @@ Usage:
     --frameworks=<frameworks>                     Comma-separated list of framework slugs that should be indexed
 
 Options:
+    -h --help                                     Show this screen.
     --create-with-mapping=<mapping>               Create the named index using mapping <mapping>. Don't specify this
                                                   option when running from a batch/Jenkins job, as creating indexes
                                                   should be done under user control. This mapping is a filename (without
