@@ -45,7 +45,7 @@ def test_upload_counterpart_file_uploads_and_calls_api_if_not_dry_run(getuser, n
             bucket.save.assert_called_once_with(
                 "g-cloud-8/agreements/123456/123456-agreement-countersignature-2016-11-12-131415.pdf",
                 mock.ANY,
-                acl='private',
+                acl='bucket-owner-full-control',
                 download_filename='The_supplier_who_signed-123456-agreement-countersignature.pdf'
             )
 
