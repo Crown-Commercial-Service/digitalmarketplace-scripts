@@ -43,7 +43,7 @@ def rename_country(client, dry_run):
                             {'registrationCountry': NEW_COUNTRY},
                             'rename supplier registered country script',
                         )
-                    )
+                    )()
                     success_counter += 1
                 except HTTPError as e:
                     print("Error updating supplier {}: {}".format(supplier['id'], e.message))
