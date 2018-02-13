@@ -13,25 +13,44 @@ Usage:
 import sys
 sys.path.insert(0, '.')
 
+import backoff
+import requests
 from docopt import docopt
-from dmapiclient import DataAPIClient
+from dmapiclient import DataAPIClient, HTTPError
+from dmapiclient.errors import HTTPTemporaryError
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 
 OLD_COUNTRY = "gb"
 NEW_COUNTRY = "country:GB"
 
+_backoff_wrap = backoff.on_exception(
+    backoff.expo,
+    (HTTPError, HTTPTemporaryError, requests.exceptions.ConnectionError, RuntimeError),
+    max_tries=5,
+)
+
+
 def rename_country(client, dry_run):
-    counter = 0
+    success_counter = 0
+    failure_counter = 0
     for supplier in client.find_suppliers_iter():
         if supplier.get('registrationCountry') == OLD_COUNTRY:
             if not dry_run:
-                client.update_supplier(
-                    supplier['id'],
-                    {'registrationCountry': NEW_COUNTRY},
-                    'script',
-                )
-            counter += 1
-    print("{}Updated {}".format('Dry run - ' if dry_run else '', counter))
+                try:
+                    _backoff_wrap(
+                        lambda: client.update_supplier(
+                            supplier['id'],
+                            {'registrationCountry': NEW_COUNTRY},
+                            'rename supplier registered country script',
+                        )
+                    )
+                    success_counter += 1
+                except HTTPError as e:
+                    print("Error updating supplier {}: {}".format(supplier['id'], e.message))
+                    failure_counter += 0
+
+    print("{}Succssfully updated {}".format('Dry run - ' if dry_run else '', success_counter))
+    print("{}Failed to update {}".format('Dry run - ' if dry_run else '', failure_counter))
 
 
 if __name__ == '__main__':
