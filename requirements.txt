@@ -4,7 +4,7 @@
 
 git+https://github.com/madzak/python-json-logger.git@v0.1.5#egg=python-json-logger==v0.1.5
 git+https://github.com/alphagov/digitalmarketplace-utils.git@28.7.0#egg=digitalmarketplace-utils==28.7.0
-git+https://github.com/alphagov/digitalmarketplace-apiclient.git@14.0.1#egg=digitalmarketplace-apiclient==14.0.1
+git+https://github.com/alphagov/digitalmarketplace-apiclient.git@14.1.0#egg=digitalmarketplace-apiclient==14.1.0
 git+https://github.com/alphagov/digitalmarketplace-content-loader.git@2.8.0#egg=digitalmarketplace-content-loader==2.8.0
 git+https://github.com/alphagov/notifications-python-client.git@4.7.1#egg=notifications-python-client==4.7.1
 
@@ -22,8 +22,8 @@ asn1crypto==0.24.0
 backoff==1.0.7
 boto3==1.4.4
 botocore==1.5.95
-certifi==2017.11.5
-cffi==1.11.2
+certifi==2018.1.18
+cffi==1.11.4
 chardet==3.0.4
 click==6.7
 contextlib2==0.4.0
@@ -43,7 +43,7 @@ mandrill==1.0.57
 Markdown==2.6.7
 MarkupSafe==1.0
 monotonic==0.3
-numpy==1.13.3
+numpy==1.14.0
 pycparser==2.18
 PyJWT==1.5.3
 pytz==2015.4
