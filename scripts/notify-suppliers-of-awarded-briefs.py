@@ -44,8 +44,8 @@ if __name__ == "__main__":
     api_token = arguments['<api_token>']
     govuk_notify_api_key = arguments['<govuk_notify_api_key>']
     govuk_notify_template_id = arguments['<govuk_notify_template_id>']
-    awarded_at = arguments.get('<awarded_at>', None)
-    brief_response_ids = arguments.get('<brief_response_ids>', None)
+    awarded_at = arguments.get('--awarded_at', None)
+    brief_response_ids = arguments.get('--brief_response_ids', None)
     dry_run = arguments['--dry-run']
     verbose = arguments['--verbose']
 
