@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 from dmutils.email.exceptions import EmailError
 from dmutils.email.helpers import hash_string
@@ -13,7 +13,8 @@ def _create_context_for_brief(stage, brief):
             env_helpers.get_web_url_from_stage(stage),
             brief['framework']['family'],
             brief['id']
-        )
+        ),
+        'utm_date': date.today().strftime("%Y%m%d")
     }
 
 

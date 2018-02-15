@@ -31,7 +31,8 @@ AWARDED_BRIEFS = [
 
 EXPECTED_BRIEF_CONTEXT = {
     'brief_title': "Tea Drinker",
-    'brief_link': 'https://www.preview.marketplace.team/digital-outcomes-and-specialists/opportunities/123'
+    'brief_link': 'https://www.preview.marketplace.team/digital-outcomes-and-specialists/opportunities/123',
+    'utm_date': "20180102"
 }
 
 
@@ -53,7 +54,8 @@ def _get_dummy_brief_response(id_, brief, awarded=False, valid_email=True):
 
 
 def test_create_context_for_brief():
-    assert tested_script._create_context_for_brief('preview', AWARDED_BRIEFS[0]) == EXPECTED_BRIEF_CONTEXT
+    with freeze_time('2018-01-02'):
+        assert tested_script._create_context_for_brief('preview', AWARDED_BRIEFS[0]) == EXPECTED_BRIEF_CONTEXT
 
 
 @mock.patch('dmutils.email.DMNotifyClient', autospec=True)
