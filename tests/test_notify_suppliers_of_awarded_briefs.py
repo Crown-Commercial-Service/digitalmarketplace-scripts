@@ -28,6 +28,32 @@ AWARDED_BRIEFS = [
     }
 ]
 
+CANCELLED_BRIEFS = [
+    {
+        "framework": {
+            "family": "digital-outcomes-and-specialists",
+            "slug": "digital-outcomes-and-specialists-2",
+        },
+        "id": 333,
+        "status": "cancelled",
+        "title": "Biscuit Dunker",
+        "cancelledAt": "2018-01-01T15:07:07.946308Z"
+    }
+]
+
+UNSUCCESSFUL_BRIEFS = [
+    {
+        "framework": {
+            "family": "digital-outcomes-and-specialists",
+            "slug": "digital-outcomes-and-specialists-2",
+        },
+        "id": 555,
+        "status": "unsuccessful",
+        "title": "Coffee Grinder",
+        "unsuccessfulAt": "2018-01-01T15:07:07.946308Z"
+    }
+]
+
 
 EXPECTED_BRIEF_CONTEXT = {
     'brief_title': "Tea Drinker",
@@ -63,16 +89,25 @@ def test_create_context_for_brief():
 @mock.patch('dmapiclient.DataAPIClient', autospec=True)
 def test_main_calls_correct_methods(data_api_client, create_context_for_brief, notify_client):
     data_api_client.find_brief_responses_iter.side_effect = [
-        [   # Only get awarded BRs on the first call
+        [   # Awarded brief responses for each awarded brief
             _get_dummy_brief_response(4321, AWARDED_BRIEFS[0], awarded=True),
             _get_dummy_brief_response(4322, AWARDED_BRIEFS[1], awarded=True),
         ],
-        [   # Get submitted BRs for 1st awarded brief on the second call
+        [   # 'Losing' brief responses for the first awarded brief
             _get_dummy_brief_response(4322, AWARDED_BRIEFS[0]),
             _get_dummy_brief_response(4323, AWARDED_BRIEFS[0], valid_email=False),
         ],
-        [   # No submitted BRs for the 2nd awarded brief
-        ]
+        [   # No 'losing' brief responses for the 2nd awarded brief
+        ],
+        [   # One brief response for the cancelled brief
+            _get_dummy_brief_response(4325, CANCELLED_BRIEFS[0]),
+        ],
+        [   # One brief response for the unsuccessful brief
+            _get_dummy_brief_response(4326, UNSUCCESSFUL_BRIEFS[0]),
+        ],
+    ]
+    data_api_client.find_briefs_iter.side_effect = [
+        CANCELLED_BRIEFS, UNSUCCESSFUL_BRIEFS
     ]
     tested_script._create_context_for_brief.return_value = EXPECTED_BRIEF_CONTEXT
 
@@ -82,12 +117,16 @@ def test_main_calls_correct_methods(data_api_client, create_context_for_brief, n
     assert data_api_client.find_brief_responses_iter.call_args_list == [
         mock.call(awarded_at="2018-01-01"),
         mock.call(brief_id=123, status='submitted'),
-        mock.call(brief_id=456, status='submitted')
+        mock.call(brief_id=456, status='submitted'),
+        mock.call(brief_id=333),
+        mock.call(brief_id=555)
     ]
     assert create_context_for_brief.call_args_list == [
         mock.call("preview", AWARDED_BRIEFS[0]),
         mock.call("preview", AWARDED_BRIEFS[0]),
-        mock.call("preview", AWARDED_BRIEFS[1])
+        mock.call("preview", AWARDED_BRIEFS[1]),
+        mock.call("preview", CANCELLED_BRIEFS[0]),
+        mock.call("preview", UNSUCCESSFUL_BRIEFS[0])
     ]
     # Only email if a valid email address is present
     assert notify_client.send_email.call_args_list == [
@@ -99,6 +138,12 @@ def test_main_calls_correct_methods(data_api_client, create_context_for_brief, n
         ),
         mock.call(
             "lucky_winner_4322@example.com", "notify_template_id", EXPECTED_BRIEF_CONTEXT, allow_resend=False
+        ),
+        mock.call(
+            "sore_loser_4325@example.com", "notify_template_id", EXPECTED_BRIEF_CONTEXT, allow_resend=False
+        ),
+        mock.call(
+            "sore_loser_4326@example.com", "notify_template_id", EXPECTED_BRIEF_CONTEXT, allow_resend=False
         )
     ]
     # Single BriefResponse API request not called
@@ -137,8 +182,22 @@ def test_main_calls_get_brief_response_when_brief_response_ids_specified(data_ap
 @mock.patch('dmutils.email.DMNotifyClient', autospec=True)
 @mock.patch('dmapiclient.DataAPIClient', autospec=True)
 def test_main_uses_awarded_at_date_param_if_provided(data_api_client, notify_client):
-    data_api_client.find_brief_responses_iter.return_value = [
-        _get_dummy_brief_response(4321, AWARDED_BRIEFS[0], awarded=True)
+    data_api_client.find_brief_responses_iter.side_effect = [
+        [   # Awarded brief response for the awarded brief
+            _get_dummy_brief_response(4321, AWARDED_BRIEFS[0], awarded=True),
+        ],
+        [
+            # No 'losing' brief responses for the awarded brief
+        ],
+        [   # Brief response for a cancelled brief
+            _get_dummy_brief_response(4321, CANCELLED_BRIEFS[0])
+        ],
+        [   # Brief response for an unsuccessful brief
+            _get_dummy_brief_response(4321, UNSUCCESSFUL_BRIEFS[0])
+        ]
+    ]
+    data_api_client.find_briefs_iter.side_effect = [
+        CANCELLED_BRIEFS, UNSUCCESSFUL_BRIEFS
     ]
 
     with freeze_time('2018-02-02'):
@@ -148,7 +207,9 @@ def test_main_uses_awarded_at_date_param_if_provided(data_api_client, notify_cli
 
     assert data_api_client.find_brief_responses_iter.call_args_list == [
         mock.call(awarded_at="2018-01-01"),
-        mock.call(brief_id=123, status="submitted")
+        mock.call(brief_id=123, status="submitted"),
+        mock.call(brief_id=333),
+        mock.call(brief_id=555)
     ]
 
 
