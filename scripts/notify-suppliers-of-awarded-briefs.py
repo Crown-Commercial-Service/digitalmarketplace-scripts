@@ -9,6 +9,9 @@ Usage:
         [options]
 
 Options:
+    -h, --help                                      Display this screen
+    -v, --verbose                                   Verbosity level
+    --dry-run                                       Log without sending emails
     --awarded_at=<awarded_at>                       Notify applicants to briefs awarded on this date, defaults to
                                                     # yesterday (date format: YYYY-MM-DD)
     --brief_response_ids=<brief_response_ids>       List of brief response IDs to send to (for resending failures)
