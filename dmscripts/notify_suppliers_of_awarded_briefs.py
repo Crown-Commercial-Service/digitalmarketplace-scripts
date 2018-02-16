@@ -30,13 +30,22 @@ def _get_brief_responses_to_be_notified(data_api_client, brief_response_ids, awa
         awarded_brief_responses = data_api_client.find_brief_responses_iter(awarded_at=awarded_at_date)
 
         for abr in awarded_brief_responses:
-            # Add the successful BriefResponse
+            # Add the awarded BriefResponse
             brief_responses.append(abr)
-            # Get the unsuccessful BriefResponses
-            submitted_brief_responses = data_api_client.find_brief_responses_iter(
-                brief_id=abr['briefId'], status='submitted'
+            # Get the other non-awarded BriefResponses for the same Brief
+            brief_responses.extend(
+                data_api_client.find_brief_responses_iter(brief_id=abr['briefId'], status='submitted')
             )
-            brief_responses.extend(submitted_brief_responses)
+
+        # Get BriefResponses for any Briefs cancelled or unsuccessful on the same date
+        for brief in data_api_client.find_briefs_iter(cancelled_on=awarded_at_date):
+            brief_responses.extend(
+                data_api_client.find_brief_responses_iter(brief_id=brief['id'])
+            )
+        for brief in data_api_client.find_briefs_iter(unsuccessful_on=awarded_at_date):
+            brief_responses.extend(
+                data_api_client.find_brief_responses_iter(brief_id=brief['id'])
+            )
 
     return brief_responses
 
