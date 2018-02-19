@@ -26,12 +26,12 @@ Description:
     failed.
 
 Usage:
-    send_dos_opportunities_email.py
+    send-dos-opportunities-email.py
         <stage> <api_token> <mailchimp_username> <mailchimp_api_key>
         [--number_of_days=<number_of_days>] [--list_id=<list_id>] [--lot_slug=<lot_slug>]
 
 Example:
-    send_dos_opportunities_email.py
+    send-dos-opportunities-email.py
         preview b7g5r7e6gv876tv6 user@gds.gov.uk 7483crh87h34c3
         --number_of_days=3 --list_id=988972hse --lot_slug=digital-outcomes
 """

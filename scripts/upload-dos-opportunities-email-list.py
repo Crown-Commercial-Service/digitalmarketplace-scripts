@@ -15,10 +15,10 @@ Description:
     that we have setup on mailchimp.
 
 Usage:
-    upload_dos_opportunities_email_list.py <stage> <api_token> <mailchimp_username> <mailchimp_api_key>
+    upload-dos-opportunities-email-list.py <stage> <api_token> <mailchimp_username> <mailchimp_api_key>
 
 Example:
-    upload_dos_opportunities_email_list.py preview myToken user@gds.gov.uk 7483crh87h34c3
+    upload-dos-opportunities-email-list.py preview myToken user@gds.gov.uk 7483crh87h34c3
 
 """
 
