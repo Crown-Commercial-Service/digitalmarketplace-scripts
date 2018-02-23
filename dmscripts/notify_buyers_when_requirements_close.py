@@ -2,7 +2,7 @@
 from datetime import datetime, timedelta
 
 import dmapiclient
-from dmutils.email import send_email
+from dmutils.email.dm_mandrill import send_email
 from dmutils.email.exceptions import EmailError
 from dmutils.formats import DATE_FORMAT
 
