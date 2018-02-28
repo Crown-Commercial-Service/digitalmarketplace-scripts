@@ -90,24 +90,23 @@ if __name__ == '__main__':
     user = arguments['<user>'] or getpass.getuser()
     dry_run = bool(arguments.get("--dry-run"))
     updated_suppliers_count = 0
+    skipped_suppliers_count = 0
+    invalid_size_suppliers_count = invalid_declaration_suppliers_count = 0
     start_time = datetime.utcnow()
 
     for supplier in client.find_suppliers_iter():
-        logger.info("Processing supplier %s", supplier["id"])
         if supplier.get("organisationSize"):
+            skipped_suppliers_count += 1
             logger.info("  already done: {}".format(supplier["id"]))
             continue
 
         supplier_frameworks = _get_supplier_frameworks(client, supplier['id'])
 
         if supplier_frameworks:
-            if len(supplier_frameworks) == 1:
-                supplier_framework = supplier_frameworks[0]
-            else:
-                # Get most recent framework declaration
-                supplier_framework = sorted(
-                    supplier_frameworks, key=lambda x: str(x['agreementReturnedAt']), reverse=True
-                )[0]
+            # Get most recent framework declaration
+            supplier_framework = sorted(
+                supplier_frameworks, key=lambda x: str(x['agreementReturnedAt']), reverse=True
+            )[0]
 
             logger.info(
                 "Supplier %s: updating with data from framework %s", supplier["id"], supplier_framework["frameworkSlug"]
@@ -115,14 +114,20 @@ if __name__ == '__main__':
 
             # Get the organisation size
             org_size = supplier_framework.get('declaration', {}).get('organisationSize')
-            logger.info('  Updating with org size {}'.format(org_size))
-
             if org_size in ['micro', 'small', 'medium', 'large']:
                 # Update the supplier
+                logger.info('  Updating with org size {}'.format(org_size))
                 _update_supplier_organisation_size(client, org_size, supplier['id'], user, dry_run)
                 updated_suppliers_count += 1
+            else:
+                logger.info('  Invalid organisation size "{}"'.format(org_size))
+                invalid_size_suppliers_count += 1
         else:
             logger.info('No valid framework declarations for supplier {}'.format(supplier['id']))
+            invalid_declaration_suppliers_count += 1
 
     duration = datetime.utcnow() - start_time
     logger.info("*** Updated {} suppliers in {}".format(updated_suppliers_count, str(duration)))
+    logger.info("*** Skipped {} suppliers that already have org size info".format(skipped_suppliers_count))
+    logger.info("*** Skipped {} suppliers with no valid declaration".format(invalid_declaration_suppliers_count))
+    logger.info("*** Skipped {} suppliers with bad info".format(invalid_size_suppliers_count))
