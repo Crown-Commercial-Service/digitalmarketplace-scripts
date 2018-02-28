@@ -5,7 +5,7 @@
 
 Usage:
     scripts/oneoff/migrate-supplier-organisation-size-from-declarations.py <stage> <data_api_token>
-        [<user>] [--dry-run]
+        [--dry-run]
 
 Positional arguments:
     <stage>                                 API stage to perform operation on
@@ -13,7 +13,6 @@ Positional arguments:
 
 Optional arguments:
     -h, --help                              show this help message and exit
-    <user>                                  Audit Trail 'updated_by' user
     --dry-run                               skip update step
 """
 import sys
@@ -70,12 +69,16 @@ def _get_supplier_frameworks(data_api_client, supplier_id):
     return [sfw for sfw in supplier_frameworks.get('frameworkInterest', []) if sfw.get('declaration')]
 
 
-def _update_supplier_organisation_size(data_api_client, org_size, supplier_id, user, dry_run):
+def _update_supplier_organisation_size(data_api_client, org_size, supplier_id, dry_run):
     try:
         logger.info("Updating supplier {} with org size {}".format(supplier_id, org_size))
         if not dry_run:
             _backoff_wrap(
-                lambda: data_api_client.update_supplier(supplier_id, {'organisationSize': org_size}, user=user)
+                lambda: data_api_client.update_supplier(
+                    supplier_id,
+                    {'organisationSize': org_size},
+                    user=f'{getpass.getuser()} (migrate organisation size script)',
+                )
             )()
     except HTTPError:
         logger.info("HTTP ERROR UPDATING SUPPLIER {}".format(supplier_id))
@@ -87,7 +90,6 @@ if __name__ == '__main__':
     configure_logger({"script": loglevel_INFO})
 
     client = DataAPIClient(get_api_endpoint_from_stage(arguments['<stage>']), arguments['<data_api_token>'])
-    user = arguments['<user>'] or getpass.getuser()
     dry_run = bool(arguments.get("--dry-run"))
     updated_suppliers_count = 0
     skipped_suppliers_count = 0
@@ -97,7 +99,7 @@ if __name__ == '__main__':
     for supplier in client.find_suppliers_iter():
         if supplier.get("organisationSize"):
             skipped_suppliers_count += 1
-            logger.info("  already done: {}".format(supplier["id"]))
+            logger.info("  already done: supplier ID {}".format(supplier["id"]))
             continue
 
         supplier_frameworks = _get_supplier_frameworks(client, supplier['id'])
@@ -117,7 +119,7 @@ if __name__ == '__main__':
             if org_size in ['micro', 'small', 'medium', 'large']:
                 # Update the supplier
                 logger.info('  Updating with org size {}'.format(org_size))
-                _update_supplier_organisation_size(client, org_size, supplier['id'], user, dry_run)
+                _update_supplier_organisation_size(client, org_size, supplier['id'], dry_run)
                 updated_suppliers_count += 1
             else:
                 logger.info('  Invalid organisation size "{}"'.format(org_size))
@@ -130,4 +132,4 @@ if __name__ == '__main__':
     logger.info("*** Updated {} suppliers in {}".format(updated_suppliers_count, str(duration)))
     logger.info("*** Skipped {} suppliers that already have org size info".format(skipped_suppliers_count))
     logger.info("*** Skipped {} suppliers with no valid declaration".format(invalid_declaration_suppliers_count))
-    logger.info("*** Skipped {} suppliers with bad info".format(invalid_size_suppliers_count))
+    logger.info("*** Skipped {} suppliers with bad org size info".format(invalid_size_suppliers_count))
