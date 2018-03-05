@@ -113,6 +113,8 @@ def get_csv_rows(records, framework_slug, count_statuses=("submitted", "failed",
         (
             "supplier_id",
             "supplier_name",
+            'supplier_contact_name',
+            'supplier_email',
             "pass_fail",
             "countersigned_at",
             "countersigned_path",
@@ -142,6 +144,8 @@ def _create_row(framework_slug, record, count_statuses):
         (
             ("supplier_id", record["supplier"]["id"]),
             ("supplier_name", record["supplier"]["name"]),
+            ("supplier_contact_name", record["supplier"]["contactInformation"][0]['contactName']),
+            ("supplier_email", record["supplier"]["contactInformation"][0]['email']),
             ("pass_fail", _pass_fail_from_record(record)),
             ("countersigned_at", record["countersignedAt"]),
             ("countersigned_path", record["countersignedPath"]),
