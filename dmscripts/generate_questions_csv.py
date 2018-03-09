@@ -89,7 +89,7 @@ def return_rows_for_sections(sections):
 
 
 def generate_csv(output_file, framework_slug, content_loader, question_set, context):
-    output_directory = os.path.dirname(output_file)
+    output_directory = os.path.dirname(output_file) or '.'
     if not os.path.exists(output_directory):
         os.makedirs(output_directory)
 
@@ -114,7 +114,7 @@ def generate_csv(output_file, framework_slug, content_loader, question_set, cont
         row.extend([''] * (max_length - len(row)))
 
     with open(output_file, 'wb') as csvfile:
-        writer = csv.writer(csvfile, delimiter=b',', quotechar=b'"', quoting=csv.QUOTE_ALL)
+        writer = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_ALL)
         header = ["Section / page title", "Page description & hint", "Question", "Description & hint"]
         header.extend(
             ["Answer {}".format(i) for i in range(1, max_length_options + 1)]
