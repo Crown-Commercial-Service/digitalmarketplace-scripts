@@ -8,14 +8,15 @@ git+https://github.com/alphagov/digitalmarketplace-apiclient.git@14.3.0#egg=digi
 git+https://github.com/alphagov/digitalmarketplace-content-loader.git@2.8.0#egg=digitalmarketplace-content-loader==2.8.0
 git+https://github.com/alphagov/notifications-python-client.git@4.7.1#egg=notifications-python-client==4.7.1
 
-unicodecsv==0.14.1
-python-dateutil==2.4.2
+clamd==1.0.2
 Jinja2==2.7.3
 jsonschema==2.5.1
-pandas==0.19.1
-xeger==0.3.1
 lorem==0.1.1
 mailchimp3==2.0.11
+pandas==0.19.1
+python-dateutil==2.4.2
+unicodecsv==0.14.1
+xeger==0.3.1
 
 ## The following requirements were added by pip freeze:
 asn1crypto==0.24.0
