@@ -135,6 +135,10 @@ The `scripts` folder in this repository contains scripts that interact with the 
 
   Makes it easier for humans and computers (namely Jenkins) to update the alias of an elasticsearch index. It was written to assist with indexing services after migrating data between environments periodically with Jenkins.
 
+* `virus-scan-s3-bucket.py`
+
+  Runs a virus scan utilising a provided clamd (ClamAV) backend against a given S3 bucket, optionally restricting by path prefix and last modified datetime.
+
 ## Running scripts with Docker
 
 One way to run common scripts locally without setting up dependencies is to use the pre-built
