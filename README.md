@@ -117,10 +117,6 @@ The `scripts` folder in this repository contains scripts that interact with the 
 
   Fetches application statistics for a framework from the API and pushes them to the Performance Platform.
 
-* `set-search-alias.py`
-
-  Used to set a new alias to an existing Elasticsearch index, via the Search API.
-
 * `update-framework-results.py`
 
   Sets supplier "on framework" status to a specified value for all supplier IDs read from file.
