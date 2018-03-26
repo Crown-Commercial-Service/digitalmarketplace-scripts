@@ -62,7 +62,7 @@ class TestMain(object):
         find_user_emails.assert_called_once_with(supplier_users, framework_services)
         self.dm_mailchimp_client.get_email_addresses_from_list.assert_called_once_with("my list id")
         self.dm_mailchimp_client.subscribe_new_emails_to_list.assert_called_once_with(
-            "my list id", ['email2@email.com']
+            "my list id", {'email2@email.com'}
         )
 
     def test_main_returns_false_if_subscribing_emails_fails(self, get_supplier_users, find_user_emails):
