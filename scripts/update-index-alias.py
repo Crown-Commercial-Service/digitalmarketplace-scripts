@@ -1,6 +1,6 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
-A script to update the elasticsearch index an alias is assoiciated with.
+A script to update the elasticsearch index an alias is associated with.
 
 Stage is an optional argument. If left as its default, 'development', the auth tokens will be set without needing to
 access the credentials repo.
