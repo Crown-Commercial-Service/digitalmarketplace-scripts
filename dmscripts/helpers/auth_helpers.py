@@ -16,7 +16,7 @@ def get_auth_token(api, stage):
         "-d",
         "{}/vars/{}.yaml".format(DM_CREDENTIALS_REPO, stage)
     ])
-    auth_tokens = yaml.load(creds)[api]['auth_tokens']
+    auth_tokens = yaml.safe_load(creds)[api]['auth_tokens']
     auth_token = [token for token in auth_tokens if token.startswith(token_prefix)]
 
     return auth_token[0]
