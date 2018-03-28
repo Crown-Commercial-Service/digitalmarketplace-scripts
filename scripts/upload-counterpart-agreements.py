@@ -45,9 +45,8 @@ from dmscripts.helpers.logging_helpers import logging
 
 from docopt import docopt
 from dmapiclient import DataAPIClient, APIError
-from boto.exception import S3ResponseError
 
-from dmutils.s3 import S3
+from dmutils.s3 import S3, S3ResponseError
 from dmutils.email.dm_notify import DMNotifyClient
 from dmutils.email.exceptions import EmailError
 
