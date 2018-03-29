@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 PREREQUISITE: For document migration to work you'll need AWS credentials set up for the relevant environment:
               Save your aws_access_key_id and aws_secret_access_key in ~/.aws/credentials
@@ -12,24 +13,21 @@ For a G-Cloud style framework (with uploaded documents to migrate) this will:
 Usage:
     scripts/make-g-cloud-live.py <framework_slug> <stage> <api_token> <draft_bucket> <documents_bucket> [--dry-run]
 """
-import sys
-from datetime import datetime
-
 import backoff
-import boto
 import collections
-import dmapiclient
-
-sys.path.insert(0, '.')
-
+from datetime import datetime
+from docopt import docopt
 import random
 import re
+import sys
 
-from docopt import docopt
+sys.path.insert(0, '.')  # noqa
+
+import dmapiclient
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage, get_assets_endpoint_from_stage
 from dmscripts.helpers.framework_helpers import find_suppliers_on_framework, get_submitted_drafts
 from dmapiclient import DataAPIClient
-from dmutils.s3 import S3
+from dmutils.s3 import S3, S3ResponseError
 
 DOCUMENT_KEYS = [
     'pricingDocumentURL', 'serviceDefinitionDocumentURL',
@@ -38,14 +36,14 @@ DOCUMENT_KEYS = [
 
 
 def assert_equal(one, two):
-    assert one == two, u"{} != {}".format(one, two)
+    assert one == two, "{} != {}".format(one, two)
 
 
 def parse_document_url(url, framework_slug):
     pattern = r'/{}/submissions/(\d+)/(\d+)-(.*)$'.format(re.escape(framework_slug))
     match = re.search(pattern, url)
     if not match:
-        raise ValueError(u"Could not parse document URL {}".format(url))
+        raise ValueError("Could not parse document URL {}".format(url))
     return {
         'supplier_id': match.group(1),
         'draft_id': match.group(2),
@@ -54,53 +52,52 @@ def parse_document_url(url, framework_slug):
 
 
 def get_draft_document_path(parsed_document, framework_slug):
-    return u'{framework_slug}/submissions/{supplier_id}/{draft_id}-{document_name}'.format(
+    return '{framework_slug}/submissions/{supplier_id}/{draft_id}-{document_name}'.format(
         framework_slug=framework_slug,
         **parsed_document)
 
 
 def get_live_document_path(parsed_document, framework_slug, service_id):
-    return u'{framework_slug}/documents/{supplier_id}/{service_id}-{document_name}'.format(
+    return '{framework_slug}/documents/{supplier_id}/{service_id}-{document_name}'.format(
         framework_slug=framework_slug,
         service_id=service_id,
         **parsed_document)
 
 
 def get_live_asset_url(live_document_path):
-    return u"{}/{}".format(get_assets_endpoint_from_stage(STAGE), live_document_path)
+    return "{}/{}".format(get_assets_endpoint_from_stage(STAGE), live_document_path)
 
 
 def document_copier(draft_bucket, documents_bucket, dry_run):
     def copy_document(draft_document_path, live_document_path):
         if not draft_bucket.path_exists(draft_document_path):
-            raise ValueError(u"Draft document {} does not exist in bucket {}".format(
+            raise ValueError("Draft document {} does not exist in bucket {}".format(
                 draft_document_path, draft_bucket.bucket_name))
-        message_suffix = u"{}:{} to {}:{}".format(
+
+        message_suffix = "{}:{} to {}:{}".format(
             draft_bucket.bucket_name, draft_document_path,
             documents_bucket.bucket_name, live_document_path)
 
         if dry_run:
-            print(u"    > dry run: skipped copying {}".format(message_suffix))
+            print("    > dry run: skipped copying {}".format(message_suffix))
         else:
-            key = documents_bucket.bucket.copy_key(live_document_path,
-                                                   src_bucket_name=draft_bucket.bucket_name,
-                                                   src_key_name=draft_document_path)
-            key.set_acl('public-read')
-            print(u"    > copied {}".format(message_suffix))
+            documents_bucket.copy(src_bucket=draft_bucket.bucket_name, src_key=draft_document_path,
+                                  target_key=live_document_path)
+            print("    > copied {}".format(message_suffix))
 
     return copy_document
 
 
-@backoff.on_exception(backoff.expo, (dmapiclient.HTTPError, boto.exception.S3ResponseError, ), max_tries=5)
+@backoff.on_exception(backoff.expo, (dmapiclient.HTTPError, S3ResponseError), max_tries=5)
 def make_draft_service_live(client, copy_document, draft_service, framework_slug, dry_run):
-    print(u"  > Migrating draft {}".format(draft_service['id']))
+    print("  > Migrating draft {}".format(draft_service['id']))
     if dry_run:
         service_id = random.randint(1000, 10000)
-        print(u"    > dry run: generating random test service ID: {}".format(service_id))
+        print("    > dry run: generating random test service ID: {}".format(service_id))
     else:
         services = client.publish_draft_service(draft_service['id'], 'make-g-cloud-live script')
         service_id = services['services']['id']
-        print(u"    > draft service published - new service ID {}".format(service_id))
+        print("    > draft service published - new service ID {}".format(service_id))
 
     document_updates = {}
     for document_key in DOCUMENT_KEYS:
@@ -116,7 +113,7 @@ def make_draft_service_live(client, copy_document, draft_service, framework_slug
             document_updates[document_key] = get_live_asset_url(live_document_path)
 
     if dry_run:
-        print(u"    > dry run: skipped updating document URLs {}".format(document_updates))
+        print("    > dry run: skipped updating document URLs {}".format(document_updates))
     else:
         client.update_service(service_id, document_updates, 'Moving documents to live bucket')
         print("    > document URLs updated")
@@ -139,14 +136,14 @@ if __name__ == '__main__':
     results = collections.Counter({'success': 0, 'fail': 0})
 
     for supplier in suppliers:
-        print(u"Migrating drafts for supplier {}".format(supplier['supplierId']))
+        print("Migrating drafts for supplier {}".format(supplier['supplierId']))
         draft_services = get_submitted_drafts(client, FRAMEWORK_SLUG, supplier['supplierId'])
         for draft_service in draft_services:
             try:
                 make_draft_service_live(client, copy_document, draft_service, FRAMEWORK_SLUG, DRY_RUN)
                 results.update({'success': 1})
             except Exception as e:
-                print(u"{} ERROR MIGRATING DRAFT {} TO LIVE: {}".format(datetime.now(), draft_service['id'], e))
+                print("{} ERROR MIGRATING DRAFT {} TO LIVE: {}".format(datetime.now(), draft_service['id'], e))
                 results.update({'fail': 1})
 
     print("Successfully published {} G-Cloud services".format(results.get('success')))
