@@ -16,7 +16,6 @@ import sys
 from datetime import datetime
 
 import backoff
-import boto
 import collections
 import dmapiclient
 
@@ -29,7 +28,7 @@ from docopt import docopt
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage, get_assets_endpoint_from_stage
 from dmscripts.helpers.framework_helpers import find_suppliers_on_framework, get_submitted_drafts
 from dmapiclient import DataAPIClient
-from dmutils.s3 import S3
+from dmutils.s3 import S3, S3ResponseError
 
 DOCUMENT_KEYS = [
     'pricingDocumentURL', 'serviceDefinitionDocumentURL',
@@ -91,7 +90,7 @@ def document_copier(draft_bucket, documents_bucket, dry_run):
     return copy_document
 
 
-@backoff.on_exception(backoff.expo, (dmapiclient.HTTPError, boto.exception.S3ResponseError, ), max_tries=5)
+@backoff.on_exception(backoff.expo, (dmapiclient.HTTPError, S3ResponseError), max_tries=5)
 def make_draft_service_live(client, copy_document, draft_service, framework_slug, dry_run):
     print(u"  > Migrating draft {}".format(draft_service['id']))
     if dry_run:
