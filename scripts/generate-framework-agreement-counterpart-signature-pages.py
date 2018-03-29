@@ -1,14 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 
-PREREQUISITE: You'll need wkhtmltopdf installed for this to work (http://wkhtmltopdf.org/)
+PREREQUISITE: You'll need wkhtmltopdf installed for this to work (http://wkhtmltopdf.org/). The `default.nix` in this
+repo can provide this dependency.
 
 Generate framework agreement counterpart signature pages from supplier "about you" information for suppliers
 who successfully applied to a framework and whose signed agreements have been approved by CCS.
-
-This script supersedes the old "generate-g8-counterpart-signature-pages.py" which uses framework-specific templates.
-Instead, this script requires a dict of framework-specific information, that is read from 'frameworkAgreementDetails'
-in the API response for the given framework.
 
 The 'frameworkAgreementDetails' JSON object from the API should look something like this:
 {
@@ -45,7 +42,7 @@ import shutil
 import sys
 import tempfile
 
-sys.path.insert(0, '.')
+sys.path.insert(0, '.')  # noqa
 
 from docopt import docopt
 from dmscripts.export_framework_applicant_details import get_csv_rows
