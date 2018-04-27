@@ -65,8 +65,12 @@ def _get_supplier_frameworks(data_api_client, supplier_id):
         logger.info("Supplier %s: not on any relevant frameworks", supplier_id)
         return None
 
-    # Filter out frameworks that do not have a declaration (i.e. containing the organisationSize)
-    return [sfw for sfw in supplier_frameworks.get('frameworkInterest', []) if sfw.get('declaration')]
+    # Filter out frameworks that do not have a declaration (i.e. containing the organisationSize) and where there
+    # is no `agreementReturnedAt` date (needed for ordering)
+    return [
+        sfw for sfw in supplier_frameworks.get('frameworkInterest', [])
+        if sfw.get('declaration') and sfw.get('agreementReturnedAt')
+    ]
 
 
 def _update_supplier_organisation_size(data_api_client, org_size, supplier_id, dry_run):
@@ -95,6 +99,9 @@ if __name__ == '__main__':
     skipped_suppliers_count = 0
     invalid_size_suppliers_count = invalid_declaration_suppliers_count = 0
     start_time = datetime.utcnow()
+    invalid_size_supplier_ids = []
+    invalid_declaration_supplier_ids = []
+    updated_supplier_ids = []
 
     for supplier in client.find_suppliers_iter():
         if supplier.get("organisationSize"):
@@ -120,15 +127,29 @@ if __name__ == '__main__':
                 # Update the supplier
                 logger.info('  Updating with org size {}'.format(org_size))
                 _update_supplier_organisation_size(client, org_size, supplier['id'], dry_run)
+                updated_supplier_ids.append(supplier['id'])
                 updated_suppliers_count += 1
             else:
+                invalid_size_supplier_ids.append(supplier['id'])
                 logger.info('  Invalid organisation size "{}"'.format(org_size))
                 invalid_size_suppliers_count += 1
         else:
+            invalid_declaration_supplier_ids.append(supplier['id'])
             logger.info('No valid framework declarations for supplier {}'.format(supplier['id']))
             invalid_declaration_suppliers_count += 1
 
     duration = datetime.utcnow() - start_time
+
+    with open('invalid_size_supplier_ids', 'w') as issis:
+        for supplier_id in invalid_size_supplier_ids:
+            issis.write(str(supplier_id) + '\n')
+    with open('invalid_declaration_supplier_ids', 'w') as idsis:
+        for supplier_id in invalid_declaration_supplier_ids:
+            idsis.write(str(supplier_id) + '\n')
+    with open('updated_supplier_ids', 'w') as usis:
+        for supplier_id in updated_supplier_ids:
+            usis.write(str(supplier_id) + '\n')
+
     logger.info("*** Updated {} suppliers in {}".format(updated_suppliers_count, str(duration)))
     logger.info("*** Skipped {} suppliers that already have org size info".format(skipped_suppliers_count))
     logger.info("*** Skipped {} suppliers with no valid declaration".format(invalid_declaration_suppliers_count))
