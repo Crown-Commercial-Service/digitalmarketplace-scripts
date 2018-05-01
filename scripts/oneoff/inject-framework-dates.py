@@ -112,7 +112,7 @@ def inject_framework_dates(stage):
                                                   f'oneoff/inject-framework-dates.py')
 
         except Exception as e:
-            print(f'Failed with {e}')
+            print(f'Failed with {e} on {framework_slug}. Data: {framework_data}')
 
 
 if __name__ == '__main__':
