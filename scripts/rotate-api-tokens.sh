@@ -99,8 +99,39 @@ function remove_old_tokens() {
   echo "Done."
 }
 
+function add_new_callback_token() {
+  create_credentials_update_branch
+
+  echo "Adding a new token for Notify callbacks to the Data-API for ${STAGE}."
+
+  api_type="api"
+  callback_token="N$(generate_api_token)"
+  new_api_data=$(./sops-wrapper -d vars/preview.yaml|yq -crM '.'${api_type}'.callback_auth_tokens |= ["'${callback_token}'"] + . | .'${api_type})
+  ./sops-wrapper --set "[\"${api_type}\"] ${new_api_data}" "vars/${STAGE_LOWER}.yaml"
+
+  commit_and_create_github_pr "Add new callback token" "## Summary\r\nInserts a new callback token to the Data API for the ${STAGE} environment in order to recycle the existing token."
+
+  echo "Done."
+}
+
+function remove_old_callback_token() {
+  create_credentials_update_branch
+
+  echo "Removing the old Notify callback token from the Data-API for ${STAGE}."
+
+  api_type="api"
+  new_api_data=$(./sops-wrapper -d vars/${STAGE_LOWER}.yaml | yq -crM '.'${api_type}'.callback_auth_tokens = .'${api_type}'.callback_auth_tokens[:1] | .'${api_type})
+  ./sops-wrapper --set "[\"${api_type}\"] ${new_api_data}" "vars/${STAGE_LOWER}.yaml"
+
+  commit_and_create_github_pr "Remove old callback token" "## Summary\r\nRemove the old callback token from the Data API for the ${STAGE} environment, leaving just the latest one."
+
+  echo "Done."
+}
+
 case ${COMMAND} in
   ADD-NEW) add_new_tokens;;
   REMOVE-OLD) remove_old_tokens;;
-  *) echo "Syntax: ./scripts/rotate-api-tokens.sh [add-new|remove-old] [preview|staging|production]";;
+  ADD-NEW-CALLBACK) add_new_callback_token;;
+  REMOVE-OLD-CALLBACK) remove_old_callback_token;;
+  *) echo "Syntax: ./scripts/rotate-api-tokens.sh [add-new|remove-old|add-new-callback|remove-old-callback] [preview|staging|production]";;
 esac
