@@ -3,17 +3,6 @@ from itertools import chain
 from dmscripts.helpers.csv_helpers import write_csv
 from dmscripts.helpers.framework_helpers import find_suppliers_with_details_and_draft_service_counts
 
-LOTS = {
-    "g-cloud-8": ("saas", "paas", "iaas", "scs",),
-    "digital-outcomes-and-specialists-2": (
-        "digital-outcomes",
-        "digital-specialists",
-        "user-research-participants",
-        "user-research-studios",
-    ),
-    "g-cloud-9": ("cloud-hosting", "cloud-software", "cloud-support",),
-}
-
 DECLARATION_FIELDS = {
     "g-cloud-8": (
         "primaryContact",
@@ -94,16 +83,50 @@ DECLARATION_FIELDS = {
         "contactNameContractNotice",
         "contactEmailContractNotice",
     ),
+    "g-cloud-10": (
+        "primaryContact",
+        "primaryContactEmail",
+        "supplierRegisteredBuilding",
+        "supplierRegisteredTown",
+        "supplierRegisteredPostcode",
+        "supplierTradingStatus",
+        "supplierRegisteredCountry",
+        "supplierCompanyRegistrationNumber",
+        "supplierDunsNumber",
+        "supplierVatNumber",
+        "supplierOrganisationSize",
+        "subcontracting",
+        "contactNameContractNotice",
+        "contactEmailContractNotice",
+    ),
+    "digital-outcomes-and-specialists-3": (
+        "primaryContact",
+        "primaryContactEmail",
+        "supplierRegisteredBuilding",
+        "supplierRegisteredTown",
+        "supplierRegisteredPostcode",
+        "supplierTradingStatus",
+        "supplierRegisteredCountry",
+        "supplierCompanyRegistrationNumber",
+        "supplierDunsNumber",
+        "supplierVatNumber",
+        "supplierOrganisationSize",
+        "subcontracting",
+        "contactNameContractNotice",
+        "contactEmailContractNotice",
+        "cyberEssentials",
+        "cyberEssentialsPlus",
+    ),
 }
 
 
-def get_csv_rows(records, framework_slug, count_statuses=("submitted", "failed",)):
+def get_csv_rows(records, framework_slug, framework_lot_slugs, count_statuses=("submitted", "failed",)):
     """
     :param count_statuses: tuple of draft service statuses that should be counted. The default ("submitted", "failed")
                            gives a count of all drafts that were originally submitted.
     """
     rows_iter = (
-        _create_row(framework_slug, record, count_statuses)
+        _create_row(framework_slug, record, count_statuses, framework_lot_slugs)
         for record in records
         if record['declaration'].get('status') == 'complete'
         # only include the record if it has at least one count with a required status
@@ -119,7 +142,7 @@ def get_csv_rows(records, framework_slug, count_statuses=("submitted", "failed",
             "countersigned_at",
             "countersigned_path",
         ),
-        (lot_slug for lot_slug in LOTS[framework_slug]),
+        (lot_slug for lot_slug in framework_lot_slugs),
         DECLARATION_FIELDS[framework_slug],
     ))
 
@@ -139,7 +162,7 @@ def _pass_fail_from_record(record):
         )
 
 
-def _create_row(framework_slug, record, count_statuses):
+def _create_row(framework_slug, record, count_statuses, framework_lot_slugs):
     return dict(chain(
         (
             ("supplier_id", record["supplier"]["id"]),
@@ -152,13 +175,13 @@ def _create_row(framework_slug, record, count_statuses):
         ),
         (
             (lot, sum(record["counts"][(lot, status)] for status in count_statuses))
-            for lot in LOTS[framework_slug]
+            for lot in framework_lot_slugs
         ),
         ((field, record["declaration"].get(field, "")) for field in DECLARATION_FIELDS[framework_slug]),
     ))
 
 
-def export_supplier_details(data_api_client, framework_slug, filename):
+def export_supplier_details(data_api_client, framework_slug, filename, framework_lot_slugs):
     records = find_suppliers_with_details_and_draft_service_counts(data_api_client, framework_slug)
-    headers, rows_iter = get_csv_rows(records, framework_slug)
+    headers, rows_iter = get_csv_rows(records, framework_slug, framework_lot_slugs)
     write_csv(headers, rows_iter, filename)
