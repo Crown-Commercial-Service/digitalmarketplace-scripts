@@ -76,7 +76,7 @@ class GenerateMasterCSV(GenerateCSVFromAPI):
         for sf in supplier_frameworks:
             # This bit takes care of the columns in static_fieldnames.
             supplier_id = sf['supplierId']
-            declaration = sf['declaration']['status'] if sf['declaration'] else ''
+            declaration = sf['declaration'].get('status', '') if sf['declaration'] else ''
             supplier_info = [
                 supplier_id,
                 sf['supplierName'],
