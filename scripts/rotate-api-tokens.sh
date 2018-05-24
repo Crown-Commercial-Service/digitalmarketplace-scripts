@@ -106,7 +106,7 @@ function add_new_callback_token() {
 
   api_type="api"
   callback_token="N$(generate_api_token)"
-  new_api_data=$(./sops-wrapper -d vars/preview.yaml|yq -crM '.'${api_type}'.callback_auth_tokens |= ["'${callback_token}'"] + . | .'${api_type})
+  new_api_data=$(./sops-wrapper -d vars/${STAGE_LOWER}.yaml|yq -crM '.'${api_type}'.callback_auth_tokens |= ["'${callback_token}'"] + . | .'${api_type})
   ./sops-wrapper --set "[\"${api_type}\"] ${new_api_data}" "vars/${STAGE_LOWER}.yaml"
 
   commit_and_create_github_pr "Add new callback token" "## Summary\r\nInserts a new callback token to the Data API for the ${STAGE} environment in order to recycle the existing token."
