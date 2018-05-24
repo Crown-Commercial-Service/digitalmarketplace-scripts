@@ -83,8 +83,12 @@ def mark_definite_framework_results(
     reassess_failed_draft_services=False,
     logger=logging.getLogger("script"),
 ):
-    for supplier_id in client.get_interested_suppliers(framework_slug).get('interestedSuppliers', ()):
-        logger.info("Supplier: %r", supplier_id)
+    interested_supplier_ids = client.get_interested_suppliers(framework_slug).get('interestedSuppliers', ())
+    total_interested_suppliers = len(interested_supplier_ids)
+    for i, supplier_id in enumerate(interested_supplier_ids, start=1):
+        logger.info("Supplier {i}/{total_interested_suppliers}: {supplier_id}",
+                    extra={'i': i, 'supplier_id': supplier_id,
+                           'total_interested_suppliers': total_interested_suppliers})
         supplier_framework = client.get_supplier_framework_info(supplier_id, framework_slug)["frameworkInterest"]
         if (supplier_framework["onFramework"] is False and not reassess_failed) or \
                 (supplier_framework["onFramework"] is True and not reassess_passed):
