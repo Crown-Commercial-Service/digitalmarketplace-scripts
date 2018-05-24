@@ -32,12 +32,13 @@ def virus_scan_bucket(s3, clam, prefix, since, dry_run=True):
     # s3.list can block for a significant amount of time against large buckets when loading with timestamps. During
     # this time there will be no output.
     logger.info('Gathering objects. This may take some time depending on the size of the bucket ...')
-    for file_meta in s3.list(prefix=prefix, load_timestamps=True):
+    for file_meta in s3.list(prefix=prefix, load_timestamps=True if since else False):
         if since and file_meta.get('last_modified') and dateutil_parser.parse(file_meta['last_modified']) < since:
             logger.info(f'Ignoring file from {file_meta["last_modified"]}: {file_meta["path"]}')
             continue
 
-        logger.info(f'Processing file from {file_meta["last_modified"]}: {file_meta["path"]}')
+        from_details = f" from {file_meta['last_modified']}" if since else ""
+        logger.info(f'Processing file{from_details}: {file_meta["path"]}')
 
         with io.BytesIO() as file_buffer:
             if not dry_run:
