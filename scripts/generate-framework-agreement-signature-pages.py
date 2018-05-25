@@ -63,6 +63,7 @@ if __name__ == '__main__':
     framework_slug = args['<framework_slug>']
     client = DataAPIClient(get_api_endpoint_from_stage(args['<stage>']), args['<api_token>'])
     framework = client.get_framework(framework_slug)['frameworks']
+    framework_lot_slugs = tuple([lot['slug'] for lot in client.get_framework(framework_slug)['frameworks']['lots']])
     framework_kwargs = framework['frameworkAgreementDetails']
     framework_kwargs['frameworkName'] = framework['name']
 
@@ -71,7 +72,7 @@ if __name__ == '__main__':
     html_dir = tempfile.mkdtemp()
 
     records = find_suppliers_with_details_and_draft_service_counts(client, framework_slug, supplier_ids)
-    headers, rows = get_csv_rows(records, framework_slug, count_statuses=("submitted",))
+    headers, rows = get_csv_rows(records, framework_slug, framework_lot_slugs, count_statuses=("submitted",))
     render_html_for_successful_suppliers(rows, framework_kwargs, args['<template_folder>'], html_dir)
     html_pages = os.listdir(html_dir)
     html_pages.remove('framework-agreement-signature-page.css')
