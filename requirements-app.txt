@@ -1,7 +1,7 @@
 # Run `make freeze-requirements` to update requirements.txt
 # with package version changes made in requirements-app.txt
 
-git+https://github.com/madzak/python-json-logger.git@v0.1.5#egg=python-json-logger==v0.1.5
+git+https://github.com/madzak/python-json-logger.git@v0.1.8#egg=python-json-logger==v0.1.8
 git+https://github.com/alphagov/digitalmarketplace-utils.git@36.11.0#egg=digitalmarketplace-utils==36.11.0
 git+https://github.com/alphagov/digitalmarketplace-apiclient.git@15.3.0#egg=digitalmarketplace-apiclient==15.3.0
 git+https://github.com/alphagov/digitalmarketplace-content-loader.git@2.8.0#egg=digitalmarketplace-content-loader==2.8.0
