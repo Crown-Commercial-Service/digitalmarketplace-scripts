@@ -164,7 +164,7 @@ in the container using a volume:
 docker run --user $(id -u) --volume $(pwd)/data:/app/data digitalmarketplace/scripts scripts/get-model-data.py ...
 ```
 
-### Docker for Mac workaround
+### Docker for Mac workaround
 
 If you are running in Docker on macOS and have local apps/services then `--net=host` will not work for you.
 Instead, a workaround script has been provided that runs inside the container to forward the scripts to the
