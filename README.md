@@ -155,11 +155,23 @@ container. The easiest way to do this is to use `--net=host` argument for `docke
 docker run --net=host digitalmarketplace/scripts scripts/index-to-search-service.py services dev ...
 ```
 
+This won't work however if you are running Docker for Mac; instead, see [below](#docker-for-mac-workaround).
+
 If the script is generating output files you need to map a local directory to the output directory
 in the container using a volume:
 
 ```
 docker run --user $(id -u) --volume $(pwd)/data:/app/data digitalmarketplace/scripts scripts/get-model-data.py ...
+```
+
+### Docker for Mac workaround
+
+If you are running in Docker on macOS and have local apps/services then `--net=host` will not work for you.
+Instead, a workaround script has been provided that runs inside the container to forward the scripts to the
+Docker host. To use it, run Docker like this:
+
+```
+docker run --entrypoint docker_for_mac_entrypoint.sh digitalmarketplace/scripts scripts/index-to-search-service.py dev ...
 ```
 
 ## A general approach to writing new scripts
