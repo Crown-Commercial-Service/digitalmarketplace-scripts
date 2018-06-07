@@ -23,7 +23,7 @@ def test_upload_counterpart_file_uploads_and_calls_api_if_not_dry_run(getuser, n
         "frameworkInterest": {
             "agreementId": 23,
             "declaration": {
-                "nameOfOrganisation": "The supplier who signed",
+                "supplierRegisteredName": "The supplier who signed",
             },
         }
     }
@@ -67,7 +67,7 @@ def test_upload_counterpart_file_does_not_perform_actions_if_dry_run(notify_fail
         "frameworkInterest": {
             "agreementId": 23,
             "declaration": {
-                "nameOfOrganisation": "The supplier who signed",
+                "supplierRegisteredName": "The supplier who signed",
                 "primaryContactEmail": "supplier.primary@example.com",
             },
         },
@@ -196,7 +196,7 @@ def test_upload_counterpart_file_sends_correct_emails(
         "frameworkInterest": {
             "agreementId": 23,
             "declaration": {
-                "nameOfOrganisation": "The supplier who signed",
+                "supplierRegisteredName": "The supplier who signed",
                 "primaryContactEmail": "supplier.primary@example.com",
             },
         },

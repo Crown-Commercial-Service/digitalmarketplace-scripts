@@ -38,7 +38,7 @@ def make_row(content_manifest):
         row = [
             ("supplier_id", record["supplier_id"]),
             ("supplier_name", record['supplier']['name']),
-            ("supplier_declaration_name", record['declaration'].get('nameOfOrganisation', '')),
+            ("supplier_declaration_name", record['declaration'].get('supplierRegisteredName', '')),
             ("status", "PASSED" if record["onFramework"] else "FAILED"),
         ]
         return row + make_fields_from_content_questions(specialist_roles, record)
