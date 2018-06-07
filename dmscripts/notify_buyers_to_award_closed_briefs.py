@@ -2,11 +2,12 @@
 from datetime import datetime, date, timedelta
 
 import dmapiclient
-from dmutils.email import DMNotifyClient
 from dmutils.email.exceptions import EmailError
 from dmutils.formats import DATE_FORMAT
 
 from dmscripts.helpers import logging_helpers, brief_data_helpers
+
+from dmscripts.helpers.email_helpers import scripts_notify_client
 
 logger = logging_helpers.configure_logger({'dmapiclient': logging_helpers.logging.INFO})
 
@@ -116,7 +117,7 @@ def main(
         return False
 
     data_api_client = dmapiclient.DataAPIClient(data_api_url, data_api_access_token)
-    notify_client = DMNotifyClient(notify_api_key, logger=logger)
+    notify_client = scripts_notify_client(notify_api_key, logger=logger)
 
     closed_briefs = brief_data_helpers.get_briefs_closed_on_date(data_api_client, date_closed)
     if not closed_briefs:

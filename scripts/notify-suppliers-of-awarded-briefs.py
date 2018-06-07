@@ -26,11 +26,11 @@ import logging
 import sys
 from docopt import docopt
 
-from dmutils.email import DMNotifyClient
 from dmapiclient import DataAPIClient
 
 sys.path.insert(0, '.')
 
+from dmscripts.helpers.email_helpers import scripts_notify_client
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.helpers import logging_helpers
 from dmscripts.notify_suppliers_of_awarded_briefs import main
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     logger = logging_helpers.configure_logger(
         {"dmapiclient": logging.INFO} if verbose else {"dmapiclient": logging.WARN}
     )
-    notify_client = DMNotifyClient(govuk_notify_api_key, logger=logger)
+    notify_client = scripts_notify_client(govuk_notify_api_key, logger=logger)
     data_api_client = DataAPIClient(base_url=get_api_endpoint_from_stage(stage), auth_token=api_token)
 
     list_of_brief_response_ids = list(map(int, brief_response_ids.split(','))) if brief_response_ids else None
