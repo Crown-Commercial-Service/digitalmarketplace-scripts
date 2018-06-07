@@ -30,12 +30,12 @@ import sys
 from datetime import datetime, timedelta
 from docopt import docopt
 
-from dmutils.email import DMNotifyClient
 from dmutils.formats import DATE_FORMAT
 from dmapiclient import DataAPIClient
 
 sys.path.insert(0, '.')
 
+from dmscripts.helpers.email_helpers import scripts_notify_client
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.helpers import logging_helpers
 from dmscripts.notify_suppliers_of_brief_withdrawal import main
@@ -62,7 +62,7 @@ if __name__ == "__main__":
         withdrawn_date and datetime.strptime(withdrawn_date, DATE_FORMAT).date() or
         datetime.today().date() - timedelta(days=1)
     )
-    notify_client = DMNotifyClient(govuk_notify_api_key, logger=logger)
+    notify_client = scripts_notify_client(govuk_notify_api_key, logger=logger)
     data_api_client = DataAPIClient(base_url=get_api_endpoint_from_stage(stage), auth_token=api_token)
 
     # Do send

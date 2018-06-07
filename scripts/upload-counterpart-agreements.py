@@ -47,8 +47,9 @@ from docopt import docopt
 from dmapiclient import DataAPIClient, APIError
 
 from dmutils.s3 import S3, S3ResponseError
-from dmutils.email.dm_notify import DMNotifyClient
 from dmutils.email.exceptions import EmailError
+
+from dmscripts.helpers.email_helpers import scripts_notify_client
 
 
 logger = logging_helpers.configure_logger({
@@ -68,7 +69,7 @@ if __name__ == '__main__':
     framework = data_api_client.get_framework(arguments['<framework_slug>'])["frameworks"]
     document_directory = arguments['<documents_directory>']
     dry_run = arguments['--dry-run']
-    dm_notify_client = arguments.get("--notify-key") and DMNotifyClient(arguments["--notify-key"], logger=logger)
+    dm_notify_client = arguments.get("--notify-key") and scripts_notify_client(arguments["--notify-key"], logger=logger)
 
     if dry_run:
         bucket = None

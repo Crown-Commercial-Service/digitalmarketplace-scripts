@@ -19,7 +19,7 @@ sys.path.insert(0, '.')
 from docopt import docopt
 
 from dmapiclient import DataAPIClient
-from dmutils.email.dm_notify import DMNotifyClient
+from dmscripts.helpers.email_helpers import scripts_notify_client
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.logging_helpers import logging
@@ -37,7 +37,7 @@ if __name__ == '__main__':
     GOVUK_NOTIFY_API_KEY = arguments['<govuk_notify_api_key>']
     GOVUK_NOTIFY_TEMPLATE_ID = arguments['<govuk_notify_template_id>']
 
-    mail_client = DMNotifyClient(GOVUK_NOTIFY_API_KEY, logger=logger)
+    mail_client = scripts_notify_client(GOVUK_NOTIFY_API_KEY, logger=logger)
     api_client = DataAPIClient(base_url=get_api_endpoint_from_stage(STAGE), auth_token=API_TOKEN)
 
     context_helper = SuccessfulSupplierContextForNotify(api_client, FRAMEWORK_SLUG)

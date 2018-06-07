@@ -135,7 +135,7 @@ class TestSendEmailToBriefUserViaNotify:
         notify_client.assert_not_called()
 
 
-@mock.patch('dmscripts.notify_buyers_to_award_closed_briefs.DMNotifyClient', autospec=True)
+@mock.patch('dmscripts.notify_buyers_to_award_closed_briefs.scripts_notify_client')
 @mock.patch('dmscripts.notify_buyers_to_award_closed_briefs.send_email_to_brief_user_via_notify')
 @mock.patch('dmscripts.helpers.brief_data_helpers.get_briefs_closed_on_date')
 @mock.patch('dmscripts.notify_buyers_to_award_closed_briefs.logger', autospec=True)
