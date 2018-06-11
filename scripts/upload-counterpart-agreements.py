@@ -3,6 +3,8 @@ PREREQUISITE: You'll need AWS credentials set up for the environment that you're
               Save your aws_access_key_id and aws_secret_access_key in ~/.aws/credentials
               If you have more than one set of credentials in there then be sure to set your AWS_PROFILE environment
               variable to reference the right credentials before running the script.
+              Alternatively, if this script is being run from Jenkins, do not provide any credentials and boto will use
+              the Jenkins IAM role. It should have the required permissions for the buckets.
 
 This will:
  * scan a directory for pdf files (they should be in the format <supplier_id>-some-ignored-words.pdf but this isn't
