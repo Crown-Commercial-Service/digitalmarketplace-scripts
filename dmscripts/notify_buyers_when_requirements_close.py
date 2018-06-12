@@ -20,7 +20,7 @@ def notify_users(email_api_key, brief):
                 extra={'brief_title': brief['title'], 'brief_id': brief['id']})
     if brief['users']:
         try:
-            email_body = render_html('email_templates/requirements_closed.html', data={
+            email_body = render_html('templates/email/requirements_closed.html', data={
                 'brief_id': brief['id'],
                 'brief_title': brief['title'],
                 'lot_slug': brief['lotSlug'],

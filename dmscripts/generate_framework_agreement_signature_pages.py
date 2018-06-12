@@ -21,21 +21,21 @@ def save_page(html, supplier_id, output_dir, descriptive_filename_part):
         htmlfile.write(html)
 
 
-def render_html_for_successful_suppliers(rows, framework_kwargs, template_dir, output_dir):
+def render_html_for_successful_suppliers(rows, framework, template_dir, output_dir):
     template_path = os.path.join(template_dir, 'framework-agreement-signature-page.html')
     template_css_path = os.path.join(template_dir, 'framework-agreement-signature-page.css')
     for data in rows:
         if data['pass_fail'] == 'fail':
             continue
-        data.update(framework_kwargs)
-        data['awardedLots'] = [lot for lot in framework_kwargs['lotOrder'] if int(data[lot]) > 0]
-        data['include_countersignature'] = False
+        data['framework'] = framework
+        data['awardedLots'] = [lot for lot in framework['frameworkAgreementDetails']['lotOrder'] if int(data[lot]) > 0]
+        data['includeCountersignature'] = False
         html = render_html(template_path, data)
         save_page(html, data['supplier_id'], output_dir, "signature-page")
     shutil.copyfile(template_css_path, os.path.join(output_dir, 'framework-agreement-signature-page.css'))
 
 
-def render_html_for_suppliers_awaiting_countersignature(rows, framework_kwargs, template_dir, output_dir):
+def render_html_for_suppliers_awaiting_countersignature(rows, framework, template_dir, output_dir):
     template_path = os.path.join(template_dir, 'framework-agreement-signature-page.html')
     template_css_path = os.path.join(template_dir, 'framework-agreement-signature-page.css')
     countersignature_img_path = os.path.join(template_dir, 'framework-agreement-countersignature.png')
@@ -48,12 +48,12 @@ def render_html_for_suppliers_awaiting_countersignature(rows, framework_kwargs, 
                 data['countersigned_path'])
             )
             continue
-        data.update(framework_kwargs)
-        data['awardedLots'] = [lot for lot in framework_kwargs['lotOrder'] if int(data[lot]) > 0]
+        data['framework'] = framework
+        data['awardedLots'] = [lot for lot in framework['lotOrder'] if int(data[lot]) > 0]
         data['countersigned_at'] = datetime.strptime(
             data['countersigned_at'], '%Y-%m-%dT%H:%M:%S.%fZ'
         ).strftime('%d %B %Y')
-        data['include_countersignature'] = True
+        data['includeCountersignature'] = True
         html = render_html(template_path, data)
         save_page(html, data['supplier_id'], output_dir, "agreement-countersignature")
     shutil.copyfile(template_css_path, os.path.join(output_dir, 'framework-agreement-signature-page.css'))

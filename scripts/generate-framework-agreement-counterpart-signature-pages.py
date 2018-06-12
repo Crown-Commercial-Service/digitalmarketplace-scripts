@@ -11,10 +11,8 @@ The 'frameworkAgreementDetails' JSON object from the API should look something l
 {
     "contractNoticeNumber": "2016/S 217-395765",
     "frameworkAgreementVersion": "RM1043iv",
-    "frameworkEndDate": "29/01/2018",
     "frameworkExtensionLength": "12 months",
     "frameworkRefDate": "16-01-2017",
-    "frameworkStartDate": "30/01/2017",
     "frameworkURL": "https://www.gov.uk/government/publications/digital-outcomes-and-specialists-2-framework-agreement",
     "lotDescriptions": {
       "digital-outcomes": "Lot 1: digital outcomes",

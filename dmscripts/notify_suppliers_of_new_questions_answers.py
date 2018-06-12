@@ -83,7 +83,7 @@ def create_context_for_supplier(stage, supplier_briefs):
 
 
 def get_html_content(context):
-    return render_html("email_templates/suppliers_new_briefs_questions_answers.html", data={
+    return render_html("templates/email/suppliers_new_briefs_questions_answers.html", data={
         "briefs": context['briefs']
     })
 

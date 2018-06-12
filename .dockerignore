@@ -2,7 +2,7 @@
 
 !dmscripts/
 !docker_for_mac_entrypoint.sh
-!email_templates/
+!templates/
 !requirements.txt
 !schemas/
 !scripts/
