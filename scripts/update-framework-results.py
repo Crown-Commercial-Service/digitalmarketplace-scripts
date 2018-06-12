@@ -5,7 +5,7 @@
 Sets supplier "on framework" status for all supplier IDs read from file. Each file line should contain one supplier ID.
 
 Usage:
-    scripts/update-framework-results.py <framework> <stage> (--pass | --fail) --api-token=<token> <ids_file>
+    scripts/update-framework-results.py <framework> <stage> (--pass | --fail) <ids_file>
 
 Example:
     python scripts/update-framework-results.py g-cloud-8 preview --pass --api-token=myToken ./g8-suppliers.txt
@@ -22,6 +22,7 @@ from docopt import docopt
 from dmapiclient import DataAPIClient
 
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
+from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.framework_helpers import set_framework_result
 from dmscripts.helpers import logging_helpers
 
@@ -32,7 +33,7 @@ if __name__ == '__main__':
 
     framework_slug = arguments['<framework>']
     data_api_url = get_api_endpoint_from_stage(arguments['<stage>'], 'api')
-    client = DataAPIClient(data_api_url, arguments['--api-token'])
+    client = DataAPIClient(data_api_url, get_auth_token('api', arguments['<stage>']))
     user = getpass.getuser()
     result = True if arguments['--pass'] else False
 
