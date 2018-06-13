@@ -35,10 +35,10 @@ def render_html_for_successful_suppliers(rows, framework, template_dir, output_d
     shutil.copyfile(template_css_path, os.path.join(output_dir, 'framework-agreement-signature-page.css'))
 
 
-def render_html_for_suppliers_awaiting_countersignature(rows, framework, template_dir, output_dir):
+def render_html_for_suppliers_awaiting_countersignature(rows, framework, template_dir, output_dir,
+                                                        countersignature_img_path):
     template_path = os.path.join(template_dir, 'framework-agreement-signature-page.html')
     template_css_path = os.path.join(template_dir, 'framework-agreement-signature-page.css')
-    countersignature_img_path = os.path.join(template_dir, 'framework-agreement-countersignature.png')
     for data in rows:
         if data['pass_fail'] == 'fail' or data['countersigned_path'] or not data['countersigned_at']:
             logger.info("SKIPPING {}: pass_fail={} countersigned_at={} countersigned_path={}".format(
@@ -49,7 +49,7 @@ def render_html_for_suppliers_awaiting_countersignature(rows, framework, templat
             )
             continue
         data['framework'] = framework
-        data['awardedLots'] = [lot for lot in framework['lotOrder'] if int(data[lot]) > 0]
+        data['awardedLots'] = [lot for lot in framework['frameworkAgreementDetails']['lotOrder'] if int(data[lot]) > 0]
         data['countersigned_at'] = datetime.strptime(
             data['countersigned_at'], '%Y-%m-%dT%H:%M:%S.%fZ'
         ).strftime('%d %B %Y')
