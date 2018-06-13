@@ -16,15 +16,22 @@
                 <h1>Signature page for {{ framework.name }} Framework Agreement,<br />
                     version: {{ framework.frameworkAgreementDetails.frameworkAgreementVersion }}-{{ framework.frameworkAgreementDetails.frameworkRefDate }}</h1>
                 <h2>Section 1 - The appointment</h2>
+  
+                <p class="instruction-list-item-body">
+                  This section includes terms about the Supplier appointment.
+                </p>
+            
                 <ol class="instruction-list">
                   <li class="instruction-list-item">
-
                     <p class="instruction-list-item-body">
                       <strong>Appointment</strong>
                     </p>
 
                     <p class="instruction-list-item-extra-information">
-                      Subject to the terms of this Framework Agreement ({{ framework.frameworkAgreementDetails.frameworkAgreementVersion }}), the Minister for the Cabinet Office, represented by the Crown Commercial Service (CCS), 9th Floor, The Capital, Old Hall Street, Liverpool, L3 9PP, appoints:
+                      Under the terms of this Framework Agreement
+                      ({{ framework.frameworkAgreementDetails.frameworkAgreementVersion }}) and the Supplier's
+                      Application, the Minister for the Cabinet Office, represented by the Crown Commercial Service
+                      (CCS), 9th Floor, The Capital, Old Hall Street, Liverpool, L3 9PP, appoints:
                     </p>
 
                     <p class="instruction-list-item-extra-information">
@@ -33,16 +40,17 @@
                     </p>
                     <p class="instruction-list-item-extra-information">
                       <strong>registered address:</strong>
-                      {{ supplierRegisteredBuilding }}
-                      {{ supplierRegisteredTown }}
-                      {{ supplierRegisteredPostcode }}
+                      {{ supplierRegisteredBuilding }}, {{ supplierRegisteredTown }}, {{ supplierRegisteredPostcode }}
                     </p>
                     <p class="instruction-list-item-extra-information">
                       <strong>company number:</strong>
                       {{ supplierCompanyRegistrationNumber }}
                     </p>
                     <p class="instruction-list-item-extra-information">
-                      (the ‘Supplier’), as a Supplier of {{ framework.name }} services who can bid for Call-Off Contracts as outlined in the Contract Notice within the Official Journal of the European Union reference {{ framework.frameworkAgreementDetails.contractNoticeNumber }} (OJEU Contract Notice).
+                      (the ‘Supplier’), as a Framework Agreement Supplier of {{ framework.name }} services who can be
+                      considered for Call-Off Contracts as outlined in the Contract Notice in the Official Journal of
+                      the European Union reference {{ framework.frameworkAgreementDetails.contractNoticeNumber }}
+                      (OJEU Contract Notice).
                     </p>
                   </li>
 
@@ -59,69 +67,78 @@
 
                   <li class="instruction-list-item">
                     <p class="instruction-list-item-body">
-                      <strong>Appointment begins at:</strong>
+                      <strong>Appointment starts at:</strong>
                       {{ framework.frameworkLiveAtUTC|dateformat }}
                     </p>
                   </li>
 
                   <li class="instruction-list-item">
                     <p class="instruction-list-item-body">
-                      <strong>Appointment expires at:</strong>
-                      23:59 on {{ framework.frameworkExpiresAtUTC|dateformat }} (unless this Framework Agreement is extended by CCS or is terminated early).
+                      <strong>Appointment ends at:</strong>
+                      23:59 on {{ framework.frameworkExpiresAtUTC|dateformat }} (unless this Framework Agreement is
+                      extended by CCS or ends early).
                     </p>
                   </li>
 
                   <li class="instruction-list-item">
                     <p class="instruction-list-item-body">
-                      <strong>Extension:</strong>
-                      Up to {{ framework.frameworkAgreementDetails.frameworkExtensionLength }}, by CCS giving written notice to Suppliers.
+                      <strong>Framework extension:</strong>
+                      Up to {{ framework.frameworkAgreementDetails.frameworkExtensionLength }}, by CCS giving written
+                      notice to Suppliers.
                     </p>
                   </li>
 
                   <li class="instruction-list-item">
                     <p class="instruction-list-item-body">
-                      <strong>Term:</strong>
-                      From and including the date at 1.3 above (Appointment begins at) to and including the date at 1.4 above (Appointment expires at).
+                      <strong>Framework term:</strong>
+                      From and including the date at 1.3 above (Appointment starts at) to and including the date at
+                      1.4 above (Appointment ends at).
                     </p>
                   </li>
 
                   <li class="instruction-list-item">
                     <p class="instruction-list-item-body">
-                      <strong>Call-Off Contract duration:</strong>
-                      Maximum 24 months with optional 6 months extension.
+                      <strong>Call-Off Contract length:</strong>
+                      Up to 24 months plus 2 optional extension periods of up to 12 months each.
                     </p>
                   </li>
 
                   <li class="instruction-list-item">
                     <p class="instruction-list-item-body">
-                      By signing this Framework Agreement, the Supplier agrees to comply with all the terms of this Framework Agreement.
+                      The Parties agree that they have read this Framework Agreement and by signing below agree to be
+                      bound by its terms.
                     </p>
                   </li>
 
                   <li class="instruction-list-item">
                     <p class="instruction-list-item-body">
-                      All Sections, including the Invitation To Tender (ITT), and Schedules annexed to this Framework Agreement are expressly a part of this Framework Agreement.
+                      All Sections, including the Invitation To Tender (known as the Invitation to Apply on the Digital
+                      Marketplace) and Schedules to this Framework Agreement are expressly a part of this Framework
+                      Agreement.
                     </p>
                   </li>
 
                   <li class="instruction-list-item">
                     <p class="instruction-list-item-body">
-                      If the Supplier agrees to enter into this Framework Agreement and perform its obligations under it,
-                      CCS agrees to pay and the Supplier agrees to accept on the signing of this Framework Agreement
-                      the sum of £1, receipt of which is hereby acknowledged by the Supplier.
+                      CCS will pay £1 to the Supplier to perform its obligations under this Framework Agreement, receipt
+                      of which is acknowledged by the Supplier signing this Framework Agreement.
                     </p>
                   </li>
                   <li class="instruction-list-item">
                     <p class="instruction-list-item-body less-margin">
-                      Your finalised Framework Agreement will include:
+                      The finalised Framework Agreement will include:
                     </p>
                     <ul class="bulleted-list">
                       <li class="no-number"><p>• a signature page, signed by the supplier</p></li>
                       <li class="no-number"><p>• a signature page, signed by the Crown Commercial Service</p></li>
                       <li class="no-number"><p>• the rest of the Framework Agreement document</li>
                     </ul>
-                    <p class="instruction-list-item-body" >
-                      The signature pages and the rest of the Framework Agreement document are 'counterparts' before signing and 'duplicate originals' after signing. The duplicate originals together constitute one Framework Agreement signed by all the necessary parties.</p>
+                  </li>
+                  <li class="instruction-list-item">
+                    <p class="instruction-list-item-body">
+                      The signature pages and the rest of the Framework Agreement document are counterparts before
+                      signing and duplicate originals after signing. The duplicate originals together make one
+                      Framework Agreement signed by all the necessary parties.</p>
                   </li>
                 </ol>
             </li>

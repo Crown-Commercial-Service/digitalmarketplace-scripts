@@ -33,6 +33,9 @@ The 'frameworkAgreementDetails' JSON object from the API should look something l
     "signaturePageNumber": 3
 }
 
+If supplied, <supplier_id_file> is a text file with one supplier ID per line; framework agreement pages will only be
+generated for these suppliers.
+
 Usage:
     scripts/generate-framework-agreement-signature-pages.py <stage> <framework_slug> <output_folder>
     [<supplier_id_file>]
