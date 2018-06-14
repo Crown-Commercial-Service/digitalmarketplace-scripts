@@ -1,9 +1,6 @@
 import os
 import re
-try:
-    import unicodecsv as csv
-except ImportError:
-    import csv
+import csv
 
 from dmutils.documents import get_document_path, generate_download_filename
 
@@ -28,9 +25,8 @@ def upload_file(bucket, dry_run, file_path, framework_slug, bucket_category,
         download_filename = generate_download_filename(
             supplier_id, document_name, supplier_name)
     if not dry_run:
-        with open(file_path) as source_file:
-            bucket.save(upload_path, source_file, acl='bucket-owner-full-control',
-                        download_filename=download_filename)
+        with open(file_path, 'rb') as source_file:
+            bucket.save(upload_path, source_file, acl='bucket-owner-full-control', download_filename=download_filename)
         print(supplier_id)
     else:
         print("[Dry-run] UPLOAD: '{}' to '{}'".format(file_path, upload_path))
@@ -63,8 +59,8 @@ def get_document_name_from_file_path(path):
 
 def get_supplier_name_dict_from_tsv(tsv_path):
     suppliers_name_dict = {}
-    with open(tsv_path, 'r') as csvfile:
-        tsv_path = csv.reader(csvfile, delimiter='\t')
-        for row in tsv_path:
+    with open(tsv_path, 'r') as tsvfile:
+        tsv_reader = csv.reader(tsvfile, delimiter='\t')
+        for row in tsv_reader:
             suppliers_name_dict[row[0]] = row[1]
     return suppliers_name_dict
