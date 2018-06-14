@@ -86,6 +86,7 @@ DECLARATION_FIELDS = {
     "g-cloud-10": (
         "primaryContact",
         "primaryContactEmail",
+        "supplierRegisteredName",
         "supplierRegisteredBuilding",
         "supplierRegisteredTown",
         "supplierRegisteredPostcode",
@@ -102,6 +103,7 @@ DECLARATION_FIELDS = {
     "digital-outcomes-and-specialists-3": (
         "primaryContact",
         "primaryContactEmail",
+        "supplierRegisteredName",
         "supplierRegisteredBuilding",
         "supplierRegisteredTown",
         "supplierRegisteredPostcode",

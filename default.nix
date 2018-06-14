@@ -20,6 +20,8 @@ in (with args; {
       # for `cryptography`
       pkgs.openssl
       pkgs.cacert
+      pkgs.sops
+      pkgs.aws-auth
     ] ++ pkgs.stdenv.lib.optionals (!pkgs.stdenv.isDarwin) [
       # package not available on darwin for now - sorry you're on your own...
       pkgs.wkhtmltopdf

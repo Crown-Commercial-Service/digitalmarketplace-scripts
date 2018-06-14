@@ -54,7 +54,7 @@ def get_html_content(briefs, number_of_days):
             {"applicationsClosedAtDateTime": datetime.strptime(brief["applicationsClosedAt"], DATETIME_FORMAT)}
         )
 
-    html_content = render_html("email_templates/dos_opportunities.html", data={
+    html_content = render_html("templates/email/dos_opportunities.html", data={
         "briefs": briefs,
         "today": datetime.today(),
         "display_date_format": DISPLAY_DATE_FORMAT,

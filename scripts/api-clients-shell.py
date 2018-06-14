@@ -44,7 +44,7 @@ def clients_in_shell(stage, api_url, api_token, search_api_url, search_api_token
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('stage', default='development', help='The stage your clients should target',
-                        choices=['development', 'preview', 'staging'], nargs='?')
+                        choices=['development', 'preview', 'staging', 'production'], nargs='?')
 
     parser.add_argument('--api-url', help='Override the implicit API URL', type=str)
     parser.add_argument('--api-token', help='Override for the API key (don\'t decrypt from dm-credentials)', type=str)
