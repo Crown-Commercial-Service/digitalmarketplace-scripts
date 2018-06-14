@@ -20,6 +20,10 @@
   position: absolute;
   list-style-type: none;
 }
+#signing li.no-increment:before {
+  content: none;
+  counter-increment: none;
+}
 #signing ol {
   padding: 0;
 }

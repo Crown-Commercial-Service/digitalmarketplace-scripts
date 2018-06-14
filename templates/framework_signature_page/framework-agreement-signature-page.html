@@ -20,12 +20,12 @@
                 <p class="instruction-list-item-body">
                   This section includes terms about the Supplier appointment.
                 </p>
-            
+  
+                <p class="instruction-list-item-body">
+                  <strong>Appointment</strong>
+                </p>
                 <ol class="instruction-list">
                   <li class="instruction-list-item">
-                    <p class="instruction-list-item-body">
-                      <strong>Appointment</strong>
-                    </p>
 
                     <p class="instruction-list-item-extra-information">
                       Under the terms of this Framework Agreement
@@ -46,8 +46,9 @@
                       <strong>company number:</strong>
                       {{ supplierCompanyRegistrationNumber }}
                     </p>
+                    
                     <p class="instruction-list-item-extra-information">
-                      (the ‘Supplier’), as a Framework Agreement Supplier of {{ framework.name }} services who can be
+                      (the ‘Supplier’), as a Framework Agreement Supplier of {{ (framework.framework.replace('-', ' ')|title).replace('And', 'and') }} services who can be
                       considered for Call-Off Contracts as outlined in the Contract Notice in the Official Journal of
                       the European Union reference {{ framework.frameworkAgreementDetails.contractNoticeNumber }}
                       (OJEU Contract Notice).
@@ -68,14 +69,14 @@
                   <li class="instruction-list-item">
                     <p class="instruction-list-item-body">
                       <strong>Appointment starts at:</strong>
-                      {{ framework.frameworkLiveAtUTC|dateformat }}
+                      {{ framework.frameworkLiveAtUTC|nodaydateformat }}
                     </p>
                   </li>
 
                   <li class="instruction-list-item">
                     <p class="instruction-list-item-body">
                       <strong>Appointment ends at:</strong>
-                      23:59 on {{ framework.frameworkExpiresAtUTC|dateformat }} (unless this Framework Agreement is
+                      23:59 on {{ framework.frameworkExpiresAtUTC|nodaydateformat }} (unless this Framework Agreement is
                       extended by CCS or ends early).
                     </p>
                   </li>
@@ -113,7 +114,7 @@
                   <li class="instruction-list-item">
                     <p class="instruction-list-item-body">
                       All Sections, including the Invitation To Tender (known as the Invitation to Apply on the Digital
-                      Marketplace) and Schedules to this Framework Agreement are expressly a part of this Framework
+                      Marketplace) and Schedules to this Framework Agreement are expressly part of this Framework
                       Agreement.
                     </p>
                   </li>
@@ -129,9 +130,9 @@
                       The finalised Framework Agreement will include:
                     </p>
                     <ul class="bulleted-list">
-                      <li class="no-number"><p>• a signature page, signed by the supplier</p></li>
-                      <li class="no-number"><p>• a signature page, signed by the Crown Commercial Service</p></li>
-                      <li class="no-number"><p>• the rest of the Framework Agreement document</li>
+                      <li class="no-number no-increment"><p>• a signature page, signed by the supplier</p></li>
+                      <li class="no-number no-increment"><p>• a signature page, signed by the Crown Commercial Service</p></li>
+                      <li class="no-number no-increment"><p>• the rest of the Framework Agreement document</li>
                     </ul>
                   </li>
                   <li class="instruction-list-item">
