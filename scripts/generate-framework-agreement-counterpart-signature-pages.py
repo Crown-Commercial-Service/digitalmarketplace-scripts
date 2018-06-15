@@ -35,7 +35,7 @@ which should be at `digitalmarketplace-credentials/signatures/<name>.png`
 
 Usage:
     scripts/generate-framework-agreement-counterpart-signature-pages.py <stage> <framework_slug>
-    <countersignature_path> <output_folder> [<supplier_id_file>]
+    <path_to_agreements_repo> <output_folder> [<supplier_id_file>]
 
 """
 import os
@@ -71,8 +71,9 @@ if __name__ == '__main__':
 
     records = find_suppliers_with_details_and_draft_service_counts(client, framework_slug, supplier_ids)
     headers, rows = get_csv_rows(records, framework_slug, framework_lot_slugs, count_statuses=("submitted",))
-    render_html_for_suppliers_awaiting_countersignature(rows, framework, 'templates/framework_signature_page', html_dir,
-                                                        args['<countersignature_path>'])
+    render_html_for_suppliers_awaiting_countersignature(
+        rows, framework, os.path.join(args['<path_to_agreements_repo>'], 'documents', framework['slug']), html_dir
+    )
     html_pages = os.listdir(html_dir)
     html_pages.remove('framework-agreement-signature-page.css')
     html_pages.remove('framework-agreement-countersignature.png')

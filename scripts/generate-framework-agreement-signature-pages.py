@@ -38,7 +38,7 @@ generated for these suppliers.
 
 Usage:
     scripts/generate-framework-agreement-signature-pages.py <stage> <framework_slug> <output_folder>
-    [<supplier_id_file>]
+    <path_to_agreements_repo> [<supplier_id_file>]
 
 """
 import os
@@ -73,7 +73,9 @@ if __name__ == '__main__':
 
     records = find_suppliers_with_details_and_draft_service_counts(client, framework_slug, supplier_ids)
     headers, rows = get_csv_rows(records, framework_slug, framework_lot_slugs, count_statuses=("submitted",))
-    render_html_for_successful_suppliers(rows, framework, 'templates/framework_signature_page', html_dir)
+    render_html_for_successful_suppliers(
+        rows, framework, os.path.join(args['<path_to_agreements_repo>'], 'documents', framework['slug']), html_dir
+    )
     html_pages = os.listdir(html_dir)
     html_pages.remove('framework-agreement-signature-page.css')
     render_pdf_for_each_html_page(html_pages, html_dir, args['<output_folder>'])
