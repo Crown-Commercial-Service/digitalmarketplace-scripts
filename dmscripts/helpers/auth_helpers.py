@@ -9,7 +9,9 @@ def get_auth_token(api, stage):
     if stage.lower() in DEV_ALIASES:
         return 'myToken'
 
-    env_var = "DM_{}_TOKEN_{}".format(api.upper(), stage.upper())
+    env_var_api_name = 'data-api' if api == 'api' else api
+    env_var_api_name = env_var_api_name.replace('-', '_')
+    env_var = "DM_{}_TOKEN_{}".format(env_var_api_name.upper(), stage.upper())
     auth_token = os.environ.get(env_var)
 
     if not auth_token:
