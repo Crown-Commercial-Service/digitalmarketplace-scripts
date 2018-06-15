@@ -30,7 +30,11 @@ def upload_counterpart_file(
     supplier_id = get_supplier_id_from_framework_file_path(file_path)
     supplier_framework = data_api_client.get_supplier_framework_info(supplier_id, framework["slug"])
     supplier_framework = supplier_framework['frameworkInterest']
-    supplier_name = supplier_framework['declaration']['supplierRegisteredName']
+    supplier_name = (
+        supplier_framework['declaration']['supplierRegisteredName']
+        if 'supplierRegisteredName' in supplier_framework['declaration'] else
+        supplier_framework['declaration']['nameOfOrganisation']
+    )
     download_filename = generate_download_filename(supplier_id, COUNTERPART_FILENAME, supplier_name)
 
     email_addresses_to_notify = dm_notify_client and frozenset(chain(
