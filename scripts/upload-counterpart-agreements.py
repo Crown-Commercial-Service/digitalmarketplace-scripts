@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """
 PREREQUISITE: You'll need AWS credentials set up for the environment that you're uploading to:
               Save your aws_access_key_id and aws_secret_access_key in ~/.aws/credentials
@@ -27,7 +29,7 @@ This will:
    * if <notify_key> and <notify_template_id> are provided, will send a notification email to all the supplier's active
      users (and their primaryContactEmail for that framework)
 
-Usage: scripts/upload-counterpart-agreements.py <stage> <api_token> <documents_directory> <framework_slug> [options]
+Usage: scripts/upload-counterpart-agreements.py <stage> <documents_directory> <framework_slug> [options]
 
 Options:
     --dry-run                                   # Don't actually do anything
@@ -40,6 +42,7 @@ import sys
 sys.path.insert(0, '.')
 
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
+from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.bulk_upload_documents import get_bucket_name, get_all_files_of_type
 from dmscripts.upload_counterpart_agreements import upload_counterpart_file
 from dmscripts.helpers import logging_helpers
@@ -67,7 +70,7 @@ if __name__ == '__main__':
         raise ValueError("Either specify both --notify-key and --notify-template-id or neither")
 
     stage = arguments['<stage>']
-    data_api_client = DataAPIClient(get_api_endpoint_from_stage(stage), arguments['<api_token>'])
+    data_api_client = DataAPIClient(get_api_endpoint_from_stage(stage), get_auth_token('api', stage))
     framework = data_api_client.get_framework(arguments['<framework_slug>'])["frameworks"]
     document_directory = arguments['<documents_directory>']
     dry_run = arguments['--dry-run']
