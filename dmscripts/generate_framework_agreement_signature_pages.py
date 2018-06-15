@@ -35,10 +35,10 @@ def render_html_for_successful_suppliers(rows, framework, template_dir, output_d
     shutil.copyfile(template_css_path, os.path.join(output_dir, 'framework-agreement-signature-page.css'))
 
 
-def render_html_for_suppliers_awaiting_countersignature(rows, framework, template_dir, output_dir,
-                                                        countersignature_img_path):
+def render_html_for_suppliers_awaiting_countersignature(rows, framework, template_dir, output_dir):
     template_path = os.path.join(template_dir, 'framework-agreement-signature-page.html')
     template_css_path = os.path.join(template_dir, 'framework-agreement-signature-page.css')
+    template_countersignature_path = os.path.join(template_dir, 'framework-agreement-countersignature.png')
     for data in rows:
         if data['pass_fail'] == 'fail' or data['countersigned_path'] or not data['countersigned_at']:
             logger.info("SKIPPING {}: pass_fail={} countersigned_at={} countersigned_path={}".format(
@@ -57,7 +57,10 @@ def render_html_for_suppliers_awaiting_countersignature(rows, framework, templat
         html = render_html(template_path, data)
         save_page(html, data['supplier_id'], output_dir, "agreement-countersignature")
     shutil.copyfile(template_css_path, os.path.join(output_dir, 'framework-agreement-signature-page.css'))
-    shutil.copyfile(countersignature_img_path, os.path.join(output_dir, 'framework-agreement-countersignature.png'))
+    shutil.copyfile(
+        template_countersignature_path,
+        os.path.join(output_dir, 'framework-agreement-countersignature.png')
+    )
 
 
 def render_pdf_for_each_html_page(html_pages, html_dir, pdf_dir):
