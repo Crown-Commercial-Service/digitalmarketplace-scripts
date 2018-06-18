@@ -5,7 +5,7 @@ script notifies suppliers of all awarded briefs in the previous day by default.
 Alternatively, when supplied with a list of BriefResponse IDs, it will notify just the suppliers for those responses.
 
 Usage:
-    notify-suppliers-of-awarded-briefs.py <stage> <api_token> <govuk_notify_api_key> <govuk_notify_template_id>
+    notify-suppliers-of-awarded-briefs.py <stage> <govuk_notify_api_key> <govuk_notify_template_id>
         [options]
 
 Options:
@@ -32,6 +32,7 @@ sys.path.insert(0, '.')
 
 from dmscripts.helpers.email_helpers import scripts_notify_client
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
+from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers import logging_helpers
 from dmscripts.notify_suppliers_of_awarded_briefs import main
 
@@ -41,7 +42,6 @@ if __name__ == "__main__":
 
     # Get arguments
     stage = arguments['<stage>']
-    api_token = arguments['<api_token>']
     govuk_notify_api_key = arguments['<govuk_notify_api_key>']
     govuk_notify_template_id = arguments['<govuk_notify_template_id>']
     awarded_at = arguments.get('--awarded_at', None)
@@ -54,7 +54,8 @@ if __name__ == "__main__":
         {"dmapiclient": logging.INFO} if verbose else {"dmapiclient": logging.WARN}
     )
     notify_client = scripts_notify_client(govuk_notify_api_key, logger=logger)
-    data_api_client = DataAPIClient(base_url=get_api_endpoint_from_stage(stage), auth_token=api_token)
+    data_api_client = DataAPIClient(base_url=get_api_endpoint_from_stage(stage),
+                                    auth_token=get_auth_token('api', stage))
 
     list_of_brief_response_ids = list(map(int, brief_response_ids.split(','))) if brief_response_ids else None
 
