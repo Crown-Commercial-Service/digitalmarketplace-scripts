@@ -2,7 +2,12 @@
 """Helper classes for fetching supplier data given a client."""
 from collections import OrderedDict
 from datetime import date
+from functools import lru_cache
 from itertools import groupby
+import json
+
+import backoff
+import requests
 
 from dmutils.formats import DISPLAY_DATE_FORMAT
 
@@ -155,3 +160,16 @@ def get_supplier_ids_from_file(supplier_id_file):
         return None
     with open(supplier_id_file, 'r') as f:
         return list(map(int, [_f for _f in [l.strip() for l in f.readlines()] if _f]))
+
+
+@lru_cache()
+@backoff.on_exception(backoff.expo, requests.exceptions.RequestException, max_tries=3)
+def country_code_to_name(country_code):
+    register, code = country_code.split(':')
+
+    register_response = requests.get(f'https://{register}.register.gov.uk/records/{code}.json')
+    if register_response.status_code == 200:
+        record = json.loads(register_response.text)
+        return record[code]['item'][0]['name']
+
+    raise requests.exceptions.RequestException(register_response)

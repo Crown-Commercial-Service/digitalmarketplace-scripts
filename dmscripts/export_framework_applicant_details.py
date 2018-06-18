@@ -2,6 +2,7 @@ from itertools import chain
 
 from dmscripts.helpers.csv_helpers import write_csv
 from dmscripts.helpers.framework_helpers import find_suppliers_with_details_and_draft_service_counts
+from dmscripts.helpers.supplier_data_helpers import country_code_to_name
 
 DECLARATION_FIELDS = {
     "g-cloud-8": (
@@ -164,6 +165,13 @@ def _pass_fail_from_record(record):
         )
 
 
+def _format_field(field_name, field_value):
+    if field_name == 'supplierRegisteredCountry':
+        field_value = country_code_to_name(field_value)
+
+    return field_name, field_value
+
+
 def _create_row(framework_slug, record, count_statuses, framework_lot_slugs):
     return dict(chain(
         (
@@ -179,7 +187,7 @@ def _create_row(framework_slug, record, count_statuses, framework_lot_slugs):
             (lot, sum(record["counts"][(lot, status)] for status in count_statuses))
             for lot in framework_lot_slugs
         ),
-        ((field, record["declaration"].get(field, "")) for field in DECLARATION_FIELDS[framework_slug]),
+        (_format_field(field, record["declaration"].get(field, "")) for field in DECLARATION_FIELDS[framework_slug]),
     ))
 
 
