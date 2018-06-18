@@ -5,7 +5,7 @@ For a DOS-type framework this will export details of all "digital-specialists" s
 specialist roles the supplier provides, the locations they can provide them in and the min and max prices per role.
 
 Usage:
-    scripts/export-dos-specialists.py <stage> <api_token> <framework_slug> <content_path>
+    scripts/export-dos-specialists.py <stage> <framework_slug> <content_path>
 """
 import sys
 sys.path.insert(0, '.')
@@ -13,6 +13,7 @@ sys.path.insert(0, '.')
 from docopt import docopt
 from dmscripts.helpers.csv_helpers import make_fields_from_content_questions, write_csv_with_make_row
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
+from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.framework_helpers import find_suppliers_with_details_and_draft_services
 from dmapiclient import DataAPIClient
 from dmcontent.content_loader import ContentLoader
@@ -58,11 +59,10 @@ if __name__ == '__main__':
     arguments = docopt(__doc__)
 
     STAGE = arguments['<stage>']
-    API_TOKEN = arguments['<api_token>']
     CONTENT_PATH = arguments['<content_path>']
     FRAMEWORK_SLUG = arguments['<framework_slug>']
 
-    client = DataAPIClient(get_api_endpoint_from_stage(STAGE), API_TOKEN)
+    client = DataAPIClient(get_api_endpoint_from_stage(STAGE), get_auth_token('api', STAGE))
 
     content_loader = ContentLoader(CONTENT_PATH)
     content_loader.load_manifest(FRAMEWORK_SLUG, "services", "edit_submission")
