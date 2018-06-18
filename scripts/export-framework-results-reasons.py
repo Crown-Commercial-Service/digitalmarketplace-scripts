@@ -13,7 +13,7 @@ Produces three files;
    incorrectly.
 
 Usage:
-    scripts/export-framework-results-reasons.py [-h] <stage> <api_token> <framework_slug> <content_path> <output_dir>
+    scripts/export-framework-results-reasons.py [-h] <stage> <framework_slug> <content_path> <output_dir>
       <declaration_schema_path> [<supplier_id_file>]
 
 Options:
@@ -25,6 +25,7 @@ sys.path.insert(0, '.')
 
 from docopt import docopt
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
+from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.supplier_data_helpers import get_supplier_ids_from_file
 from dmscripts.export_framework_results_reasons import export_suppliers
 from dmapiclient import DataAPIClient
@@ -34,7 +35,7 @@ from dmcontent.content_loader import ContentLoader
 if __name__ == '__main__':
     args = docopt(__doc__)
 
-    client = DataAPIClient(get_api_endpoint_from_stage(args['<stage>']), args['<api_token>'])
+    client = DataAPIClient(get_api_endpoint_from_stage(args['<stage>']), get_auth_token('api', args['<stage>']))
     content_loader = ContentLoader(args['<content_path>'])
 
     declaration_definite_pass_schema = json.load(open(args["<declaration_schema_path>"], "r"))
