@@ -3,11 +3,11 @@
 Uses the Notify API to send emails.
 
 Usage:
-    scripts/notify-suppliers-whether-application-made-for-framework.py <stage> <api_token> <framework_slug>
+    scripts/notify-suppliers-whether-application-made-for-framework.py <stage> <framework_slug>
         <govuk_notify_api_key> [--dry-run]
 
 Example:
-    scripts/notify-suppliers-whether-application-made-for-framework.py preview myToken g-cloud-9
+    scripts/notify-suppliers-whether-application-made-for-framework.py preview g-cloud-9
         my-awesome-key --dry-run
 
 Options:
@@ -23,6 +23,7 @@ from dmutils.email.exceptions import EmailError
 from dmutils.dates import update_framework_with_formatted_dates
 from dmscripts.helpers.email_helpers import scripts_notify_client
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
+from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.logging_helpers import logging
 from dmscripts.helpers.supplier_data_helpers import AppliedToFrameworkSupplierContextForNotify
@@ -37,13 +38,13 @@ if __name__ == '__main__':
     arguments = docopt(__doc__)
 
     STAGE = arguments['<stage>']
-    API_TOKEN = arguments['<api_token>']
     FRAMEWORK_SLUG = arguments['<framework_slug>']
     GOVUK_NOTIFY_API_KEY = arguments['<govuk_notify_api_key>']
     DRY_RUN = arguments['--dry-run']
 
     mail_client = scripts_notify_client(GOVUK_NOTIFY_API_KEY, logger=logger)
-    api_client = DataAPIClient(base_url=get_api_endpoint_from_stage(STAGE), auth_token=API_TOKEN)
+    api_client = DataAPIClient(base_url=get_api_endpoint_from_stage(STAGE),
+                               auth_token=get_auth_token('api', STAGE))
 
     framework_data = api_client.get_framework(FRAMEWORK_SLUG)['frameworks']
     update_framework_with_formatted_dates(framework_data)
