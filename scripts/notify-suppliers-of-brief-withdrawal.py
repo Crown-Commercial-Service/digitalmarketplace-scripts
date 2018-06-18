@@ -4,12 +4,11 @@ If a brief has been withdrawn suppliers need to be notified that their applicati
 script notifies suppliers of all briefs withdrawn on a given date. Alternatively, when supplied with a given brief id
 it will notify just the suppliers with responses to that brief (requires brief withdrawal date).
 
-Usage: notify-suppliers-of-brief-withdrawl.py <stage> <api_token> <govuk_notify_api_key>
+Usage: notify-suppliers-of-brief-withdrawl.py <stage> <govuk_notify_api_key>
     <govuk_notify_template_id> [<withdrawn_date>] [<brief_id>] [--dry-run] [--verbose]
 
 Options:
     --stage=<stage>                                       Stage to target
-    --api_token=<api_token>                               API Token
     --govuk_notify_api_key=<govuk_notify_api_key>         Notify API Token
     --govuk_notify_template_id=<govuk_notify_template_id> Notify template id on account corresponding to token provided
     --withdrawn_date=[<withdrawn_date>]                   Notify users of briefs withdrawn on this date, defaults to
@@ -37,6 +36,7 @@ sys.path.insert(0, '.')
 
 from dmscripts.helpers.email_helpers import scripts_notify_client
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
+from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers import logging_helpers
 from dmscripts.notify_suppliers_of_brief_withdrawal import main
 
@@ -46,7 +46,6 @@ if __name__ == "__main__":
 
     # Get arguments
     stage = arguments['<stage>']
-    api_token = arguments['<api_token>']
     govuk_notify_api_key = arguments['<govuk_notify_api_key>']
     govuk_notify_template_id = arguments['<govuk_notify_template_id>']
     withdrawn_date = arguments.get('<withdrawn_date>', None)
@@ -63,7 +62,8 @@ if __name__ == "__main__":
         datetime.today().date() - timedelta(days=1)
     )
     notify_client = scripts_notify_client(govuk_notify_api_key, logger=logger)
-    data_api_client = DataAPIClient(base_url=get_api_endpoint_from_stage(stage), auth_token=api_token)
+    data_api_client = DataAPIClient(base_url=get_api_endpoint_from_stage(stage),
+                                    auth_token=get_auth_token('api', stage))
 
     # Do send
     ok = main(
