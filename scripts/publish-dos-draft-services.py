@@ -6,7 +6,7 @@ For a DOS-style framework (with no documents to migrate) this will:
  3. Migrate these from drafts to "real" services
 
 Usage:
-    scripts/make-dos-live.py <framework_slug> <stage> <api_token> [--dry-run]
+    scripts/publish-dos-draft-services.py <framework_slug> <stage> <api_token> [--dry-run]
 """
 import sys
 sys.path.insert(0, '.')
@@ -23,7 +23,7 @@ def make_draft_service_live(client, draft, dry_run):
         print("    > no-op")
     else:
         try:
-            services = client.publish_draft_service(draft['id'], "make dos live script")
+            services = client.publish_draft_service(draft['id'], "publish dos draft services script")
             service_id = services['services']['id']
             print(u"    > draft service published - new service ID {}".format(service_id))
         except Exception as e:

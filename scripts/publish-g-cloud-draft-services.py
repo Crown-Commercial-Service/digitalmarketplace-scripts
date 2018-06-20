@@ -13,7 +13,7 @@ For a G-Cloud style framework (with uploaded documents to migrate) this will:
  3. Migrate these from drafts to "real" services, which includes moving documents to the live documents bucket
     and updating document URLs in the migrated version of the services
 Usage:
-    scripts/make-g-cloud-live.py <framework_slug> <stage> <api_token> <draft_bucket> <documents_bucket> [--dry-run]
+    scripts/publish-g-cloud-draft-services.py <framework_slug> <stage> <api_token> <draft_bucket> <documents_bucket> [--dry-run]
 """
 import backoff
 import collections
@@ -97,7 +97,7 @@ def make_draft_service_live(client, copy_document, draft_service, framework_slug
         service_id = random.randint(1000, 10000)
         print("    > dry run: generating random test service ID: {}".format(service_id))
     else:
-        services = client.publish_draft_service(draft_service['id'], 'make-g-cloud-live script')
+        services = client.publish_draft_service(draft_service['id'], 'publish g-cloud draft services script')
         service_id = services['services']['id']
         print("    > draft service published - new service ID {}".format(service_id))
 

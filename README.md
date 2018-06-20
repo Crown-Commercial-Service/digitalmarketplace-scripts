@@ -72,11 +72,11 @@ The `scripts` folder in this repository contains scripts that interact with the 
   a framework and posts to the API to set the `on_framework` value in the
   `supplier_frameworks` table.
 
-* `make-dos-live.py`
+* `publish-dos-draft-services.py`
   For a DOS-style framework (with no documents to migrate) this will make draft services for suppliers "on framework"
   into real services.
 
-* `make-g-cloud-live.py`
+* `publish-g-cloud-draft-services.py`
   For a G-Cloud-style framework (with documents to migrate) this will make draft services for suppliers "on framework"
   into real services.
 
