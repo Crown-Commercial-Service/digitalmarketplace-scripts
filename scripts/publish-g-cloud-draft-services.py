@@ -13,7 +13,8 @@ For a G-Cloud style framework (with uploaded documents to migrate) this will:
  3. Migrate these from drafts to "real" services, which includes moving documents to the live documents bucket
     and updating document URLs in the migrated version of the services
 Usage:
-    scripts/publish-g-cloud-draft-services.py <framework_slug> <stage> <api_token> <draft_bucket> <documents_bucket> [--dry-run]
+    scripts/publish-g-cloud-draft-services.py <framework_slug> <stage> <api_token> <draft_bucket>
+        <documents_bucket> [--dry-run]
 """
 import backoff
 import collections
