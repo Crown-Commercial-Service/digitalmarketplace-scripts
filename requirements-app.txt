@@ -8,6 +8,7 @@ git+https://github.com/alphagov/digitalmarketplace-content-loader.git@2.8.0#egg=
 
 
 awscli==1.14.31
+backoff==1.0.7
 clamd==1.0.2
 Jinja2==2.7.3
 jsonschema==2.5.1

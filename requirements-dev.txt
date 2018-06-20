@@ -7,3 +7,4 @@ ipython-genutils==0.2.0
 lxml==3.7.2
 mock==2.0.0
 pytest==3.2.3
+requests-mock==0.6.0

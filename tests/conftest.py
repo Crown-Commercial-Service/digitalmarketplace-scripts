@@ -4,6 +4,7 @@ import json
 import os
 import pytest
 from mock import Mock
+import requests_mock
 
 
 FIXTURES_DIR = os.path.join(os.path.dirname(__file__), 'fixtures')
@@ -32,3 +33,19 @@ def mock_data_client():
     with open(os.path.join(FIXTURES_DIR, 'test_supplier_frameworks_response.json')) as supplier_frameworks_response:
         mock_data_client.find_framework_suppliers.return_value = json.loads(supplier_frameworks_response.read())
     return mock_data_client
+
+
+@pytest.yield_fixture
+def rmock():
+    with requests_mock.mock() as rmock:
+        real_register_uri = rmock.register_uri
+
+        def register_uri_with_complete_qs(*args, **kwargs):
+            if 'complete_qs' not in kwargs:
+                kwargs['complete_qs'] = True
+
+            return real_register_uri(*args, **kwargs)
+
+        rmock.register_uri = register_uri_with_complete_qs
+
+        yield rmock

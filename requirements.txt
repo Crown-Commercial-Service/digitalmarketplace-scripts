@@ -9,6 +9,7 @@ git+https://github.com/alphagov/digitalmarketplace-content-loader.git@2.8.0#egg=
 
 
 awscli==1.14.31
+backoff==1.0.7
 clamd==1.0.2
 Jinja2==2.7.3
 jsonschema==2.5.1
@@ -23,7 +24,6 @@ yq==2.4.1
 
 ## The following requirements were added by pip freeze:
 asn1crypto==0.24.0
-backoff==1.0.7
 boto3==1.4.8
 botocore==1.8.35
 certifi==2018.4.16
