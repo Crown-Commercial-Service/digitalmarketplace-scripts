@@ -110,8 +110,8 @@ def copy_draft_documents(client, copy_document, draft_service, framework_slug, d
             try:
                 copy_document(draft_document_path, live_document_path)
 
-            except S3ResponseError as e:
-                if str(e).startswith('Target key already exists in S3'):
+            except ValueError as e:
+                if not str(e).startswith('Target key already exists in S3'):
                     raise e
 
             document_updates[document_key] = get_live_asset_url(live_document_path)
