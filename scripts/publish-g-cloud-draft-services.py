@@ -14,7 +14,11 @@ For a G-Cloud style framework (with uploaded documents to migrate) this will:
     and updating document URLs in the migrated version of the services
 Usage:
     scripts/publish-g-cloud-draft-services.py <framework_slug> <stage> <api_token> <draft_bucket>
-        <documents_bucket> [--dry-run]
+        <documents_bucket> [--dry-run] [--draft-ids=<filename>]
+
+If you specify the `--draft-ids` parameter, pass in list of newline-separated draft ids. This script will then do a
+full re-publish of just those drafts (i.e. try to re-publish it, and then copy the documents across again and update
+those links).
 """
 import backoff
 import collections
@@ -91,17 +95,8 @@ def document_copier(draft_bucket, documents_bucket, dry_run):
     return copy_document
 
 
-@backoff.on_exception(backoff.expo, (dmapiclient.HTTPError, S3ResponseError), max_tries=5)
-def make_draft_service_live(client, copy_document, draft_service, framework_slug, dry_run):
-    print("  > Migrating draft {}".format(draft_service['id']))
-    if dry_run:
-        service_id = random.randint(1000, 10000)
-        print("    > dry run: generating random test service ID: {}".format(service_id))
-    else:
-        services = client.publish_draft_service(draft_service['id'], 'publish g-cloud draft services script')
-        service_id = services['services']['id']
-        print("    > draft service published - new service ID {}".format(service_id))
-
+@backoff.on_exception(backoff.expo, S3ResponseError, max_tries=5)
+def copy_draft_documents(client, copy_document, draft_service, framework_slug, dry_run, service_id):
     document_updates = {}
     for document_key in DOCUMENT_KEYS:
         if document_key in draft_service:
@@ -122,6 +117,31 @@ def make_draft_service_live(client, copy_document, draft_service, framework_slug
         print("    > document URLs updated")
 
 
+@backoff.on_exception(backoff.expo, dmapiclient.HTTPError, max_tries=5)
+def make_draft_service_live(client, copy_document, draft_service, framework_slug, dry_run,
+                            continue_if_published=False):
+    print("  > Migrating draft {}".format(draft_service['id']))
+    if dry_run:
+        service_id = random.randint(1000, 10000)
+        print("    > dry run: generating random test service ID: {}".format(service_id))
+    else:
+        try:
+            services = client.publish_draft_service(draft_service['id'], 'publish g-cloud draft services script')
+            service_id = services['services']['id']
+            print("    > draft service published - new service ID {}".format(service_id))
+
+        except dmapiclient.HTTPError as e:
+            if continue_if_published and e.status_code == 400 \
+                    and str(e).startswith('Cannot re-publish a submitted service'):
+                published_draft = client.get_draft_service(draft_service['id'])
+                services = client.get_service(published_draft['services']['serviceId'])
+                service_id = services['services']['id']
+            else:
+                raise e
+
+    copy_draft_documents(client, copy_document, draft_service, framework_slug, dry_run, service_id)
+
+
 if __name__ == '__main__':
     arguments = docopt(__doc__)
 
@@ -133,21 +153,35 @@ if __name__ == '__main__':
     DOCUMENTS_BUCKET = S3(arguments['<documents_bucket>'])
     DRY_RUN = arguments['--dry-run']
     FRAMEWORK_SLUG = arguments['<framework_slug>']
+    DRAFT_IDS = arguments['--draft-ids']
+
     copy_document = document_copier(DRAFT_BUCKET, DOCUMENTS_BUCKET, DRY_RUN)
 
-    suppliers = find_suppliers_on_framework(client, FRAMEWORK_SLUG)
     results = collections.Counter({'success': 0, 'fail': 0})
 
-    for supplier in suppliers:
-        print("Migrating drafts for supplier {}".format(supplier['supplierId']))
-        draft_services = get_submitted_drafts(client, FRAMEWORK_SLUG, supplier['supplierId'])
-        for draft_service in draft_services:
-            try:
-                make_draft_service_live(client, copy_document, draft_service, FRAMEWORK_SLUG, DRY_RUN)
-                results.update({'success': 1})
-            except Exception as e:
-                print("{} ERROR MIGRATING DRAFT {} TO LIVE: {}".format(datetime.now(), draft_service['id'], e))
-                results.update({'fail': 1})
+    def get_draft_services():
+        if DRAFT_IDS:
+            with open(DRAFT_IDS) as draft_ids:
+                draft_ids = [line.strip() for line in draft_ids.read().split()]
+
+            for draft_id in draft_ids:
+                yield client.get_draft_service(draft_id)['services']
+
+        else:
+            suppliers = find_suppliers_on_framework(client, FRAMEWORK_SLUG)
+            for supplier in suppliers:
+                print("Migrating drafts for supplier {}".format(supplier['supplierId']))
+                for draft in get_submitted_drafts(client, FRAMEWORK_SLUG, supplier['supplierId']):
+                    yield draft
+
+    for draft_service in get_draft_services():
+        try:
+            make_draft_service_live(client, copy_document, draft_service, FRAMEWORK_SLUG, DRY_RUN,
+                                    continue_if_published=True if DRAFT_IDS else False)
+            results.update({'success': 1})
+        except Exception as e:
+            print("{} ERROR MIGRATING DRAFT {} TO LIVE: {}".format(datetime.now(), draft_service['id'], e))
+            results.update({'fail': 1})
 
     print("Successfully published {} G-Cloud services".format(results.get('success')))
     if results.get('fail'):
