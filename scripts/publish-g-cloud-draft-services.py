@@ -4,8 +4,11 @@ PREREQUISITE: For document migration to work you'll need AWS credentials set up 
               Save your aws_access_key_id and aws_secret_access_key in ~/.aws/credentials
               If you have more than one set of credentials in there then be sure to set your AWS_PROFILE environment
               variable to reference the right credentials before running the script.
-              Alternatively, if this script is being run from Jenkins, do not provide any credentials and boto will use
-              the Jenkins IAM role. It should have the required permissions for the buckets.
+              THIS SCRIPT NEEDS TO BE RUN BY AN AWS IAM ENTITY FROM THE SAME ACCOUNT AS THE DOCUMENTS BUCKET BEING
+              UPLOADED TO. THIS IS SO THE S3 OBJECT OWNER IS THAT ACCOUNT AND NOT A DIFFERENT ACCOUNT. OTHERWISE THERE
+              WILL BE PERMISSION ISSUES IF A SUPPLIER UPDATES THEIR DOCUMENTS. CHANGING OBJECT OWNERS ONCE UPLOADED
+              IS NOT IMPOSSIBLE BUT IT IS A RIGHT FAFF. CURRENTLY THERE IS NOT AN EASY WAY TO DO THIS FROM JENKINS. A
+              PROCESS COULD BE SET UP TO ALLOW JENKINS TO ASSUME A DIFFERENT ROLE.
 
 For a G-Cloud style framework (with uploaded documents to migrate) this will:
  1. Find all suppliers awarded onto the framework
@@ -90,7 +93,7 @@ def document_copier(draft_bucket, documents_bucket, dry_run):
             print("    > dry run: skipped copying {}".format(message_suffix))
         else:
             documents_bucket.copy(src_bucket=draft_bucket.bucket_name, src_key=draft_document_path,
-                                  target_key=live_document_path)
+                                  target_key=live_document_path, acl='public-read')
             print("    > copied {}".format(message_suffix))
 
     return copy_document
