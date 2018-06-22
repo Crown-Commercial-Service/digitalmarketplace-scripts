@@ -171,7 +171,10 @@ if __name__ == '__main__':
                 draft_ids = [line.strip() for line in draft_ids.read().split()]
 
             for draft_id in draft_ids:
-                yield client.get_draft_service(draft_id)['services']
+                draft_service = client.get_draft_service(draft_id)['services']
+                supplier_framework = client.get_supplier_framework_info(draft_service['supplierId'], FRAMEWORK_SLUG)
+                if supplier_framework['onFramework']:
+                    yield draft_service
 
         else:
             suppliers = find_suppliers_on_framework(client, FRAMEWORK_SLUG)
