@@ -3,16 +3,17 @@
 See: https://www.pivotaltracker.com/n/projects/997836/stories/110243076
 
 Usage:
-    scripts/oneoff/rename-west-england.py <stage> <api_token> [--dry-run]
+    scripts/oneoff/rename-west-england.py <stage> [--dry-run]
 """
 import sys
-sys.path.insert(0, '.')
+sys.path.insert(0, '.')  # noqa
 
 from multiprocessing.pool import ThreadPool
 import itertools
 from docopt import docopt
 from dmapiclient import DataAPIClient
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
+from dmscripts.helpers.auth_helpers import get_auth_token
 
 OLD_LOCATION = "West England"
 NEW_LOCATION = "South West England"
@@ -50,11 +51,10 @@ if __name__ == '__main__':
     arguments = docopt(__doc__)
 
     stage = arguments['<stage>']
-    api_token = arguments['<api_token>']
     dry_run = arguments['--dry-run']
 
     api_url = get_api_endpoint_from_stage(stage)
-    client = DataAPIClient(api_url, api_token)
+    client = DataAPIClient(api_url, get_auth_token('api', stage))
 
     counter = 0
     for draft in get_all_drafts(client):
