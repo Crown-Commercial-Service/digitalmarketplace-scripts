@@ -14,7 +14,7 @@ clearly presented to them.
 See: https://trello.com/c/Wvvtb1yW/52
 
 Usage:
-    ./scripts/oneoff/migrate-supplier-trading-status.py <stage> <api_token> [--dry-run]
+    ./scripts/oneoff/migrate-supplier-trading-status.py <stage> [--dry-run]
 """
 import sys
 sys.path.insert(0, '.')  # noqa
@@ -25,6 +25,7 @@ import requests
 from docopt import docopt
 from dmapiclient import DataAPIClient, HTTPError
 from dmapiclient.errors import HTTPTemporaryError
+from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 
 
@@ -79,8 +80,7 @@ if __name__ == '__main__':
     arguments = docopt(__doc__)
 
     stage = arguments['<stage>']
-    api_token = arguments['<api_token>']
     dry_run = arguments['--dry-run']
     api_url = get_api_endpoint_from_stage(stage)
 
-    migrate_trading_statuses(DataAPIClient(api_url, api_token), dry_run)
+    migrate_trading_statuses(DataAPIClient(api_url, get_auth_token('api', stage)), dry_run)
