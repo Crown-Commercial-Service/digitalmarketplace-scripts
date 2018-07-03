@@ -15,10 +15,10 @@ Description:
     that we have setup on mailchimp.
 
 Usage:
-    upload-dos-opportunities-email-list.py <stage> <api_token> <mailchimp_username> <mailchimp_api_key>
+    upload-dos-opportunities-email-list.py <stage> <mailchimp_username> <mailchimp_api_key>
 
 Example:
-    upload-dos-opportunities-email-list.py preview myToken user@gds.gov.uk 7483crh87h34c3
+    upload-dos-opportunities-email-list.py preview user@gds.gov.uk 7483crh87h34c3
 
 """
 
@@ -28,7 +28,8 @@ from docopt import docopt
 from dmapiclient import DataAPIClient
 from dmutils.email.dm_mailchimp import DMMailChimpClient
 
-sys.path.insert(0, '.')
+sys.path.insert(0, '.')  # noqa
+from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.upload_dos_opportunities_email_list import main
 from dmscripts.helpers import logging_helpers
@@ -60,7 +61,7 @@ if __name__ == '__main__':
     ]
 
     api_url = get_api_endpoint_from_stage(arguments['<stage>'])
-    data_api_client = DataAPIClient(api_url, arguments['<api_token>'])
+    data_api_client = DataAPIClient(api_url, get_auth_token('api', arguments['<stage>']))
     dm_mailchimp_client = DMMailChimpClient(
         arguments['<mailchimp_username>'],
         arguments['<mailchimp_api_key>'],
