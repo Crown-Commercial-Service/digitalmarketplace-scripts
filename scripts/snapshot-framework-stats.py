@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 """Usage:
-    snapshot_framework_stats.py <framework_slug> <stage> <api_token>
+    snapshot_framework_stats.py <framework_slug> <stage>
 
 Example:
-    ./snapshot_framework_stats.py g-cloud-7 dev myToken
+    ./snapshot_framework_stats.py g-cloud-7 dev
 """
 
 import backoff
@@ -14,8 +14,9 @@ import sys
 import dmapiclient
 from dmapiclient.audit import AuditTypes
 
-sys.path.insert(0, '.')
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage  # noqa
+sys.path.insert(0, '.')  # noqa
+from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
+from dmscripts.helpers.auth_helpers import get_auth_token
 
 
 logger = logging.getLogger('script')
@@ -46,6 +47,6 @@ if __name__ == '__main__':
 
     snapshot_framework_stats(
         get_api_endpoint_from_stage(arguments['<stage>']),
-        arguments['<api_token>'],
+        get_auth_token('api', arguments['<stage>']),
         arguments['<framework_slug>'],
     )
