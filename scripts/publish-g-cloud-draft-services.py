@@ -13,7 +13,7 @@ For a G-Cloud style framework (with uploaded documents to migrate) this will:
  3. Migrate these from drafts to "real" services, which includes moving documents to the live documents bucket
     and updating document URLs in the migrated version of the services
 Usage:
-    scripts/publish-g-cloud-draft-services.py <framework_slug> <stage> <api_token> <draft_bucket>
+    scripts/publish-g-cloud-draft-services.py <framework_slug> <stage> <draft_bucket>
         <documents_bucket> [--dry-run] [--draft-ids=<filename>]
 
 If you specify the `--draft-ids` parameter, pass in list of newline-separated draft ids. This script will then do a
@@ -31,6 +31,7 @@ import sys
 sys.path.insert(0, '.')  # noqa
 
 import dmapiclient
+from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage, get_assets_endpoint_from_stage
 from dmscripts.helpers.framework_helpers import find_suppliers_on_framework, get_submitted_drafts
 from dmapiclient import DataAPIClient
@@ -154,7 +155,7 @@ if __name__ == '__main__':
     STAGE = arguments['<stage>']
     api_url = get_api_endpoint_from_stage(STAGE)
 
-    client = DataAPIClient(api_url, arguments['<api_token>'])
+    client = DataAPIClient(api_url, get_auth_token('api', STAGE))
     DRAFT_BUCKET = S3(arguments['<draft_bucket>'])
     DOCUMENTS_BUCKET = S3(arguments['<documents_bucket>'])
     DRY_RUN = arguments['--dry-run']
