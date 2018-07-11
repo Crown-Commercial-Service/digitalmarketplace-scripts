@@ -41,7 +41,6 @@ Options:
 import sys
 sys.path.insert(0, '.')
 
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.bulk_upload_documents import get_bucket_name, get_all_files_of_type
 from dmscripts.upload_counterpart_agreements import upload_counterpart_file
@@ -53,6 +52,7 @@ from dmapiclient import DataAPIClient, APIError
 
 from dmutils.s3 import S3, S3ResponseError
 from dmutils.email.exceptions import EmailError
+from dmutils.env_helpers import get_api_endpoint_from_stage
 
 from dmscripts.helpers.email_helpers import scripts_notify_client
 

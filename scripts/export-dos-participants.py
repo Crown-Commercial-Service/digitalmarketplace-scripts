@@ -15,11 +15,11 @@ from dmscripts.helpers.framework_helpers import find_suppliers_with_details_and_
 
 from docopt import docopt
 from dmscripts.helpers.csv_helpers import write_csv_with_make_row
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmapiclient import DataAPIClient
 from dmcontent.content_loader import ContentLoader
 from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.logging_helpers import logging
+from dmutils.env_helpers import get_api_endpoint_from_stage
 
 logger = logging_helpers.configure_logger({"dmapiclient": logging.WARNING})
 

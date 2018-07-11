@@ -14,10 +14,10 @@ from docopt import docopt
 
 from dmapiclient import DataAPIClient
 from dmcontent.content_loader import ContentLoader
+from dmutils.env_helpers import get_api_endpoint_from_stage
 
 from dmscripts.helpers.csv_helpers import make_fields_from_content_questions, write_csv_with_make_row
 from dmscripts.helpers.framework_helpers import find_suppliers_with_details_and_draft_services
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 
 
 def find_all_outcomes(client):

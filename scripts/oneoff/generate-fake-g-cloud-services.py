@@ -77,7 +77,7 @@ sys.path.insert(0, '.')
 from datetime import date
 
 from dmapiclient import DataAPIClient, SearchAPIClient  # noqa
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage  # noqa
+from dmutils.env_helpers import get_api_endpoint_from_stage
 from dmscripts.json_schema_service_faker import JsonSchemaGCloudServiceFaker  # noqa
 from dmscripts.helpers.service_faker_helpers import eligible_g9_declaration_base, gen_gcloud_name
 

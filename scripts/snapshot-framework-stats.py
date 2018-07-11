@@ -15,7 +15,7 @@ import dmapiclient
 from dmapiclient.audit import AuditTypes
 
 sys.path.insert(0, '.')
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage  # noqa
+from dmutils.env_helpers import get_api_endpoint_from_stage
 
 
 logger = logging.getLogger('script')

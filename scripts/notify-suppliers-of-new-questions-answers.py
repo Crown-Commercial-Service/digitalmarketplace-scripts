@@ -23,7 +23,7 @@ import sys
 from docopt import docopt
 
 sys.path.insert(0, '.')
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
+from dmutils.env_helpers import get_api_endpoint_from_stage
 from dmscripts.notify_suppliers_of_new_questions_answers import main
 
 
