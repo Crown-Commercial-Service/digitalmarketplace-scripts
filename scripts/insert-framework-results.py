@@ -21,7 +21,7 @@ sys.path.insert(0, '.')
 
 from docopt import docopt
 from dmapiclient import DataAPIClient
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
+from dmutils.env_helpers import get_api_endpoint_from_stage
 from dmscripts.insert_framework_results import insert_results
 
 

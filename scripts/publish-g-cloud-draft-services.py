@@ -31,7 +31,7 @@ import sys
 sys.path.insert(0, '.')  # noqa
 
 import dmapiclient
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage, get_assets_endpoint_from_stage
+from dmutils.env_helpers import get_api_endpoint_from_stage, get_assets_endpoint_from_stage
 from dmscripts.helpers.framework_helpers import find_suppliers_on_framework, get_submitted_drafts
 from dmapiclient import DataAPIClient
 from dmutils.s3 import S3, S3ResponseError

@@ -18,7 +18,7 @@ import requests
 from docopt import docopt
 from dmapiclient import DataAPIClient, HTTPError
 from dmapiclient.errors import HTTPTemporaryError
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
+from dmutils.env_helpers import get_api_endpoint_from_stage
 
 OLD_COUNTRY = "gb"
 NEW_COUNTRY = "country:GB"

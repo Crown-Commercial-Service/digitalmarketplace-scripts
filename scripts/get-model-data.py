@@ -36,8 +36,8 @@ sys.path.insert(0, '.')
 from docopt import docopt
 
 from dmapiclient import DataAPIClient
+from dmutils.env_helpers import get_api_endpoint_from_stage
 
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.helpers.logging_helpers import logging, configure_logger
 from dmscripts.models import queries
 from dmscripts.models.process_rules import (

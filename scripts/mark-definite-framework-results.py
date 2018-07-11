@@ -37,8 +37,7 @@ sys.path.insert(0, '.')
 import getpass
 import json
 
-
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
+from dmutils.env_helpers import get_api_endpoint_from_stage
 from dmapiclient import DataAPIClient
 from dmscripts.mark_definite_framework_results import mark_definite_framework_results
 from dmscripts.helpers.logging_helpers import configure_logger

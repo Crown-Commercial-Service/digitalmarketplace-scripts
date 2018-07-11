@@ -12,7 +12,7 @@ from multiprocessing.pool import ThreadPool
 import itertools
 from docopt import docopt
 from dmapiclient import DataAPIClient
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
+from dmutils.env_helpers import get_api_endpoint_from_stage
 
 OLD_LOCATION = "West England"
 NEW_LOCATION = "South West England"

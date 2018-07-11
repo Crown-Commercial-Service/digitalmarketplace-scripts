@@ -30,8 +30,8 @@ import requests
 from dateutil.parser import parse as dateutil_parse
 from dmapiclient import DataAPIClient, HTTPError
 from dmapiclient.errors import HTTPTemporaryError
+from dmutils.env_helpers import get_api_endpoint_from_stage
 
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.helpers.logging_helpers import configure_logger
 from dmscripts.helpers.logging_helpers import INFO as loglevel_INFO
 

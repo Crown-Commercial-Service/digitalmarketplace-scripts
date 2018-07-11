@@ -44,11 +44,10 @@ from docopt import docopt
 from dmapiclient import DataAPIClient
 
 sys.path.insert(0, '.')
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.send_dos_opportunities_email import main
 from dmscripts.helpers import logging_helpers
 from dmutils.email.dm_mailchimp import DMMailChimpClient
-
+from dmutils.env_helpers import get_api_endpoint_from_stage
 
 logger = logging_helpers.configure_logger()
 

@@ -2,11 +2,10 @@
 from datetime import datetime, timedelta
 
 import dmapiclient
-from dmutils.email.dm_mandrill import send_email
+from dmutils.email.dm_mandrill import send_email, get_sent_emails
 from dmutils.email.exceptions import EmailError
 from dmutils.formats import DATE_FORMAT
 
-from dmscripts.helpers.email_helpers import get_sent_emails
 from dmscripts.helpers.brief_data_helpers import get_briefs_closed_on_date
 from dmscripts.helpers.html_helpers import render_html
 from dmscripts.helpers import logging_helpers

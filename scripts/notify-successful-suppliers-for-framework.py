@@ -19,8 +19,8 @@ sys.path.insert(0, '.')
 from docopt import docopt
 
 from dmapiclient import DataAPIClient
+from dmutils.env_helpers import get_api_endpoint_from_stage
 from dmscripts.helpers.email_helpers import scripts_notify_client
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.logging_helpers import logging
 from dmscripts.helpers.supplier_data_helpers import SuccessfulSupplierContextForNotify

@@ -24,11 +24,11 @@ import sys
 sys.path.insert(0, '.')
 
 from docopt import docopt
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.helpers.supplier_data_helpers import get_supplier_ids_from_file
 from dmscripts.export_framework_results_reasons import export_suppliers
 from dmapiclient import DataAPIClient
 from dmcontent.content_loader import ContentLoader
+from dmutils.env_helpers import get_api_endpoint_from_stage
 
 
 if __name__ == '__main__':
