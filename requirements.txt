@@ -2,11 +2,13 @@
 # Run `make freeze-requirements` to update requirements.txt
 # with package version changes made in requirements-app.txt
 
+Flask==0.10.1
+git+https://github.com/alphagov/Flask-FeatureFlags.git@1.0#egg=Flask-FeatureFlags==1.0
+
 git+https://github.com/madzak/python-json-logger.git@v0.1.8#egg=python-json-logger==v0.1.8
-git+https://github.com/alphagov/digitalmarketplace-utils.git@39.1.0#egg=digitalmarketplace-utils==39.1.0
+git+https://github.com/alphagov/digitalmarketplace-utils.git@40.4.0#egg=digitalmarketplace-utils==40.4.0
 git+https://github.com/alphagov/digitalmarketplace-apiclient.git@16.4.1#egg=digitalmarketplace-apiclient==16.4.1
 git+https://github.com/alphagov/digitalmarketplace-content-loader.git@2.8.0#egg=digitalmarketplace-content-loader==2.8.0
-
 
 awscli==1.14.31
 backoff==1.0.7
@@ -34,8 +36,6 @@ contextlib2==0.4.0
 cryptography==1.9
 docopt==0.6.2
 docutils==0.14
-Flask==0.10.1
-Flask-FeatureFlags==0.6
 Flask-Login==0.4.1
 Flask-Script==2.0.6
 Flask-WTF==0.14.2
