@@ -16,7 +16,6 @@ clamd==1.0.2
 Jinja2==2.7.3
 jsonschema==2.5.1
 lorem==0.1.1
-mailchimp3==2.0.11
 notifications-python-client==4.8.2
 pandas==0.19.1
 python-dateutil==2.4.2
@@ -44,6 +43,7 @@ idna==2.7
 inflection==0.3.1
 itsdangerous==0.24
 jmespath==0.9.3
+mailchimp3==2.0.11
 mandrill==1.0.57
 Markdown==2.6.7
 MarkupSafe==1.0
