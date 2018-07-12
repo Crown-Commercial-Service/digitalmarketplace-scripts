@@ -6,7 +6,7 @@ the file at <bad_words_path> (typically blacklist.txt in https://github.com/alph
 and generate a CSV report of any bad word found.
 
 Usage:
-    scripts/scan-g-cloud-services-for-bad-words.py <stage> <api_token> <bad_words_path> <framework_slug> <output_dir>
+    scripts/scan-g-cloud-services-for-bad-words.py <stage> <bad_words_path> <framework_slug> <output_dir>
 """
 
 import sys
@@ -19,6 +19,7 @@ import re
 from docopt import docopt
 from dmapiclient import DataAPIClient
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
+from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.logging_helpers import logging
 
@@ -167,6 +168,6 @@ def output_bad_words(
 if __name__ == '__main__':
     arguments = docopt(__doc__)
     main(
-        arguments['<stage>'], arguments['<api_token>'], arguments['<bad_words_path>'],
+        arguments['<stage>'], get_auth_token('api', arguments['<stage>']), arguments['<bad_words_path>'],
         arguments['<framework_slug>'], arguments['<output_dir>'])
     logger.info("BAD WORD COUNTS: {}".format(BAD_WORDS_COUNTER))

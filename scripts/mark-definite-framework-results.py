@@ -20,7 +20,7 @@ whose status is already "failed", though this can be controlled with the --reass
 and --reassess-failed-draft-services, the latter of which will mark "failed" services back as "submitted" if it proves
 not to fail this time around (or if no draft_service_schema is supplied).
 
-Usage: mark-definite-framework-results.py [options] <stage> <api_token> <framework_slug>
+Usage: mark-definite-framework-results.py [options] <stage> <framework_slug>
             <declaration_definite_pass_schema_path> [<draft_service_schema_path>]
 
 --updated-by=<user_string>        Specify updated_by string to use in API requests
@@ -39,6 +39,7 @@ import json
 
 
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
+from dmscripts.helpers.auth_helpers import get_auth_token
 from dmapiclient import DataAPIClient
 from dmscripts.mark_definite_framework_results import mark_definite_framework_results
 from dmscripts.helpers.logging_helpers import configure_logger
@@ -49,7 +50,7 @@ if __name__ == "__main__":
     from docopt import docopt
     args = docopt(__doc__)
 
-    client = DataAPIClient(get_api_endpoint_from_stage(args["<stage>"], "api"), args["<api_token>"])
+    client = DataAPIClient(get_api_endpoint_from_stage(args["<stage>"], "api"), get_auth_token('api', args['<stage>']))
     updated_by = args["--updated-by"] or getpass.getuser()
 
     declaration_definite_pass_schema = json.load(open(args["<declaration_definite_pass_schema_path>"], "r"))

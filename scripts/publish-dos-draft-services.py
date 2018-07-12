@@ -6,13 +6,14 @@ For a DOS-style framework (with no documents to migrate) this will:
  3. Migrate these from drafts to "real" services
 
 Usage:
-    scripts/publish-dos-draft-services.py <framework_slug> <stage> <api_token> [--dry-run]
+    scripts/publish-dos-draft-services.py <framework_slug> <stage> [--dry-run]
 """
 import sys
 sys.path.insert(0, '.')
 
 from docopt import docopt
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
+from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.framework_helpers import find_suppliers_on_framework, get_submitted_drafts
 from dmapiclient import DataAPIClient
 
@@ -41,7 +42,7 @@ if __name__ == "__main__":
     FRAMEWORK_SLUG = arguments['<framework_slug>']
 
     api_url = get_api_endpoint_from_stage(STAGE)
-    client = DataAPIClient(api_url, arguments['<api_token>'])
+    client = DataAPIClient(api_url, get_auth_token('api', STAGE))
 
     suppliers = find_suppliers_on_framework(client, FRAMEWORK_SLUG)
 

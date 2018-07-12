@@ -6,7 +6,7 @@ most recently uploaded signed framework agreement file and update the
 FrameworkAgreement record with this file path.
 
 Usage:
-    scripts/oneoff/save-signed-agreement-path.py <stage> <api_token> [--dry-run]
+    scripts/oneoff/save-signed-agreement-path.py <stage> [--dry-run]
 """
 import sys
 sys.path.insert(0, '.')
@@ -15,6 +15,7 @@ import getpass
 
 from docopt import docopt
 from dmapiclient import DataAPIClient
+from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 
 from dmutils import s3
@@ -39,7 +40,7 @@ if __name__ == '__main__':
     arguments = docopt(__doc__)
 
     data_api_url = get_api_endpoint_from_stage(arguments['<stage>'], 'api')
-    client = DataAPIClient(data_api_url, arguments['<api_token>'])
+    client = DataAPIClient(data_api_url, get_auth_token('api', arguments['<stage>']))
 
     FRAMEWORKS = ['g-cloud-7', 'g-cloud-8', 'digital-outcomes-and-specialists']
     BUCKET_NAME = get_bucket_name(arguments['<stage>'])

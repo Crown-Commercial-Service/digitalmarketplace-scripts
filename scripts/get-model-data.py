@@ -9,7 +9,7 @@ CSV files are read from and saved to `<output-dir>/<model>.csv`
 If called without a model name the script will dump all defined models.
 
 Usage:
-    scripts/get-model-data.py [options] <stage> <api_token> [<model>...]
+    scripts/get-model-data.py [options] <stage> [<model>...]
 
 Options:
     -h --help       Show this screen.
@@ -37,6 +37,7 @@ from docopt import docopt
 
 from dmapiclient import DataAPIClient
 
+from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.helpers.logging_helpers import logging, configure_logger
 from dmscripts.models import queries
@@ -431,7 +432,6 @@ if __name__ == '__main__':
     arguments = docopt(__doc__)
 
     STAGE = arguments['<stage>']
-    API_TOKEN = arguments['<api_token>']
     OUTPUT_DIR = arguments['--output-dir']
     MODELS = arguments['<model>']
 
@@ -447,7 +447,7 @@ if __name__ == '__main__':
 
     limit = int(arguments.get('--limit')) if arguments.get('--limit') else None
 
-    client = DataAPIClient(get_api_endpoint_from_stage(STAGE), API_TOKEN)
+    client = DataAPIClient(get_api_endpoint_from_stage(STAGE), get_auth_token('api', STAGE))
 
     for config in CONFIGS:
         # Skip CSVs that weren't requested

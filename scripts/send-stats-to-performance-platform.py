@@ -3,7 +3,7 @@
 Script to fetch application statistics for a framework from the API and push them to the Performance Platform.
 
 Usage:
-    scripts/send-stats-to-performance-platform.py <framework_slug> <stage> <api_token> <pp_bearer> (--day | --hour)
+    scripts/send-stats-to-performance-platform.py <framework_slug> <stage> <pp_bearer> (--day | --hour)
 """
 import sys
 
@@ -12,8 +12,9 @@ from docopt import docopt
 from dmapiclient import DataAPIClient
 
 sys.path.insert(0, '.')
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage  # noqa
-from dmscripts.send_stats_to_performance_platform import send_framework_stats  # noqa
+from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
+from dmscripts.helpers.auth_helpers import get_auth_token
+from dmscripts.send_stats_to_performance_platform import send_framework_stats
 
 
 if __name__ == "__main__":
@@ -24,7 +25,7 @@ if __name__ == "__main__":
     PERIOD = 'day' if arguments['--day'] else 'hour'
 
     api_url = get_api_endpoint_from_stage(STAGE)
-    client = DataAPIClient(api_url, arguments['<api_token>'])
+    client = DataAPIClient(api_url, get_auth_token('api', STAGE))
 
     ok = send_framework_stats(client, FRAMEWORK_SLUG, PERIOD, arguments['<pp_bearer>'])
     if not ok:

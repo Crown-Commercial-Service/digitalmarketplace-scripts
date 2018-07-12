@@ -8,7 +8,7 @@ different format. This script is to migrate our existing data to fall in line wi
 See: https://trello.com/c/FeBysBI7
 
 Usage:
-    ./scripts/oneoff/rename-supplier-registered-country.py <stage> <api_token> [--dry-run]
+    ./scripts/oneoff/rename-supplier-registered-country.py <stage> [--dry-run]
 """
 import sys
 sys.path.insert(0, '.')
@@ -19,6 +19,7 @@ from docopt import docopt
 from dmapiclient import DataAPIClient, HTTPError
 from dmapiclient.errors import HTTPTemporaryError
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
+from dmscripts.helpers.auth_helpers import get_auth_token
 
 OLD_COUNTRY = "gb"
 NEW_COUNTRY = "country:GB"
@@ -57,8 +58,7 @@ if __name__ == '__main__':
     arguments = docopt(__doc__)
 
     stage = arguments['<stage>']
-    api_token = arguments['<api_token>']
     dry_run = arguments['--dry-run']
     api_url = get_api_endpoint_from_stage(stage)
 
-    rename_country(DataAPIClient(api_url, api_token), dry_run)
+    rename_country(DataAPIClient(api_url, get_auth_token('api', stage)), dry_run)
