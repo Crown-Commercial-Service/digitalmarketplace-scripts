@@ -10,14 +10,14 @@ from dmscripts.helpers.logging_helpers import logging
 
 HOURLY_TIME_FORMAT = '%Y-%m-%dT%H:00:00+00:00'  # On the hour exactly
 DAILY_TIME_FORMAT = '%Y-%m-%dT00:00:00+00:00'  # Midnight
-PERFORMANCE_PLATFORM_URLS = {
+PERFORMANCE_PLATFORM_URL_TEMPLATES = {
     "day": {
-        "stage": "https://www.performance.service.gov.uk/data/gcloud/applications-by-stage",
-        "lot": "https://www.performance.service.gov.uk/data/gcloud/applications-by-lot",
+        "stage": "https://www.performance.service.gov.uk/data/{pp_service}/applications-by-stage",
+        "lot": "https://www.performance.service.gov.uk/data/{pp_service}/applications-by-lot",
     },
     "hour": {
-        "stage": "https://www.performance.service.gov.uk/data/gcloud/applications-by-stage-realtime",
-        "lot": "https://www.performance.service.gov.uk/data/gcloud/applications-by-lot-realtime",
+        "stage": "https://www.performance.service.gov.uk/data/{pp_service}/applications-by-stage-realtime",
+        "lot": "https://www.performance.service.gov.uk/data/{pp_service}/applications-by-lot-realtime",
     },
 }
 
@@ -69,11 +69,11 @@ def _find(statistic, filter_value):
         return statistic == filter_value
 
 
-def _generate_id(timestamp, period, data_type, data_item):
+def _generate_id(timestamp, period, data_type, data_item, pp_service):
     # Instructions from Performance Platform:
     # _id should be a unique url-friendly, base64-encoded, UTF8 encoded concatenation identifier, formed from:
-    # _timestamp, service (= gcloud), period (= day or hour), dataType (= applications-by-stage/lot), stage/lot
-    id_bytes = '{}-gcloud-{}-{}-{}'.format(timestamp, period, data_type, data_item).encode('utf-8')
+    # _timestamp, service (= e.g. gcloud), period (= day or hour), dataType (= applications-by-stage/lot), stage/lot
+    id_bytes = "-".join((timestamp, pp_service, period, data_type, data_item,)).encode('utf-8')
     return base64.b64encode(id_bytes).decode('utf-8')
 
 
@@ -128,40 +128,40 @@ def services_by_lot(stats, framework):
     )
 
 
-def send_by_stage_stats(stats, timestamp_string, period, pp_bearer):
+def send_by_stage_stats(stats, timestamp_string, period, pp_bearer, pp_service):
     data_type = "applications-by-stage"
     processed_stats = applications_by_stage(stats)
     data = [{
-        "_id": _generate_id(timestamp_string, period, data_type, stage),
+        "_id": _generate_id(timestamp_string, period, data_type, stage, pp_service),
         "_timestamp": timestamp_string,
-        "service": "gcloud",
+        "service": pp_service,
         "stage": stage,
         "count": processed_stats.get(stage, 0),
         "dataType": data_type,
         "period": period
     } for stage in processed_stats]
 
-    return send_data(data, PERFORMANCE_PLATFORM_URLS[period]['stage'], pp_bearer)
+    return send_data(data, PERFORMANCE_PLATFORM_URL_TEMPLATES[period]['stage'].format(pp_service=pp_service), pp_bearer)
 
 
-def send_by_lot_stats(stats, timestamp_string, period, framework, pp_bearer):
+def send_by_lot_stats(stats, timestamp_string, period, framework, pp_bearer, pp_service):
     data_type = "applications-by-lot"
     processed_stats = services_by_lot(stats, framework)
     data = [{
-        "_id": _generate_id(timestamp_string, period, data_type, lot),
+        "_id": _generate_id(timestamp_string, period, data_type, lot, pp_service),
         "_timestamp": timestamp_string,
-        "service": "gcloud",
+        "service": pp_service,
         "lot": lot,
         "count": processed_stats.get(lot, 0),
         "dataType": data_type,
         "period": period
     } for lot in processed_stats]
 
-    return send_data(data, PERFORMANCE_PLATFORM_URLS[period]['lot'], pp_bearer)
+    return send_data(data, PERFORMANCE_PLATFORM_URL_TEMPLATES[period]['lot'].format(pp_service=pp_service), pp_bearer)
 
 
 @backoff.on_exception(backoff.expo, dmapiclient.HTTPError, max_tries=5)
-def send_framework_stats(data_api_client, framework_slug, period, pp_bearer):
+def send_framework_stats(data_api_client, framework_slug, period, pp_bearer, pp_service):
     stats = data_api_client.get_framework_stats(framework_slug)
     framework = data_api_client.get_framework(framework_slug)['frameworks']
     now = datetime.utcnow()
