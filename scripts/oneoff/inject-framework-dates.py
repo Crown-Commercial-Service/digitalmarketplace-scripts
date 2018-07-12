@@ -12,7 +12,7 @@ import sys
 
 import argparse
 
-sys.path.insert(0, '.')  # noqa
+sys.path.insert(0, '.')
 
 from dmapiclient import DataAPIClient
 from dmscripts.helpers.auth_helpers import get_auth_token, get_api_url

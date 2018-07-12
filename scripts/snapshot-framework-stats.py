@@ -14,7 +14,7 @@ import sys
 import dmapiclient
 from dmapiclient.audit import AuditTypes
 
-sys.path.insert(0, '.')  # noqa
+sys.path.insert(0, '.')
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.helpers.auth_helpers import get_auth_token
 

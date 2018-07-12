@@ -17,7 +17,7 @@ import logging
 import io
 import sys
 
-sys.path.insert(0, '.')  # noqa
+sys.path.insert(0, '.')
 
 from dmutils.s3 import S3
 from dmscripts.helpers.logging_helpers import INFO, configure_logger

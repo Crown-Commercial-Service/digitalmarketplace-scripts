@@ -10,7 +10,7 @@ from dmapiclient import HTTPError
 from dmapiclient.audit import AuditTypes
 from dmapiclient.data import DataAPIClient
 
-sys.path.insert(0, '.')  # noqa
+sys.path.insert(0, '.')
 
 from dmscripts.helpers.auth_helpers import get_api_url, get_auth_token
 

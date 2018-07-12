@@ -28,7 +28,7 @@ from docopt import docopt
 from dmapiclient import DataAPIClient
 from dmutils.email.dm_mailchimp import DMMailChimpClient
 
-sys.path.insert(0, '.')  # noqa
+sys.path.insert(0, '.')
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.upload_dos_opportunities_email_list import main

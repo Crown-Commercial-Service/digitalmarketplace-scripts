@@ -8,7 +8,7 @@ Usage:
 """
 import itertools
 import sys
-sys.path.insert(0, '.')  # noqa
+sys.path.insert(0, '.')
 
 from docopt import docopt
 from dmapiclient import DataAPIClient
