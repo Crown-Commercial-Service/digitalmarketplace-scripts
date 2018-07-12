@@ -157,7 +157,7 @@ def test_services_by_lot():
 
 @mock.patch('dmscripts.send_stats_to_performance_platform.send_data')
 def test_send_by_stage_stats_per_day_calls_send_data_with_correct_data(send_data):
-    send_by_stage_stats(STATS_JSON, '2017-03-29T00:00:00+00:00', 'day', 'pp-bearer-token')
+    send_by_stage_stats(STATS_JSON, '2017-03-29T00:00:00+00:00', 'day', 'pp-bearer-token', 'gcloud')
     expected_sent_data_items = [
         {'count': 184,
          '_timestamp': '2017-03-29T00:00:00+00:00',
@@ -212,44 +212,44 @@ def test_send_by_stage_stats_per_day_calls_send_data_with_correct_data(send_data
 
 @mock.patch('dmscripts.send_stats_to_performance_platform.send_data')
 def test_send_by_stage_stats_per_hour_calls_send_data_with_correct_data(send_data):
-    send_by_stage_stats(STATS_JSON, '2017-03-29T12:00:00+00:00', 'hour', 'pp-bearer-token')
+    send_by_stage_stats(STATS_JSON, '2017-03-29T12:00:00+00:00', 'hour', 'pp-bearer-token', 'hcloud')
     expected_sent_data_items = [
         {'count': 184,
          '_timestamp': '2017-03-29T12:00:00+00:00',
-         'service': 'gcloud',
+         'service': 'hcloud',
          'dataType': 'applications-by-stage',
          'period': 'hour',
-         # Base 64 encoding of '2017-03-29T12:00:00+00:00-gcloud-hour-applications-by-stage-interested'
-         '_id': 'MjAxNy0wMy0yOVQxMjowMDowMCswMDowMC1nY2xvdWQtaG91ci1hcHBsaWNhdGlvbnMtYnktc3RhZ2UtaW50ZXJlc3RlZA==',
+         # Base 64 encoding of '2017-03-29T12:00:00+00:00-hcloud-hour-applications-by-stage-interested'
+         '_id': 'MjAxNy0wMy0yOVQxMjowMDowMCswMDowMC1oY2xvdWQtaG91ci1hcHBsaWNhdGlvbnMtYnktc3RhZ2UtaW50ZXJlc3RlZA==',
          'stage': 'interested'
          },
         {'count': 97,
          '_timestamp': '2017-03-29T12:00:00+00:00',
-         'service': 'gcloud',
+         'service': 'hcloud',
          'dataType': 'applications-by-stage',
          'period': 'hour',
-         # Base 64 encoding of '2017-03-29T12:00:00+00:00-gcloud-hour-applications-by-stage-made-declaration'
-         '_id': 'MjAxNy0wMy0yOVQxMjowMDowMCswMDowMC1nY2xvdWQtaG91ci1hcHBsaWNhdGlvbnMtYnktc3RhZ2UtbWFkZS1kZWNsYXJhdGlvbg==',  # noqa
+         # Base 64 encoding of '2017-03-29T12:00:00+00:00-hcloud-hour-applications-by-stage-made-declaration'
+         '_id': 'MjAxNy0wMy0yOVQxMjowMDowMCswMDowMC1oY2xvdWQtaG91ci1hcHBsaWNhdGlvbnMtYnktc3RhZ2UtbWFkZS1kZWNsYXJhdGlvbg==',  # noqa
          'stage': 'made-declaration'
          },
         {'count': 79,
          '_timestamp': '2017-03-29T12:00:00+00:00',
-         'service': 'gcloud',
+         'service': 'hcloud',
          'dataType': 'applications-by-stage',
          'period': 'hour',
-         # Base 64 encoding of '2017-03-29T12:00:00+00:00-gcloud-hour-applications-by-stage-completed-services'
-         '_id': 'MjAxNy0wMy0yOVQxMjowMDowMCswMDowMC1nY2xvdWQtaG91ci1hcHBsaWNhdGlvbnMtYnktc3RhZ2UtY29tcGxldGVkLXNlcnZpY2Vz',  # noqa
+         # Base 64 encoding of '2017-03-29T12:00:00+00:00-hcloud-hour-applications-by-stage-completed-services'
+         '_id': 'MjAxNy0wMy0yOVQxMjowMDowMCswMDowMC1oY2xvdWQtaG91ci1hcHBsaWNhdGlvbnMtYnktc3RhZ2UtY29tcGxldGVkLXNlcnZpY2Vz',  # noqa
          'stage': 'completed-services'
          },
         {'count': 89,
          '_timestamp': '2017-03-29T12:00:00+00:00',
-         'service': 'gcloud',
+         'service': 'hcloud',
          'dataType': 'applications-by-stage',
          'period': 'hour',
-         # Base 64 encoding of '2017-03-29T12:00:00+00:00-gcloud-hour-applications-by-stage-eligible'
-         '_id': 'MjAxNy0wMy0yOVQxMjowMDowMCswMDowMC1nY2xvdWQtaG91ci1hcHBsaWNhdGlvbnMtYnktc3RhZ2UtZWxpZ2libGU=',
+         # Base 64 encoding of '2017-03-29T12:00:00+00:00-hcloud-hour-applications-by-stage-eligible'
+         '_id': 'MjAxNy0wMy0yOVQxMjowMDowMCswMDowMC1oY2xvdWQtaG91ci1hcHBsaWNhdGlvbnMtYnktc3RhZ2UtZWxpZ2libGU=',
          'stage': 'eligible'
-         }
+         },
     ]
     # Python 2 and Python 3 can generate the data in varying order, so test items independent of order in the list
     sent_data = send_data.call_args[0][0]
@@ -260,14 +260,21 @@ def test_send_by_stage_stats_per_hour_calls_send_data_with_correct_data(send_dat
 
     send_data.assert_called_with(
         mock.ANY,  # Data sent has already been tested above
-        'https://www.performance.service.gov.uk/data/gcloud/applications-by-stage-realtime',
+        'https://www.performance.service.gov.uk/data/hcloud/applications-by-stage-realtime',
         'pp-bearer-token'
     )
 
 
 @mock.patch('dmscripts.send_stats_to_performance_platform.send_data')
 def test_send_by_lot_stats_per_day_calls_send_data_with_correct_data(send_data):
-    send_by_lot_stats(STATS_JSON, '2017-03-29T00:00:00+00:00', 'day', FRAMEWORK_JSON['frameworks'], 'pp-bearer-token')
+    send_by_lot_stats(
+        STATS_JSON,
+        '2017-03-29T00:00:00+00:00',
+        'day',
+        FRAMEWORK_JSON['frameworks'],
+        'pp-bearer-token',
+        'gcloud',
+    )
     expected_sent_data_items = [
         {'count': 84,
          '_timestamp': '2017-03-29T00:00:00+00:00',
@@ -314,7 +321,14 @@ def test_send_by_lot_stats_per_day_calls_send_data_with_correct_data(send_data):
 
 @mock.patch('dmscripts.send_stats_to_performance_platform.send_data')
 def test_send_by_lot_stats_per_hour_calls_send_data_with_correct_data(send_data):
-    send_by_lot_stats(STATS_JSON, '2017-03-29T12:00:00+00:00', 'hour', FRAMEWORK_JSON['frameworks'], 'pp-bearer-token')
+    send_by_lot_stats(
+        STATS_JSON,
+        '2017-03-29T12:00:00+00:00',
+        'hour',
+        FRAMEWORK_JSON['frameworks'],
+        'pp-bearer-token',
+        'gcloud',
+    )
     expected_sent_data_items = [
         {'count': 84,
          '_timestamp': '2017-03-29T12:00:00+00:00',
