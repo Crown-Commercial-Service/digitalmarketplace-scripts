@@ -16,7 +16,7 @@ import sys
 
 import argparse
 
-sys.path.insert(0, '.')  # noqa
+sys.path.insert(0, '.')
 
 from dmapiclient import DataAPIClient
 from dmapiclient.errors import HTTPError

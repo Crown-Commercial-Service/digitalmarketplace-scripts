@@ -31,7 +31,7 @@ Arguments:
 """
 import os
 import sys
-sys.path.insert(0, '.')  # noqa
+sys.path.insert(0, '.')
 
 from docopt import docopt
 

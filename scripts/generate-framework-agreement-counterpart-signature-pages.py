@@ -43,7 +43,7 @@ import shutil
 import sys
 import tempfile
 
-sys.path.insert(0, '.')  # noqa
+sys.path.insert(0, '.')
 
 from docopt import docopt
 from dmscripts.export_framework_applicant_details import get_csv_rows

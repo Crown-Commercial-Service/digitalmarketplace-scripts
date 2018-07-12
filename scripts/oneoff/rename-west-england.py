@@ -6,7 +6,7 @@ Usage:
     scripts/oneoff/rename-west-england.py <stage> [--dry-run]
 """
 import sys
-sys.path.insert(0, '.')  # noqa
+sys.path.insert(0, '.')
 
 from multiprocessing.pool import ThreadPool
 import itertools

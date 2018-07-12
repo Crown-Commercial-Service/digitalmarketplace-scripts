@@ -8,7 +8,7 @@ Usage:
     scripts/export-dos-outcomes.py <stage> <framework_slug> <content_path>
 """
 import sys
-sys.path.insert(0, '.')  # noqa
+sys.path.insert(0, '.')
 
 from docopt import docopt
 

@@ -18,7 +18,7 @@ Options:
 
 import sys
 
-sys.path.insert(0, '.')  # noqa
+sys.path.insert(0, '.')
 from docopt import docopt
 
 from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage

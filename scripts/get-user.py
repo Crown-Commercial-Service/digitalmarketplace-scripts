@@ -25,7 +25,7 @@ import sys
 import dmapiclient
 from docopt import docopt
 
-sys.path.insert(0, '.')  # noqa
+sys.path.insert(0, '.')
 from dmscripts.helpers.auth_helpers import get_auth_token, get_api_url
 
 

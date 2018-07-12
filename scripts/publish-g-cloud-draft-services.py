@@ -28,7 +28,7 @@ import random
 import re
 import sys
 
-sys.path.insert(0, '.')  # noqa
+sys.path.insert(0, '.')
 
 import dmapiclient
 from dmscripts.helpers.auth_helpers import get_auth_token

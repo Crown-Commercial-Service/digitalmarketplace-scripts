@@ -9,7 +9,7 @@ Usage:
     scripts/oneoff/save-signed-agreement-path.py <stage> [--dry-run]
 """
 import sys
-sys.path.insert(0, '.')  # noqa
+sys.path.insert(0, '.')
 import time
 import getpass
 
