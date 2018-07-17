@@ -172,6 +172,6 @@ def send_framework_stats(data_api_client, framework_slug, period, pp_bearer, pp_
         if period == 'day' else
         (now - timedelta(hours=1)).strftime(HOURLY_TIME_FORMAT)
     )
-    res1 = send_by_stage_stats(stats, timestamp_string, period, pp_bearer)
-    res2 = send_by_lot_stats(stats, timestamp_string, period, framework, pp_bearer)
+    res1 = send_by_stage_stats(stats, timestamp_string, period, pp_bearer, pp_service)
+    res2 = send_by_lot_stats(stats, timestamp_string, period, framework, pp_bearer, pp_service)
     return res1 == res2 == 200
