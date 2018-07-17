@@ -53,10 +53,7 @@ if __name__ == "__main__":
         auth_token=get_auth_token('api', stage)
     )
 
-    users = sorted(
-        data_api_client.find_users_iter(role='supplier', personal_data_removed=True),
-        key=lambda i: i['supplier']['supplierId']
-    )
+    users = sorted(data_api_client.find_users_iter(role='supplier'), key=lambda i: i['supplier']['supplierId'])
     users_by_supplier_id = groupby(users, lambda i: i['supplier']['supplierId'])
 
     for supplier_id, users in users_by_supplier_id:
