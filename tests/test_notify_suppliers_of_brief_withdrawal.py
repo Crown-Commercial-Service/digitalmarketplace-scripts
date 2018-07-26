@@ -9,13 +9,13 @@ WITHDRAWN_BRIEFS = (
         "id": 123,
         "withdrawnAt": "2016-01-28 16:23:50.618053",
         "title": "Tea Drinker",
-        "frameworkFramework": "digital-outcomes-and-specialists"
+        'framework': {'family': 'digital-outcomes-and-specialists'},
     },
     {
         "id": 235,
         "withdrawnAt": "2016-01-28 08:23:50.618053",
         "title": "Cookie Muncher",
-        "frameworkFramework": "digital-outcomes-and-specialists"
+        'framework': {'family': 'digital-outcomes-and-specialists'},
     }
 )
 

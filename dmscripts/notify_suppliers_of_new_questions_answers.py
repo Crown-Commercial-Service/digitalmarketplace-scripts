@@ -74,7 +74,7 @@ def create_context_for_supplier(stage, supplier_briefs):
                 'brief_title': brief['title'],
                 'brief_link': '{0}/{1}/opportunities/{2}?utm_id={3}qa'.format(
                     env_helpers.get_web_url_from_stage(stage),
-                    brief['frameworkFramework'], brief['id'],
+                    brief['framework']['family'], brief['id'],
                     datetime.utcnow().strftime("%Y%m%d")
                 )
             } for brief in supplier_briefs

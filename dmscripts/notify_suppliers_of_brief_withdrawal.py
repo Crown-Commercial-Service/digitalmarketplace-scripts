@@ -13,7 +13,7 @@ def create_context_for_brief(stage, brief):
         'brief_title': brief['title'],
         'brief_link': '{}/{}/opportunities/{}'.format(
             env_helpers.get_web_url_from_stage(stage),
-            brief['frameworkFramework'],
+            brief['framework']['family'],
             brief['id']
         )
     }
