@@ -38,19 +38,19 @@ ALL_BRIEFS = [
     # a brief with a question inside of the date range
     {"id": 3, "clarificationQuestions": [
         {"publishedAt": "2017-03-23T06:00:00.669156Z"}
-    ], 'title': 'Amazing Title', 'frameworkFramework': 'digital-outcomes-and-specialists'},
+    ], 'title': 'Amazing Title', 'framework': {'family': 'digital-outcomes-and-specialists'}},
 
     # a brief with two questions inside of the date range
     {"id": 4, "clarificationQuestions": [
         {"publishedAt": "2017-03-22T18:00:00.669156Z"},
         {"publishedAt": "2017-03-23T06:00:00.669156Z"}
-    ], 'title': 'Brilliant Title', 'frameworkFramework': 'digital-outcomes-and-specialists'},
+    ], 'title': 'Brilliant Title', 'framework': {'family': 'digital-outcomes-and-specialists'}},
 
     # a brief with two questions, one of them outside the range and one inside the range
     {"id": 5, "clarificationQuestions": [
         {"publishedAt": "2017-03-22T06:00:00.669156Z"},
         {"publishedAt": "2017-03-23T06:00:00.669156Z"}
-    ], 'title': 'Confounded Title', 'frameworkFramework': 'digital-outcomes-and-specialists'},
+    ], 'title': 'Confounded Title', 'framework': {'family': 'digital-outcomes-and-specialists'}},
 
     # a brief with questions over the weekend
     {"id": 6, "clarificationQuestions": [
