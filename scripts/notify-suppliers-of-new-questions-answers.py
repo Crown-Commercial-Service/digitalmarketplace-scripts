@@ -22,9 +22,9 @@ import sys
 from docopt import docopt
 
 sys.path.insert(0, '.')
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.notify_suppliers_of_new_questions_answers import main
+from dmutils.env_helpers import get_api_endpoint_from_stage
 
 
 if __name__ == "__main__":

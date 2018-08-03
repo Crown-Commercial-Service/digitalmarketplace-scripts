@@ -3,14 +3,14 @@ from datetime import datetime, timedelta, date
 from dmutils.email.exceptions import EmailError
 from dmutils.email.helpers import hash_string
 from dmutils.formats import DATE_FORMAT
-from dmscripts.helpers import env_helpers
+from dmutils.env_helpers import get_web_url_from_stage
 
 
 def _create_context_for_brief(stage, brief):
     return {
         'brief_title': brief['title'],
         'brief_link': '{}/{}/opportunities/{}'.format(
-            env_helpers.get_web_url_from_stage(stage),
+            get_web_url_from_stage(stage),
             brief['framework']['family'],
             brief['id']
         ),

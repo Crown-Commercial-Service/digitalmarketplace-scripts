@@ -12,10 +12,10 @@ import sys
 sys.path.insert(0, '.')
 
 from docopt import docopt
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.framework_helpers import find_suppliers_on_framework, get_submitted_drafts
 from dmapiclient import DataAPIClient
+from dmutils.env_helpers import get_api_endpoint_from_stage
 
 
 def make_draft_service_live(client, draft, dry_run):

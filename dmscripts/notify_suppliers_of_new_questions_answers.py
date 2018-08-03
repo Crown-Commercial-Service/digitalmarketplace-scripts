@@ -2,12 +2,13 @@ import dmapiclient
 
 from datetime import datetime, timedelta
 
-from dmscripts.helpers import env_helpers, logging_helpers
+from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.html_helpers import render_html
 from dmscripts.helpers.logging_helpers import logging
 from dmutils.email.exceptions import EmailError
 from dmutils.email.dm_mandrill import send_email
 from dmutils.formats import DATETIME_FORMAT
+from dmutils.env_helpers import get_web_url_from_stage
 
 
 EMAIL_SUBJECT = "New answers to supplier questions on the Digital Marketplace"
@@ -73,7 +74,7 @@ def create_context_for_supplier(stage, supplier_briefs):
             {
                 'brief_title': brief['title'],
                 'brief_link': '{0}/{1}/opportunities/{2}?utm_id={3}qa'.format(
-                    env_helpers.get_web_url_from_stage(stage),
+                    get_web_url_from_stage(stage),
                     brief['framework']['family'], brief['id'],
                     datetime.utcnow().strftime("%Y%m%d")
                 )
