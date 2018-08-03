@@ -18,10 +18,10 @@ import csv
 import re
 from docopt import docopt
 from dmapiclient import DataAPIClient
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.logging_helpers import logging
+from dmutils.env_helpers import get_api_endpoint_from_stage
 
 logger = logging_helpers.configure_logger({"dmapiclient": logging.WARNING})
 

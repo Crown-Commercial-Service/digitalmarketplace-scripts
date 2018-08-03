@@ -15,8 +15,8 @@ import dmapiclient
 from dmapiclient.audit import AuditTypes
 
 sys.path.insert(0, '.')
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.helpers.auth_helpers import get_auth_token
+from dmutils.env_helpers import get_api_endpoint_from_stage
 
 
 logger = logging.getLogger('script')

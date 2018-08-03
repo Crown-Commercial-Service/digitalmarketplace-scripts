@@ -22,11 +22,11 @@ from dmapiclient import DataAPIClient
 from dmutils.email.exceptions import EmailError
 from dmutils.dates import update_framework_with_formatted_dates
 from dmscripts.helpers.email_helpers import scripts_notify_client
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.logging_helpers import logging
 from dmscripts.helpers.supplier_data_helpers import AppliedToFrameworkSupplierContextForNotify
+from dmutils.env_helpers import get_api_endpoint_from_stage
 
 logger = logging_helpers.configure_logger({"dmapiclient": logging.INFO})
 

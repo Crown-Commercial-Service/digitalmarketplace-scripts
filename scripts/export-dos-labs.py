@@ -14,9 +14,9 @@ from docopt import docopt
 from dmapiclient import DataAPIClient
 
 from dmscripts.helpers.auth_helpers import get_auth_token
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.helpers.framework_helpers import find_suppliers_with_details_and_draft_services
 from dmscripts.export_dos_labs import append_contact_information_to_services
+from dmutils.env_helpers import get_api_endpoint_from_stage
 
 if sys.version_info[0] < 3:
     import unicodecsv as csv

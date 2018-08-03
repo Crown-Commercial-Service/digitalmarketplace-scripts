@@ -1,6 +1,6 @@
 from dmutils.email.helpers import hash_string
 
-from dmscripts.helpers import env_helpers
+from dmutils.env_helpers import get_web_url_from_stage
 
 
 def get_brief_response_emails(data_api_client, brief_id):
@@ -12,7 +12,7 @@ def create_context_for_brief(stage, brief):
     return {
         'brief_title': brief['title'],
         'brief_link': '{}/{}/opportunities/{}'.format(
-            env_helpers.get_web_url_from_stage(stage),
+            get_web_url_from_stage(stage),
             brief['framework']['family'],
             brief['id']
         )

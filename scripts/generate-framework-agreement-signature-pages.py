@@ -50,13 +50,13 @@ sys.path.insert(0, '.')
 
 from docopt import docopt
 from dmscripts.export_framework_applicant_details import get_csv_rows
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.framework_helpers import find_suppliers_with_details_and_draft_service_counts
 from dmscripts.helpers.supplier_data_helpers import get_supplier_ids_from_file
 from dmscripts.generate_framework_agreement_signature_pages import render_html_for_successful_suppliers, \
     render_pdf_for_each_html_page
 from dmapiclient import DataAPIClient
+from dmutils.env_helpers import get_api_endpoint_from_stage
 
 
 if __name__ == '__main__':

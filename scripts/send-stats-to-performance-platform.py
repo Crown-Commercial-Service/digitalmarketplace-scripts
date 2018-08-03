@@ -12,9 +12,9 @@ from docopt import docopt
 from dmapiclient import DataAPIClient
 
 sys.path.insert(0, '.')
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.send_stats_to_performance_platform import send_framework_stats
+from dmutils.env_helpers import get_api_endpoint_from_stage
 
 
 if __name__ == "__main__":

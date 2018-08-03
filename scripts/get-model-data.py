@@ -38,13 +38,13 @@ from docopt import docopt
 from dmapiclient import DataAPIClient
 
 from dmscripts.helpers.auth_helpers import get_auth_token
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.helpers.logging_helpers import logging, configure_logger
 from dmscripts.models import queries
 from dmscripts.models.process_rules import (
     format_datetime_string_as_date, remove_username_from_email_address, construct_brief_url, extract_id_from_user_info
 )
 from dmscripts.models.writecsv import csv_path
+from dmutils.env_helpers import get_api_endpoint_from_stage
 
 
 DOS_SPECIALIST_ROLES = [
