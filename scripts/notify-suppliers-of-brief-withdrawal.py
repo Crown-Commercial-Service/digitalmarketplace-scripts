@@ -35,10 +35,10 @@ from dmapiclient import DataAPIClient
 sys.path.insert(0, '.')
 
 from dmscripts.helpers.email_helpers import scripts_notify_client
-from dmscripts.helpers.env_helpers import get_api_endpoint_from_stage
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers import logging_helpers
 from dmscripts.notify_suppliers_of_brief_withdrawal import main
+from dmutils.env_helpers import get_api_endpoint_from_stage
 
 
 if __name__ == "__main__":
