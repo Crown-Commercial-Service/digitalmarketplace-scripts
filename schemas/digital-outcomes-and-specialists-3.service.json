@@ -1,0 +1,27 @@
+{
+    "$schema": "http://json-schema.org/draft-04/schema#",
+    "type": "object",
+    "anyOf": [
+        {
+            "properties": {
+                "lotSlug": {"enum": ["user-research-participants"]},
+                "anonymousRecruitment": {"enum": [true]},
+                "manageIncentives": {"enum": [true]}
+            }
+        },
+        {
+            "properties": {
+                "lotSlug": {"enum": ["digital-outcomes", "digital-specialists"]},
+                "helpGovernmentImproveServices": {"enum": [true]},
+                "bespokeSystemInformation": {"enum": [true]},
+                "dataProtocols": {"enum": [true]},
+                "openStandardsPrinciples": {"enum": [true]}
+            }
+        },
+        {
+            "properties": {
+                "lotSlug": {"enum": ["user-research-studios"]}
+            }
+        }
+    ]
+}
