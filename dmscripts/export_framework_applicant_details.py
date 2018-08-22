@@ -117,8 +117,6 @@ DECLARATION_FIELDS = {
         "subcontracting",
         "contactNameContractNotice",
         "contactEmailContractNotice",
-        "cyberEssentials",
-        "cyberEssentialsPlus",
     ),
 }
 
