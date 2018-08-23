@@ -54,7 +54,7 @@ function commit_and_create_github_pr() {
   git config user.email "support@digitalmarketplace.service.gov.uk"
   git config user.name "dm-ssp-jenkins"
   git commit -a -m "$1" -m "$2"
-  git push origin "${GIT_CREDS_UPDATE_BRANCH_NAME}"
+  git push -q origin "${GIT_CREDS_UPDATE_BRANCH_NAME}"
   post_data="{\"title\": \"$1\", \"body\": \"$2\", \"base\": \"master\", \"head\": \"${GIT_CREDS_UPDATE_BRANCH_NAME}\"}"
   response_data=$(curl -XPOST -H "Accept: application/vnd.github.v3.full+json" -d "$post_data" "https://${GITHUB_ACCESS_TOKEN}@api.github.com/repos/alphagov/digitalmarketplace-credentials/pulls")
   echo "Created PR#$(echo "${response_data}" | jq -crM '.number') on alphagov/digitalmarketplace-credentials."
