@@ -1,4 +1,4 @@
-FROM python:3.6.1-slim
+FROM python:3.6-slim
 
 ENV APP_DIR /app
 
