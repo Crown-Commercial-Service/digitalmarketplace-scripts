@@ -98,9 +98,9 @@ FRAMEWORK_MAPPINGS = {
 def search_mapping_matches_framework(mapping_name, frameworks):
     # Check that the mapping has been generated from at least one of the frameworks given in
     # the comma-separated list
-    if mapping_name:
-        return any(mapping_name == FRAMEWORK_MAPPINGS[fw] for fw in frameworks.split(','))
-    return False
+    if any(mapping_name == FRAMEWORK_MAPPINGS[fw] for fw in frameworks.split(',')):
+        return True
+    raise ValueError("Incorrect mapping '{}' for the supplied framework(s): {}".format(mapping_name, frameworks))
 
 
 def do_index(doc_type, search_api_url, search_api_access_token, data_api_url, data_api_access_token, mapping, serial,
@@ -119,7 +119,7 @@ def do_index(doc_type, search_api_url, search_api_access_token, data_api_url, da
         dmapiclient.DataAPIClient(data_api_url, data_api_access_token),
         dmapiclient.SearchAPIClient(search_api_url, search_api_access_token),
         index)
-    if search_mapping_matches_framework(mapping, frameworks):
+    if mapping and search_mapping_matches_framework(mapping, frameworks):
         indexer.create_index(mapping=mapping)
 
     counter = 0

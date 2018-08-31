@@ -198,3 +198,20 @@ class TestIndexers:
         assert create_index.call_args_list == [
             mock.call(mock.ANY, mapping='briefs-digital-outcomes-and-specialists-2')
         ]
+
+    @mock.patch.object(ServiceIndexer, 'create_index', autospec=True)
+    def test_incorrect_mapping_for_framework_raises_error(self, create_index):
+        with pytest.raises(ValueError) as e:
+            do_index(
+                'services',
+                "http://search-api-url", "mySearchAPIToken",
+                "http://data-api-url", "myDataAPIToken",
+                mapping='services',
+                serial=True,  # don't run in parallel for testing
+                index="my-new-g-cloud-10-index",
+                frameworks="g-cloud-10"
+            )
+
+        assert str(e.value) == "Incorrect mapping 'services' for the supplied framework(s): g-cloud-10"
+
+        assert create_index.call_args_list == []
