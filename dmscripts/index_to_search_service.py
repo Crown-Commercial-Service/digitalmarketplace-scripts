@@ -85,6 +85,24 @@ indexers = {
 }
 
 
+# Hardcoded for now as we are unlikely to add new frameworks in the near future
+FRAMEWORK_MAPPINGS = {
+    'g-cloud-9': 'services',
+    'g-cloud-10': 'services-g-cloud-10',
+    'digital-outcomes-and-specialists': 'briefs-digital-outcomes-and-specialists-2',
+    'digital-outcomes-and-specialists-2': 'briefs-digital-outcomes-and-specialists-2',
+    'digital-outcomes-and-specialists-3': 'briefs-digital-outcomes-and-specialists-2',
+}
+
+
+def search_mapping_matches_framework(mapping_name, frameworks):
+    # Check that the mapping has been generated from at least one of the frameworks given in
+    # the comma-separated list
+    if any(mapping_name == FRAMEWORK_MAPPINGS[fw] for fw in frameworks.split(',')):
+        return True
+    raise ValueError("Incorrect mapping '{}' for the supplied framework(s): {}".format(mapping_name, frameworks))
+
+
 def do_index(doc_type, search_api_url, search_api_access_token, data_api_url, data_api_access_token, mapping, serial,
              index, frameworks):
     logger.info("Search API URL: {search_api_url}", extra={'search_api_url': search_api_url})
@@ -101,7 +119,7 @@ def do_index(doc_type, search_api_url, search_api_access_token, data_api_url, da
         dmapiclient.DataAPIClient(data_api_url, data_api_access_token),
         dmapiclient.SearchAPIClient(search_api_url, search_api_access_token),
         index)
-    if mapping:
+    if mapping and search_mapping_matches_framework(mapping, frameworks):
         indexer.create_index(mapping=mapping)
 
     counter = 0

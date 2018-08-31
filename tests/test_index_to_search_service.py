@@ -166,3 +166,52 @@ class TestIndexers:
             mock.call(mock.ANY, 'service1'),
             mock.call(mock.ANY, 'service2'),
         ]
+
+    @mock.patch.object(ServiceIndexer, 'create_index', autospec=True)
+    def test_do_index_creates_new_index_from_services_mapping(self, create_index):
+        do_index(
+            'services',
+            "http://search-api-url", "mySearchAPIToken",
+            "http://data-api-url", "myDataAPIToken",
+            mapping='services-g-cloud-10',
+            serial=True,  # don't run in parallel for testing
+            index="my-new-g-cloud-10-index",
+            frameworks="g-cloud-10"
+        )
+
+        assert create_index.call_args_list == [
+            mock.call(mock.ANY, mapping='services-g-cloud-10')
+        ]
+
+    @mock.patch.object(BriefIndexer, 'create_index', autospec=True)
+    def test_do_index_creates_new_index_from_briefs_mapping(self, create_index):
+        do_index(
+            'briefs',
+            "http://search-api-url", "mySearchAPIToken",
+            "http://data-api-url", "myDataAPIToken",
+            mapping='briefs-digital-outcomes-and-specialists-2',
+            serial=True,  # don't run in parallel for testing
+            index="my-new-dos-index",
+            frameworks="digital-outcomes-and-specialists,digital-outcomes-and-specialists-2"
+        )
+
+        assert create_index.call_args_list == [
+            mock.call(mock.ANY, mapping='briefs-digital-outcomes-and-specialists-2')
+        ]
+
+    @mock.patch.object(ServiceIndexer, 'create_index', autospec=True)
+    def test_incorrect_mapping_for_framework_raises_error(self, create_index):
+        with pytest.raises(ValueError) as e:
+            do_index(
+                'services',
+                "http://search-api-url", "mySearchAPIToken",
+                "http://data-api-url", "myDataAPIToken",
+                mapping='services',
+                serial=True,  # don't run in parallel for testing
+                index="my-new-g-cloud-10-index",
+                frameworks="g-cloud-10"
+            )
+
+        assert str(e.value) == "Incorrect mapping 'services' for the supplied framework(s): g-cloud-10"
+
+        assert create_index.call_args_list == []
