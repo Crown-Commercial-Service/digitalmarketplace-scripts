@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, date
 
 from dmutils.email.exceptions import EmailError
-from dmutils.email.helpers import hash_string
+from dmutils.email.helpers import get_email_addresses, hash_string, validate_email_address
 from dmutils.formats import DATE_FORMAT
 from dmutils.env_helpers import get_web_url_from_stage
 
@@ -55,34 +55,49 @@ def _build_and_send_emails(brief_responses, mail_client, stage, dry_run, templat
 
     # Now email everyone whose Brief got awarded
     for brief_response in brief_responses:
-        email_address = brief_response["respondToEmailAddress"]
-        if not email_address:
+        # Although we don't officially support it, in some cases users
+        # have multiple email addresses in their respondToEmailAddress field
+        email_addresses = get_email_addresses(brief_response["respondToEmailAddress"])
+        if not email_addresses:
             continue
 
-        brief_email_context = _create_context_for_brief(stage, brief_response['brief'])
-        try:
-            if not dry_run:
-                mail_client.send_email(
-                    email_address, template_id, brief_email_context, allow_resend=False
-                )
-            logger.info(
-                "{dry_run}EMAIL: Award of Brief Response ID: {brief_response_id} to {email_address}",
-                extra={
-                    'dry_run': '[Dry-run] - ' if dry_run else '',
-                    'brief_response_id': brief_response['id'],
-                    'email_address': hash_string(email_address),
-                }
-            )
-        except EmailError:
-            # Log individual failures in more detail
+        invalid_email_addresses = [a for a in email_addresses if not validate_email_address(a)]
+        if invalid_email_addresses:
             logger.error(
-                "Email sending failed for BriefResponse {brief_response_id} (Brief ID {brief_id})",
+                "Invalid email address(es) for BriefResponse {brief_response_id} (Brief ID {brief_id})",
                 extra={
                     "brief_id": brief_response['brief']['id'],
-                    "brief_response_id": brief_response['id']
+                    "brief_response_id": brief_response['id'],
                 }
             )
             failed_brief_responses.append(brief_response['id'])
+            continue
+
+        brief_email_context = _create_context_for_brief(stage, brief_response['brief'])
+        for email_address in email_addresses:
+            try:
+                if not dry_run:
+                    mail_client.send_email(
+                        email_address, template_id, brief_email_context, allow_resend=False
+                    )
+                logger.info(
+                    "{dry_run}EMAIL: Award of Brief Response ID: {brief_response_id} to {email_address}",
+                    extra={
+                        'dry_run': '[Dry-run] - ' if dry_run else '',
+                        'brief_response_id': brief_response['id'],
+                        'email_address': hash_string(email_address),
+                    }
+                )
+            except EmailError:
+                # Log individual failures in more detail
+                logger.error(
+                    "Email sending failed for BriefResponse {brief_response_id} (Brief ID {brief_id})",
+                    extra={
+                        "brief_id": brief_response['brief']['id'],
+                        "brief_response_id": brief_response['id']
+                    }
+                )
+                failed_brief_responses.append(brief_response['id'])
 
     return failed_brief_responses
 
