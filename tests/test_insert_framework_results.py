@@ -54,4 +54,4 @@ def test_http_error_handling(mock_data_client):
     mock_data_client.get_supplier.return_value = {'suppliers': {'name': 'Supplier Name'}}
 
     result = insert_result(mock_data_client, 123456, "Supplier Name", 'g-cloud-7', True, 'user')
-    assert result == 'Error inserting result for 123456 (True): Request failed (status: 503)\n'
+    assert result == 'Error inserting result for 123456 (True): Unknown request failure in dmapiclient (status: 503)\n'
