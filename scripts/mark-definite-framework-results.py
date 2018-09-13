@@ -18,7 +18,9 @@ supplier_frameworks with no remaining non-failed draft services are considered a
 The default behaviour is to skip supplier_frameworks which already have a non-null onFramework set and draft services
 whose status is already "failed", though this can be controlled with the --reassess-passed-sf, --reassess-failed-sf
 and --reassess-failed-draft-services, the latter of which will mark "failed" services back as "submitted" if it proves
-not to fail this time around (or if no draft_service_schema is supplied).
+not to fail this time around (or if no draft_service_schema is supplied). You may only want to reassess certain
+suppliers. This can be done with the `supplier-id-file` option. It should be set to the path to a file containing the
+supplier ids to check, one per line.
 
 Usage: mark-definite-framework-results.py [options] <stage> <framework_slug>
             <declaration_definite_pass_schema_path> [<draft_service_schema_path>]
@@ -29,6 +31,7 @@ Usage: mark-definite-framework-results.py [options] <stage> <framework_slug>
 --reassess-failed-sf              Don't skip supplier_frameworks with onFramework already False
 --reassess-failed-draft-services  Don't skip draft_services with "failed" status
 -v, --verbose                     Produce more detailed console output
+--supplier-id-file=<path>         Path to file containing supplier ids to check. One ID per line.
 """
 import sys
 sys.path.insert(0, '.')
@@ -43,6 +46,7 @@ from dmapiclient import DataAPIClient
 from dmscripts.mark_definite_framework_results import mark_definite_framework_results
 from dmscripts.helpers.logging_helpers import configure_logger
 from dmscripts.helpers.logging_helpers import INFO as loglevel_INFO, DEBUG as loglevel_DEBUG
+from dmscripts.helpers.supplier_data_helpers import get_supplier_ids_from_file
 from dmutils.env_helpers import get_api_endpoint_from_stage
 
 
@@ -62,6 +66,9 @@ if __name__ == "__main__":
         open(args["<draft_service_schema_path>"], "r")
     ) if args["<draft_service_schema_path>"] else None
 
+    supplier_id_file = args["--supplier-id-file"]
+    supplier_ids = get_supplier_ids_from_file(supplier_id_file)
+
     configure_logger({"script": loglevel_DEBUG if args["--verbose"] else loglevel_INFO})
 
     mark_definite_framework_results(
@@ -75,4 +82,5 @@ if __name__ == "__main__":
         reassess_failed=args["--reassess-failed-sf"],
         reassess_failed_draft_services=args["--reassess-failed-draft-services"],
         dry_run=args["--dry-run"],
+        supplier_ids=supplier_ids,
     )

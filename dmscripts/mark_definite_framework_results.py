@@ -82,8 +82,11 @@ def mark_definite_framework_results(
     reassess_failed=False,
     reassess_failed_draft_services=False,
     logger=logging.getLogger("script"),
+    supplier_ids=None,
 ):
-    interested_supplier_ids = client.get_interested_suppliers(framework_slug).get('interestedSuppliers', ())
+    interested_supplier_ids = supplier_ids or client.get_interested_suppliers(
+        framework_slug
+    ).get('interestedSuppliers', ())
     total_interested_suppliers = len(interested_supplier_ids)
     for i, supplier_id in enumerate(interested_supplier_ids, start=1):
         logger.info("Supplier {i}/{total_interested_suppliers}: {supplier_id}",
