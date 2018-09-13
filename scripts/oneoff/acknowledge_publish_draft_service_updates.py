@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 
 import argparse
-import backoff
 import multiprocessing as mp
 from multiprocessing.pool import ThreadPool
 import sys
 
-from dmapiclient import HTTPError
 from dmapiclient.audit import AuditTypes
 from dmapiclient.data import DataAPIClient
 
@@ -18,7 +16,6 @@ from dmscripts.helpers.auth_helpers import get_api_url, get_auth_token
 ACKNOWLEDGE_USER = 'scripts/oneoff/acknowledge_publish_draft_service_updates.py'
 
 
-@backoff.on_exception(backoff.expo, HTTPError, max_tries=5)
 def acknowledge_update(audit_event):
     response = data.acknowledge_audit_event(audit_event['id'], user=ACKNOWLEDGE_USER)['auditEvents']
     print(f'Acknowledged {audit_event["id"]} on service id #{audit_event["data"]["serviceId"]} by '

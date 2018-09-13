@@ -124,7 +124,6 @@ def copy_draft_documents(client, copy_document, draft_service, framework_slug, d
         print("    > document URLs updated")
 
 
-@backoff.on_exception(backoff.expo, dmapiclient.HTTPError, max_tries=5)
 def make_draft_service_live(client, copy_document, draft_service, framework_slug, dry_run,
                             continue_if_published=False):
     print("  > Migrating draft {}".format(draft_service['id']))
