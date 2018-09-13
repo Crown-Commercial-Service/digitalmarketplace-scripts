@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """Selectively migrate supplier organisation size from a recent framework declaration to the field on supplier itself.
 
-   Based on scripts/oneoff/migrate-supplier-data-from-declarations.py (retry/backoff explained there in more detail)
+   Based on scripts/oneoff/migrate-supplier-data-from-declarations.py
 
 Usage:
     scripts/oneoff/migrate-supplier-organisation-size-from-declarations.py <stage> <data_api_token>
@@ -22,11 +22,8 @@ from datetime import datetime
 import logging
 import getpass
 
-import backoff
 from docopt import docopt
-import requests
 from dmapiclient import DataAPIClient, HTTPError
-from dmapiclient.errors import HTTPTemporaryError
 
 from dmscripts.helpers.logging_helpers import configure_logger
 from dmscripts.helpers.logging_helpers import INFO as loglevel_INFO
@@ -34,13 +31,6 @@ from dmutils.env_helpers import get_api_endpoint_from_stage
 
 
 logger = logging.getLogger("script")
-
-
-_backoff_wrap = backoff.on_exception(
-    backoff.expo,
-    (HTTPTemporaryError, requests.exceptions.ConnectionError, RuntimeError),
-    max_tries=5,
-)
 
 
 def _catch_404_none(func):
@@ -57,9 +47,7 @@ def _get_supplier_frameworks(data_api_client, supplier_id):
     # Get all supplierFrameworks for this supplier that have a declaration
     try:
         supplier_frameworks = _catch_404_none(
-            _backoff_wrap(
-                lambda: data_api_client.get_supplier_frameworks(supplier_id)
-            )
+            lambda: data_api_client.get_supplier_frameworks(supplier_id)
         )
     except StopIteration:
         logger.info("Supplier %s: not on any relevant frameworks", supplier_id)
@@ -77,13 +65,11 @@ def _update_supplier_organisation_size(data_api_client, org_size, supplier_id, d
     try:
         logger.info("Updating supplier {} with org size {}".format(supplier_id, org_size))
         if not dry_run:
-            _backoff_wrap(
-                lambda: data_api_client.update_supplier(
-                    supplier_id,
-                    {'organisationSize': org_size},
-                    user=f'{getpass.getuser()} (migrate organisation size script)',
-                )
-            )()
+            data_api_client.update_supplier(
+                supplier_id,
+                {'organisationSize': org_size},
+                user=f'{getpass.getuser()} (migrate organisation size script)',
+            )
     except HTTPError:
         logger.info("HTTP ERROR UPDATING SUPPLIER {}".format(supplier_id))
 

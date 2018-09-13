@@ -29,7 +29,6 @@ from docopt import docopt
 import requests
 from dateutil.parser import parse as dateutil_parse
 from dmapiclient import DataAPIClient, HTTPError
-from dmapiclient.errors import HTTPTemporaryError
 
 from dmscripts.helpers.logging_helpers import configure_logger
 from dmscripts.helpers.logging_helpers import INFO as loglevel_INFO
@@ -41,7 +40,7 @@ logger = logging.getLogger("script")
 
 _backoff_wrap = backoff.on_exception(
     backoff.expo,
-    (HTTPTemporaryError, requests.exceptions.ConnectionError, RuntimeError),
+    (requests.exceptions.ConnectionError, RuntimeError),
     max_tries=5,
 )
 
@@ -107,9 +106,7 @@ if __name__ == '__main__':
             supplier_framework = next(
                 sfr["frameworkInterest"] for sfr in (
                     _catch_404_none(
-                        _backoff_wrap(
-                            lambda: client.get_supplier_framework_info(supplier["id"], framework["slug"])
-                        )
+                        lambda: client.get_supplier_framework_info(supplier["id"], framework["slug"])
                     ) for framework in frameworks
                 ) if sfr and sfr["frameworkInterest"]["onFramework"]
             )
@@ -184,27 +181,24 @@ if __name__ == '__main__':
         # we're going to deprecate this field
         contact_update["address2"] = ""
 
-        # the following _backoff_wrap-wrapped calls are a little ugly as `backoff` is designed as a function decorator
-        # and we really want to retry inline blocks, so we're declaring them as lambdas which we immediately execute
-        # after decoration
         logger.info("supplier_update = %s", pformat(supplier_update))
         if not dry_run:
             try:
-                _backoff_wrap(lambda: client.update_supplier(supplier["id"], supplier_update, user=user))()
+                client.update_supplier(supplier["id"], supplier_update, user=user)
             except HTTPError as hte:
                 if 'duplicate key value violates unique constraint "ix_suppliers_duns_number"' in hte.message:
                     logger.info("DUNS clash {} for supplier {}".format(supplier_update['dunsNumber'], supplier['id']))
                     supplier_update.pop('dunsNumber', None)
                     logger.info("revised supplier_update = %s", pformat(supplier_update))
-                    _backoff_wrap(lambda: client.update_supplier(supplier["id"], supplier_update, user=user))()
+                    client.update_supplier(supplier["id"], supplier_update, user=user)
                 else:
                     logger.info("HTTP ERROR UPDATING SUPPLIER {}".format(supplier['id']))
 
         logger.info("contact_update = %s", pformat(contact_update))
         if not dry_run:
-            _backoff_wrap(lambda: client.update_contact_information(
+            client.update_contact_information(
                 supplier["id"],
                 contact["id"],
                 contact_update,
                 user=user,
-            ))()
+            )

@@ -19,12 +19,9 @@ Usage:
 import sys
 sys.path.insert(0, '.')
 
-import backoff
 import getpass
-import requests
 from docopt import docopt
 from dmapiclient import DataAPIClient, HTTPError
-from dmapiclient.errors import HTTPTemporaryError
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmutils.env_helpers import get_api_endpoint_from_stage
 
@@ -37,12 +34,6 @@ NEW_TRADING_STATUS_MAPPING = {
     'sole trader': 'sole trader',
 }
 
-_backoff_wrap = backoff.on_exception(
-    backoff.expo,
-    (HTTPError, HTTPTemporaryError, requests.exceptions.ConnectionError, RuntimeError),
-    max_tries=5,
-)
-
 
 def migrate_trading_statuses(client, dry_run):
     prefix = '[DRY RUN]: ' if dry_run else ''
@@ -54,13 +45,11 @@ def migrate_trading_statuses(client, dry_run):
 
         if not dry_run:
             try:
-                _backoff_wrap(
-                    lambda: client.update_supplier(
-                        supplier_id=supplier['id'],
-                        supplier={'tradingStatus': mapped_trading_status},
-                        user=f'{getpass.getuser()} (migrate trading status script)',
-                    )
-                )()
+                client.update_supplier(
+                    supplier_id=supplier['id'],
+                    supplier={'tradingStatus': mapped_trading_status},
+                    user=f'{getpass.getuser()} (migrate trading status script)',
+                )
                 success_counter += 1
 
             except HTTPError as e:
