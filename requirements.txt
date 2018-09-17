@@ -6,7 +6,7 @@ Flask==0.12.4
 
 git+https://github.com/madzak/python-json-logger.git@v0.1.8#egg=python-json-logger==v0.1.8
 git+https://github.com/alphagov/digitalmarketplace-utils.git@43.4.0#egg=digitalmarketplace-utils==43.4.0
-git+https://github.com/alphagov/digitalmarketplace-apiclient.git@16.4.1#egg=digitalmarketplace-apiclient==16.4.1
+git+https://github.com/alphagov/digitalmarketplace-apiclient.git@19.4.0#egg=digitalmarketplace-apiclient==19.4.0
 git+https://github.com/alphagov/digitalmarketplace-content-loader.git@2.8.0#egg=digitalmarketplace-content-loader==2.8.0
 
 awscli==1.14.31
@@ -55,11 +55,11 @@ pycparser==2.18
 PyJWT==1.6.4
 pytz==2015.4
 PyYAML==3.11
-requests==2.18.4
+requests==2.19.1
 rsa==3.4.2
 s3transfer==0.1.13
 six==1.11.0
-urllib3==1.22
+urllib3==1.23
 Werkzeug==0.14.1
 workdays==1.4
 WTForms==2.2.1

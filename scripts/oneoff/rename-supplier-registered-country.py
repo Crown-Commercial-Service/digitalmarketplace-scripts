@@ -13,22 +13,13 @@ Usage:
 import sys
 sys.path.insert(0, '.')
 
-import backoff
-import requests
 from docopt import docopt
 from dmapiclient import DataAPIClient, HTTPError
-from dmapiclient.errors import HTTPTemporaryError
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmutils.env_helpers import get_api_endpoint_from_stage
 
 OLD_COUNTRY = "gb"
 NEW_COUNTRY = "country:GB"
-
-_backoff_wrap = backoff.on_exception(
-    backoff.expo,
-    (HTTPError, HTTPTemporaryError, requests.exceptions.ConnectionError, RuntimeError),
-    max_tries=5,
-)
 
 
 def rename_country(client, dry_run):
@@ -38,13 +29,11 @@ def rename_country(client, dry_run):
         if supplier.get('registrationCountry') == OLD_COUNTRY:
             if not dry_run:
                 try:
-                    _backoff_wrap(
-                        lambda: client.update_supplier(
-                            supplier['id'],
-                            {'registrationCountry': NEW_COUNTRY},
-                            'rename supplier registered country script',
-                        )
-                    )()
+                    client.update_supplier(
+                        supplier['id'],
+                        {'registrationCountry': NEW_COUNTRY},
+                        'rename supplier registered country script',
+                    )
                     success_counter += 1
                 except HTTPError as e:
                     print("Error updating supplier {}: {}".format(supplier['id'], e.message))

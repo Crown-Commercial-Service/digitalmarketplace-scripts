@@ -1,9 +1,7 @@
-import backoff
 import base64
 import requests
 
 from datetime import datetime, timedelta
-import dmapiclient
 
 from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.logging_helpers import logging
@@ -160,7 +158,6 @@ def send_by_lot_stats(stats, timestamp_string, period, framework, pp_bearer, pp_
     return send_data(data, PERFORMANCE_PLATFORM_URL_TEMPLATES[period]['lot'].format(pp_service=pp_service), pp_bearer)
 
 
-@backoff.on_exception(backoff.expo, dmapiclient.HTTPError, max_tries=5)
 def send_framework_stats(data_api_client, framework_slug, period, pp_bearer, pp_service):
     stats = data_api_client.get_framework_stats(framework_slug)
     framework = data_api_client.get_framework(framework_slug)['frameworks']

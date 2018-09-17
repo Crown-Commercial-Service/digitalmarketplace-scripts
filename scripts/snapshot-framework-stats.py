@@ -6,7 +6,6 @@ Example:
     ./snapshot_framework_stats.py g-cloud-7 dev
 """
 
-import backoff
 from docopt import docopt
 import logging
 import sys
@@ -23,7 +22,6 @@ logger = logging.getLogger('script')
 logging.basicConfig(level=logging.INFO)
 
 
-@backoff.on_exception(backoff.expo, dmapiclient.HTTPError, max_tries=5)
 def get_stats(data_client, framework_slug):
     return data_client.get_framework_stats(framework_slug)
 

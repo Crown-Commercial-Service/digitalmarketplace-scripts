@@ -1,7 +1,6 @@
 from datetime import datetime
 from multiprocessing.pool import ThreadPool
 
-import backoff
 import dmapiclient
 from six.moves import map
 
@@ -52,7 +51,6 @@ class IndexerBase(object):
     def include_in_index(self, item):
         raise NotImplementedError()
 
-    @backoff.on_exception(backoff.expo, dmapiclient.HTTPError, max_tries=5)
     def index_item(self, item):
         if self.include_in_index(item):
             self.search_client.index(self.index, item['id'], item, self.document_type)
