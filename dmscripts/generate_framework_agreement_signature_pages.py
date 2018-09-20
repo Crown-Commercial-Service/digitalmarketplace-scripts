@@ -25,7 +25,7 @@ def render_html_for_successful_suppliers(rows, framework, template_dir, output_d
     template_path = os.path.join(template_dir, 'framework-agreement-signature-page.html')
     template_css_path = os.path.join(template_dir, 'framework-agreement-signature-page.css')
     for data in rows:
-        if data['pass_fail'] == 'fail':
+        if data['pass_fail'] in ('fail', 'discretionary'):
             continue
         data['framework'] = framework
         data['awardedLots'] = [lot for lot in framework['frameworkAgreementDetails']['lotOrder'] if int(data[lot]) > 0]
