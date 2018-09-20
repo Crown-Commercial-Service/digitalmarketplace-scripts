@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 
 For a DOS-style framework (with no documents to migrate) this will:
@@ -44,8 +45,9 @@ if __name__ == "__main__":
     api_url = get_api_endpoint_from_stage(STAGE)
     client = DataAPIClient(api_url, get_auth_token('api', STAGE))
 
+    print("Finding suppliers...")
     suppliers = find_suppliers_on_framework(client, FRAMEWORK_SLUG)
-
+    print("Migrating drafts...")
     for supplier in suppliers:
         print(u"Migrating drafts for supplier {} - {}".format(supplier['supplierId'], supplier['supplierName']))
         draft_services = get_submitted_drafts(client, FRAMEWORK_SLUG, supplier['supplierId'])
