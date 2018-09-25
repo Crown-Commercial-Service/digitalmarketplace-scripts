@@ -106,7 +106,7 @@ def upload_to_s3(file_path, framework_slug, download_filename, bucket, dry_run, 
             with open(file_path, 'rb') as source_file:
                 # S3 bucket already logging external request
                 bucket.save(
-                    "{}/{}".format(framework_slug, download_filename),
+                    "{}/reports/{}".format(framework_slug, download_filename),
                     source_file,
                     acl='private',
                     download_filename=download_filename
