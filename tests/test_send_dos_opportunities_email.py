@@ -1,7 +1,8 @@
 import mock
-from freezegun import freeze_time
-
 from datetime import date
+
+import pytest
+from freezegun import freeze_time
 from lxml import html
 
 from dmscripts.send_dos_opportunities_email import (
@@ -135,13 +136,22 @@ def test_get_html_content_with_briefs_from_several_days():
         assert "Since Friday" in html_content
 
 
-def test_get_campaign_data():
+@pytest.mark.parametrize(
+    ('framework_iterations', 'expected_subject_suffix'),
+    (
+        (["1"], "1"),
+        (["2"], "2"),
+        (["1", "2"], "1 and 2"),
+    )
+)
+def test_get_campaign_data(framework_iterations, expected_subject_suffix):
     lot_name = "Digital Outcomes"
     list_id = "1111111"
-    expected_subject = "New opportunities for Digital Outcomes: Digital Outcomes and Specialists 2"
+    expected_subject = \
+        f"New opportunities for Digital Outcomes: Digital Outcomes and Specialists {expected_subject_suffix}"
 
     with freeze_time('2017-04-19 08:00:00'):
-        campaign_data = get_campaign_data(lot_name, list_id)
+        campaign_data = get_campaign_data(lot_name, list_id, framework_iterations)
         assert campaign_data["recipients"]["list_id"] == list_id
         assert campaign_data["settings"]["subject_line"] == expected_subject
         assert campaign_data["settings"]["title"] == "DOS Suppliers: Digital Outcomes [19 April]"
@@ -155,7 +165,11 @@ def test_get_campaign_data():
 def test_main_creates_campaign_sets_content_and_sends_campaign(
     get_campaign_data, get_live_briefs_between_two_dates, get_html_content
 ):
-    get_live_briefs_between_two_dates.return_value = [{"brief": "yaytest"}]
+    live_briefs = [
+        {"brief": "yaytest", "frameworkName": "Digital Outcomes and Specialists 2"},
+        {"brief": "bootest", "frameworkName": "Digital Outcomes and Specialists 1"},
+    ]
+    get_live_briefs_between_two_dates.return_value = live_briefs
     get_campaign_data.return_value = {"created": "campaign"}
     get_html_content.return_value = {"first": "content"}
 
@@ -164,11 +178,11 @@ def test_main_creates_campaign_sets_content_and_sends_campaign(
     main(mock.MagicMock(), dm_mailchimp_client, LOT_DATA, 1)
 
     # Creates campaign
-    get_campaign_data.assert_called_once_with("Digital specialists", "096e52cebb")
+    get_campaign_data.assert_called_once_with("Digital specialists", "096e52cebb", ["1", "2"])
     dm_mailchimp_client.create_campaign.assert_called_once_with({"created": "campaign"})
 
     # Sets campaign content
-    get_html_content.assert_called_once_with([{"brief": "yaytest"}], 1)
+    get_html_content.assert_called_once_with(live_briefs, 1)
     dm_mailchimp_client.set_campaign_content.assert_called_once_with("1", {"first": "content"})
 
     # Sends campaign
