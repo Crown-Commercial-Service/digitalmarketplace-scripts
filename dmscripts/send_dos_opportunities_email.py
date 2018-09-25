@@ -18,14 +18,16 @@ def get_live_briefs_between_two_dates(data_api_client, lot_slug, start_date, end
     ]
 
 
-def get_campaign_data(lot_name, list_id):
+def get_campaign_data(lot_name, list_id, framework_iterations):
     return {
         "type": "regular",
         "recipients": {
             "list_id": list_id,
         },
         "settings": {
-            "subject_line": "New opportunities for {0}: Digital Outcomes and Specialists 2".format(lot_name),
+            "subject_line": "New opportunities for {0}: Digital Outcomes and Specialists {1}".format(
+                lot_name, " and ".join(framework_iterations)
+            ),
             "title": "DOS Suppliers: {0} [{1}]".format(lot_name, datetime.now().strftime("%d %B")),
             "from_name": "Digital Marketplace Team",
             "reply_to": "do-not-reply@digitalmarketplace.service.gov.uk",
@@ -84,7 +86,8 @@ def main(data_api_client, mailchimp_client, lot_data, number_of_days):
         "{0} new briefs found for '{1}' lot".format(len(live_briefs), lot_data["lot_slug"])
     )
 
-    campaign_data = get_campaign_data(lot_data["lot_name"], lot_data["list_id"])
+    framework_iterations = sorted({brief['frameworkName'][-1] for brief in live_briefs})
+    campaign_data = get_campaign_data(lot_data["lot_name"], lot_data["list_id"], framework_iterations)
     logger.info(
         "Creating campaign for '{0}' lot".format(lot_data["lot_slug"])
     )
