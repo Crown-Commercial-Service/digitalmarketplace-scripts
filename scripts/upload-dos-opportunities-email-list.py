@@ -15,10 +15,10 @@ Description:
     that we have setup on mailchimp.
 
 Usage:
-    upload-dos-opportunities-email-list.py <stage> <mailchimp_username> <mailchimp_api_key>
+    upload-dos-opportunities-email-list.py <stage> <mailchimp_username> <mailchimp_api_key> <framework_slug>
 
 Example:
-    upload-dos-opportunities-email-list.py preview user@gds.gov.uk 7483crh87h34c3
+    upload-dos-opportunities-email-list.py preview user@gds.gov.uk 7483crh87h34c3 digital-outcomes-and-specialists-3
 
 """
 
@@ -35,33 +35,36 @@ from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.logging_helpers import logging
 from dmutils.env_helpers import get_api_endpoint_from_stage
 
+LOT_SLUGS = ('digital-specialists', 'digital-outcomes', 'user-research-participants')
 
 logger = logging_helpers.configure_logger({'dmapiclient': logging.INFO})
 
 
 if __name__ == '__main__':
     arguments = docopt(__doc__)
+    framework_slug = arguments['<framework_slug>']
+    stage = arguments['<stage>']
+
+    list_ids = {
+        'digital-outcomes-and-specialists-2': {
+            'digital-specialists': "30ba9fdf39" if stage == "production" else "07c21f0451",
+            'digital-outcomes': "97952fee38" if stage == "production" else "f0077c516d",
+            'user-research-participants': "e6b93a3bce" if stage == "production" else "d35601203b",
+        },
+        'digital-outcomes-and-specialists-3': {
+            'digital-specialists': "bee802d641" if stage == "production" else "07c21f0451",
+            'digital-outcomes': "5c92c78a78" if stage == "production" else "f0077c516d",
+            'user-research-participants': "34ebe0bffa" if stage == "production" else "d35601203b",
+        }
+    }
 
     lots = [
-        {
-            "lot_slug": "digital-specialists",
-            "list_id": "30ba9fdf39" if arguments['<stage>'] == "production" else "07c21f0451",
-            "framework_slug": "digital-outcomes-and-specialists-2"
-        },
-        {
-            "lot_slug": "digital-outcomes",
-            "list_id": "97952fee38" if arguments['<stage>'] == "production" else "f0077c516d",
-            "framework_slug": "digital-outcomes-and-specialists-2"
-        },
-        {
-            "lot_slug": "user-research-participants",
-            "list_id": "e6b93a3bce" if arguments['<stage>'] == "production" else "d35601203b",
-            "framework_slug": "digital-outcomes-and-specialists-2"
-        }
+        {'lot_slug': lot_slug, 'list_id': list_ids[framework_slug][lot_slug], 'framework_slug': framework_slug}
+        for lot_slug in LOT_SLUGS
     ]
 
-    api_url = get_api_endpoint_from_stage(arguments['<stage>'])
-    data_api_client = DataAPIClient(api_url, get_auth_token('api', arguments['<stage>']))
+    api_url = get_api_endpoint_from_stage(stage)
+    data_api_client = DataAPIClient(api_url, get_auth_token('api', stage))
     dm_mailchimp_client = DMMailChimpClient(
         arguments['<mailchimp_username>'],
         arguments['<mailchimp_api_key>'],
