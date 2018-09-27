@@ -9,24 +9,26 @@ from dmutils.formats import DATETIME_FORMAT, DISPLAY_DATE_FORMAT
 logger = logging_helpers.configure_logger({'dmapiclient': logging.INFO})
 
 
-def get_live_briefs_between_two_dates(data_api_client, lot_slug, start_date, end_date):
+def get_live_briefs_between_two_dates(data_api_client, lot_slug, start_date, end_date, framework_slug):
     """Get all briefs for a lot which were published between 2 dates."""
     return [
-        brief for brief in data_api_client.find_briefs_iter(status="live", lot=lot_slug, human=True)
+        brief for brief in data_api_client.find_briefs_iter(
+            status="live", lot=lot_slug, human=True, framework=framework_slug
+        )
         if datetime.strptime(brief['publishedAt'], DATETIME_FORMAT).date() >= start_date
         and datetime.strptime(brief['publishedAt'], DATETIME_FORMAT).date() <= end_date
     ]
 
 
-def get_campaign_data(lot_name, list_id, framework_iterations):
+def get_campaign_data(lot_name, list_id, framework_name):
     return {
         "type": "regular",
         "recipients": {
             "list_id": list_id,
         },
         "settings": {
-            "subject_line": "New opportunities for {0}: Digital Outcomes and Specialists {1}".format(
-                lot_name, " and ".join(framework_iterations)
+            "subject_line": "New opportunities for {0}: {1}".format(
+                lot_name, framework_name
             ),
             "title": "DOS Suppliers: {0} [{1}]".format(lot_name, datetime.now().strftime("%d %B")),
             "from_name": "Digital Marketplace Team",
@@ -66,7 +68,7 @@ def get_html_content(briefs, number_of_days):
     return {"html": html_content}
 
 
-def main(data_api_client, mailchimp_client, lot_data, number_of_days):
+def main(data_api_client, mailchimp_client, lot_data, number_of_days, framework_slug):
     logger.info(
         "Begin process to send DOS notification emails for '{0}' lot".format(lot_data["lot_slug"]),
         extra={"lot_data": lot_data, "number_of_days": number_of_days}
@@ -75,7 +77,9 @@ def main(data_api_client, mailchimp_client, lot_data, number_of_days):
     start_date = date.today() - timedelta(days=number_of_days)
     end_date = date.today() - timedelta(days=1)
 
-    live_briefs = get_live_briefs_between_two_dates(data_api_client, lot_data["lot_slug"], start_date, end_date)
+    live_briefs = get_live_briefs_between_two_dates(
+        data_api_client, lot_data["lot_slug"], start_date, end_date, framework_slug
+    )
     if not live_briefs:
         logger.info(
             "No new briefs found for '{0}' lot".format(lot_data["lot_slug"]),
@@ -86,8 +90,7 @@ def main(data_api_client, mailchimp_client, lot_data, number_of_days):
         "{0} new briefs found for '{1}' lot".format(len(live_briefs), lot_data["lot_slug"])
     )
 
-    framework_iterations = sorted({brief['frameworkName'][-1] for brief in live_briefs})
-    campaign_data = get_campaign_data(lot_data["lot_name"], lot_data["list_id"], framework_iterations)
+    campaign_data = get_campaign_data(lot_data["lot_name"], lot_data["list_id"], live_briefs[0]['frameworkName'])
     logger.info(
         "Creating campaign for '{0}' lot".format(lot_data["lot_slug"])
     )

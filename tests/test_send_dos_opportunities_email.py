@@ -38,9 +38,12 @@ def test_get_live_briefs_between_two_dates():
 
     data_api_client.find_briefs_iter.return_value = iter(brief_iter_values)
     briefs = get_live_briefs_between_two_dates(
-        data_api_client, "digital-specialists", date(2017, 3, 23), date(2017, 3, 23)
+        data_api_client, "digital-specialists", date(2017, 3, 23), date(2017, 3, 23),
+        'digital-outcomes-and-specialists-7',
     )
-    data_api_client.find_briefs_iter.assert_called_once_with(status="live", lot="digital-specialists", human=True)
+    assert data_api_client.find_briefs_iter.call_args_list == [
+        mock.call(status="live", lot="digital-specialists", human=True, framework='digital-outcomes-and-specialists-7')
+    ]
     assert briefs == [
         {"publishedAt": "2017-03-23T23:59:59.669156Z"},
         {"publishedAt": "2017-03-23T09:52:17.669156Z"},
@@ -49,7 +52,8 @@ def test_get_live_briefs_between_two_dates():
 
     data_api_client.find_briefs_iter.return_value = iter(brief_iter_values)
     briefs = get_live_briefs_between_two_dates(
-        data_api_client, "digital-specialists", date(2017, 3, 18), date(2017, 3, 20)
+        data_api_client, "digital-specialists", date(2017, 3, 18), date(2017, 3, 20),
+        'digital-outcomes-and-specialists-1',
     )
     assert briefs == [
         {"publishedAt": "2017-03-20T09:52:17.669156Z"},
@@ -136,38 +140,31 @@ def test_get_html_content_with_briefs_from_several_days():
         assert "Since Friday" in html_content
 
 
-@pytest.mark.parametrize(
-    ('framework_iterations', 'expected_subject_suffix'),
-    (
-        (["1"], "1"),
-        (["2"], "2"),
-        (["1", "2"], "1 and 2"),
-    )
-)
-def test_get_campaign_data(framework_iterations, expected_subject_suffix):
-    lot_name = "Digital Outcomes"
+def test_get_campaign_data():
+    framework_name = "Digit Outcomes and Specialists Two"
+    lot_name = "Digital Somethings"
     list_id = "1111111"
-    expected_subject = \
-        f"New opportunities for Digital Outcomes: Digital Outcomes and Specialists {expected_subject_suffix}"
 
     with freeze_time('2017-04-19 08:00:00'):
-        campaign_data = get_campaign_data(lot_name, list_id, framework_iterations)
+        campaign_data = get_campaign_data(lot_name, list_id, framework_name)
         assert campaign_data["recipients"]["list_id"] == list_id
-        assert campaign_data["settings"]["subject_line"] == expected_subject
-        assert campaign_data["settings"]["title"] == "DOS Suppliers: Digital Outcomes [19 April]"
+        assert campaign_data["settings"]["subject_line"] == f"New opportunities for {lot_name}: {framework_name}"
+        assert campaign_data["settings"]["title"] == f"DOS Suppliers: {lot_name} [19 April]"
         assert campaign_data["settings"]["from_name"] == "Digital Marketplace Team"
         assert campaign_data["settings"]["reply_to"] == "do-not-reply@digitalmarketplace.service.gov.uk"
 
 
+@pytest.mark.parametrize(
+    ('framework_name'), ('Digital Outcomes and Specialists 2', 'Digital Outcomes and Specialists 3')
+)
 @mock.patch('dmscripts.send_dos_opportunities_email.get_html_content', autospec=True)
 @mock.patch('dmscripts.send_dos_opportunities_email.get_live_briefs_between_two_dates', autospec=True)
 @mock.patch('dmscripts.send_dos_opportunities_email.get_campaign_data', autospec=True)
 def test_main_creates_campaign_sets_content_and_sends_campaign(
-    get_campaign_data, get_live_briefs_between_two_dates, get_html_content
+    get_campaign_data, get_live_briefs_between_two_dates, get_html_content, framework_name
 ):
     live_briefs = [
-        {"brief": "yaytest", "frameworkName": "Digital Outcomes and Specialists 2"},
-        {"brief": "bootest", "frameworkName": "Digital Outcomes and Specialists 1"},
+        {"brief": "yaytest", "frameworkName": framework_name},
     ]
     get_live_briefs_between_two_dates.return_value = live_briefs
     get_campaign_data.return_value = {"created": "campaign"}
@@ -175,10 +172,10 @@ def test_main_creates_campaign_sets_content_and_sends_campaign(
 
     dm_mailchimp_client = mock.MagicMock(spec=DMMailChimpClient)
     dm_mailchimp_client.create_campaign.return_value = "1"
-    main(mock.MagicMock(), dm_mailchimp_client, LOT_DATA, 1)
+    main(mock.MagicMock(), dm_mailchimp_client, LOT_DATA, 1, framework_name)
 
     # Creates campaign
-    get_campaign_data.assert_called_once_with("Digital specialists", "096e52cebb", ["1", "2"])
+    get_campaign_data.assert_called_once_with("Digital specialists", "096e52cebb", framework_name)
     dm_mailchimp_client.create_campaign.assert_called_once_with({"created": "campaign"})
 
     # Sets campaign content
@@ -192,18 +189,18 @@ def test_main_creates_campaign_sets_content_and_sends_campaign(
 @mock.patch('dmscripts.send_dos_opportunities_email.get_live_briefs_between_two_dates', autospec=True)
 def test_main_gets_live_briefs_for_one_day(get_live_briefs_between_two_dates):
     with freeze_time('2017-04-19 08:00:00'):
-        main(mock.MagicMock(), mock.MagicMock(), LOT_DATA, 1)
+        main(mock.MagicMock(), mock.MagicMock(), LOT_DATA, 1, 'Digital Outcomes and Specialists')
         get_live_briefs_between_two_dates.assert_called_once_with(
-            mock.ANY, "digital-specialists", date(2017, 4, 18), date(2017, 4, 18)
+            mock.ANY, "digital-specialists", date(2017, 4, 18), date(2017, 4, 18), 'Digital Outcomes and Specialists'
         )
 
 
 @mock.patch('dmscripts.send_dos_opportunities_email.get_live_briefs_between_two_dates', autospec=True)
 def test_main_gets_live_briefs_for_three_days(get_live_briefs_between_two_dates):
     with freeze_time('2017-04-10 08:00:00'):
-        main(mock.MagicMock(), mock.MagicMock(), LOT_DATA, 3)
+        main(mock.MagicMock(), mock.MagicMock(), LOT_DATA, 3, 'Digital Outcomes and Specialists')
         get_live_briefs_between_two_dates.assert_called_once_with(
-            mock.ANY, "digital-specialists", date(2017, 4, 7), date(2017, 4, 9)
+            mock.ANY, "digital-specialists", date(2017, 4, 7), date(2017, 4, 9), 'Digital Outcomes and Specialists'
         )
 
 
@@ -213,7 +210,7 @@ def test_if_no_briefs_then_no_campaign_created_nor_sent(get_live_briefs_between_
     get_live_briefs_between_two_dates.return_value = []
 
     dm_mailchimp_client = mock.MagicMock(DMMailChimpClient)
-    result = main(mock.MagicMock(), dm_mailchimp_client, LOT_DATA, 3)
+    result = main(mock.MagicMock(), dm_mailchimp_client, LOT_DATA, 3, 'Digital Outcomes and Specialists')
 
     assert result is True
     assert dm_mailchimp_client.create_campaign.call_count == 0
