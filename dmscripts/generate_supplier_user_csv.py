@@ -108,7 +108,7 @@ def upload_to_s3(file_path, framework_slug, download_filename, bucket, dry_run, 
                 bucket.save(
                     "{}/reports/{}".format(framework_slug, download_filename),
                     source_file,
-                    acl='private',
+                    acl='bucket-owner-full-control',
                     download_filename=download_filename
                 )
                 logger.info("UPLOADED: '{}' to '{}'".format(file_path, download_filename))

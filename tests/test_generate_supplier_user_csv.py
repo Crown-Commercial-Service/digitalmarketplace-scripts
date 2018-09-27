@@ -183,7 +183,7 @@ def test_upload_to_s3_uploads_or_logs_for_dry_run(dry_run):
             mock.call(
                 "g-cloud-10/reports/supplier-users-g-cloud-10.csv",
                 mock.ANY,  # file object
-                acl='private',
+                acl='bucket-owner-full-control',
                 download_filename='supplier-users-g-cloud-10.csv'
             )
         ]
