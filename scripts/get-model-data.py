@@ -53,6 +53,9 @@ DOS_SPECIALIST_ROLES = [
     "communicationsManager",
     "contentDesigner",
     "securityConsultant",
+    "dataArchitect",
+    "dataEngineer",
+    "dataScientist",
     "deliveryManager",
     "designer",
     "developer",
@@ -95,7 +98,13 @@ CONFIGS = [
     {
         'name': 'dos_services',
         'base_model': 'services',
-        'get_data_kwargs': {'framework': 'digital-outcomes-and-specialists, digital-outcomes-and-specialists-2'},
+        'get_data_kwargs': {
+            'framework': (
+                'digital-outcomes-and-specialists, '
+                'digital-outcomes-and-specialists-2, '
+                'digital-outcomes-and-specialists-3'
+            )
+        },
         'keys': (
             [
                 'id',
