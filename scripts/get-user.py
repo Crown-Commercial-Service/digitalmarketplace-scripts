@@ -59,6 +59,25 @@ def get_supplier_id(api_client, framework, lot):
     return random.choice(services)['supplierId']
 
 
+def get_random_buyer_with_brief(api_client, framework, lot):
+    briefs = api_client.find_briefs(
+        framework=framework,
+        lot=lot,
+        status="live,cancelled,unsuccessful,closed,awarded",
+        with_users=True,
+    )["briefs"]
+
+    if not briefs:
+        print("No users with published briefs found for '{}' framework{}".format(
+            framework, " and '{}' lot".format(lot) if lot else "")
+        )
+        sys.exit(1)
+
+    brief = random.choice(briefs)
+
+    return random.choice(brief["users"])
+
+
 def get_random_user(api_client, role, supplier_id=None):
     return random.choice([
         u for u in api_client.find_users(role=role, supplier_id=supplier_id)['users']
@@ -81,6 +100,12 @@ def get_user(api_url, api_token, stage, role, framework, lot):
         supplier_id = get_supplier_id(api_client, framework, lot)
         print('Supplier id: {}'.format(supplier_id))
         return get_random_user(api_client, None, supplier_id)
+    if role == "buyer" and framework is not None:
+        framework = get_full_framework_slug(framework)
+        print('Framework: {}'.format(framework))
+        if framework.startswith("digital-outcomes-and-specialists"):
+            print("Has requirements: True")
+            return get_random_buyer_with_brief(api_client, framework, lot)
     else:
         return get_random_user(api_client, role)
 
