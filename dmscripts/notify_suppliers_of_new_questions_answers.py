@@ -3,17 +3,14 @@ import dmapiclient
 from datetime import datetime, timedelta
 
 from dmscripts.helpers import logging_helpers
-from dmscripts.helpers.html_helpers import render_html
 from dmscripts.helpers.logging_helpers import logging
 from dmutils.email.exceptions import EmailError
-from dmutils.email.dm_mandrill import DMMandrillClient
+from dmutils.email.dm_notify import DMNotifyClient
 from dmutils.formats import DATETIME_FORMAT
 from dmutils.env_helpers import get_web_url_from_stage
 
 
-EMAIL_SUBJECT = "New answers to supplier questions on the Digital Marketplace"
-EMAIL_FROM_ADDRESS = "do-not-reply@digitalmarketplace.service.gov.uk"
-EMAIL_FROM_NAME = "Digital Marketplace Team"
+EMAIL_TEMPLATE_ID = "847e8aa0-4ba4-495e-9d39-ae3b32007025"
 
 
 logger = logging_helpers.configure_logger({'dmapiclient': logging.INFO})
@@ -83,22 +80,20 @@ def create_context_for_supplier(stage, supplier_briefs):
     }
 
 
-def get_html_content(context):
-    return render_html("templates/email/suppliers_new_briefs_questions_answers.html", data={
-        "briefs": context['briefs']
-    })
+def get_template_personalisation(context):
+    return {
+        "briefs": "\n".join(brief["brief_link"] for brief in context["briefs"]),
+    }
 
 
 def send_supplier_emails(email_api_key, email_addresses, supplier_context, logger):
-    email_client = DMMandrillClient(email_api_key, logger=logger)
-    email_client.send_email(
-        email_addresses,
-        EMAIL_FROM_ADDRESS,
-        EMAIL_FROM_NAME,
-        get_html_content(supplier_context),
-        EMAIL_SUBJECT,
-        ["supplier-new-brief-questions-answers"],
-    )
+    email_client = DMNotifyClient(email_api_key, logger=logger)
+    for email_address in email_addresses:
+        email_client.send_email(
+            template_name_or_id=EMAIL_TEMPLATE_ID,
+            email_address=email_address,
+            template_personalisation=get_template_personalisation(supplier_context),
+        )
 
 
 def main(data_api_url, data_api_token, email_api_key, stage, dry_run, supplier_ids=[]):
