@@ -2,7 +2,7 @@
 from datetime import datetime, timedelta
 
 import dmapiclient
-from dmutils.email.dm_mandrill import send_email, get_sent_emails
+from dmutils.email.dm_mandrill import DMMandrillClient
 from dmutils.email.exceptions import EmailError
 from dmutils.formats import DATE_FORMAT
 
@@ -17,6 +17,7 @@ logger = logging_helpers.configure_logger({'dmapiclient': logging.INFO})
 def notify_users(email_api_key, brief):
     logger.info("Notifying users about brief ID: {brief_id} - '{brief_title}'",
                 extra={'brief_title': brief['title'], 'brief_id': brief['id']})
+    email_client = DMMandrillClient(email_api_key, logger=logger)
     if brief['users']:
         try:
             email_body = render_html('templates/email/requirements_closed.html', data={
@@ -25,16 +26,14 @@ def notify_users(email_api_key, brief):
                 'lot_slug': brief['lotSlug'],
                 'framework_slug': brief['frameworkSlug']
             })
-            send_email(
+            email_client.send_email(
                 [user['emailAddress'] for user in brief['users'] if user['active']],
-                email_body,
-                email_api_key,
-                u'Next steps for your ‘{}’ requirements'.format(brief['title']),
                 'enquiries@digitalmarketplace.service.gov.uk',
                 'Digital Marketplace Admin',
+                email_body,
+                u'Next steps for your ‘{}’ requirements'.format(brief['title']),
                 ['requirements-closed'],
                 metadata={'brief_id': brief['id']},
-                logger=logger
             )
 
             return True
@@ -55,9 +54,10 @@ def get_date_closed(date_closed):
 
 
 def get_notified_briefs(email_api_key, date_closed):
+    email_client = DMMandrillClient(email_api_key, logger=logger)
     return set(
         email['metadata']['brief_id']
-        for email in get_sent_emails(email_api_key, ['requirements-closed'], date_from=date_closed.isoformat())
+        for email in email_client.get_sent_emails(['requirements-closed'], date_from=date_closed.isoformat())
         if 'brief_id' in (email.get('metadata') or {})
     )
 
