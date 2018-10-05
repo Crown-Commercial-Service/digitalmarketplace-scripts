@@ -6,11 +6,11 @@ virtualenv:
 	[ -z $$VIRTUAL_ENV ] && [ ! -d venv ] && python3 -m venv venv || true
 
 .PHONY: requirements
-requirements: virtualenv requirements.txt
+requirements: virtualenv test-requirements requirements.txt
 	${VIRTUALENV_ROOT}/bin/pip install -r requirements.txt
 
 .PHONY: requirements-dev
-requirements-dev: virtualenv requirements-dev.txt
+requirements-dev: virtualenv test-requirements requirements-dev.txt
 	${VIRTUALENV_ROOT}/bin/pip install -r requirements-dev.txt
 
 .PHONY: freeze-requirements
