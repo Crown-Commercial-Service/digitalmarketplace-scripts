@@ -38,6 +38,9 @@ in (with args; {
     VIRTUAL_ENV_DISABLE_PROMPT = "1";
     SOURCE_DATE_EPOCH = "315532800";
 
+    # pip's builds will never be pure - allow gcc to include impure paths
+    NIX_ENFORCE_PURITY=0;
+
     # if we don't have this, we get unicode troubles in a --pure nix-shell
     LANG="en_GB.UTF-8";
 
@@ -48,7 +51,7 @@ in (with args; {
         ${pythonPackages.python}/bin/python -m venv $VIRTUALENV_ROOT
       fi
       source $VIRTUALENV_ROOT/bin/activate
-      pip install -r requirements${pkgs.stdenv.lib.optionalString forDev "-dev"}.txt
+      make requirements${pkgs.stdenv.lib.optionalString forDev "-dev"}
     '';
   }).overrideAttrs (if builtins.pathExists localOverridesPath then (import localOverridesPath args) else (x: x));
 })
