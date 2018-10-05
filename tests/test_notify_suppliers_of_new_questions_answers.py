@@ -270,7 +270,7 @@ def test_get_html_content_renders_multiple_briefs():
 
 
 @mock.patch(MODULE_UNDER_TEST + '.get_html_content')
-@mock.patch(MODULE_UNDER_TEST + '.send_email')
+@mock.patch(MODULE_UNDER_TEST + '.DMMandrillClient.send_email')
 def test_send_emails_calls_mandrill_api_client(send_email, get_html_content):
     logger = mock.Mock()
     get_html_content.return_value = "my content is bananas"
@@ -295,13 +295,11 @@ def test_send_emails_calls_mandrill_api_client(send_email, get_html_content):
 
     send_email.assert_called_once_with(
         ['a@example.com', 'a2@example.com'],
-        "my content is bananas",
-        "MANDRILL_API_KEY",
-        EMAIL_SUBJECT,
         EMAIL_FROM_ADDRESS,
         EMAIL_FROM_NAME,
+        "my content is bananas",
+        EMAIL_SUBJECT,
         ["supplier-new-brief-questions-answers"],
-        logger=logger
     )
 
 

@@ -6,7 +6,7 @@ from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.html_helpers import render_html
 from dmscripts.helpers.logging_helpers import logging
 from dmutils.email.exceptions import EmailError
-from dmutils.email.dm_mandrill import send_email
+from dmutils.email.dm_mandrill import DMMandrillClient
 from dmutils.formats import DATETIME_FORMAT
 from dmutils.env_helpers import get_web_url_from_stage
 
@@ -90,15 +90,14 @@ def get_html_content(context):
 
 
 def send_supplier_emails(email_api_key, email_addresses, supplier_context, logger):
-    send_email(
+    email_client = DMMandrillClient(email_api_key, logger=logger)
+    email_client.send_email(
         email_addresses,
-        get_html_content(supplier_context),
-        email_api_key,
-        EMAIL_SUBJECT,
         EMAIL_FROM_ADDRESS,
         EMAIL_FROM_NAME,
+        get_html_content(supplier_context),
+        EMAIL_SUBJECT,
         ["supplier-new-brief-questions-answers"],
-        logger=logger
     )
 
 

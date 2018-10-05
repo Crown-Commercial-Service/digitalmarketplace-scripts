@@ -40,7 +40,7 @@ def test_get_date_closed():
         check_date_closed(value, expected)
 
 
-@mock.patch('dmscripts.notify_buyers_when_requirements_close.get_sent_emails')
+@mock.patch('dmscripts.notify_buyers_when_requirements_close.DMMandrillClient.get_sent_emails')
 def test_get_notified_briefs(get_sent_emails):
     get_sent_emails.return_value = [
         {},
@@ -51,10 +51,10 @@ def test_get_notified_briefs(get_sent_emails):
     ]
 
     assert get_notified_briefs('KEY', datetime.date(2015, 1, 2)) == set([100, 200, 300])
-    get_sent_emails.assert_called_once_with('KEY', ['requirements-closed'], date_from='2015-01-02')
+    get_sent_emails.assert_called_once_with(['requirements-closed'], date_from='2015-01-02')
 
 
-@mock.patch('dmscripts.notify_buyers_when_requirements_close.send_email')
+@mock.patch('dmscripts.notify_buyers_when_requirements_close.DMMandrillClient.send_email')
 def test_notify_users(send_email):
     notify_users('KEY', {
         'id': 100,
@@ -70,21 +70,19 @@ def test_notify_users(send_email):
 
     send_email.assert_called_once_with(
         ['a@example.com', 'c@example.com'],
+        'enquiries@digitalmarketplace.service.gov.uk',
+        'Digital Marketplace Admin',
         FakeMail(
             'My brief title',
             '/buyers/frameworks/framework-slug/requirements/lot-slug/100/responses'
         ),
-        'KEY',
         u'Next steps for your \u2018My brief title\u2019 requirements',
-        'enquiries@digitalmarketplace.service.gov.uk',
-        'Digital Marketplace Admin',
         ['requirements-closed'],
-        logger=mock.ANY,
         metadata={'brief_id': 100}
     )
 
 
-@mock.patch('dmscripts.notify_buyers_when_requirements_close.send_email')
+@mock.patch('dmscripts.notify_buyers_when_requirements_close.DMMandrillClient.send_email')
 def test_notify_users_returns_false_on_error(send_email):
     send_email.side_effect = EmailError('Error')
     assert not notify_users('KEY', {
