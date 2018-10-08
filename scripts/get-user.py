@@ -18,97 +18,12 @@ Example:
     ./get-user.py --stage=staging supplier dos2 digital-outcomes
 """
 
-import random
-import re
 import sys
 
-import dmapiclient
 from docopt import docopt
 
 sys.path.insert(0, '.')
-from dmscripts.helpers.auth_helpers import get_auth_token, get_api_url
-
-
-def get_full_framework_slug(framework):
-    iteration = re.search('(\d+)', framework)
-    if framework.startswith('g'):
-        prefix = 'g-cloud'
-    elif framework.startswith('d'):
-        prefix = 'digital-outcomes-and-specialists'
-    else:
-        return framework
-
-    if iteration:
-        return "{}-{}".format(prefix, iteration.group(1))
-    else:
-        return prefix
-
-
-def get_supplier_id(api_client, framework, lot):
-    services = [
-        s for s in api_client.find_services(framework=framework, lot=lot)['services']
-        if s['status'] in ['published']
-    ]
-
-    if not services:
-        print("No live services found for '{}' framework{}".format(
-            framework, " and '{}' lot".format(lot) if lot else '')
-        )
-        sys.exit(1)
-
-    return random.choice(services)['supplierId']
-
-
-def get_random_buyer_with_brief(api_client, framework, lot):
-    briefs = api_client.find_briefs(
-        framework=framework,
-        lot=lot,
-        status="live,cancelled,unsuccessful,closed,awarded",
-        with_users=True,
-    )["briefs"]
-
-    if not briefs:
-        print("No users with published briefs found for '{}' framework{}".format(
-            framework, " and '{}' lot".format(lot) if lot else "")
-        )
-        sys.exit(1)
-
-    brief = random.choice(briefs)
-
-    return random.choice(brief["users"])
-
-
-def get_random_user(api_client, role, supplier_id=None):
-    return random.choice([
-        u for u in api_client.find_users(role=role, supplier_id=supplier_id)['users']
-        if u['active'] and not u['locked']
-    ])
-
-
-def get_user(api_url, api_token, stage, role, framework, lot):
-    if not api_url:
-        api_url = get_api_url('api', stage)
-
-    api_token = api_token or get_auth_token('api', stage)
-    api_client = dmapiclient.DataAPIClient(api_url, api_token)
-
-    if role == 'supplier' and framework is not None:
-        framework = get_full_framework_slug(framework)
-        print('Framework: {}'.format(framework))
-        if lot is not None:
-            print('Lot: {}'.format(lot))
-        supplier_id = get_supplier_id(api_client, framework, lot)
-        print('Supplier id: {}'.format(supplier_id))
-        return get_random_user(api_client, None, supplier_id)
-    if role == "buyer" and framework is not None:
-        framework = get_full_framework_slug(framework)
-        print('Framework: {}'.format(framework))
-        if framework.startswith("digital-outcomes-and-specialists"):
-            print("Has requirements: True")
-            return get_random_buyer_with_brief(api_client, framework, lot)
-    else:
-        return get_random_user(api_client, role)
-
+from dmscripts.get_user import get_user
 
 if __name__ == "__main__":
     arguments = docopt(__doc__)
