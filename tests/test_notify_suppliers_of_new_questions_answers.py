@@ -4,7 +4,6 @@ from freezegun import freeze_time
 from dmutils.email.exceptions import EmailError
 
 from datetime import datetime
-from lxml import html
 
 from dmscripts.notify_suppliers_of_new_questions_answers import (
     main,
@@ -16,11 +15,10 @@ from dmscripts.notify_suppliers_of_new_questions_answers import (
     invert_a_dictionary_so_supplier_id_is_key_and_brief_id_is_value,
     create_context_for_supplier,
     send_supplier_emails,
-    get_html_content,
-    EMAIL_SUBJECT,
-    EMAIL_FROM_ADDRESS,
-    EMAIL_FROM_NAME
+    get_template_personalisation,
 )
+
+NOTIFY_API_KEY = "1" * 73
 
 ALL_BRIEFS = [
     # a brief with no questions
@@ -236,7 +234,7 @@ def test_create_context_for_supplier_returns_correct_production_url():
         }
 
 
-def test_get_html_content_renders_multiple_briefs():
+def test_get_template_personalisation_renders_multiple_briefs():
     context = {
         'briefs': [
             {
@@ -253,30 +251,25 @@ def test_get_html_content_renders_multiple_briefs():
     }
 
     with freeze_time('1999-04-20 08:00:00'):
-        html_content = get_html_content(context)
+        template_personalisation = get_template_personalisation(context)
 
-    doc = html.fromstring(html_content)
-    brief_titles = doc.xpath('//*[@class="opportunity-title"]')
-    brief_links = doc.xpath('//*[@class="opportunity-link"]')
-
-    assert len(brief_titles) == 2
-    assert brief_titles[0].text_content() == "Amazing Title"
-    assert brief_titles[1].text_content() == 'Brilliant Title'
-    assert len(brief_links) == 2
-    assert brief_links[0].text_content() == 'https://www.digitalmarketplace.service.gov.uk/' \
-        'digital-outcomes-and-specialists/opportunities/3?utm_id=19990420qa'
-    assert brief_links[1].text_content() == 'https://www.digitalmarketplace.service.gov.uk/' \
-        'digital-outcomes-and-specialists/opportunities/4?utm_id=19990420qa'
+    assert (
+        template_personalisation["briefs"]
+        ==
+        "https://www.digitalmarketplace.service.gov.uk/"
+        "digital-outcomes-and-specialists/opportunities/3?utm_id=19990420qa"
+        "\n"
+        "https://www.digitalmarketplace.service.gov.uk/"
+        "digital-outcomes-and-specialists/opportunities/4?utm_id=19990420qa"
+    )
 
 
-@mock.patch(MODULE_UNDER_TEST + '.get_html_content')
-@mock.patch(MODULE_UNDER_TEST + '.send_email')
-def test_send_emails_calls_mandrill_api_client(send_email, get_html_content):
+@mock.patch(MODULE_UNDER_TEST + '.DMNotifyClient.send_email')
+def test_send_emails_calls_notify_api_client(send_email):
     logger = mock.Mock()
-    get_html_content.return_value = "my content is bananas"
 
     send_supplier_emails(
-        'MANDRILL_API_KEY',
+        NOTIFY_API_KEY,
         ['a@example.com', 'a2@example.com'],
         {'briefs': [
             {
@@ -293,15 +286,28 @@ def test_send_emails_calls_mandrill_api_client(send_email, get_html_content):
         logger
     )
 
-    send_email.assert_called_once_with(
-        ['a@example.com', 'a2@example.com'],
-        "my content is bananas",
-        "MANDRILL_API_KEY",
-        EMAIL_SUBJECT,
-        EMAIL_FROM_ADDRESS,
-        EMAIL_FROM_NAME,
-        ["supplier-new-brief-questions-answers"],
-        logger=logger
+    assert send_email.call_count == 2
+    send_email.assert_any_call(
+        email_address="a@example.com",
+        template_name_or_id=mock.ANY,
+        template_personalisation={
+            "briefs": "https://www.digitalmarketplace.service.gov.uk/"
+                      "digital-outcomes-and-specialists/opportunities/3?utm_id=20170419qa"
+                      "\n"
+                      "https://www.digitalmarketplace.service.gov.uk/"
+                      "digital-outcomes-and-specialists/opportunities/4?utm_id=20170419qa",
+        }
+    )
+    send_email.assert_any_call(
+        email_address="a2@example.com",
+        template_name_or_id=mock.ANY,
+        template_personalisation={
+            "briefs": "https://www.digitalmarketplace.service.gov.uk/"
+                      "digital-outcomes-and-specialists/opportunities/3?utm_id=20170419qa"
+                      "\n"
+                      "https://www.digitalmarketplace.service.gov.uk/"
+                      "digital-outcomes-and-specialists/opportunities/4?utm_id=20170419qa",
+        }
     )
 
 
@@ -330,7 +336,7 @@ def test_main_calls_functions(
     ]
 
     with freeze_time('2017-04-19 08:00:00'):
-        result = main('api_url', 'api_token', 'MANDRILL_API_KEY', 'preview', dry_run=False)
+        result = main('api_url', 'api_token', NOTIFY_API_KEY, 'preview', dry_run=False)
 
     assert result
     assert data_api_client.call_args == mock.call('api_url', 'api_token')
@@ -348,7 +354,7 @@ def test_main_calls_functions(
     ]
     assert send_supplier_emails.call_args_list == [
         mock.call(
-            'MANDRILL_API_KEY',
+            NOTIFY_API_KEY,
             ['a@example.com', 'a2@example.com'],
             {'briefs': [
                 {
@@ -363,7 +369,7 @@ def test_main_calls_functions(
             mock.ANY
         ),
         mock.call(
-            'MANDRILL_API_KEY',
+            NOTIFY_API_KEY,
             ['b@example.com'],
             {'briefs': [
                 {
@@ -398,7 +404,7 @@ def test_main_can_restrict_to_custom_list_of_suppliers(
     get_supplier_email_addresses_by_supplier_id.return_value = ['a@example.com']
 
     with freeze_time('2017-04-19 08:00:00'):
-        main('api_url', 'api_token', 'MANDRILL_API_KEY', 'preview', dry_run=False, supplier_ids=[4])
+        main('api_url', 'api_token', NOTIFY_API_KEY, 'preview', dry_run=False, supplier_ids=[4])
 
     assert data_api_client.call_args == mock.call('api_url', 'api_token')
     assert get_supplier_email_addresses_by_supplier_id.call_args_list == [
@@ -406,7 +412,7 @@ def test_main_can_restrict_to_custom_list_of_suppliers(
     ]
     assert send_supplier_emails.call_args_list == [
         mock.call(
-            'MANDRILL_API_KEY',
+            NOTIFY_API_KEY,
             ['a@example.com'],
             {'briefs': [
                 {

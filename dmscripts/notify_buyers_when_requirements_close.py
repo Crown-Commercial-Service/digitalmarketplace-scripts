@@ -2,40 +2,45 @@
 from datetime import datetime, timedelta
 
 import dmapiclient
-from dmutils.email.dm_mandrill import send_email, get_sent_emails
+from dmutils.email.dm_notify import DMNotifyClient
 from dmutils.email.exceptions import EmailError
+from dmutils.env_helpers import get_web_url_from_stage
 from dmutils.formats import DATE_FORMAT
 
 from dmscripts.helpers.brief_data_helpers import get_briefs_closed_on_date
-from dmscripts.helpers.html_helpers import render_html
 from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.logging_helpers import logging
+
+
+EMAIL_TEMPLATE_ID = "c1f88c6f-1c6f-4f50-b52b-947bcea5e6c1"
 
 logger = logging_helpers.configure_logger({'dmapiclient': logging.INFO})
 
 
-def notify_users(email_api_key, brief):
+def notify_users(email_api_key, stage, brief):
     logger.info("Notifying users about brief ID: {brief_id} - '{brief_title}'",
                 extra={'brief_title': brief['title'], 'brief_id': brief['id']})
+    email_client = DMNotifyClient(email_api_key, logger=logger)
     if brief['users']:
         try:
-            email_body = render_html('templates/email/requirements_closed.html', data={
-                'brief_id': brief['id'],
-                'brief_title': brief['title'],
-                'lot_slug': brief['lotSlug'],
-                'framework_slug': brief['frameworkSlug']
-            })
-            send_email(
-                [user['emailAddress'] for user in brief['users'] if user['active']],
-                email_body,
-                email_api_key,
-                u'Next steps for your ‘{}’ requirements'.format(brief['title']),
-                'enquiries@digitalmarketplace.service.gov.uk',
-                'Digital Marketplace Admin',
-                ['requirements-closed'],
-                metadata={'brief_id': brief['id']},
-                logger=logger
-            )
+            brief_responses_url = \
+                "{base_url}/buyers/frameworks/{framework_slug}/requirements/{lot_slug}/{brief_id}/responses".format(
+                    base_url=get_web_url_from_stage(stage),
+                    brief_id=brief["id"],
+                    brief_title=brief["title"],
+                    lot_slug=brief["lotSlug"],
+                    framework_slug=brief["frameworkSlug"],
+                )
+            for email_address in (user['emailAddress'] for user in brief['users'] if user['active']):
+                email_client.send_email(
+                    email_address,
+                    template_name_or_id=EMAIL_TEMPLATE_ID,
+                    template_personalisation={
+                        "brief_title": brief["title"],
+                        "brief_responses_url": brief_responses_url,
+                    },
+                    allow_resend=False,
+                )
 
             return True
         except EmailError as e:
@@ -54,17 +59,7 @@ def get_date_closed(date_closed):
         return datetime.strptime(date_closed, DATE_FORMAT).date()
 
 
-def get_notified_briefs(email_api_key, date_closed):
-    return set(
-        email['metadata']['brief_id']
-        for email in get_sent_emails(email_api_key, ['requirements-closed'], date_from=date_closed.isoformat())
-        if 'brief_id' in (email.get('metadata') or {})
-    )
-
-
-def main(data_api_url, data_api_access_token, email_api_key, date_closed, dry_run):
-    logger.info("Data API URL: {data_api_url}", extra={'data_api_url': data_api_url})
-
+def main(data_api_url, data_api_access_token, email_api_key, stage, date_closed, dry_run):
     date_closed = get_date_closed(date_closed)
     if date_closed < (datetime.utcnow() - timedelta(days=8)).date():
         logger.error('Not allowed to notify about briefs that closed more than a week ago')
@@ -79,18 +74,11 @@ def main(data_api_url, data_api_access_token, email_api_key, date_closed, dry_ru
 
     logger.info("Notifying users about {briefs_count} closed briefs", extra={'briefs_count': len(closed_briefs)})
 
-    notified_briefs = get_notified_briefs(email_api_key, date_closed)
-
-    logger.info('Brief notifications sent since {date_closed}: {notified_briefs_count}',
-                extra={'date_closed': date_closed, 'notified_briefs_count': len(notified_briefs)})
-
     for brief in closed_briefs:
-        if brief['id'] in notified_briefs:
-            logger.info('Brief notification already sent for brief ID: {brief_id}', extra={'brief_id': brief['id']})
-        elif dry_run:
+        if dry_run:
             logger.info("Would notify users about brief ID: {brief_id}", extra={'brief_id': brief['id']})
         else:
-            status = notify_users(email_api_key, brief)
+            status = notify_users(email_api_key, stage, brief)
             if not status:
                 return False
 

@@ -5,7 +5,7 @@ suppliers who have started an application, completed an application or asked a q
 opportunity. If a supplier is interested in more than one brief that has had a question or answer posted,
 then these are grouped into a single email.
 
-Usage: notify-suppliers-of-new-questions-answers.py <stage> <mandrill_api_key> [options]
+Usage: notify-suppliers-of-new-questions-answers.py <stage> <notify_api_key> [options]
 
 Options:
     --dry-run                               List notifications that would be sent without sending the emails
@@ -14,7 +14,7 @@ Options:
                                             to any supplier
 
 Examples:
-    ./scripts/notify-suppliers-of-new-questions-answers.py preview mandrillToken --dry-run --supplier-ids=2,3,4
+    ./scripts/notify-suppliers-of-new-questions-answers.py preview notify-token --dry-run --supplier-ids=2,3,4
 """
 
 import sys
@@ -37,7 +37,7 @@ if __name__ == "__main__":
     ok = main(
         data_api_url=get_api_endpoint_from_stage(arguments['<stage>'], 'api'),
         data_api_token=get_auth_token('api', arguments['<stage>']),
-        email_api_key=arguments['<mandrill_api_key>'],
+        email_api_key=arguments['<notify_api_key>'],
         stage=arguments['<stage>'],
         dry_run=arguments['--dry-run'],
         supplier_ids=list_of_supplier_ids

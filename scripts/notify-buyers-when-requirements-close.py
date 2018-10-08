@@ -26,6 +26,7 @@ if __name__ == "__main__":
         data_api_url=get_api_endpoint_from_stage(arguments['<stage>'], 'api'),
         data_api_access_token=get_auth_token('api', arguments['<stage>']),
         email_api_key=arguments['--email-api-key'],
+        stage=arguments['<stage>'],
         date_closed=arguments['--date-closed'],
         dry_run=arguments['--dry-run']
     )
