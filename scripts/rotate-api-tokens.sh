@@ -1,5 +1,5 @@
 #!/bin/bash
-# This script will update Data and Search API tokens for a given environment. It does this by checking out the
+# This script will update Data, Search and Antivirus API tokens for a given environment. It does this by checking out the
 # dm-credentials repository, decrypting the relevant creds files and using 'yq' (a yaml CLI editor) to inject new
 # tokens. These are committed and pushed up, then the GitHub API is used to create a pull request for the developer
 # to manually approve.
@@ -64,22 +64,22 @@ function commit_and_create_github_pr() {
 function add_new_tokens() {
   create_credentials_update_branch
 
-  echo "Adding three new tokens (Application, Jenkins, Developer) to the Data-API and Search-API for ${STAGE}."
+  echo "Adding three new tokens (Application, Jenkins, Developer) to the Data-API, Search-API and Antivirus-API for ${STAGE}."
 
-  # Insert three new tokens for the api and search-api, and update Jenkins config with the new jenkins token.
-  for api_type in api search_api; do
+  # Insert three new tokens for the api, search-api and antivirus-api, and update Jenkins config with the new jenkins token.
+  for api_type in api search_api antivirus_api; do
     app_token="A$(generate_api_token)"
     jenkins_token="J$(generate_api_token)"
     dev_token="D$(generate_api_token)"
 
-    # Add the tokens for the Data/Search API
+    # Add the tokens for the Data/Search/Antivirus APIs
     ./sops-wrapper --set "[\"${api_type}\"] $(./sops-wrapper -d vars/${STAGE_LOWER}.yaml | yq -crM '.'${api_type}'.auth_tokens |= ["'${app_token}'", "'${jenkins_token}'", "'${dev_token}'"] + . | .'${api_type})" "vars/${STAGE_LOWER}.yaml"
 
     # Update the tokens for Jenkins
     ./sops-wrapper --set "[\"jenkins_env_variables\"] $(./sops-wrapper -d jenkins-vars/jenkins.yaml | yq -crM '.jenkins_env_variables.'$(get_jenkins_env_token_name ${api_type})' = "'${jenkins_token}'" | .jenkins_env_variables')" jenkins-vars/jenkins.yaml
   done
 
-  commit_and_create_github_pr "Add new API tokens" "## Summary\r\nInsert three new Data and Search API tokens (application, jenkins, developer) for the ${STAGE} environment in order to recycle the existing tokens."
+  commit_and_create_github_pr "Add new API tokens" "## Summary\r\nInsert three new Data, Search and Antivirus API tokens (application, jenkins, developer) for the ${STAGE} environment in order to recycle the existing tokens."
 
   echo "Done."
 }
@@ -89,12 +89,12 @@ function remove_old_tokens() {
 
   echo "Removing all tokens except the three newest (Application, Jenkins, Developer) from the Data-API and Search-API for ${STAGE}."
 
-  for api_type in api search_api; do
-    # Remove all except the first three Data/Search API tokens
+  for api_type in api search_api antivirus_api; do
+    # Remove all except the first three Data/Search/Antivirus API tokens
     ./sops-wrapper --set "[\"${api_type}\"] $(./sops-wrapper -d vars/${STAGE_LOWER}.yaml | yq -crM '.'${api_type}'.auth_tokens = .'${api_type}'.auth_tokens[:3] | .'${api_type})" vars/${STAGE_LOWER}.yaml
   done
 
-  commit_and_create_github_pr "Remove old API tokens" "## Summary\r\nRemove all old Data and Search API tokens for the ${STAGE} environment, leaving just the latest three (application, jenkins, developer)."
+  commit_and_create_github_pr "Remove old API tokens" "## Summary\r\nRemove all old Data, Search and Antivirus API tokens for the ${STAGE} environment, leaving just the latest three (application, jenkins, developer)."
 
   echo "Done."
 }
