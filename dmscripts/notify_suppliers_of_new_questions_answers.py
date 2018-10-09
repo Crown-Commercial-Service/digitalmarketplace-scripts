@@ -91,8 +91,8 @@ def send_supplier_emails(email_api_key, email_addresses, supplier_context, logge
     for email_address in email_addresses:
         email_client.send_email(
             template_name_or_id=EMAIL_TEMPLATE_ID,
-            email_address=email_address,
-            template_personalisation=get_template_personalisation(supplier_context),
+            to_email_address=email_address,
+            personalisation=get_template_personalisation(supplier_context),
         )
 
 

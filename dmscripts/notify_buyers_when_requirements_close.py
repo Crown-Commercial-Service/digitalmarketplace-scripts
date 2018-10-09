@@ -35,7 +35,7 @@ def notify_users(email_api_key, stage, brief):
                 email_client.send_email(
                     email_address,
                     template_name_or_id=EMAIL_TEMPLATE_ID,
-                    template_personalisation={
+                    personalisation={
                         "brief_title": brief["title"],
                         "brief_responses_url": brief_responses_url,
                     },
