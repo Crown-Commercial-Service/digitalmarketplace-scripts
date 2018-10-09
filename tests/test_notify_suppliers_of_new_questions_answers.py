@@ -264,7 +264,7 @@ def test_get_template_personalisation_renders_multiple_briefs():
     )
 
 
-@mock.patch(MODULE_UNDER_TEST + '.DMNotifyClient.send_email')
+@mock.patch(MODULE_UNDER_TEST + '.DMNotifyClient.send_email', autospec=True)
 def test_send_emails_calls_notify_api_client(send_email):
     logger = mock.Mock()
 
@@ -288,9 +288,10 @@ def test_send_emails_calls_notify_api_client(send_email):
 
     assert send_email.call_count == 2
     send_email.assert_any_call(
-        email_address="a@example.com",
+        mock.ANY,  # self
+        to_email_address="a@example.com",
         template_name_or_id=mock.ANY,
-        template_personalisation={
+        personalisation={
             "briefs": "https://www.digitalmarketplace.service.gov.uk/"
                       "digital-outcomes-and-specialists/opportunities/3?utm_id=20170419qa"
                       "\n"
@@ -299,9 +300,10 @@ def test_send_emails_calls_notify_api_client(send_email):
         }
     )
     send_email.assert_any_call(
-        email_address="a2@example.com",
+        mock.ANY,  # self
+        to_email_address="a2@example.com",
         template_name_or_id=mock.ANY,
-        template_personalisation={
+        personalisation={
             "briefs": "https://www.digitalmarketplace.service.gov.uk/"
                       "digital-outcomes-and-specialists/opportunities/3?utm_id=20170419qa"
                       "\n"

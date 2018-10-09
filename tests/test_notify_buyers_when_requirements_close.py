@@ -42,7 +42,7 @@ def test_get_date_closed():
         check_date_closed(value, expected)
 
 
-@mock.patch('dmscripts.notify_buyers_when_requirements_close.DMNotifyClient.send_email')
+@mock.patch('dmscripts.notify_buyers_when_requirements_close.DMNotifyClient.send_email', autospec=True)
 def test_notify_users(send_email):
     notify_users(NOTIFY_API_KEY, 'preview', {
         'id': 100,
@@ -62,18 +62,20 @@ def test_notify_users(send_email):
 
     assert send_email.call_count == 2
     send_email.assert_any_call(
+        mock.ANY,  # self
         'a@example.com',
         template_name_or_id=mock.ANY,
-        template_personalisation={
+        personalisation={
             "brief_title": "My brief title",
             "brief_responses_url": brief_responses_url,
         },
         allow_resend=False,
     )
     send_email.assert_any_call(
+        mock.ANY,  # self
         'c@example.com',
         template_name_or_id=mock.ANY,
-        template_personalisation={
+        personalisation={
             "brief_title": "My brief title",
             "brief_responses_url": brief_responses_url,
         },
@@ -81,7 +83,7 @@ def test_notify_users(send_email):
     )
 
 
-@mock.patch('dmscripts.notify_buyers_when_requirements_close.DMNotifyClient.send_email')
+@mock.patch('dmscripts.notify_buyers_when_requirements_close.DMNotifyClient.send_email', autospec=True)
 def test_notify_users_returns_false_on_error(send_email):
     send_email.side_effect = EmailError('Error')
     assert not notify_users(NOTIFY_API_KEY, 'preview', {
