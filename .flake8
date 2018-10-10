@@ -9,5 +9,5 @@ ignore = D203,W503
 max-complexity = 19
 max-line-length = 120
 per-file-ignores =
-    scripts/* : E402
+    scripts/** : E402
     scripts/get-model-data.py : C901
