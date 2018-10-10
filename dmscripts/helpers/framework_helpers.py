@@ -1,6 +1,7 @@
 from collections import Counter
 from functools import partial
 from multiprocessing.pool import ThreadPool
+import re
 
 from dmapiclient import HTTPError
 
@@ -96,3 +97,18 @@ def add_draft_counts(client, framework_slug, record):
         for ds in client.find_draft_services_iter(record['supplier']['id'], framework=framework_slug)
     )
     return dict(record, counts=counts)
+
+
+def get_full_framework_slug(framework):
+    iteration = re.search('(\d+)', framework)
+    if framework.startswith('g'):
+        prefix = 'g-cloud'
+    elif framework.startswith('d'):
+        prefix = 'digital-outcomes-and-specialists'
+    else:
+        return framework
+
+    if iteration:
+        return "{}-{}".format(prefix, iteration.group(1))
+    else:
+        return prefix
