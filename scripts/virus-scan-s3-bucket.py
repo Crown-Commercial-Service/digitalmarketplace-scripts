@@ -10,6 +10,8 @@ Example:
 """
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor
+from contextlib import contextmanager
 import dateutil.parser as dateutil_parser
 import logging
 import sys
@@ -29,6 +31,11 @@ from dmscripts.helpers.auth_helpers import get_auth_token
 logger = logging.getLogger("script")
 
 
+@contextmanager
+def nullcontext():
+    yield
+
+
 if __name__ == '__main__':
     a = argparse.ArgumentParser()
     a.add_argument('stage',
@@ -45,6 +52,11 @@ if __name__ == '__main__':
                    type=dateutil_parser.parse,
                    help='A timezone-aware ISO8601 datetime string; if provided, only scan objects uploaded after '
                         'this point in time (Example: 2018-01-01T12:00:00Z).')
+    a.add_argument('--concurrency', "-c",
+                   type=int,
+                   default=2,
+                   help="Number of concurrent requests to make to Antivirus API. 0 disables concurrency & threading"
+                        "entirely")
     a.add_argument('--dry-run',
                    action='store_true',
                    default=False,
@@ -77,14 +89,17 @@ if __name__ == '__main__':
         args.dry_run,
     )
 
-    candidate_count, pass_count, fail_count, already_tagged_count = virus_scan_bucket(
-        s3_client=boto3.client("s3", region_name="eu-west-1"),  # actual region specified here doesn't matter
-        antivirus_api_client=av_api_client,
-        bucket_name=args.bucket,
-        prefix=args.prefix,
-        since=args.since,
-        dry_run=args.dry_run,
-    )
+    with ThreadPoolExecutor(max_workers=args.concurrency) if args.concurrency else nullcontext() as executor:
+        map_callable = map if executor is None else executor.map
+        candidate_count, pass_count, fail_count, already_tagged_count = virus_scan_bucket(
+            s3_client=boto3.client("s3", region_name="eu-west-1"),  # actual region specified here doesn't matter
+            antivirus_api_client=av_api_client,
+            bucket_name=args.bucket,
+            prefix=args.prefix,
+            since=args.since,
+            dry_run=args.dry_run,
+            map_callable=map_callable,
+        )
 
     logger.info(
         "Total files found:\t%s\nTotal files passed:\t%s\nTotal files failed:\t%s\nTotal files already tagged:\t%s",

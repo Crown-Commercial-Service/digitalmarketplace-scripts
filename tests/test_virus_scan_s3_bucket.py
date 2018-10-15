@@ -1,3 +1,5 @@
+from concurrent.futures import ThreadPoolExecutor
+from contextlib import contextmanager
 from datetime import datetime
 from itertools import groupby
 
@@ -9,6 +11,11 @@ import pytest
 from dmapiclient import AntivirusAPIClient
 
 from dmscripts.virus_scan_s3_bucket import virus_scan_bucket
+
+
+@contextmanager
+def nullcontext():
+    yield
 
 
 class TestVirusScanBucket:
@@ -135,87 +142,117 @@ class TestVirusScanBucket:
 
         return av_api_client, s3_client
 
+    @pytest.mark.parametrize("concurrency", (0, 1, 3,))
     @pytest.mark.parametrize("versions_page_size", (2, 4, 100,))
     @pytest.mark.parametrize("dry_run", (False, True,))
-    def test_unfiltered(self, versions_page_size, dry_run):
+    def test_unfiltered(self, versions_page_size, dry_run, concurrency):
         av_api_client, s3_client = self._get_mock_clients(self.versions_responses, versions_page_size)
 
-        retval = virus_scan_bucket(
-            s3_client,
-            av_api_client,
-            "spade",
-            prefix="",
-            since=None,
-            dry_run=dry_run,
-        )
+        with ThreadPoolExecutor(max_workers=concurrency) if concurrency else nullcontext() as executor:
+            map_callable = map if executor is None else executor.map
+            retval = virus_scan_bucket(
+                s3_client,
+                av_api_client,
+                "spade",
+                prefix="",
+                since=None,
+                dry_run=dry_run,
+                map_callable=map_callable,
+            )
 
-        assert av_api_client.mock_calls == [] if dry_run else [
-            mock.call.scan_and_tag_s3_object("spade", "sandman/4321-billy-winks.pdf", "oo_.BepoodlLml"),
-            mock.call.scan_and_tag_s3_object("spade", "sandman/4321-billy-winks.pdf", "moB_eLplool.do"),
-            mock.call.scan_and_tag_s3_object("spade", "sandman/4321-billy-winks.pdf", "ooBmo_pe.ldoLl"),
-            mock.call.scan_and_tag_s3_object("spade", "sandman/1234-deedaw.pdf", "epmlLoBodo_ol."),
-            mock.call.scan_and_tag_s3_object("spade", "sandman/1234-deedaw.pdf", "loleLoooBp_md."),
-            mock.call.scan_and_tag_s3_object("spade", "sandman/4321-billy-winks.pdf", "molo.oB_oLdelp"),
-            mock.call.scan_and_tag_s3_object("spade", "dribbling/bib.jpeg", "ldmoo_.pBeolLo"),
-        ]
         assert s3_client.mock_calls == [
             mock.call.get_paginator("list_object_versions"),
             mock.call.get_paginator().paginate(Bucket="spade", Prefix=""),
         ]
-        assert retval == (7, 0, 0, 0,) if dry_run else (7, 4, 1, 2,)
 
+        if dry_run:
+            assert av_api_client.mock_calls == []
+            assert retval == (7, 0, 0, 0,)
+        else:
+            # taking string representations because call()s are not sortable and we want to disregard order
+            assert sorted(str(c) for c in av_api_client.mock_calls) == sorted(str(c) for c in (
+                mock.call.scan_and_tag_s3_object("spade", "sandman/4321-billy-winks.pdf", "oo_.BepoodlLml"),
+                mock.call.scan_and_tag_s3_object("spade", "sandman/4321-billy-winks.pdf", "moB_eLplool.do"),
+                mock.call.scan_and_tag_s3_object("spade", "sandman/4321-billy-winks.pdf", "ooBmo_pe.ldoLl"),
+                mock.call.scan_and_tag_s3_object("spade", "sandman/1234-deedaw.pdf", "epmlLoBodo_ol."),
+                mock.call.scan_and_tag_s3_object("spade", "sandman/1234-deedaw.pdf", "loleLoooBp_md."),
+                mock.call.scan_and_tag_s3_object("spade", "sandman/4321-billy-winks.pdf", "molo.oB_oLdelp"),
+                mock.call.scan_and_tag_s3_object("spade", "dribbling/bib.jpeg", "ldmoo_.pBeolLo"),
+            ))
+            assert retval == (7, 4, 1, 2,)
+
+    @pytest.mark.parametrize("concurrency", (0, 1, 3,))
     @pytest.mark.parametrize("versions_page_size", (2, 4, 100,))
     @pytest.mark.parametrize("dry_run", (False, True,))
-    def test_since_filtered(self, versions_page_size, dry_run):
+    def test_since_filtered(self, versions_page_size, dry_run, concurrency):
         av_api_client, s3_client = self._get_mock_clients(self.versions_responses, versions_page_size)
 
-        retval = virus_scan_bucket(
-            s3_client,
-            av_api_client,
-            "spade",
-            prefix="",
-            since=datetime(2012, 11, 10, 9, 8, 7),
-            dry_run=dry_run,
-        )
+        with ThreadPoolExecutor(max_workers=concurrency) if concurrency else nullcontext() as executor:
+            map_callable = map if executor is None else executor.map
+            retval = virus_scan_bucket(
+                s3_client,
+                av_api_client,
+                "spade",
+                prefix="",
+                since=datetime(2012, 11, 10, 9, 8, 7),
+                dry_run=dry_run,
+                map_callable=map_callable,
+            )
 
-        assert av_api_client.mock_calls == [] if dry_run else [
-            mock.call.scan_and_tag_s3_object("spade", "sandman/4321-billy-winks.pdf", "oo_.BepoodlLml"),
-            mock.call.scan_and_tag_s3_object("spade", "sandman/4321-billy-winks.pdf", "ooBmo_pe.ldoLl"),
-            mock.call.scan_and_tag_s3_object("spade", "sandman/4321-billy-winks.pdf", "molo.oB_oLdelp"),
-        ]
         assert s3_client.mock_calls == [
             mock.call.get_paginator("list_object_versions"),
             mock.call.get_paginator().paginate(Bucket="spade", Prefix=""),
         ]
-        assert retval == (3, 0, 0, 0,) if dry_run else (3, 1, 1, 1,)
 
+        if dry_run:
+            assert av_api_client.mock_calls == []
+            assert retval == (3, 0, 0, 0,)
+        else:
+            # taking string representations because call()s are not sortable and we want to disregard order
+            assert sorted(str(c) for c in av_api_client.mock_calls) == sorted(str(c) for c in (
+                mock.call.scan_and_tag_s3_object("spade", "sandman/4321-billy-winks.pdf", "oo_.BepoodlLml"),
+                mock.call.scan_and_tag_s3_object("spade", "sandman/4321-billy-winks.pdf", "ooBmo_pe.ldoLl"),
+                mock.call.scan_and_tag_s3_object("spade", "sandman/4321-billy-winks.pdf", "molo.oB_oLdelp"),
+            ))
+            assert retval == (3, 1, 1, 1,)
+
+    @pytest.mark.parametrize("concurrency", (0, 1, 3,))
     @pytest.mark.parametrize("versions_page_size", (2, 4, 100,))
     @pytest.mark.parametrize("dry_run", (False, True,))
-    def test_prefix_filtered(self, versions_page_size, dry_run):
+    def test_prefix_filtered(self, versions_page_size, dry_run, concurrency):
         av_api_client, s3_client = self._get_mock_clients(
             tuple(v_r for v_r in self.versions_responses if v_r[0]["Key"].startswith("sand")),
             versions_page_size,
         )
 
-        retval = virus_scan_bucket(
-            s3_client,
-            av_api_client,
-            "spade",
-            prefix="sand",
-            since=None,
-            dry_run=dry_run,
-        )
+        with ThreadPoolExecutor(max_workers=concurrency) if concurrency else nullcontext() as executor:
+            map_callable = map if executor is None else executor.map
+            retval = virus_scan_bucket(
+                s3_client,
+                av_api_client,
+                "spade",
+                prefix="sand",
+                since=None,
+                dry_run=dry_run,
+                map_callable=map_callable,
+            )
 
-        assert av_api_client.mock_calls == [] if dry_run else [
-            mock.call.scan_and_tag_s3_object("spade", "sandman/4321-billy-winks.pdf", "oo_.BepoodlLml"),
-            mock.call.scan_and_tag_s3_object("spade", "sandman/4321-billy-winks.pdf", "moB_eLplool.do"),
-            mock.call.scan_and_tag_s3_object("spade", "sandman/4321-billy-winks.pdf", "ooBmo_pe.ldoLl"),
-            mock.call.scan_and_tag_s3_object("spade", "sandman/1234-deedaw.pdf", "epmlLoBodo_ol."),
-            mock.call.scan_and_tag_s3_object("spade", "sandman/1234-deedaw.pdf", "loleLoooBp_md."),
-            mock.call.scan_and_tag_s3_object("spade", "sandman/4321-billy-winks.pdf", "molo.oB_oLdelp"),
-        ]
         assert s3_client.mock_calls == [
             mock.call.get_paginator("list_object_versions"),
             mock.call.get_paginator().paginate(Bucket="spade", Prefix="sand"),
         ]
-        assert retval == (6, 0, 0, 0,) if dry_run else (6, 3, 1, 2,)
+
+        if dry_run:
+            assert av_api_client.mock_calls == []
+            assert retval == (6, 0, 0, 0,)
+        else:
+            # taking string representations because call()s are not sortable and we want to disregard order
+            assert sorted(str(c) for c in av_api_client.mock_calls) == sorted(str(c) for c in (
+                mock.call.scan_and_tag_s3_object("spade", "sandman/4321-billy-winks.pdf", "oo_.BepoodlLml"),
+                mock.call.scan_and_tag_s3_object("spade", "sandman/4321-billy-winks.pdf", "moB_eLplool.do"),
+                mock.call.scan_and_tag_s3_object("spade", "sandman/4321-billy-winks.pdf", "ooBmo_pe.ldoLl"),
+                mock.call.scan_and_tag_s3_object("spade", "sandman/1234-deedaw.pdf", "epmlLoBodo_ol."),
+                mock.call.scan_and_tag_s3_object("spade", "sandman/1234-deedaw.pdf", "loleLoooBp_md."),
+                mock.call.scan_and_tag_s3_object("spade", "sandman/4321-billy-winks.pdf", "molo.oB_oLdelp"),
+            ))
+            assert retval == (6, 3, 1, 2,)
