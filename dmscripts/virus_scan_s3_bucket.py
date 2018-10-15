@@ -5,19 +5,26 @@ import logging
 logger = logging.getLogger("script")
 
 
-def virus_scan_bucket(s3_client, antivirus_api_client, bucket_name, prefix="", since=None, dry_run=True):
+def virus_scan_bucket(
+    s3_client,
+    antivirus_api_client,
+    bucket_name,
+    prefix="",
+    since=None,
+    dry_run=True,
+    map_callable=map,
+):
     candidate_count, pass_count, fail_count, already_tagged_count = 0, 0, 0, 0
 
-    for version in chain.from_iterable(
-        page.get("Versions") or ()
-        for page in s3_client.get_paginator("list_object_versions").paginate(
-            Bucket=bucket_name,
-            Prefix=prefix,
-        )
-    ):
+    def handle_version(version):
+        # integer incrementing is "atomic" in python so it's ok to share these counters across threads. the reason we
+        # don't pass the count back in the return value instead is that normal `map` implementations enforce the order
+        # of yielded responses - as such a hanging request will impede progress of a (count summing) consumer, leaving
+        # the counter lagging behind, which could result in an inaccurate count if aborted early.
+        nonlocal candidate_count, pass_count, fail_count, already_tagged_count
         if since and version.get('LastModified') and version['LastModified'] < since:
             logger.debug("Ignoring file from %s: %s", version["LastModified"], version["Key"])
-            continue
+            return
 
         logger.info(
             f"{'(Would be) ' if dry_run else ''}Requesting scan of key %s version %s (%s)",
@@ -49,5 +56,29 @@ def virus_scan_bucket(s3_client, antivirus_api_client, bucket_name, prefix="", s
                         message += f" ({result['existingAvStatus']['avStatus.ts']})"
 
             logger.info("%s: %s", version["VersionId"], message)
+
+    try:
+        for _ in map_callable(
+            handle_version,
+            chain.from_iterable(
+                page.get("Versions") or ()
+                for page in s3_client.get_paginator("list_object_versions").paginate(
+                    Bucket=bucket_name,
+                    Prefix=prefix,
+                )
+            ),
+        ):
+            # `map` produces a lazy iterable that has to be consumed for the action to be performed, but we don't care
+            # about the result
+            pass
+    except BaseException as e:
+        logger.warning(
+            "Aborting with candidate_count = %s, pass_count = %s, fail_count = %s, already_tagged_count = %s",
+            candidate_count,
+            pass_count,
+            fail_count,
+            already_tagged_count,
+        )
+        raise
 
     return candidate_count, pass_count, fail_count, already_tagged_count
