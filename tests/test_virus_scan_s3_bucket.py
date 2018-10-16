@@ -1,3 +1,4 @@
+from collections import Counter
 from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from datetime import datetime
@@ -167,7 +168,7 @@ class TestVirusScanBucket:
 
         if dry_run:
             assert av_api_client.mock_calls == []
-            assert retval == (7, 0, 0, 0,)
+            assert retval == Counter({"candidate": 7})
         else:
             # taking string representations because call()s are not sortable and we want to disregard order
             assert sorted(str(c) for c in av_api_client.mock_calls) == sorted(str(c) for c in (
@@ -179,7 +180,12 @@ class TestVirusScanBucket:
                 mock.call.scan_and_tag_s3_object("spade", "sandman/4321-billy-winks.pdf", "molo.oB_oLdelp"),
                 mock.call.scan_and_tag_s3_object("spade", "dribbling/bib.jpeg", "ldmoo_.pBeolLo"),
             ))
-            assert retval == (7, 4, 1, 2,)
+            assert retval == Counter({
+                "candidate": 7,
+                "pass": 4,
+                "fail": 1,
+                "already_tagged": 2,
+            })
 
     @pytest.mark.parametrize("concurrency", (0, 1, 3,))
     @pytest.mark.parametrize("versions_page_size", (2, 4, 100,))
@@ -206,7 +212,7 @@ class TestVirusScanBucket:
 
         if dry_run:
             assert av_api_client.mock_calls == []
-            assert retval == (3, 0, 0, 0,)
+            assert retval == Counter({"candidate": 3})
         else:
             # taking string representations because call()s are not sortable and we want to disregard order
             assert sorted(str(c) for c in av_api_client.mock_calls) == sorted(str(c) for c in (
@@ -214,7 +220,12 @@ class TestVirusScanBucket:
                 mock.call.scan_and_tag_s3_object("spade", "sandman/4321-billy-winks.pdf", "ooBmo_pe.ldoLl"),
                 mock.call.scan_and_tag_s3_object("spade", "sandman/4321-billy-winks.pdf", "molo.oB_oLdelp"),
             ))
-            assert retval == (3, 1, 1, 1,)
+            assert retval == Counter({
+                "candidate": 3,
+                "pass": 1,
+                "fail": 1,
+                "already_tagged": 1,
+            })
 
     @pytest.mark.parametrize("concurrency", (0, 1, 3,))
     @pytest.mark.parametrize("versions_page_size", (2, 4, 100,))
@@ -244,7 +255,7 @@ class TestVirusScanBucket:
 
         if dry_run:
             assert av_api_client.mock_calls == []
-            assert retval == (6, 0, 0, 0,)
+            assert retval == Counter({"candidate": 6})
         else:
             # taking string representations because call()s are not sortable and we want to disregard order
             assert sorted(str(c) for c in av_api_client.mock_calls) == sorted(str(c) for c in (
@@ -255,4 +266,9 @@ class TestVirusScanBucket:
                 mock.call.scan_and_tag_s3_object("spade", "sandman/1234-deedaw.pdf", "loleLoooBp_md."),
                 mock.call.scan_and_tag_s3_object("spade", "sandman/4321-billy-winks.pdf", "molo.oB_oLdelp"),
             ))
-            assert retval == (6, 3, 1, 2,)
+            assert retval == Counter({
+                "candidate": 6,
+                "pass": 3,
+                "fail": 1,
+                "already_tagged": 2,
+            })

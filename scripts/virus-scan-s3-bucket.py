@@ -91,7 +91,7 @@ if __name__ == '__main__':
 
     with ThreadPoolExecutor(max_workers=args.concurrency) if args.concurrency else nullcontext() as executor:
         map_callable = map if executor is None else executor.map
-        candidate_count, pass_count, fail_count, already_tagged_count = virus_scan_bucket(
+        counter = virus_scan_bucket(
             s3_client=boto3.client("s3", region_name="eu-west-1"),  # actual region specified here doesn't matter
             antivirus_api_client=av_api_client,
             bucket_name=args.bucket,
@@ -103,10 +103,10 @@ if __name__ == '__main__':
 
     logger.info(
         "Total files found:\t%s\nTotal files passed:\t%s\nTotal files failed:\t%s\nTotal files already tagged:\t%s",
-        candidate_count,
-        pass_count,
-        fail_count,
-        already_tagged_count,
+        counter.get("candidate", 0),
+        counter.get("pass", 0),
+        counter.get("fail", 0),
+        counter.get("already_passed", 0),
     )
 
-    sys.exit(fail_count)
+    sys.exit(counter.get("fail", 0))
