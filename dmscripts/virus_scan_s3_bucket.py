@@ -1,3 +1,4 @@
+from collections import Counter
 from itertools import chain
 import logging
 
@@ -15,11 +16,11 @@ def virus_scan_bucket(
     map_callable=map,
 ):
     def handle_version(version):
+        counters_to_increment = set()
+
         if since and version.get('LastModified') and version['LastModified'] < since:
             logger.debug("Ignoring file from %s: %s", version["LastModified"], version["Key"])
-            return 0, 0, 0, 0
-
-        candidate_count_inner, pass_count_inner, fail_count_inner, already_tagged_count_inner = 0, 0, 0, 0
+            return ()
 
         logger.info(
             f"{'(Would be) ' if dry_run else ''}Requesting scan of key %s version %s (%s)",
@@ -27,7 +28,7 @@ def virus_scan_bucket(
             version["VersionId"],
             version["LastModified"],
         )
-        candidate_count_inner += 1
+        counters_to_increment.add("candidate")
 
         if not dry_run:
             result = antivirus_api_client.scan_and_tag_s3_object(
@@ -38,12 +39,12 @@ def virus_scan_bucket(
 
             if result["avStatusApplied"]:
                 if result.get("newAvStatus", {}).get("avStatus.result") == "pass":
-                    pass_count_inner += 1
+                    counters_to_increment.add("pass")
                 else:
-                    fail_count_inner += 1
+                    counters_to_increment.add("fail")
                 message = f"Marked with result {result.get('newAvStatus', {}).get('avStatus.result')}"
             else:
-                already_tagged_count_inner += 1
+                counters_to_increment.add("already_tagged")
                 message = f"Unchanged: "
                 if result.get("existingAvStatus", {}).get("avStatus.result"):
                     message += f"already marked as {result['existingAvStatus']['avStatus.result']!r}"
@@ -52,11 +53,11 @@ def virus_scan_bucket(
 
             logger.info("%s: %s", version["VersionId"], message)
 
-        return candidate_count_inner, pass_count_inner, fail_count_inner, already_tagged_count_inner
+        return counters_to_increment
 
-    total_candidate_count, total_pass_count, total_fail_count, total_already_tagged_count = 0, 0, 0, 0
+    counter = Counter()
     try:
-        for candidate_count, pass_count, fail_count, already_tagged_count in map_callable(
+        for _counters_to_increment in map_callable(
             handle_version,
             chain.from_iterable(
                 page.get("Versions") or ()
@@ -66,18 +67,9 @@ def virus_scan_bucket(
                 )
             ),
         ):
-            total_candidate_count += candidate_count
-            total_pass_count += pass_count
-            total_fail_count += fail_count
-            total_already_tagged_count += already_tagged_count
+            counter.update(_counters_to_increment)
     except BaseException as e:
-        logger.warning(
-            "Aborting with candidate_count = %s, pass_count = %s, fail_count = %s, already_tagged_count = %s",
-            total_candidate_count,
-            total_pass_count,
-            total_fail_count,
-            total_already_tagged_count,
-        )
+        logger.warning("Aborting with counter = %s", counter)
         raise
 
-    return total_candidate_count, total_pass_count, total_fail_count, total_already_tagged_count
+    return counter
