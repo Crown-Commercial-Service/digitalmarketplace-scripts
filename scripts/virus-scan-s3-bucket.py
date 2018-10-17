@@ -106,7 +106,7 @@ if __name__ == '__main__':
         counter.get("candidate", 0),
         counter.get("pass", 0),
         counter.get("fail", 0),
-        counter.get("already_passed", 0),
+        counter.get("already_tagged", 0),
     )
 
     sys.exit(counter.get("fail", 0))
