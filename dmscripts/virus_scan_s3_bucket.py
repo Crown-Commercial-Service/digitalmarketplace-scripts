@@ -9,13 +9,14 @@ logger = logging.getLogger("script")
 def virus_scan_bucket(
     s3_client,
     antivirus_api_client,
-    bucket_name,
+    bucket_names,
     prefix="",
     since=None,
     dry_run=True,
     map_callable=map,
 ):
-    def handle_version(version):
+    def handle_version(version_bucket_name):
+        version, bucket_name = version_bucket_name
         counters_to_increment = set()
 
         if since and version.get('LastModified') and version['LastModified'] < since:
@@ -23,7 +24,8 @@ def virus_scan_bucket(
             return ()
 
         logger.info(
-            f"{'(Would be) ' if dry_run else ''}Requesting scan of key %s version %s (%s)",
+            f"{'(Would be) ' if dry_run else ''}Requesting scan of bucket %s key %s version %s (%s)",
+            bucket_name,
             version["Key"],
             version["VersionId"],
             version["LastModified"],
@@ -60,15 +62,17 @@ def virus_scan_bucket(
         for _counters_to_increment in map_callable(
             handle_version,
             chain.from_iterable(
-                page.get("Versions") or ()
-                for page in s3_client.get_paginator("list_object_versions").paginate(
-                    Bucket=bucket_name,
-                    Prefix=prefix,
-                )
+                chain.from_iterable(
+                    ((version, bucket_name) for version in page.get("Versions") or ())
+                    for page in s3_client.get_paginator("list_object_versions").paginate(
+                        Bucket=bucket_name,
+                        Prefix=prefix,
+                    )
+                ) for bucket_name in bucket_names
             ),
         ):
             counter.update(_counters_to_increment)
-    except BaseException as e:
+    except Exception:
         logger.warning("Aborting with counter = %s", counter)
         raise
 

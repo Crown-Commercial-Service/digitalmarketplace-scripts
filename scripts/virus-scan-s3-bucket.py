@@ -41,9 +41,10 @@ if __name__ == '__main__':
     a.add_argument('stage',
                    type=str,
                    help='One of dev, preview, staging or production')
-    a.add_argument('bucket',
+    a.add_argument('buckets',
                    type=str,
-                   help='The s3 bucket to use (e.g. `digitalmarketplace-dev-uploads`).')
+                   help='The s3 bucket(s) to use, comma separated (e.g. `digitalmarketplace-dev-uploads,other-bucket`)'
+                        '.')
     a.add_argument('--prefix',
                    default='',
                    type=str,
@@ -81,9 +82,9 @@ if __name__ == '__main__':
     )
 
     logger.info(
-        "Configuration:\nTarget stage:\t%s\nTarget bucket:\t%s\nFilter prefix:\t%s\nModified since:\t%s\nDry run:\t%s",
+        "Configuration:\nTarget stage:\t%s\nTarget buckets:\t%s\nFilter prefix:\t%s\nModified since:\t%s\nDry run:\t%s",
         args.stage,
-        args.bucket,
+        args.buckets,
         args.prefix,
         args.since,
         args.dry_run,
@@ -91,15 +92,20 @@ if __name__ == '__main__':
 
     with ThreadPoolExecutor(max_workers=args.concurrency) if args.concurrency else nullcontext() as executor:
         map_callable = map if executor is None else executor.map
-        counter = virus_scan_bucket(
-            s3_client=boto3.client("s3", region_name="eu-west-1"),  # actual region specified here doesn't matter
-            antivirus_api_client=av_api_client,
-            bucket_name=args.bucket,
-            prefix=args.prefix,
-            since=args.since,
-            dry_run=args.dry_run,
-            map_callable=map_callable,
-        )
+        try:
+            counter = virus_scan_bucket(
+                s3_client=boto3.client("s3", region_name="eu-west-1"),  # actual region specified here doesn't matter
+                antivirus_api_client=av_api_client,
+                bucket_names=args.buckets.split(","),
+                prefix=args.prefix,
+                since=args.since,
+                dry_run=args.dry_run,
+                map_callable=map_callable,
+            )
+        except Exception:
+            if executor is not None:
+                executor.shutdown(wait=False)
+            raise
 
     logger.info(
         "Total files found:\t%s\nTotal files passed:\t%s\nTotal files failed:\t%s\nTotal files already tagged:\t%s",
