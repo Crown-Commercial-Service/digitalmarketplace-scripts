@@ -3,6 +3,9 @@ from itertools import chain
 import logging
 
 
+from dmapiclient.errors import APIError
+
+
 logger = logging.getLogger("script")
 
 
@@ -33,25 +36,32 @@ def virus_scan_bucket(
         counters_to_increment.add("candidate")
 
         if not dry_run:
-            result = antivirus_api_client.scan_and_tag_s3_object(
-                bucket_name,
-                version["Key"],
-                version["VersionId"],
-            )
-
-            if result["avStatusApplied"]:
-                if result.get("newAvStatus", {}).get("avStatus.result") == "pass":
-                    counters_to_increment.add("pass")
+            try:
+                result = antivirus_api_client.scan_and_tag_s3_object(
+                    bucket_name,
+                    version["Key"],
+                    version["VersionId"],
+                )
+            except APIError as e:
+                if 400 <= int(e.status_code) < 500:
+                    counters_to_increment.add("error")
+                    message = str(e)
                 else:
-                    counters_to_increment.add("fail")
-                message = f"Marked with result {result.get('newAvStatus', {}).get('avStatus.result')}"
+                    raise
             else:
-                counters_to_increment.add("already_tagged")
-                message = f"Unchanged: "
-                if result.get("existingAvStatus", {}).get("avStatus.result"):
-                    message += f"already marked as {result['existingAvStatus']['avStatus.result']!r}"
-                    if result.get("existingAvStatus", {}).get("avStatus.ts"):
-                        message += f" ({result['existingAvStatus']['avStatus.ts']})"
+                if result["avStatusApplied"]:
+                    if result.get("newAvStatus", {}).get("avStatus.result") == "pass":
+                        counters_to_increment.add("pass")
+                    else:
+                        counters_to_increment.add("fail")
+                    message = f"Marked with result {result.get('newAvStatus', {}).get('avStatus.result')}"
+                else:
+                    counters_to_increment.add("already_tagged")
+                    message = f"Unchanged: "
+                    if result.get("existingAvStatus", {}).get("avStatus.result"):
+                        message += f"already marked as {result['existingAvStatus']['avStatus.result']!r}"
+                        if result.get("existingAvStatus", {}).get("avStatus.ts"):
+                            message += f" ({result['existingAvStatus']['avStatus.ts']})"
 
             logger.info("%s: %s", version["VersionId"], message)
 
