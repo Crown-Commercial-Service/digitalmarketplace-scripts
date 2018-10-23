@@ -108,11 +108,16 @@ if __name__ == '__main__':
             raise
 
     logger.info(
-        "Total files found:\t%s\nTotal files passed:\t%s\nTotal files failed:\t%s\nTotal files already tagged:\t%s",
+        "Total files found:\t%s\n"
+        "Total files passed:\t%s\n"
+        "Total files failed:\t%s\n"
+        "Total files already tagged:\t%s"
+        "Total files errored:\t%s",
         counter.get("candidate", 0),
         counter.get("pass", 0),
         counter.get("fail", 0),
         counter.get("already_tagged", 0),
+        counter.get("error", 0),
     )
 
-    sys.exit(counter.get("fail", 0))
+    sys.exit(counter.get("fail", 0) + counter.get("error", 0))
