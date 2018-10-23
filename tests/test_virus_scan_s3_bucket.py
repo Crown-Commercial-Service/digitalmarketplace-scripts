@@ -10,6 +10,7 @@ import boto3
 import pytest
 
 from dmapiclient import AntivirusAPIClient
+from dmapiclient.errors import APIError
 
 from dmscripts.virus_scan_s3_bucket import virus_scan_bucket
 
@@ -17,6 +18,12 @@ from dmscripts.virus_scan_s3_bucket import virus_scan_bucket
 @contextmanager
 def nullcontext():
     yield
+
+
+def _raise_if_exc(maybe_exception):
+    if isinstance(maybe_exception, Exception):
+        raise maybe_exception
+    return maybe_exception
 
 
 @pytest.mark.parametrize("concurrency", (0, 1, 3,))
@@ -146,6 +153,14 @@ class TestVirusScanBucket:
                     "newAvStatus": {"avStatus.result": "fail"},
                 },
             ),
+            (
+                {
+                    "VersionId": "Hn_olFerweyr",
+                    "Key": "handy/mount.pdf",
+                    "LastModified": datetime(2012, 12, 9, 23, 24, 25),
+                },
+                APIError(response=mock.Mock(status_code=403), message="Forbidden"),
+            ),
         ),
     }
 
@@ -162,7 +177,7 @@ class TestVirusScanBucket:
             )
         }
         av_api_client = mock.create_autospec(AntivirusAPIClient)
-        av_api_client.scan_and_tag_s3_object.side_effect = lambda b, k, v: scan_tag_responses[b, k, v]
+        av_api_client.scan_and_tag_s3_object.side_effect = lambda b, k, v: _raise_if_exc(scan_tag_responses[b, k, v])
 
         # generate sequence of "pages" to be returned by list_object_versions paginator, chunked by versions_page_size
         versions_pages = {
@@ -247,7 +262,7 @@ class TestVirusScanBucket:
 
         if dry_run:
             assert av_api_client.mock_calls == []
-            assert retval == Counter({"candidate": 9})
+            assert retval == Counter({"candidate": 10})
         else:
             # taking string representations because call()s are not sortable and we want to disregard order
             assert sorted(str(c) for c in av_api_client.mock_calls) == sorted(str(c) for c in (
@@ -260,12 +275,14 @@ class TestVirusScanBucket:
                 mock.call.scan_and_tag_s3_object("spade", "dribbling/bib.jpeg", "ldmoo_.pBeolLo"),
                 mock.call.scan_and_tag_s3_object("martello", "unmentionables.PNG", "lFHrwenroye_"),
                 mock.call.scan_and_tag_s3_object("martello", "sandy/mount.pdf", "nHwr_elFoyre"),
+                mock.call.scan_and_tag_s3_object("martello", "handy/mount.pdf", "Hn_olFerweyr"),
             ))
             assert retval == Counter({
-                "candidate": 9,
+                "candidate": 10,
                 "pass": 4,
                 "fail": 2,
                 "already_tagged": 3,
+                "error": 1,
             })
 
     def test_since_filtered_single_bucket(self, versions_page_size, dry_run, concurrency):
@@ -329,7 +346,7 @@ class TestVirusScanBucket:
 
         if dry_run:
             assert av_api_client.mock_calls == []
-            assert retval == Counter({"candidate": 5})
+            assert retval == Counter({"candidate": 6})
         else:
             # taking string representations because call()s are not sortable and we want to disregard order
             assert sorted(str(c) for c in av_api_client.mock_calls) == sorted(str(c) for c in (
@@ -338,12 +355,14 @@ class TestVirusScanBucket:
                 mock.call.scan_and_tag_s3_object("spade", "sandman/4321-billy-winks.pdf", "molo.oB_oLdelp"),
                 mock.call.scan_and_tag_s3_object("martello", "unmentionables.PNG", "lFHrwenroye_"),
                 mock.call.scan_and_tag_s3_object("martello", "sandy/mount.pdf", "nHwr_elFoyre"),
+                mock.call.scan_and_tag_s3_object("martello", "handy/mount.pdf", "Hn_olFerweyr"),
             ))
             assert retval == Counter({
-                "candidate": 5,
+                "candidate": 6,
                 "pass": 1,
                 "fail": 2,
                 "already_tagged": 2,
+                "error": 1,
             })
 
     def test_prefix_filtered_single_bucket(self, versions_page_size, dry_run, concurrency):
