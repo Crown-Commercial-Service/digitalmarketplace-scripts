@@ -10,7 +10,8 @@ from dmapiclient.data import DataAPIClient
 
 sys.path.insert(0, '.')
 
-from dmscripts.helpers.auth_helpers import get_api_url, get_auth_token
+from dmscripts.helpers.auth_helpers import get_auth_token
+from dmutils.env_helpers import get_api_endpoint_from_stage
 
 
 ACKNOWLEDGE_USER = 'scripts/oneoff/acknowledge_publish_draft_service_updates.py'
@@ -30,7 +31,7 @@ if __name__ == '__main__':
                                                '(YYYY-MM-DD).')
     args = parser.parse_args()
 
-    data = DataAPIClient(get_api_url('api', args.stage), get_auth_token('api', args.stage))
+    data = DataAPIClient(get_api_endpoint_from_stage(args.stage), get_auth_token('api', args.stage))
 
     audit_events = data.find_audit_events_iter(audit_type=AuditTypes.update_service,
                                                user='Moving documents to live bucket',

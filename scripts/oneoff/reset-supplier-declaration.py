@@ -20,12 +20,13 @@ sys.path.insert(0, '.')
 
 from dmapiclient import DataAPIClient
 from dmapiclient.errors import HTTPError
-from dmscripts.helpers.auth_helpers import get_auth_token, get_api_url
+from dmscripts.helpers.auth_helpers import get_auth_token
+from dmutils.env_helpers import get_api_endpoint_from_stage
 
 
 def reset_supplier_declaration(stage, framework_slug, reason, email, supplier_id):
     data_api_token = get_auth_token('api', stage) if stage != 'development' else 'myToken'
-    data_api_client = DataAPIClient(get_api_url('api', stage), data_api_token)
+    data_api_client = DataAPIClient(get_api_endpoint_from_stage(stage), data_api_token)
 
     if email:
         user = data_api_client.get_user(email_address=email)
