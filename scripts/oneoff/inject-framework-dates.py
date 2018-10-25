@@ -15,7 +15,8 @@ import argparse
 sys.path.insert(0, '.')
 
 from dmapiclient import DataAPIClient
-from dmscripts.helpers.auth_helpers import get_auth_token, get_api_url
+from dmscripts.helpers.auth_helpers import get_auth_token
+from dmutils.env_helpers import get_api_endpoint_from_stage
 
 # Dates taken from https://github.com/alphagov/digitalmarketplace-frameworks/blob
 # /e1f8e5c4a1a98d817e1bc9ff90ace85c1a0762c6/frameworks/<framework>/messages/dates.yml
@@ -110,7 +111,7 @@ FRAMEWORKS_AND_DATES = {
 
 def inject_framework_dates(stage):
     data_api_token = get_auth_token('api', stage) if stage != 'development' else 'myToken'
-    data_api_client = DataAPIClient(get_api_url('api', stage), data_api_token)
+    data_api_client = DataAPIClient(get_api_endpoint_from_stage(stage), data_api_token)
 
     for framework_slug, framework_data in FRAMEWORKS_AND_DATES.items():
         print(f'Injecting dates for {framework_slug}: {framework_data}')

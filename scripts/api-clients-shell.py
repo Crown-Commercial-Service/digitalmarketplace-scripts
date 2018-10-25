@@ -25,7 +25,8 @@ import sys
 from dmapiclient import DataAPIClient, SearchAPIClient
 
 sys.path.insert(0, '.')
-from dmscripts.helpers.auth_helpers import get_auth_token, get_api_url
+from dmscripts.helpers.auth_helpers import get_auth_token
+from dmutils.env_helpers import get_api_endpoint_from_stage
 
 
 def clients_in_shell(stage, api_url, api_token, search_api_url, search_api_token):
@@ -34,8 +35,8 @@ def clients_in_shell(stage, api_url, api_token, search_api_url, search_api_token
     search_api_token = search_api_token or get_auth_token('search_api', stage)
 
     print('Creating clients...')
-    data = DataAPIClient(api_url or get_api_url('api', stage), api_token)  # noqa
-    search = SearchAPIClient(search_api_url or get_api_url('search-api', stage), search_api_token)  # noqa
+    data = DataAPIClient(api_url or get_api_endpoint_from_stage(stage), api_token)  # noqa
+    search = SearchAPIClient(search_api_url or get_api_endpoint_from_stage(stage, app='search-api'), search_api_token)  # noqa
 
     print('Dropping into shell...')
     IPython.embed()
