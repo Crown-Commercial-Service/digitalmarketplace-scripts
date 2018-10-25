@@ -111,7 +111,7 @@ if __name__ == '__main__':
         "Total files found:\t%s\n"
         "Total files passed:\t%s\n"
         "Total files failed:\t%s\n"
-        "Total files already tagged:\t%s"
+        "Total files already tagged:\t%s\n"
         "Total files errored:\t%s",
         counter.get("candidate", 0),
         counter.get("pass", 0),
