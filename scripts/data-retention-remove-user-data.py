@@ -32,6 +32,7 @@ sys.path.insert(0, '.')
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers import logging_helpers
 from dmutils.env_helpers import get_api_endpoint_from_stage
+from dmscripts.supplier_framework import SupplierFrameworkMethods
 
 
 if __name__ == "__main__":
@@ -52,6 +53,11 @@ if __name__ == "__main__":
         base_url=get_api_endpoint_from_stage(stage),
         auth_token=get_auth_token('api', stage)
     )
+    supplier_frameworks = SupplierFrameworkMethods(
+        api_client=data_api_client,
+        logger=logger,
+        dry_run=dry_run
+    )
     cutoff_date = datetime.now() - timedelta(days=365 * 3)
 
     all_users = list(data_api_client.find_users_iter(personal_data_removed=False))
@@ -67,3 +73,4 @@ if __name__ == "__main__":
                     user['id'],
                     'Data Retention Script {}'.format(datetime.now().isoformat())
                 )
+    supplier_frameworks.remove_declaration_from_suppliers(cutoff_date)
