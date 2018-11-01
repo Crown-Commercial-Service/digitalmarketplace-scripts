@@ -22,7 +22,6 @@ Examples:
 """
 import logging
 import sys
-from datetime import datetime, timedelta
 from docopt import docopt
 
 from dmapiclient import DataAPIClient
@@ -32,7 +31,7 @@ sys.path.insert(0, '.')
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers import logging_helpers
 from dmutils.env_helpers import get_api_endpoint_from_stage
-from dmscripts.supplier_framework import SupplierFrameworkMethods
+from dmscripts.data_retention_remove_user_data import main
 
 
 if __name__ == "__main__":
@@ -45,7 +44,6 @@ if __name__ == "__main__":
     verbose = arguments['--verbose']
 
     # Set defaults, instantiate clients
-    prefix = '[DRY RUN]: ' if dry_run else ''
     logger = logging_helpers.configure_logger(
         {"dmapiclient": logging.INFO} if verbose else {"dmapiclient": logging.WARN}
     )
@@ -53,24 +51,4 @@ if __name__ == "__main__":
         base_url=get_api_endpoint_from_stage(stage),
         auth_token=get_auth_token('api', stage)
     )
-    supplier_frameworks = SupplierFrameworkMethods(
-        api_client=data_api_client,
-        logger=logger,
-        dry_run=dry_run
-    )
-    cutoff_date = datetime.now() - timedelta(days=365 * 3)
-
-    all_users = list(data_api_client.find_users_iter(personal_data_removed=False))
-
-    for user in all_users:
-        last_logged_in_at = datetime.strptime(user['loggedInAt'], '%Y-%m-%dT%H:%M:%S.%fZ')
-        if last_logged_in_at < cutoff_date and not user['personalDataRemoved']:
-            logger.warn(
-                f"{prefix}Removing personal data for user: {user['id']}"
-            )
-            if not dry_run:
-                data_api_client.remove_user_personal_data(
-                    user['id'],
-                    'Data Retention Script {}'.format(datetime.now().isoformat())
-                )
-    supplier_frameworks.remove_declaration_from_suppliers(cutoff_date)
+    main(data_api_client, logger, dry_run)
