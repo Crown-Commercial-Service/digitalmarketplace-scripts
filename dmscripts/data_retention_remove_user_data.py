@@ -8,18 +8,11 @@ This script gets all the suppliers that can have their declarations removed beca
 specified framework, identifies their ids, and then calls the endpoint to remove the declaration
 """
 from dmscripts.helpers.supplier_data_helpers import SupplierFrameworkDeclarations
-from datetime import datetime, timedelta
+from datetime import datetime
 
 
-def main(data_api_client, logger, dry_run: bool):
-    supplier_frameworks = SupplierFrameworkDeclarations(
-        api_client=data_api_client,
-        logger=logger,
-        dry_run=dry_run
-    )
+def remove_user_data(data_api_client, logger, dry_run: bool, cutoff_date):
     prefix = '[DRY RUN]: ' if dry_run else ''
-    cutoff_date = datetime.now() - timedelta(days=365 * 3)
-
     all_users = list(data_api_client.find_users_iter(personal_data_removed=False))
 
     for user in all_users:
@@ -33,4 +26,12 @@ def main(data_api_client, logger, dry_run: bool):
                     user['id'],
                     'Data Retention Script {}'.format(datetime.now().isoformat())
                 )
+
+
+def remove_supplier_data(data_api_client, logger, dry_run: bool, cutoff_date):
+    supplier_frameworks = SupplierFrameworkDeclarations(
+        api_client=data_api_client,
+        logger=logger,
+        dry_run=dry_run
+    )
     supplier_frameworks.remove_declaration_from_suppliers(cutoff_date)

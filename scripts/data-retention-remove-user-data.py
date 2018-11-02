@@ -31,7 +31,8 @@ sys.path.insert(0, '.')
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers import logging_helpers
 from dmutils.env_helpers import get_api_endpoint_from_stage
-from dmscripts.data_retention_remove_user_data import main
+from dmscripts.data_retention_remove_user_data import remove_supplier_data, remove_user_data
+from datetime import timedelta, datetime
 
 
 if __name__ == "__main__":
@@ -51,4 +52,6 @@ if __name__ == "__main__":
         base_url=get_api_endpoint_from_stage(stage),
         auth_token=get_auth_token('api', stage)
     )
-    main(data_api_client, logger, dry_run)
+    cutoff_date = datetime.now() - timedelta(days=365 * 3)
+    remove_supplier_data(data_api_client, logger, dry_run, cutoff_date)
+    remove_user_data(data_api_client, logger, dry_run, cutoff_date)
