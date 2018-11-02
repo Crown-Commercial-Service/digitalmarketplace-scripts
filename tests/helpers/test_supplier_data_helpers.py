@@ -22,6 +22,13 @@ class TestSupplierFrameworkDeclarations(BaseAssessmentTest):
         supplier_framework = SupplierFrameworkDeclarations(mocked_api_client, mock.ANY, 'g-cloud-8', dry_run=False)
         assert supplier_framework.suppliers_application_failed_to_framework() == [12345, 23456]
 
+    def test_remove_declaration_from_suppliers(self):
+        mocked_api_client = mock.create_autospec(DataAPIClient)
+        mocked_api_client.remove_supplier_declaration.return_value = {'declaration': {}}
+        sfd = SupplierFrameworkDeclarations(mocked_api_client, mock.ANY, 'g-cloud-8', dry_run=False)
+        assert sfd.remove_declaration(1, 'g-cloud-8')['declaration'] == {}
+        mocked_api_client.remove_supplier_declaration.assert_called_with(1, 'g-cloud-8', 'user')
+
 
 class TestCountryCodeToName:
     GB_COUNTRY_JSON = {
