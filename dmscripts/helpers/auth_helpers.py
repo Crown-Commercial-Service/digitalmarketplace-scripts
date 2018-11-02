@@ -26,14 +26,3 @@ def get_auth_token(api, stage):
         auth_token = next(token for token in auth_tokens if token.startswith(token_prefix))
 
     return auth_token
-
-
-def get_api_url(api, stage):
-    if stage in DEV_ALIASES:
-        url = 'http://localhost:{}'.format(5001 if api == 'search-api' else 5000)
-    elif stage == 'production':
-        url = 'https://{}.digitalmarketplace.service.gov.uk'
-    else:
-        url = 'https://{{}}.{}.marketplace.team'.format(stage)
-
-    return url.format(api)

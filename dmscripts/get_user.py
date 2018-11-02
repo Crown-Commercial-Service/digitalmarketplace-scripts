@@ -1,10 +1,10 @@
 
 import sys
-
 import dmapiclient
 
 sys.path.insert(0, '.')  # noqa
-from dmscripts.helpers.auth_helpers import get_auth_token, get_api_url
+from dmutils.env_helpers import get_api_endpoint_from_stage
+from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.framework_helpers import get_full_framework_slug
 from dmscripts.helpers.user_helpers import (
     get_random_buyer_with_brief,
@@ -15,7 +15,7 @@ from dmscripts.helpers.user_helpers import (
 
 def get_user(api_url, api_token, stage, role, framework, lot):
     if not api_url:
-        api_url = get_api_url('api', stage)
+        api_url = get_api_endpoint_from_stage(stage)
 
     api_token = api_token or get_auth_token('api', stage)
     api_client = dmapiclient.DataAPIClient(api_url, api_token)
