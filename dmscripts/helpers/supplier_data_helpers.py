@@ -221,9 +221,7 @@ class SupplierFrameworkDeclarations:
 
     def remove_supplier_declaration_for_expired_frameworks(self):
         """
-        Gets a list of all suppliers on all frameworks older than 'date_from' and removes their declarations
-        :param date_from: the date before which declarations should be removed
-        :type date_from: datetime
+        Gets a list of all suppliers on all frameworks older than three years and removes their declarations
         :return: None
         :rtype: None
         """
@@ -234,6 +232,10 @@ class SupplierFrameworkDeclarations:
                 framework_slug=framework
             )['supplierFrameworks']
             for supplier in suppliers_with_declarations_to_clear:
+                self.logger.info(
+                    f"Declaration of supplier {supplier['supplierId']} "
+                    f"that applied to framework {framework} removed"
+                )
                 self.remove_declaration(supplier['supplierId'], framework_slug=framework)
 
 
