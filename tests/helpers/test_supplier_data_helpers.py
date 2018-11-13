@@ -2,7 +2,7 @@ import pytest
 import requests
 
 from dmscripts.helpers.supplier_data_helpers import country_code_to_name
-from dmscripts.data_retention_remove_user_data import SupplierFrameworkDeclarations
+from dmscripts.data_retention_remove_supplier_declarations import SupplierFrameworkDeclarations
 from tests.assessment_helpers import BaseAssessmentTest
 import mock
 from dmapiclient import DataAPIClient
