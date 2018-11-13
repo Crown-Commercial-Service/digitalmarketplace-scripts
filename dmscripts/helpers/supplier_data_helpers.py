@@ -219,7 +219,7 @@ class SupplierFrameworkDeclarations:
         all_frameworks = self.api_client.find_frameworks()["frameworks"]
         return [framework['slug'] for framework in all_frameworks if framework['frameworkExpiresAtUTC'] <= date_closed]
 
-    def remove_supplier_declaration_for_expired_frameworks(self, date_from=None):
+    def remove_supplier_declaration_for_expired_frameworks(self):
         """
         Gets a list of all suppliers on all frameworks older than 'date_from' and removes their declarations
         :param date_from: the date before which declarations should be removed
@@ -227,8 +227,7 @@ class SupplierFrameworkDeclarations:
         :return: None
         :rtype: None
         """
-        if not date_from:
-            date_from = date.today() - timedelta(365 * 3)
+        date_from = date.today() - timedelta(365 * 3)
         old_frameworks = self._frameworks_older_than_date(date_from)
         for framework in old_frameworks:
             suppliers_with_declarations_to_clear = self.api_client.find_framework_suppliers_iter(
