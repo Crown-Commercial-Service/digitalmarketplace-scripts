@@ -28,6 +28,8 @@ from dmapiclient import DataAPIClient
 
 sys.path.insert(0, '.')
 
+logger = logging.getLogger("script")
+
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers import logging_helpers
 from dmutils.env_helpers import get_api_endpoint_from_stage
@@ -44,7 +46,7 @@ if __name__ == "__main__":
     verbose = arguments['--verbose']
 
     # Set defaults, instantiate clients
-    logger = logging_helpers.configure_logger(
+    logging_helpers.configure_logger(
         {"dmapiclient": logging.INFO} if verbose else {"dmapiclient": logging.WARN}
     )
     data_api_client = DataAPIClient(
