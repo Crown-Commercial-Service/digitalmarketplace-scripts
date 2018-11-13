@@ -156,6 +156,9 @@ class AppliedToFrameworkSupplierContextForNotify(SupplierFrameworkData):
 
 
 class SupplierFrameworkDeclarations:
+    """
+    Methods for manipulating supplier declarations
+    """
 
     def __init__(self, api_client, logger, framework_slug: str=None, dry_run: bool=True):
         self.api_client = api_client
@@ -213,10 +216,10 @@ class SupplierFrameworkDeclarations:
         :return: list of framework slugs
         :rtype: List[str]
         """
-        all_frameworks = self.api_client.find_frameworks()
+        all_frameworks = self.api_client.find_frameworks()["frameworks"]
         return [framework['slug'] for framework in all_frameworks if framework['frameworkExpiresAtUTC'] <= date_closed]
 
-    def remove_declaration_from_suppliers(self, date_from=None):
+    def remove_supplier_declaration_for_expired_frameworks(self, date_from=None):
         """
         Gets a list of all suppliers on all frameworks older than 'date_from' and removes their declarations
         :param date_from: the date before which declarations should be removed
@@ -228,7 +231,7 @@ class SupplierFrameworkDeclarations:
             date_from = date.today() - timedelta(365 * 3)
         old_frameworks = self._frameworks_older_than_date(date_from)
         for framework in old_frameworks:
-            suppliers_with_declarations_to_clear = self.api_client.find_framework_suppliers(
+            suppliers_with_declarations_to_clear = self.api_client.find_framework_suppliers_iter(
                 framework_slug=framework
             )['supplierFrameworks']
             for supplier in suppliers_with_declarations_to_clear:
