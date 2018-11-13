@@ -32,7 +32,7 @@ from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers import logging_helpers
 from dmutils.env_helpers import get_api_endpoint_from_stage
 from datetime import timedelta, datetime
-from dmutils.formats import DATETIME_FORMAT
+from dmscripts.data_retention_remove_supplier_declarations import remove_supplier_data
 
 
 if __name__ == "__main__":
@@ -52,18 +52,7 @@ if __name__ == "__main__":
         base_url=get_api_endpoint_from_stage(stage),
         auth_token=get_auth_token('api', stage)
     )
-    cutoff_date = datetime.now() - timedelta(days=365 * 3)
-    prefix = '[DRY RUN]: ' if dry_run else ''
-    all_users = data_api_client.find_users_iter(personal_data_removed=False)
+    cutoff_date = datetime.today() - timedelta(days=365 * 3)
 
-    for user in all_users:
-        last_logged_in_at = datetime.strptime(user['loggedInAt'], DATETIME_FORMAT)
-        if last_logged_in_at < cutoff_date and not user['personalDataRemoved']:
-            logger.warn(
-                f"{prefix}Removing personal data for user: {user['id']}"
-            )
-            if not dry_run:
-                data_api_client.remove_user_personal_data(
-                    user['id'],
-                    'Data Retention Script {}'.format(datetime.now().isoformat())
-                )
+    prefix = '[DRY RUN]: ' if dry_run else ''
+    remove_supplier_data(data_api_client=data_api_client, logger=logger, dry_run=dry_run, cutoff_date=cutoff_date)
