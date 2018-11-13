@@ -31,7 +31,6 @@ sys.path.insert(0, '.')
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers import logging_helpers
 from dmutils.env_helpers import get_api_endpoint_from_stage
-from datetime import timedelta, datetime
 from dmscripts.data_retention_remove_supplier_declarations import remove_supplier_data
 
 
@@ -52,7 +51,4 @@ if __name__ == "__main__":
         base_url=get_api_endpoint_from_stage(stage),
         auth_token=get_auth_token('api', stage)
     )
-    cutoff_date = datetime.today() - timedelta(days=365 * 3)
-
-    prefix = '[DRY RUN]: ' if dry_run else ''
-    remove_supplier_data(data_api_client=data_api_client, logger=logger, dry_run=dry_run, cutoff_date=cutoff_date)
+    remove_supplier_data(data_api_client=data_api_client, logger=logger, dry_run=dry_run)
