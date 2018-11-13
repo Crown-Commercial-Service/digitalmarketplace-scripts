@@ -237,6 +237,7 @@ class SupplierFrameworkDeclarations:
                     f"that applied to framework {framework} removed"
                 )
                 self.remove_declaration(supplier['supplierId'], framework_slug=framework)
+        self.logger.info("All declarations older than three years have been cleared")
 
 
 def get_supplier_ids_from_file(supplier_id_file):
