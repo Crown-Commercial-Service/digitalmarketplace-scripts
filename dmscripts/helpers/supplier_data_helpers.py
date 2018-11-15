@@ -206,7 +206,7 @@ class SupplierFrameworkDeclarations:
         """
         failed_supplier_ids = self.suppliers_application_failed_to_framework()
         for supplier_id in failed_supplier_ids:
-            self.remove_declaration(supplier_id)
+            self.remove_declaration(supplier_id, self.framework_slug)
 
     def _frameworks_older_than_date(self, date_closed):
         """

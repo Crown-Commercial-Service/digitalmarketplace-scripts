@@ -14,25 +14,7 @@ class TestSupplierFrameworkDeclarations(BaseAssessmentTest):
     @pytest.fixture
     def mocked_api_client(self):
         from dmapiclient import DataAPIClient
-        return mock.create_autospec(DataAPIClient)
-
-    def _supplier_framework_response(self):
-        with open("tests/fixtures/test_supplier_frameworks_response.json", 'r') as response_file:
-            return json.load(response_file)['supplierFrameworks']
-
-    def test_suppliers_application_failed_to_framework(self, mocked_api_client):
-        mocked_api_client.find_framework_suppliers_iter.side_effect = lambda *args, **kwargs: \
-            iter(self._supplier_framework_response())
-        supplier_framework = SupplierFrameworkDeclarations(mocked_api_client, mock.ANY, 'g-cloud-8', dry_run=False)
-        assert supplier_framework.suppliers_application_failed_to_framework() == [12345, 23456]
-
-    def test_remove_declaration_from_suppliers(self, mocked_api_client):
-        mocked_api_client.remove_supplier_declaration.return_value = {'declaration': {}}
-        sfd = SupplierFrameworkDeclarations(mocked_api_client, mock.ANY, 'g-cloud-8', dry_run=False)
-        assert sfd.remove_declaration(1, 'g-cloud-8')['declaration'] == {}
-        mocked_api_client.remove_supplier_declaration.assert_called_with(1, 'g-cloud-8', 'user')
-
-    def test_remove_supplier_declaration_for_expired_frameworks(self, mocked_api_client):
+        mocked_api_client = mock.create_autospec(DataAPIClient)
         with freeze_time("Jan 1st, 2018"):
             mocked_api_client.find_frameworks.return_value = {
                 "frameworks": [
@@ -54,6 +36,26 @@ class TestSupplierFrameworkDeclarations(BaseAssessmentTest):
                     }
                 ]
             }
+            mocked_api_client.find_framework_suppliers_iter.side_effect = lambda *args, **kwargs: \
+                iter(self._supplier_framework_response())
+        return mocked_api_client
+
+    def _supplier_framework_response(self):
+        with open("tests/fixtures/test_supplier_frameworks_response.json", 'r') as response_file:
+            return json.load(response_file)['supplierFrameworks']
+
+    def test_suppliers_application_failed_to_framework(self, mocked_api_client):
+        supplier_framework = SupplierFrameworkDeclarations(mocked_api_client, mock.ANY, 'g-cloud-8', dry_run=False)
+        assert supplier_framework.suppliers_application_failed_to_framework() == [12345, 23456]
+
+    def test_remove_declaration_from_suppliers(self, mocked_api_client):
+        mocked_api_client.remove_supplier_declaration.return_value = {'declaration': {}}
+        sfd = SupplierFrameworkDeclarations(mocked_api_client, mock.ANY, 'g-cloud-8', dry_run=False)
+        assert sfd.remove_declaration(1, 'g-cloud-8')['declaration'] == {}
+        mocked_api_client.remove_supplier_declaration.assert_called_with(1, 'g-cloud-8', 'user')
+
+    def test_remove_supplier_declaration_for_expired_frameworks(self, mocked_api_client):
+        with freeze_time("Jan 1st, 2018"):
             sfd = SupplierFrameworkDeclarations(mocked_api_client, mock.MagicMock())
             sfd.remove_supplier_declaration_for_expired_frameworks()
             expected_calls = [
@@ -61,6 +63,15 @@ class TestSupplierFrameworkDeclarations(BaseAssessmentTest):
                 mock.call(framework_slug="framework-expired-a-decade-ago")
             ]
             mocked_api_client.find_framework_suppliers_iter.assert_has_calls(expected_calls, any_order=True)
+
+    def test_remove_declaration_from_failed_applicants(self, mocked_api_client):
+        sfd = SupplierFrameworkDeclarations(mocked_api_client, mock.MagicMock(), 'g-cloud-8', False)
+        sfd.remove_declaration_from_failed_applicants()
+        expected_calls = [
+            mock.call(supplier_id=12345, framework_slug='g-cloud-8', user='user'),
+            mock.call(supplier_id=23456, framework_slug='g-cloud-8', user='user')
+        ]
+        mocked_api_client.remove_supplier_declaration.assert_has_calls(expected_calls, any_order=True)
 
 
 class TestCountryCodeToName:
