@@ -38,21 +38,27 @@ class TestNoPrevResults(_BaseMarkResultsTestMixin, BaseAssessmentTest):
     @pytest.mark.parametrize(
         # we can very easily parametrize this into the 16 possible combinations of these flags - the results for the
         # first three flags should be identical and it's very easy to flip some of the assertions for the dry_run mode
-        "reassess_passed,reassess_failed,reassess_failed_ds,dry_run",
+        "reassess_passed_suppliers,reassess_failed_suppliers,reassess_failed_suppliers_ds,dry_run",
         tuple(product(*repeat((False, True,), 4))),
     )
-    def test_with_ds_schema(self, reassess_passed, reassess_failed, reassess_failed_ds, dry_run,):
+    def test_with_ds_schema(
+            self,
+            reassess_passed_suppliers,
+            reassess_failed_suppliers,
+            reassess_failed_suppliers_ds,
+            dry_run,
+    ):
         mark_definite_framework_results(
             self.mock_data_client,
             "Blazes Boylan",
             "h-cloud-99",
             self._declaration_definite_pass_schema(),
-            declaration_baseline_schema=self._declaration_definite_pass_schema()["definitions"]["baseline"],
+            declaration_discretionary_pass_schema=self._declaration_definite_pass_schema()["definitions"]["baseline"],
             service_schema=self._draft_service_schema(),
             dry_run=dry_run,
-            reassess_passed=reassess_passed,
-            reassess_failed=reassess_failed,
-            reassess_failed_draft_services=reassess_failed_ds,
+            reassess_passed_suppliers=reassess_passed_suppliers,
+            reassess_failed_suppliers=reassess_failed_suppliers,
+            reassess_failed_draft_services=reassess_failed_suppliers_ds,
         )
 
         expected_sf_actions = {
@@ -73,21 +79,27 @@ class TestNoPrevResults(_BaseMarkResultsTestMixin, BaseAssessmentTest):
 
     @pytest.mark.parametrize(
         # see above explanation of parameterization
-        "reassess_passed,reassess_failed,reassess_failed_ds,dry_run",
+        "reassess_passed_suppliers,reassess_failed_suppliers,reassess_failed_suppliers_ds,dry_run",
         tuple(product(*repeat((False, True,), 4))),
     )
-    def test_without_ds_schema(self, reassess_passed, reassess_failed, reassess_failed_ds, dry_run,):
+    def test_without_ds_schema(
+            self,
+            reassess_passed_suppliers,
+            reassess_failed_suppliers,
+            reassess_failed_suppliers_ds,
+            dry_run,
+    ):
         mark_definite_framework_results(
             self.mock_data_client,
             "Blazes Boylan",
             "h-cloud-99",
             self._declaration_definite_pass_schema(),
-            declaration_baseline_schema=self._declaration_definite_pass_schema()["definitions"]["baseline"],
+            declaration_discretionary_pass_schema=self._declaration_definite_pass_schema()["definitions"]["baseline"],
             service_schema=None,
             dry_run=dry_run,
-            reassess_passed=reassess_passed,
-            reassess_failed=reassess_failed,
-            reassess_failed_draft_services=reassess_failed_ds,
+            reassess_passed_suppliers=reassess_passed_suppliers,
+            reassess_failed_suppliers=reassess_failed_suppliers,
+            reassess_failed_draft_services=reassess_failed_suppliers_ds,
         )
 
         expected_sf_actions = {
@@ -104,14 +116,14 @@ class TestNoPrevResults(_BaseMarkResultsTestMixin, BaseAssessmentTest):
 
     @pytest.mark.parametrize(
         # see above explanation of parameterization
-        "reassess_passed,reassess_failed,reassess_failed_ds,dry_run",
+        "reassess_passed_suppliers,reassess_failed_suppliers,reassess_failed_suppliers_ds,dry_run",
         tuple(product(*repeat((False, True,), 4))),
     )
     def test_no_baseline_schema(
         self,
-        reassess_passed,
-        reassess_failed,
-        reassess_failed_ds,
+        reassess_passed_suppliers,
+        reassess_failed_suppliers,
+        reassess_failed_suppliers_ds,
         dry_run,
     ):
         mark_definite_framework_results(
@@ -119,12 +131,12 @@ class TestNoPrevResults(_BaseMarkResultsTestMixin, BaseAssessmentTest):
             "Blazes Boylan",
             "h-cloud-99",
             self._declaration_definite_pass_schema(),
-            declaration_baseline_schema=None,
+            declaration_discretionary_pass_schema=None,
             service_schema=self._draft_service_schema(),
             dry_run=dry_run,
-            reassess_passed=reassess_passed,
-            reassess_failed=reassess_failed,
-            reassess_failed_draft_services=reassess_failed_ds,
+            reassess_passed_suppliers=reassess_passed_suppliers,
+            reassess_failed_suppliers=reassess_failed_suppliers,
+            reassess_failed_draft_services=reassess_failed_suppliers_ds,
         )
 
         expected_sf_actions = {
@@ -144,14 +156,14 @@ class TestNoPrevResults(_BaseMarkResultsTestMixin, BaseAssessmentTest):
 
     @pytest.mark.parametrize(
         # see above explanation of parameterization
-        "reassess_passed,reassess_failed,reassess_failed_ds,dry_run",
+        "reassess_passed_suppliers,reassess_failed_suppliers,reassess_failed_suppliers_ds,dry_run",
         tuple(product(*repeat((False, True,), 4))),
     )
     def test_neither_optional_schema(
         self,
-        reassess_passed,
-        reassess_failed,
-        reassess_failed_ds,
+        reassess_passed_suppliers,
+        reassess_failed_suppliers,
+        reassess_failed_suppliers_ds,
         dry_run,
     ):
         mark_definite_framework_results(
@@ -159,12 +171,12 @@ class TestNoPrevResults(_BaseMarkResultsTestMixin, BaseAssessmentTest):
             "Blazes Boylan",
             "h-cloud-99",
             self._declaration_definite_pass_schema(),
-            declaration_baseline_schema=None,
+            declaration_discretionary_pass_schema=None,
             service_schema=None,
             dry_run=dry_run,
-            reassess_passed=reassess_passed,
-            reassess_failed=reassess_failed,
-            reassess_failed_draft_services=reassess_failed_ds,
+            reassess_passed_suppliers=reassess_passed_suppliers,
+            reassess_failed_suppliers=reassess_failed_suppliers,
+            reassess_failed_draft_services=reassess_failed_suppliers_ds,
         )
 
         expected_sf_actions = {
@@ -188,11 +200,11 @@ class TestPrevResults(_BaseMarkResultsTestMixin, BaseAssessmentMismatchedOnFrame
             "Blazes Boylan",
             "h-cloud-99",
             self._declaration_definite_pass_schema(),
-            declaration_baseline_schema=self._declaration_definite_pass_schema()["definitions"]["baseline"],
+            declaration_discretionary_pass_schema=self._declaration_definite_pass_schema()["definitions"]["baseline"],
             service_schema=self._draft_service_schema(),
             dry_run=dry_run,
-            reassess_passed=False,
-            reassess_failed=False,
+            reassess_passed_suppliers=False,
+            reassess_failed_suppliers=False,
             reassess_failed_draft_services=False,
         )
 
@@ -209,17 +221,17 @@ class TestPrevResults(_BaseMarkResultsTestMixin, BaseAssessmentMismatchedOnFrame
 
     # it's very easy to flip some of the assertions for the dry_run mode so using parametrization here
     @pytest.mark.parametrize("dry_run", (False, True,),)
-    def test_reassess_failed(self, dry_run,):
+    def test_reassess_failed_suppliers(self, dry_run,):
         mark_definite_framework_results(
             self.mock_data_client,
             "Blazes Boylan",
             "h-cloud-99",
             self._declaration_definite_pass_schema(),
-            declaration_baseline_schema=self._declaration_definite_pass_schema()["definitions"]["baseline"],
+            declaration_discretionary_pass_schema=self._declaration_definite_pass_schema()["definitions"]["baseline"],
             service_schema=self._draft_service_schema(),
             dry_run=dry_run,
-            reassess_passed=False,
-            reassess_failed=True,
+            reassess_passed_suppliers=False,
+            reassess_failed_suppliers=True,
             reassess_failed_draft_services=False,
         )
 
@@ -237,17 +249,17 @@ class TestPrevResults(_BaseMarkResultsTestMixin, BaseAssessmentMismatchedOnFrame
 
     # it's very easy to flip some of the assertions for the dry_run mode so using parametrization here
     @pytest.mark.parametrize("dry_run", (False, True,),)
-    def test_reassess_passed(self, dry_run,):
+    def test_reassess_passed_suppliers(self, dry_run,):
         mark_definite_framework_results(
             self.mock_data_client,
             "Blazes Boylan",
             "h-cloud-99",
             self._declaration_definite_pass_schema(),
-            declaration_baseline_schema=self._declaration_definite_pass_schema()["definitions"]["baseline"],
+            declaration_discretionary_pass_schema=self._declaration_definite_pass_schema()["definitions"]["baseline"],
             service_schema=self._draft_service_schema(),
             dry_run=dry_run,
-            reassess_passed=True,
-            reassess_failed=False,
+            reassess_passed_suppliers=True,
+            reassess_failed_suppliers=False,
             reassess_failed_draft_services=False,
         )
 
@@ -272,11 +284,11 @@ class TestPrevResults(_BaseMarkResultsTestMixin, BaseAssessmentMismatchedOnFrame
             "Blazes Boylan",
             "h-cloud-99",
             self._declaration_definite_pass_schema(),
-            declaration_baseline_schema=self._declaration_definite_pass_schema()["definitions"]["baseline"],
+            declaration_discretionary_pass_schema=self._declaration_definite_pass_schema()["definitions"]["baseline"],
             service_schema=self._draft_service_schema(),
             dry_run=dry_run,
-            reassess_passed=True,
-            reassess_failed=True,
+            reassess_passed_suppliers=True,
+            reassess_failed_suppliers=True,
             reassess_failed_draft_services=True,
         )
 
@@ -304,11 +316,11 @@ class TestPrevResults(_BaseMarkResultsTestMixin, BaseAssessmentMismatchedOnFrame
             "Blazes Boylan",
             "h-cloud-99",
             self._declaration_definite_pass_schema(),
-            declaration_baseline_schema=self._declaration_definite_pass_schema()["definitions"]["baseline"],
+            declaration_discretionary_pass_schema=self._declaration_definite_pass_schema()["definitions"]["baseline"],
             service_schema=None,
             dry_run=dry_run,
-            reassess_passed=True,
-            reassess_failed=True,
+            reassess_passed_suppliers=True,
+            reassess_failed_suppliers=True,
             reassess_failed_draft_services=True,
         )
 

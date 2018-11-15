@@ -24,7 +24,7 @@ def get_validation_errors(candidate, schema):
 
 def add_failed_questions(questions_numbers,
                          declaration_definite_pass_schema,
-                         declaration_baseline_schema
+                         declaration_discretionary_pass_schema
                          ):
     def inner(record):
         if record['declaration'].get('status') != 'complete':
@@ -34,8 +34,11 @@ def add_failed_questions(questions_numbers,
 
         all_failed_keys = get_validation_errors(record['declaration'], declaration_definite_pass_schema)
 
-        if declaration_baseline_schema:
-            baseline_only_failed_keys = get_validation_errors(record['declaration'], declaration_baseline_schema)
+        if declaration_discretionary_pass_schema:
+            baseline_only_failed_keys = get_validation_errors(
+                record['declaration'],
+                declaration_discretionary_pass_schema
+            )
         else:
             baseline_only_failed_keys = all_failed_keys
 
@@ -61,7 +64,7 @@ def find_suppliers_with_details(client,
                                 questions_numbers,
                                 framework_slug,
                                 declaration_definite_pass_schema,
-                                declaration_baseline_schema,
+                                declaration_discretionary_pass_schema,
                                 supplier_ids=None,
                                 map_impl=map,
                                 ):
@@ -73,7 +76,7 @@ def find_suppliers_with_details(client,
     )
     records = list(map(add_failed_questions(questions_numbers,
                                             declaration_definite_pass_schema,
-                                            declaration_baseline_schema), records))
+                                            declaration_discretionary_pass_schema), records))
 
     return records
 
@@ -184,7 +187,7 @@ def export_suppliers(
     content_loader,
     output_dir,
     declaration_definite_pass_schema,
-    declaration_baseline_schema=None,
+    declaration_discretionary_pass_schema=None,
     supplier_ids=None,
     map_impl=map,
 ):
@@ -198,7 +201,7 @@ def export_suppliers(
         questions_numbers,
         framework_slug,
         declaration_definite_pass_schema,
-        declaration_baseline_schema,
+        declaration_discretionary_pass_schema,
         supplier_ids,
         map_impl=map_impl,
     )
