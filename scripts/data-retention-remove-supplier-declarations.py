@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 """
-Our data retention policy is that users have accounts deactivated and personal data stripped after 3 years without
-a login.
+Our data retention policy is that supplier declarations are removed 3 years after a framework's expiry date.
 
 This script is very simple and has not been upgraded to accept any arguments to prevent the possibility of accidental
 deletion. If you are in doubt use the dry run option.
 
-Usage: data-retention-remove-user-data.py <stage> [--dry-run] [--verbose]
+Usage: data-retention-remove-supplier-declarations.py <stage> [--dry-run] [--verbose]
 
 Options:
     --stage=<stage>                                       Stage to target
@@ -16,8 +15,8 @@ Options:
     -h, --help                                            Show this screen
 
 Examples:
-    ./scripts/data-retention-remove-user-data.py preview
-    ./scripts/data-retention-remove-user-data.py preview --dry-run --verbose
+    ./scripts/data-retention-remove-supplier-declarations.py preview
+    ./scripts/data-retention-remove-supplier-declarations.py preview --dry-run --verbose
 
 """
 import logging
