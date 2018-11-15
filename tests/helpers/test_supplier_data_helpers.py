@@ -6,6 +6,8 @@ from dmscripts.data_retention_remove_supplier_declarations import SupplierFramew
 from tests.assessment_helpers import BaseAssessmentTest
 import mock
 import json
+from datetime import timedelta, date
+from freezegun import freeze_time
 
 
 class TestSupplierFrameworkDeclarations(BaseAssessmentTest):
@@ -30,6 +32,36 @@ class TestSupplierFrameworkDeclarations(BaseAssessmentTest):
         sfd = SupplierFrameworkDeclarations(mocked_api_client, mock.ANY, 'g-cloud-8', dry_run=False)
         assert sfd.remove_declaration(1, 'g-cloud-8')['declaration'] == {}
         mocked_api_client.remove_supplier_declaration.assert_called_with(1, 'g-cloud-8', 'user')
+
+    def test_remove_supplier_declaration_for_expired_frameworks(self, mocked_api_client):
+        with freeze_time("Jan 1st, 2018"):
+            mocked_api_client.find_frameworks.return_value = {
+                "frameworks": [
+                    {
+                        "slug": "framework-expired-yesterday",
+                        "frameworkExpiresAtUTC": date.today() - timedelta(days=1)
+                    },
+                    {
+                        "slug": "framework-expired-almost-three-years-ago",
+                        "frameworkExpiresAtUTC": date.today() - timedelta(days=(365 * 3) - 1)
+                    },
+                    {
+                        "slug": "framework-expired-three-years-ago",
+                        "frameworkExpiresAtUTC": date.today() - timedelta(days=365 * 3)
+                    },
+                    {
+                        "slug": "framework-expired-a-decade-ago",
+                        "frameworkExpiresAtUTC": date.today() - timedelta(days=365 * 10)
+                    }
+                ]
+            }
+            sfd = SupplierFrameworkDeclarations(mocked_api_client, mock.MagicMock())
+            sfd.remove_supplier_declaration_for_expired_frameworks()
+            expected_calls = [
+                mock.call(framework_slug="framework-expired-three-years-ago"),
+                mock.call(framework_slug="framework-expired-a-decade-ago")
+            ]
+            mocked_api_client.find_framework_suppliers_iter.assert_has_calls(expected_calls, any_order=True)
 
 
 class TestCountryCodeToName:
