@@ -8,3 +8,13 @@ def remove_supplier_data(data_api_client, logger, dry_run: bool):
         dry_run=dry_run
     )
     supplier_frameworks.remove_supplier_declaration_for_expired_frameworks()
+
+
+def remove_unsuccessful_supplier_declarations(data_api_client, logger, dry_run: bool, framework_slug: str):
+    supplier_frameworks_methods = SupplierFrameworkDeclarations(
+        api_client=data_api_client,
+        logger=logger,
+        dry_run=dry_run,
+        framework_slug=framework_slug
+    )
+    supplier_frameworks_methods.remove_declaration_from_failed_applicants()
