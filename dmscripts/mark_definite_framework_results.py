@@ -75,11 +75,11 @@ def mark_definite_framework_results(
     updated_by,
     framework_slug,
     declaration_definite_pass_schema,
-    declaration_baseline_schema=None,
+    declaration_discretionary_pass_schema=None,
     service_schema=None,
     dry_run=True,
-    reassess_passed=False,
-    reassess_failed=False,
+    reassess_passed_suppliers=False,
+    reassess_failed_suppliers=False,
     reassess_failed_draft_services=False,
     logger=logging.getLogger("script"),
     supplier_ids=None,
@@ -88,16 +88,29 @@ def mark_definite_framework_results(
         framework_slug
     ).get('interestedSuppliers', ())
     total_interested_suppliers = len(interested_supplier_ids)
+
+    # Loop over suppliers breaking out if they pass or fail, if they make it to the end they get a discretionary pass
     for i, supplier_id in enumerate(interested_supplier_ids, start=1):
-        logger.info("Supplier {i}/{total_interested_suppliers}: {supplier_id}",
-                    extra={'i': i, 'supplier_id': supplier_id,
-                           'total_interested_suppliers': total_interested_suppliers})
+        logger.info(
+            "Supplier {i}/{total_interested_suppliers}: {supplier_id}",
+            extra={'i': i, 'supplier_id': supplier_id, 'total_interested_suppliers': total_interested_suppliers}
+        )
         supplier_framework = client.get_supplier_framework_info(supplier_id, framework_slug)["frameworkInterest"]
-        if (supplier_framework["onFramework"] is False and not reassess_failed) or \
-                (supplier_framework["onFramework"] is True and not reassess_passed):
+
+        # Skip the reassessment of those suppliers who have already passed or failed?
+        if (
+            supplier_framework["onFramework"] is False and not reassess_failed_suppliers or
+            supplier_framework["onFramework"] is True and not reassess_passed_suppliers
+        ):
             logger.info("\tSkipping: already %s", "passed" if supplier_framework["onFramework"] else "failed")
             continue
 
+        # A supplier must have completed their declaration to pass their application
+        if supplier_framework["declaration"].get("status") != "complete":
+            fail_supplier(supplier_id, framework_slug, updated_by, supplier_framework, client, logger, dry_run=dry_run)
+            continue
+
+        # A supplier should have at least one valid service to pass their application
         service_counter = _assess_draft_services(
             client,
             updated_by,
@@ -108,42 +121,62 @@ def mark_definite_framework_results(
             reassess_failed_draft_services=reassess_failed_draft_services,
             logger=logger
         )
+        if not service_counter["passed"]:
+            fail_supplier(supplier_id, framework_slug, updated_by, supplier_framework, client, logger, dry_run=dry_run)
+            continue
 
-        if (
-            supplier_framework["declaration"].get("status") == "complete"
-            and service_counter["passed"]
-            and _passes_validation(
+        # Check for a definite pass
+        supplier_passes_validation = _passes_validation(
+            supplier_framework["declaration"],
+            declaration_definite_pass_schema,
+            logger,
+            schema_name="declaration_definite_pass_schema",
+            tablevel=1
+        )
+        if supplier_passes_validation:
+            # Congratulations supplier, you pass!
+            pass_supplier(supplier_id, framework_slug, updated_by, supplier_framework, client, logger, dry_run=dry_run)
+            continue
+
+        # The supplier didn't pass, but check for, and default to, a discretionary pass
+        if declaration_discretionary_pass_schema:
+            supplier_passes_discretionary_validation = _passes_validation(
                 supplier_framework["declaration"],
-                declaration_definite_pass_schema,
+                declaration_discretionary_pass_schema,
                 logger,
-                schema_name="declaration_definite_pass_schema",
-                tablevel=1)
-        ):
-            logger.info("\tResult: PASS")
-            if not dry_run:
-                if supplier_framework["onFramework"] is not True:
-                    client.set_framework_result(supplier_id, framework_slug, True, updated_by)
-                else:
-                    logger.debug("\tUnchanged result - not re-setting")
-        elif supplier_framework["declaration"].get("status") != "complete" or (not service_counter["passed"]) or \
-                (declaration_baseline_schema and not _passes_validation(
-                    supplier_framework["declaration"],
-                    declaration_baseline_schema,
-                    logger,
-                    schema_name="declaration_baseline_schema",
-                    tablevel=1,
-                )):
-            logger.info("\tResult: FAIL")
-            if not dry_run:
-                if supplier_framework["onFramework"] is not False:
-                    client.set_framework_result(supplier_id, framework_slug, False, updated_by)
-                else:
-                    logger.debug("\tUnchanged result - not re-setting")
-        else:
-            # a result of DISCRETIONARY should pretty much never overwrite an already-made decision
-            logger.info(
-                "\tResult: DISCRETIONARY%s",
-                " (but leaving as {})".format(
-                    "PASS" if supplier_framework["onFramework"] else "FAIL"
-                ) if supplier_framework["onFramework"] is not None else "",
+                schema_name="declaration_discretionary_pass_schema",
+                tablevel=1,
             )
+            if not supplier_passes_discretionary_validation:
+                fail_supplier(
+                    supplier_id,
+                    framework_slug,
+                    updated_by,
+                    supplier_framework,
+                    client,
+                    logger,
+                    dry_run=dry_run
+                )
+                continue
+        # a result of DISCRETIONARY should pretty much never overwrite an already-made decision
+        log_message = "\tResult: DISCRETIONARY%s"
+        if supplier_framework["onFramework"] is not None:
+            log_message += " (but leaving as {})".format("PASS" if supplier_framework["onFramework"] else "FAIL")
+
+
+def pass_supplier(supplier_id, framework_slug, updated_by, supplier_framework, client, logger, dry_run=True):
+    logger.info("\tResult: PASS")
+    if not dry_run:
+        if supplier_framework["onFramework"] is not True:
+            client.set_framework_result(supplier_id, framework_slug, True, updated_by)
+        else:
+            logger.debug("\tUnchanged result - not re-setting")
+
+
+def fail_supplier(supplier_id, framework_slug, updated_by, supplier_framework, client, logger, dry_run=True):
+    logger.info("\tResult: FAIL")
+    if not dry_run:
+        if supplier_framework["onFramework"] is not False:
+            client.set_framework_result(supplier_id, framework_slug, False, updated_by)
+        else:
+            logger.debug("\tUnchanged result - not re-setting")

@@ -59,7 +59,7 @@ if __name__ == "__main__":
 
     declaration_definite_pass_schema = json.load(open(args["<declaration_definite_pass_schema_path>"], "r"))
 
-    declaration_baseline_schema = \
+    declaration_discretionary_pass_schema = \
         (declaration_definite_pass_schema.get("definitions") or {}).get("baseline")
 
     service_schema = json.load(
@@ -76,7 +76,7 @@ if __name__ == "__main__":
         updated_by,
         args["<framework_slug>"],
         declaration_definite_pass_schema,
-        declaration_baseline_schema=declaration_baseline_schema,
+        declaration_discretionary_pass_schema=declaration_discretionary_pass_schema,
         service_schema=service_schema,
         reassess_passed=args["--reassess-passed-sf"],
         reassess_failed=args["--reassess-failed-sf"],
