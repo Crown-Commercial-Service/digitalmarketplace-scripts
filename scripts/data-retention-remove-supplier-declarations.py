@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 """
-Our data retention policy is that users have accounts deactivated and personal data stripped after 3 years without
-a login.
+Our data retention policy is that supplier declarations are removed 3 years after a framework's expiry date.
 
 This script is very simple and has not been upgraded to accept any arguments to prevent the possibility of accidental
 deletion. If you are in doubt use the dry run option.
 
-Usage: data-retention-remove-user-data.py <stage> [--dry-run] [--verbose]
+Usage: data-retention-remove-supplier-declarations.py <stage> [--dry-run] [--verbose]
 
 Options:
     --stage=<stage>                                       Stage to target
@@ -16,8 +15,8 @@ Options:
     -h, --help                                            Show this screen
 
 Examples:
-    ./scripts/data-retention-remove-user-data.py preview
-    ./scripts/data-retention-remove-user-data.py preview --dry-run --verbose
+    ./scripts/data-retention-remove-supplier-declarations.py preview
+    ./scripts/data-retention-remove-supplier-declarations.py preview --dry-run --verbose
 
 """
 import logging
@@ -28,11 +27,12 @@ from dmapiclient import DataAPIClient
 
 sys.path.insert(0, '.')
 
+logger = logging.getLogger("script")
+
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers import logging_helpers
 from dmutils.env_helpers import get_api_endpoint_from_stage
-from datetime import timedelta, datetime
-from dmutils.formats import DATETIME_FORMAT
+from dmscripts.data_retention_remove_supplier_declarations import remove_supplier_data
 
 
 if __name__ == "__main__":
@@ -45,25 +45,11 @@ if __name__ == "__main__":
     verbose = arguments['--verbose']
 
     # Set defaults, instantiate clients
-    logger = logging_helpers.configure_logger(
+    logging_helpers.configure_logger(
         {"dmapiclient": logging.INFO} if verbose else {"dmapiclient": logging.WARN}
     )
     data_api_client = DataAPIClient(
         base_url=get_api_endpoint_from_stage(stage),
         auth_token=get_auth_token('api', stage)
     )
-    cutoff_date = datetime.now() - timedelta(days=365 * 3)
-    prefix = '[DRY RUN]: ' if dry_run else ''
-    all_users = data_api_client.find_users_iter(personal_data_removed=False)
-
-    for user in all_users:
-        last_logged_in_at = datetime.strptime(user['loggedInAt'], DATETIME_FORMAT)
-        if last_logged_in_at < cutoff_date and not user['personalDataRemoved']:
-            logger.warn(
-                f"{prefix}Removing personal data for user: {user['id']}"
-            )
-            if not dry_run:
-                data_api_client.remove_user_personal_data(
-                    user['id'],
-                    'Data Retention Script {}'.format(datetime.now().isoformat())
-                )
+    remove_supplier_data(data_api_client=data_api_client, logger=logger, dry_run=dry_run)

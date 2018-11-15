@@ -2,6 +2,66 @@ import pytest
 import requests
 
 from dmscripts.helpers.supplier_data_helpers import country_code_to_name
+from dmscripts.data_retention_remove_supplier_declarations import SupplierFrameworkDeclarations
+from tests.assessment_helpers import BaseAssessmentTest
+import mock
+import json
+from datetime import timedelta, date
+from freezegun import freeze_time
+
+
+class TestSupplierFrameworkDeclarations(BaseAssessmentTest):
+
+    @pytest.fixture
+    def mocked_api_client(self):
+        from dmapiclient import DataAPIClient
+        return mock.create_autospec(DataAPIClient)
+
+    def _supplier_framework_response(self):
+        with open("tests/fixtures/test_supplier_frameworks_response.json", 'r') as response_file:
+            return json.load(response_file)['supplierFrameworks']
+
+    def test_suppliers_application_failed_to_framework(self, mocked_api_client):
+        mocked_api_client.find_framework_suppliers_iter.side_effect = lambda *args, **kwargs: \
+            iter(self._supplier_framework_response())
+        supplier_framework = SupplierFrameworkDeclarations(mocked_api_client, mock.ANY, 'g-cloud-8', dry_run=False)
+        assert supplier_framework.suppliers_application_failed_to_framework() == [12345, 23456]
+
+    def test_remove_declaration_from_suppliers(self, mocked_api_client):
+        mocked_api_client.remove_supplier_declaration.return_value = {'declaration': {}}
+        sfd = SupplierFrameworkDeclarations(mocked_api_client, mock.ANY, 'g-cloud-8', dry_run=False)
+        assert sfd.remove_declaration(1, 'g-cloud-8')['declaration'] == {}
+        mocked_api_client.remove_supplier_declaration.assert_called_with(1, 'g-cloud-8', 'user')
+
+    def test_remove_supplier_declaration_for_expired_frameworks(self, mocked_api_client):
+        with freeze_time("Jan 1st, 2018"):
+            mocked_api_client.find_frameworks.return_value = {
+                "frameworks": [
+                    {
+                        "slug": "framework-expired-yesterday",
+                        "frameworkExpiresAtUTC": date.today() - timedelta(days=1)
+                    },
+                    {
+                        "slug": "framework-expired-almost-three-years-ago",
+                        "frameworkExpiresAtUTC": date.today() - timedelta(days=(365 * 3) - 1)
+                    },
+                    {
+                        "slug": "framework-expired-three-years-ago",
+                        "frameworkExpiresAtUTC": date.today() - timedelta(days=365 * 3)
+                    },
+                    {
+                        "slug": "framework-expired-a-decade-ago",
+                        "frameworkExpiresAtUTC": date.today() - timedelta(days=365 * 10)
+                    }
+                ]
+            }
+            sfd = SupplierFrameworkDeclarations(mocked_api_client, mock.MagicMock())
+            sfd.remove_supplier_declaration_for_expired_frameworks()
+            expected_calls = [
+                mock.call(framework_slug="framework-expired-three-years-ago"),
+                mock.call(framework_slug="framework-expired-a-decade-ago")
+            ]
+            mocked_api_client.find_framework_suppliers_iter.assert_has_calls(expected_calls, any_order=True)
 
 
 class TestCountryCodeToName:
