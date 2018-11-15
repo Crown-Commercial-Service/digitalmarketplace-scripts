@@ -232,7 +232,7 @@ class SupplierFrameworkDeclarations:
         for framework in old_frameworks:
             suppliers_with_declarations_to_clear = self.api_client.find_framework_suppliers_iter(
                 framework_slug=framework
-            )['supplierFrameworks']
+            )
             for supplier in suppliers_with_declarations_to_clear:
                 self.logger.info(
                     f"Declaration of supplier {supplier['supplierId']} "
