@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Helper classes for fetching supplier data given a client."""
 from collections import OrderedDict
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from functools import lru_cache
 from itertools import groupby
 import json
@@ -9,7 +9,7 @@ import json
 import backoff
 import requests
 
-from dmutils.formats import DISPLAY_DATE_FORMAT
+from dmutils.formats import DISPLAY_DATE_FORMAT, DATETIME_FORMAT
 
 
 class SupplierFrameworkData(object):
@@ -217,7 +217,9 @@ class SupplierFrameworkDeclarations:
         :rtype: List[str]
         """
         all_frameworks = self.api_client.find_frameworks()["frameworks"]
-        return [framework['slug'] for framework in all_frameworks if framework['frameworkExpiresAtUTC'] <= date_closed]
+        return [
+            framework['slug'] for framework in all_frameworks
+            if datetime.strptime(framework['frameworkExpiresAtUTC'], DATETIME_FORMAT) <= date_closed]
 
     def remove_supplier_declaration_for_expired_frameworks(self):
         """
@@ -225,7 +227,7 @@ class SupplierFrameworkDeclarations:
         :return: None
         :rtype: None
         """
-        date_from = date.today() - timedelta(365 * 3)
+        date_from = datetime.today() - timedelta(365 * 3)
         old_frameworks = self._frameworks_older_than_date(date_from)
         for framework in old_frameworks:
             suppliers_with_declarations_to_clear = self.api_client.find_framework_suppliers_iter(
