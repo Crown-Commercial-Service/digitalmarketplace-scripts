@@ -195,6 +195,10 @@ class SupplierFrameworkDeclarations:
                              supplier_id, framework_slug
                              )
         else:
+            self.logger.info(
+                f"Declaration of supplier {supplier_id} "
+                f"that applied to framework {framework_slug} removed"
+            )
             return self.api_client.remove_supplier_declaration(supplier_id, framework_slug, 'user')
 
     def remove_declaration_from_failed_applicants(self):
@@ -234,10 +238,6 @@ class SupplierFrameworkDeclarations:
                 framework_slug=framework
             )
             for supplier in suppliers_with_declarations_to_clear:
-                self.logger.info(
-                    f"Declaration of supplier {supplier['supplierId']} "
-                    f"that applied to framework {framework} removed"
-                )
                 self.remove_declaration(supplier['supplierId'], framework_slug=framework)
         self.logger.info("All declarations older than three years have been cleared")
 
