@@ -160,7 +160,7 @@ class SupplierFrameworkDeclarations:
     Methods for manipulating supplier declarations
     """
 
-    def __init__(self, api_client, logger, framework_slug: str=None, dry_run: bool=True):
+    def __init__(self, api_client, logger, framework_slug, dry_run):
         self.api_client = api_client
         self.framework_slug = framework_slug
         self.dry_run = dry_run
@@ -179,7 +179,7 @@ class SupplierFrameworkDeclarations:
             if framework_supplier['onFramework'] is not True
         ]
 
-    def remove_declaration(self, supplier_id: int, framework_slug: str):
+    def remove_declaration(self, supplier_id, framework_slug):
         """
         This method accesses an endpoint and removes the declaration of the associated SupplierFramework. It returns
         either the response object from the endpoint, or throws an exception
