@@ -6,7 +6,6 @@ from dmscripts.data_retention_remove_supplier_declarations import SupplierFramew
 from tests.assessment_helpers import BaseAssessmentTest
 import mock
 import json
-from datetime import timedelta, date
 from freezegun import freeze_time
 
 
@@ -39,19 +38,19 @@ class TestSupplierFrameworkDeclarations(BaseAssessmentTest):
                 "frameworks": [
                     {
                         "slug": "framework-expired-yesterday",
-                        "frameworkExpiresAtUTC": date.today() - timedelta(days=1)
+                        "frameworkExpiresAtUTC": "2017-12-31T23:59:59.999999Z"
                     },
                     {
                         "slug": "framework-expired-almost-three-years-ago",
-                        "frameworkExpiresAtUTC": date.today() - timedelta(days=(365 * 3) - 1)
+                        "frameworkExpiresAtUTC": "2015-01-03T23:59:59.999999Z"
                     },
                     {
                         "slug": "framework-expired-three-years-ago",
-                        "frameworkExpiresAtUTC": date.today() - timedelta(days=365 * 3)
+                        "frameworkExpiresAtUTC": "2015-01-02T00:00:00.000000Z"
                     },
                     {
                         "slug": "framework-expired-a-decade-ago",
-                        "frameworkExpiresAtUTC": date.today() - timedelta(days=365 * 10)
+                        "frameworkExpiresAtUTC": "2008-01-04T23:59:59.999999Z"
                     }
                 ]
             }
