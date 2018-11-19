@@ -160,13 +160,12 @@ class SupplierFrameworkDeclarations:
     Methods for manipulating supplier declarations
     """
 
-    def __init__(self, api_client, logger, framework_slug, dry_run):
+    def __init__(self, api_client, logger, dry_run):
         self.api_client = api_client
-        self.framework_slug = framework_slug
         self.dry_run = dry_run
         self.logger = logger
 
-    def suppliers_application_failed_to_framework(self):
+    def suppliers_application_failed_to_framework(self, framework_slug):
         """
         This functions calls the api endpoint and returns a list of the supplier_ids of suppliers that applied to be on
         the framework specified when the class was created but failed
@@ -175,7 +174,7 @@ class SupplierFrameworkDeclarations:
         """
         return [
             framework_supplier['supplierId']
-            for framework_supplier in self.api_client.find_framework_suppliers_iter(self.framework_slug)
+            for framework_supplier in self.api_client.find_framework_suppliers_iter(framework_slug)
             if framework_supplier['onFramework'] is not True
         ]
 
@@ -201,16 +200,16 @@ class SupplierFrameworkDeclarations:
             )
             return self.api_client.remove_supplier_declaration(supplier_id, framework_slug, 'user')
 
-    def remove_declaration_from_failed_applicants(self):
+    def remove_declaration_from_failed_applicants(self, framework_slug):
         """
         This method gets a list of failed applicants and then calls the remove_declaration function for each one. It
         returns None.
         :return: None
         :rtype: None
         """
-        failed_supplier_ids = self.suppliers_application_failed_to_framework()
+        failed_supplier_ids = self.suppliers_application_failed_to_framework(framework_slug)
         for supplier_id in failed_supplier_ids:
-            self.remove_declaration(supplier_id, self.framework_slug)
+            self.remove_declaration(supplier_id, framework_slug)
 
     def _frameworks_older_than_date(self, date_closed):
         """
