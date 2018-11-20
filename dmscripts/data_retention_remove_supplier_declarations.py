@@ -14,7 +14,6 @@ def remove_unsuccessful_supplier_declarations(data_api_client, logger, dry_run, 
     supplier_frameworks_methods = SupplierFrameworkDeclarations(
         api_client=data_api_client,
         logger=logger,
-        dry_run=dry_run,
-        framework_slug=framework_slug
+        dry_run=dry_run
     )
-    supplier_frameworks_methods.remove_declaration_from_failed_applicants()
+    supplier_frameworks_methods.remove_declaration_from_failed_applicants(framework_slug)
