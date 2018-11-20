@@ -6,7 +6,7 @@ removed immediately. This reduces the likelihood of commercially sensitive data 
 This script is very simple and has not been upgraded to accept any arguments to prevent the possibility of accidental
 deletion. If you are in doubt use the dry run option.
 
-Usage: data-retention-remove-supplier-declarations.py <stage> <framework-slug> [--dry-run] [--verbose]
+Usage: data-retention-remove-failed-suppliers-declarations.py <stage> <framework-slug> [--dry-run] [--verbose]
 
 Options:
     --stage=<stage>                                       Stage to target
