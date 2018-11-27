@@ -1,5 +1,7 @@
 # digitalmarketplace-scripts
 
+![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)
+
 ## A short overview of current scripts
 
 The `scripts` folder in this repository contains scripts that interact with the Digital Marketplace APIs (
