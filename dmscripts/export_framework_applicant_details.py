@@ -189,7 +189,7 @@ def _create_row(framework_slug, record, count_statuses, framework_lot_slugs):
     ))
 
 
-def export_supplier_details(data_api_client, framework_slug, filename, framework_lot_slugs):
-    records = find_suppliers_with_details_and_draft_service_counts(data_api_client, framework_slug)
+def export_supplier_details(data_api_client, framework_slug, filename, framework_lot_slugs, map_impl=map):
+    records = find_suppliers_with_details_and_draft_service_counts(data_api_client, framework_slug, map_impl=map_impl)
     headers, rows_iter = get_csv_rows(records, framework_slug, framework_lot_slugs)
     write_csv(headers, rows_iter, filename)

@@ -4,6 +4,7 @@ Generate a list of buyer users name and email address, optionally with a list of
 Usage:
     scripts/generate-buyer-email-list.py <stage> [--briefs]
 """
+from multiprocessing.pool import ThreadPool
 import sys
 
 sys.path.insert(0, '.')
@@ -24,4 +25,6 @@ if __name__ == '__main__':
     output = sys.stdout
     include_briefs = bool(arguments.get('--briefs'))
 
-    list_buyers(client, output, include_briefs)
+    pool = ThreadPool(10)
+
+    list_buyers(client, output, include_briefs, unordered_map_impl=pool.imap_unordered)

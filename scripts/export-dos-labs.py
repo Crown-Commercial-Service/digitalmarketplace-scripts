@@ -7,6 +7,7 @@ Usage:
     scripts/export-dos-labs.py <stage> <framework_slug>
 """
 import itertools
+from multiprocessing.pool import ThreadPool
 import sys
 sys.path.insert(0, '.')
 
@@ -26,11 +27,12 @@ else:
 REQUIRED_CONTACT_DETAILS_KEYS = ['email', 'contactName', 'phoneNumber']
 
 
-def find_all_labs(client):
+def find_all_labs(client, map_impl=map):
     records = find_suppliers_with_details_and_draft_services(client,
                                                              FRAMEWORK_SLUG,
                                                              lot="user-research-studios",
-                                                             statuses="submitted"
+                                                             statuses="submitted",
+                                                             map_impl=map_impl,
                                                              )
     records = list(filter(lambda record: record['onFramework'], records))
     records = append_contact_information_to_services(records, REQUIRED_CONTACT_DETAILS_KEYS)
@@ -58,4 +60,7 @@ if __name__ == '__main__':
     FRAMEWORK_SLUG = arguments['<framework_slug>']
 
     client = DataAPIClient(get_api_endpoint_from_stage(STAGE), get_auth_token('api', STAGE))
-    write_labs_csv(find_all_labs(client), "output/{}-labs.csv".format(FRAMEWORK_SLUG))
+
+    pool = ThreadPool(3)
+
+    write_labs_csv(find_all_labs(client, map_impl=pool.imap), "output/{}-labs.csv".format(FRAMEWORK_SLUG))
