@@ -62,9 +62,15 @@ def find_suppliers_with_details(client,
                                 framework_slug,
                                 declaration_definite_pass_schema,
                                 declaration_baseline_schema,
-                                supplier_ids=None
+                                supplier_ids=None,
+                                map_impl=map,
                                 ):
-    records = find_suppliers_with_details_and_draft_service_counts(client, framework_slug, supplier_ids)
+    records = find_suppliers_with_details_and_draft_service_counts(
+        client,
+        framework_slug,
+        supplier_ids,
+        map_impl=map_impl,
+    )
     records = list(map(add_failed_questions(questions_numbers,
                                             declaration_definite_pass_schema,
                                             declaration_baseline_schema), records))
@@ -180,6 +186,7 @@ def export_suppliers(
     declaration_definite_pass_schema,
     declaration_baseline_schema=None,
     supplier_ids=None,
+    map_impl=map,
 ):
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
@@ -192,7 +199,8 @@ def export_suppliers(
         framework_slug,
         declaration_definite_pass_schema,
         declaration_baseline_schema,
-        supplier_ids
+        supplier_ids,
+        map_impl=map_impl,
     )
 
     handlers = [SuccessfulHandler(), FailedHandler(), DiscretionaryHandler()]

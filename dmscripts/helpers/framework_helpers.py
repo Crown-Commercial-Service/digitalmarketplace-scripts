@@ -1,6 +1,5 @@
 from collections import Counter
 from functools import partial
-from multiprocessing.pool import ThreadPool
 import re
 
 from dmapiclient import HTTPError
@@ -39,24 +38,32 @@ def find_suppliers_on_framework(client, framework_slug):
     )
 
 
-def find_suppliers_with_details_and_draft_services(client, framework_slug, supplier_ids=None, lot=None, statuses=None):
-    pool = ThreadPool(3)
-
+def find_suppliers_with_details_and_draft_services(
+    client,
+    framework_slug,
+    supplier_ids=None,
+    lot=None,
+    statuses=None,
+    map_impl=map,
+):
     records = find_suppliers(client, framework_slug, supplier_ids)
-    records = pool.imap(partial(add_supplier_info, client), records)
-    records = pool.imap(partial(add_framework_info, client, framework_slug), records)
-    records = pool.imap(partial(add_draft_services, client, framework_slug, lot=lot, statuses=statuses), records)
+    records = map_impl(partial(add_supplier_info, client), records)
+    records = map_impl(partial(add_framework_info, client, framework_slug), records)
+    records = map_impl(partial(add_draft_services, client, framework_slug, lot=lot, statuses=statuses), records)
     records = [record for record in records if len(record["services"]) > 0]
     return records
 
 
-def find_suppliers_with_details_and_draft_service_counts(client, framework_slug, supplier_ids=None):
-    pool = ThreadPool(3)
-
+def find_suppliers_with_details_and_draft_service_counts(
+    client,
+    framework_slug,
+    supplier_ids=None,
+    map_impl=map,
+):
     records = find_suppliers(client, framework_slug, supplier_ids)
-    records = pool.imap(partial(add_supplier_info, client), records)
-    records = pool.imap(partial(add_framework_info, client, framework_slug), records)
-    records = pool.imap(partial(add_draft_counts, client, framework_slug), records)
+    records = map_impl(partial(add_supplier_info, client), records)
+    records = map_impl(partial(add_framework_info, client, framework_slug), records)
+    records = map_impl(partial(add_draft_counts, client, framework_slug), records)
     return records
 
 
