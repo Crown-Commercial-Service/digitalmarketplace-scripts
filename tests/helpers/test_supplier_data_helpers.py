@@ -6,6 +6,7 @@ from dmscripts.data_retention_remove_supplier_declarations import SupplierFramew
 from tests.assessment_helpers import BaseAssessmentTest
 import mock
 import json
+from datetime import datetime
 from freezegun import freeze_time
 
 
@@ -45,13 +46,23 @@ class TestSupplierFrameworkDeclarations(BaseAssessmentTest):
             return json.load(response_file)['supplierFrameworks']
 
     def test_suppliers_application_failed_to_framework(self, mocked_api_client):
-        supplier_framework = SupplierFrameworkDeclarations(mocked_api_client, mock.MagicMock(), dry_run=False)
+        supplier_framework = SupplierFrameworkDeclarations(
+            mocked_api_client,
+            mock.MagicMock(),
+            dry_run=False,
+            user='Data Retention Script {}'.format(datetime.now().isoformat())
+        )
         assert supplier_framework.suppliers_application_failed_to_framework('g-cloud-8') == [12345, 23456]
 
     def test_remove_declaration_from_suppliers(self, mocked_api_client):
         with freeze_time('2019-01-01 12:00:00'):
             mocked_api_client.remove_supplier_declaration.return_value = {'declaration': {}}
-            sfd = SupplierFrameworkDeclarations(mocked_api_client, mock.MagicMock(), dry_run=False)
+            sfd = SupplierFrameworkDeclarations(
+                mocked_api_client,
+                mock.MagicMock(),
+                dry_run=False,
+                user='Data Retention Script {}'.format(datetime.now().isoformat())
+            )
             assert sfd.remove_declaration(1, 'g-cloud-8')['declaration'] == {}
             mocked_api_client.remove_supplier_declaration.assert_called_with(
                 1,
@@ -60,7 +71,12 @@ class TestSupplierFrameworkDeclarations(BaseAssessmentTest):
 
     def test_remove_supplier_declaration_for_expired_frameworks(self, mocked_api_client):
         with freeze_time("Jan 1st, 2018"):
-            sfd = SupplierFrameworkDeclarations(mocked_api_client, mock.MagicMock(), dry_run=False)
+            sfd = SupplierFrameworkDeclarations(
+                mocked_api_client,
+                mock.MagicMock(),
+                dry_run=False,
+                user='Data Retention Script {}'.format(datetime.now().isoformat())
+            )
             sfd.remove_supplier_declaration_for_expired_frameworks()
             expected_calls = [
                 mock.call(framework_slug="framework-expired-three-years-ago"),
@@ -70,7 +86,12 @@ class TestSupplierFrameworkDeclarations(BaseAssessmentTest):
 
     def test_remove_declaration_from_failed_applicants(self, mocked_api_client):
         with freeze_time("2019-01-01 12:00:00"):
-            sfd = SupplierFrameworkDeclarations(mocked_api_client, mock.MagicMock(), False)
+            sfd = SupplierFrameworkDeclarations(
+                mocked_api_client,
+                mock.MagicMock(),
+                dry_run=False,
+                user='Data Retention Script {}'.format(datetime.now().isoformat())
+            )
             sfd.remove_declaration_from_failed_applicants(framework_slug='g-cloud-8')
             expected_calls = [
                 mock.call(
