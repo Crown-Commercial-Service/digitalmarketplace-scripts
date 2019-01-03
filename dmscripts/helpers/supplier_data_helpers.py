@@ -198,7 +198,11 @@ class SupplierFrameworkDeclarations:
                 f"Declaration of supplier {supplier_id} "
                 f"that applied to framework {framework_slug} removed"
             )
-            return self.api_client.remove_supplier_declaration(supplier_id, framework_slug, 'user')
+            return self.api_client.remove_supplier_declaration(
+                supplier_id,
+                framework_slug,
+                'Data Retention Script {}'.format(datetime.now().isoformat())
+            )
 
     def remove_declaration_from_failed_applicants(self, framework_slug):
         """
