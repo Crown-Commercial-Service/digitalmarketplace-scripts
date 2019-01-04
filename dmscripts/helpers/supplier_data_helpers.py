@@ -160,10 +160,11 @@ class SupplierFrameworkDeclarations:
     Methods for manipulating supplier declarations
     """
 
-    def __init__(self, api_client, logger, dry_run):
+    def __init__(self, api_client, logger, dry_run, user):
         self.api_client = api_client
         self.dry_run = dry_run
         self.logger = logger
+        self.user = user  # passed through by the script that calls this
 
     def suppliers_application_failed_to_framework(self, framework_slug):
         """
@@ -198,7 +199,11 @@ class SupplierFrameworkDeclarations:
                 f"Declaration of supplier {supplier_id} "
                 f"that applied to framework {framework_slug} removed"
             )
-            return self.api_client.remove_supplier_declaration(supplier_id, framework_slug, 'user')
+            return self.api_client.remove_supplier_declaration(
+                supplier_id,
+                framework_slug,
+                user=f'{self.user} {datetime.now().isoformat()}'
+            )
 
     def remove_declaration_from_failed_applicants(self, framework_slug):
         """

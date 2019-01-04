@@ -6,7 +6,7 @@ removed immediately. This reduces the likelihood of commercially sensitive data 
 This script is very simple and has not been upgraded to accept any arguments to prevent the possibility of accidental
 deletion. If you are in doubt use the dry run option.
 
-Usage: data-retention-remove-failed-suppliers-declarations.py <stage> <framework-slug> [--dry-run] [--verbose]
+Usage: data-retention-remove-failed-suppliers-declarations.py <stage> <framework-slug> [--dry-run] [--verbose] [<user>]
 
 Options:
     --stage=<stage>                                       Stage to target
@@ -15,6 +15,7 @@ Options:
     --dry-run
     --verbose                                             List data that would have been stripped
     -h, --help                                            Show this screen
+    <user>                                                The user who's running this script
 
 Examples:
     ./scripts/data-retention-remove-failed-suppliers-declarations.py preview g-cloud-9
@@ -22,6 +23,7 @@ Examples:
 
 """
 import logging
+import getpass
 import sys
 from docopt import docopt
 
@@ -46,6 +48,7 @@ if __name__ == "__main__":
     dry_run = arguments['--dry-run']
     framework = arguments['<framework-slug>']
     verbose = arguments['--verbose']
+    user = arguments['<user>'] or getpass.getuser()
 
     # Set defaults, instantiate clients
     logging_helpers.configure_logger(
@@ -59,5 +62,6 @@ if __name__ == "__main__":
         data_api_client=data_api_client,
         logger=logger,
         dry_run=dry_run,
-        framework_slug=framework
+        framework_slug=framework,
+        user=user
     )

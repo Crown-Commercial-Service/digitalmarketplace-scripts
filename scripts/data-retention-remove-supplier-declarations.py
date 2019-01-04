@@ -5,7 +5,7 @@ Our data retention policy is that supplier declarations are removed 3 years afte
 This script is very simple and has not been upgraded to accept any arguments to prevent the possibility of accidental
 deletion. If you are in doubt use the dry run option.
 
-Usage: data-retention-remove-supplier-declarations.py <stage> [--dry-run] [--verbose]
+Usage: data-retention-remove-supplier-declarations.py <stage> [--dry-run] [--verbose] [<user>]
 
 Options:
     --stage=<stage>                                       Stage to target
@@ -13,6 +13,7 @@ Options:
     --dry-run                                             List account that would have data stripped
     --verbose
     -h, --help                                            Show this screen
+    <user>                                                The user who's running this script.
 
 Examples:
     ./scripts/data-retention-remove-supplier-declarations.py preview
@@ -21,6 +22,7 @@ Examples:
 """
 import logging
 import sys
+import getpass
 from docopt import docopt
 
 from dmapiclient import DataAPIClient
@@ -43,6 +45,7 @@ if __name__ == "__main__":
 
     dry_run = arguments['--dry-run']
     verbose = arguments['--verbose']
+    user = arguments['<user>'] or getpass.getuser()
 
     # Set defaults, instantiate clients
     logging_helpers.configure_logger(
@@ -52,4 +55,4 @@ if __name__ == "__main__":
         base_url=get_api_endpoint_from_stage(stage),
         auth_token=get_auth_token('api', stage)
     )
-    remove_supplier_data(data_api_client=data_api_client, logger=logger, dry_run=dry_run)
+    remove_supplier_data(data_api_client=data_api_client, logger=logger, dry_run=dry_run, user=user)
