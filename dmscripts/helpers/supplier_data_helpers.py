@@ -202,7 +202,7 @@ class SupplierFrameworkDeclarations:
             return self.api_client.remove_supplier_declaration(
                 supplier_id,
                 framework_slug,
-                self.user
+                user=f'{self.user} {datetime.now().isoformat()}'
             )
 
     def remove_declaration_from_failed_applicants(self, framework_slug):

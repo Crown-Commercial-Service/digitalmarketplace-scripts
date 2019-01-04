@@ -6,7 +6,6 @@ from dmscripts.data_retention_remove_supplier_declarations import SupplierFramew
 from tests.assessment_helpers import BaseAssessmentTest
 import mock
 import json
-from datetime import datetime
 from freezegun import freeze_time
 
 
@@ -50,7 +49,7 @@ class TestSupplierFrameworkDeclarations(BaseAssessmentTest):
             mocked_api_client,
             mock.MagicMock(),
             dry_run=False,
-            user='Data Retention Script {}'.format(datetime.now().isoformat())
+            user='Data Retention Script'
         )
         assert supplier_framework.suppliers_application_failed_to_framework('g-cloud-8') == [12345, 23456]
 
@@ -61,7 +60,7 @@ class TestSupplierFrameworkDeclarations(BaseAssessmentTest):
                 mocked_api_client,
                 mock.MagicMock(),
                 dry_run=False,
-                user='Data Retention Script {}'.format(datetime.now().isoformat())
+                user='Data Retention Script'
             )
             assert sfd.remove_declaration(1, 'g-cloud-8')['declaration'] == {}
             mocked_api_client.remove_supplier_declaration.assert_called_with(
@@ -75,7 +74,7 @@ class TestSupplierFrameworkDeclarations(BaseAssessmentTest):
                 mocked_api_client,
                 mock.MagicMock(),
                 dry_run=False,
-                user='Data Retention Script {}'.format(datetime.now().isoformat())
+                user='Data Retention Script'
             )
             sfd.remove_supplier_declaration_for_expired_frameworks()
             expected_calls = [
@@ -90,7 +89,7 @@ class TestSupplierFrameworkDeclarations(BaseAssessmentTest):
                 mocked_api_client,
                 mock.MagicMock(),
                 dry_run=False,
-                user='Data Retention Script {}'.format(datetime.now().isoformat())
+                user='Data Retention Script'
             )
             sfd.remove_declaration_from_failed_applicants(framework_slug='g-cloud-8')
             expected_calls = [
