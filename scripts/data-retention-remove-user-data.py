@@ -1,15 +1,17 @@
 #!/usr/bin/env python
 """
 Our data retention policy is that users have accounts deactivated and personal data stripped after 3 years without
-a login.
+a login. This script not only does that but also removes any such users' email addresses from any of our mailing lists.
 
-This script is very simple and has not been upgraded to accept any arguments to prevent the possibility of accidental
-deletion. If you are in doubt use the dry run option.
+This script is simple and has deliberately been designed without many arguments to reduce the possibility of
+accidental deletion. If you are in doubt use the dry run option.
 
-Usage: data-retention-remove-user-data.py <stage> [--dry-run] [--verbose]
+Usage: data-retention-remove-user-data.py <stage> [options]
 
 Options:
     --stage=<stage>                                       Stage to target
+    --mailchimp-api-key=<mailchimp_api_key>               Mailchimp API key, omit to skip mailing list checks
+    --mailchimp-username=<mailchimp_username>             Mailchimp username, omit to skip mailing list checks
 
     --dry-run                                             List account that would have data stripped
     --verbose
@@ -28,11 +30,12 @@ from dmapiclient import DataAPIClient
 
 sys.path.insert(0, '.')
 
+from dmutils.email.dm_mailchimp import DMMailChimpClient
+from dmutils.env_helpers import get_api_endpoint_from_stage
+
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers import logging_helpers
-from dmutils.env_helpers import get_api_endpoint_from_stage
-from datetime import timedelta, datetime
-from dmutils.formats import DATETIME_FORMAT
+from dmscripts.data_retention_remove_user_data import data_retention_remove_user_data
 
 
 if __name__ == "__main__":
@@ -41,29 +44,34 @@ if __name__ == "__main__":
     # Get script arguments
     stage = arguments['<stage>']
 
-    dry_run = arguments['--dry-run']
-    verbose = arguments['--verbose']
-
     # Set defaults, instantiate clients
     logger = logging_helpers.configure_logger(
-        {"dmapiclient": logging.INFO} if verbose else {"dmapiclient": logging.WARN}
+        {"dmapiclient": logging.INFO} if arguments['--verbose'] else {"dmapiclient": logging.WARN}
     )
     data_api_client = DataAPIClient(
         base_url=get_api_endpoint_from_stage(stage),
-        auth_token=get_auth_token('api', stage)
+        auth_token=get_auth_token('api', stage),
     )
-    cutoff_date = datetime.now() - timedelta(days=365 * 3)
-    prefix = '[DRY RUN]: ' if dry_run else ''
-    all_users = data_api_client.find_users_iter(personal_data_removed=False)
 
-    for user in all_users:
-        last_logged_in_at = datetime.strptime(user['loggedInAt'], DATETIME_FORMAT)
-        if last_logged_in_at < cutoff_date and not user['personalDataRemoved']:
-            logger.warn(
-                f"{prefix}Removing personal data for user: {user['id']}"
-            )
-            if not dry_run:
-                data_api_client.remove_user_personal_data(
-                    user['id'],
-                    'Data Retention Script {}'.format(datetime.now().isoformat())
-                )
+    if bool(arguments["<mailchimp_username>"]) != bool(arguments["<mailchimp_api_key>"]):
+        raise TypeError(
+            "Either both of '--mailchimp-api-key' and '--mailchimp-username' need to be specified or neither"
+        )
+
+    if arguments["<mailchimp_username>"]:
+        dm_mailchimp_client = DMMailChimpClient(
+            arguments["<mailchimp_username>"],
+            arguments["<mailchimp_api_key>"],
+            logger,
+        )
+        logger.info("Using Mailchimp username %s for mailing list checks", repr(arguments["<mailchimp_username>"]))
+    else:
+        dm_mailchimp_client = None
+        logger.warn("No Mailchimp credentials provided - skipping mailing list checks")
+
+    data_retention_remove_user_data(
+        data_api_client=data_api_client,
+        logger=logger,
+        dm_mailchimp_client=dm_mailchimp_client,
+        dry_run=arguments['--dry-run'],
+    )
