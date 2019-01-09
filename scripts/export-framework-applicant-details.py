@@ -18,6 +18,7 @@ Example:
 """
 import datetime
 import errno
+from multiprocessing.pool import ThreadPool
 import os
 import sys
 
@@ -53,4 +54,6 @@ if __name__ == '__main__':
 
     framework_lot_slugs = tuple([lot['slug'] for lot in client.get_framework(FRAMEWORK)['frameworks']['lots']])
 
-    export_supplier_details(client, FRAMEWORK, filepath, framework_lot_slugs=framework_lot_slugs)
+    pool = ThreadPool(3)
+
+    export_supplier_details(client, FRAMEWORK, filepath, framework_lot_slugs=framework_lot_slugs, map_impl=pool.imap)

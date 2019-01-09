@@ -20,6 +20,7 @@ Options:
     -h --help
 """
 import json
+from multiprocessing.pool import ThreadPool
 import sys
 sys.path.insert(0, '.')
 
@@ -44,6 +45,8 @@ if __name__ == '__main__':
     supplier_id_file = args['<supplier_id_file>']
     supplier_ids = get_supplier_ids_from_file(supplier_id_file)
 
+    pool = ThreadPool(3)
+
     export_suppliers(
         client,
         args['<framework_slug>'],
@@ -51,5 +54,6 @@ if __name__ == '__main__':
         args['<output_dir>'],
         declaration_definite_pass_schema,
         declaration_baseline_schema,
-        supplier_ids
+        supplier_ids,
+        map_impl=pool.imap,
     )

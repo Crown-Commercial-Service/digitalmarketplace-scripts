@@ -41,6 +41,7 @@ Usage:
     <path_to_agreements_repo> [<supplier_id_file>]
 
 """
+from multiprocessing.pool import ThreadPool
 import os
 import shutil
 import sys
@@ -71,7 +72,14 @@ if __name__ == '__main__':
     supplier_ids = get_supplier_ids_from_file(supplier_id_file)
     html_dir = tempfile.mkdtemp()
 
-    records = find_suppliers_with_details_and_draft_service_counts(client, framework_slug, supplier_ids)
+    pool = ThreadPool(3)
+
+    records = find_suppliers_with_details_and_draft_service_counts(
+        client,
+        framework_slug,
+        supplier_ids,
+        map_impl=pool.imap,
+    )
     headers, rows = get_csv_rows(records, framework_slug, framework_lot_slugs, count_statuses=("submitted",))
     render_html_for_successful_suppliers(
         rows, framework, os.path.join(args['<path_to_agreements_repo>'], 'documents', framework['slug']), html_dir

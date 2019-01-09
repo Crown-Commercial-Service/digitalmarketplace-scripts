@@ -1,4 +1,3 @@
-from multiprocessing.pool import ThreadPool
 from dmapiclient import HTTPError
 
 import sys
@@ -29,10 +28,9 @@ def buyer_requirements(client):
     return inner_function
 
 
-def add_buyer_requirements(client, users):
-    pool = ThreadPool(10)
+def add_buyer_requirements(client, users, map_unordered_impl=map):
     callback = buyer_requirements(client)
-    return pool.imap_unordered(callback, users)
+    return map_unordered_impl(callback, users)
 
 
 def find_buyer_users(client):
@@ -41,12 +39,12 @@ def find_buyer_users(client):
             yield user
 
 
-def list_buyers(client, output, include_briefs):
+def list_buyers(client, output, include_briefs, map_unordered_impl=map):
     writer = csv.writer(output, delimiter=',', quotechar='"')
     users = find_buyer_users(client)
 
     if include_briefs:
-        users = add_buyer_requirements(client, users)
+        users = add_buyer_requirements(client, users, map_unordered_impl=map_unordered_impl)
     else:
         users = ((user, None) for user in users)
 

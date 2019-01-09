@@ -7,6 +7,7 @@ specialist roles the supplier provides, the locations they can provide them in a
 Usage:
     scripts/export-dos-specialists.py <stage> <framework_slug> <content_path>
 """
+from multiprocessing.pool import ThreadPool
 import sys
 sys.path.insert(0, '.')
 
@@ -23,11 +24,12 @@ from dmutils.env_helpers import get_api_endpoint_from_stage
 logger = logging_helpers.configure_logger({"dmapiclient": logging.WARNING})
 
 
-def find_all_specialists(client):
+def find_all_specialists(client, map_impl=map):
     return find_suppliers_with_details_and_draft_services(client,
                                                           FRAMEWORK_SLUG,
                                                           lot="digital-specialists",
-                                                          statuses="submitted"
+                                                          statuses="submitted",
+                                                          map_impl=map_impl,
                                                           )
 
 
@@ -68,7 +70,9 @@ if __name__ == '__main__':
     content_loader.load_manifest(FRAMEWORK_SLUG, "services", "edit_submission")
     content_manifest = content_loader.get_manifest(FRAMEWORK_SLUG, "edit_submission")
 
-    suppliers = find_all_specialists(client)
+    pool = ThreadPool(3)
+
+    suppliers = find_all_specialists(client, map_impl=pool.imap)
 
     write_csv_with_make_row(
         suppliers,
