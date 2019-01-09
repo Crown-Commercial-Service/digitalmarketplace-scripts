@@ -53,12 +53,12 @@ if __name__ == "__main__":
         auth_token=get_auth_token('api', stage),
     )
 
-    if bool(arguments["<mailchimp_username>"]) != bool(arguments["<mailchimp_api_key>"]):
+    if bool(arguments.get("<mailchimp_username>")) != bool(arguments.get("<mailchimp_api_key>")):
         raise TypeError(
             "Either both of '--mailchimp-api-key' and '--mailchimp-username' need to be specified or neither"
         )
 
-    if arguments["<mailchimp_username>"]:
+    if arguments.get("<mailchimp_username>"):
         dm_mailchimp_client = DMMailChimpClient(
             arguments["<mailchimp_username>"],
             arguments["<mailchimp_api_key>"],
