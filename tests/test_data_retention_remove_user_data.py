@@ -19,7 +19,7 @@ class TestDataRetentionRemoveUserData:
                 "id": 1235,
                 "emailAddress": "alaki@abe-aku.ta",
                 "loggedInAt": "2001-01-12T13:33:33.00000Z",
-                "personalDataRemoved": True,
+                "personalDataRemoved": False,
             },
             {
                 "id": 1236,
@@ -39,6 +39,12 @@ class TestDataRetentionRemoveUserData:
                 "loggedInAt": "2001-12-13T14:56:56.00000Z",
                 "personalDataRemoved": False,
             },
+            {
+                "id": 1239,
+                "emailAddress": "<removed>@1234.net",
+                "loggedInAt": "2001-01-12T13:33:34.00000Z",
+                "personalDataRemoved": True,
+            },
         ))
 
     def _get_email_hash_side_effect(self, email):
@@ -55,6 +61,7 @@ class TestDataRetentionRemoveUserData:
                 {"list_id": "ce", "name": "Cork Examiner"},
             ),
             "ananias@praisegod.barebones": (),
+            "<removed>@1234.net": (),
         }[email_address]
 
     @pytest.mark.parametrize("dry_run", (False, True,))
@@ -85,6 +92,7 @@ class TestDataRetentionRemoveUserData:
             mock.call.find_users_iter(),
         ] + ([] if dry_run else [
             mock.call.remove_user_personal_data(1234, "Data Retention Script 2004-06-16T13:01:02"),
+            mock.call.remove_user_personal_data(1235, "Data Retention Script 2004-06-16T13:01:02"),
             mock.call.remove_user_personal_data(1236, "Data Retention Script 2004-06-16T13:01:02"),
         ])
 
