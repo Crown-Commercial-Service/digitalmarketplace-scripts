@@ -1,12 +1,11 @@
 from datetime import datetime, date, timedelta
 
 from dmscripts.helpers.html_helpers import render_html
-from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.logging_helpers import logging
 from dmutils.formats import DATETIME_FORMAT, DISPLAY_DATE_FORMAT
 
 
-logger = logging_helpers.configure_logger({'dmapiclient': logging.INFO})
+logger = logging.getLogger('script')
 
 
 def get_live_briefs_between_two_dates(data_api_client, lot_slug, start_date, end_date, framework_slug):
