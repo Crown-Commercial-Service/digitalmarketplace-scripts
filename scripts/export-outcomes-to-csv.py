@@ -14,6 +14,7 @@ Options:
     -h --help
 """
 from contextlib import contextmanager
+import logging
 import sys
 sys.path.insert(0, '.')
 
@@ -22,6 +23,7 @@ from docopt import docopt
 from dmapiclient import DataAPIClient
 from dmutils.env_helpers import get_api_endpoint_from_stage
 
+from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.export_outcomes_to_csv import export_outcomes_to_csv
 
@@ -34,6 +36,7 @@ def _stdout_context_manager():
 if __name__ == "__main__":
     args = docopt(__doc__)
 
+    logger = logging_helpers.configure_logger({"dmapiclient": logging.INFO})
     api_client = DataAPIClient(get_api_endpoint_from_stage(args["<stage>"]), get_auth_token("api", args["<stage>"]))
 
     filename = args["<output_filename>"]
