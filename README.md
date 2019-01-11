@@ -111,7 +111,7 @@ The `scripts` folder in this repository contains scripts that interact with the 
 
   Checks all free-text fields in G-Cloud services for "bad words" and generates a CSV report of any bad words found.
 
-* `send-dos-opportunities-email.py`
+* `notify-suppliers-of-new-dos-opportunities.py`
 
   **Runs Mon-Fri 8:00am on Jenkins**. Send emails with new opportunities on a lot to suppliers who are on this lot.
 
