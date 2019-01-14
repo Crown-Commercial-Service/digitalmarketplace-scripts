@@ -15,9 +15,8 @@ def data_retention_remove_user_data(
 ):
     cutoff_date = datetime.now() - timedelta(days=365 * 3)
     prefix = '[DRY RUN]: ' if dry_run else ''
-    all_users = data_api_client.find_users_iter()
 
-    for user in all_users:
+    for user in data_api_client.find_users_iter(personal_data_removed=False):
         last_logged_in_at = datetime.strptime(user['loggedInAt'], DATETIME_FORMAT)
         if last_logged_in_at < cutoff_date:
             if dm_mailchimp_client is not None:
@@ -53,12 +52,11 @@ def data_retention_remove_user_data(
                         user["id"],
                     )
 
-            if not user['personalDataRemoved']:
-                logger.warn(
-                    f"{prefix}Removing personal data in API for user: {user['id']}"
+            logger.warn(
+                f"{prefix}Removing personal data in API for user: {user['id']}"
+            )
+            if not dry_run:
+                data_api_client.remove_user_personal_data(
+                    user['id'],
+                    'Data Retention Script {}'.format(datetime.now().isoformat())
                 )
-                if not dry_run:
-                    data_api_client.remove_user_personal_data(
-                        user['id'],
-                        'Data Retention Script {}'.format(datetime.now().isoformat())
-                    )

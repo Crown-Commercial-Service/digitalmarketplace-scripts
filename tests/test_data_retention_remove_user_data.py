@@ -7,8 +7,8 @@ from dmscripts.data_retention_remove_user_data import data_retention_remove_user
 
 
 class TestDataRetentionRemoveUserData:
-    def _find_users_iter_side_effect(self, *args, **kwargs):
-        return iter((
+    def _find_users_iter_side_effect(self, *args, **kw):
+        return (user for user in (
             {
                 "id": 1234,
                 "emailAddress": "walkup@walkup.eggs",
@@ -19,7 +19,7 @@ class TestDataRetentionRemoveUserData:
                 "id": 1235,
                 "emailAddress": "alaki@abe-aku.ta",
                 "loggedInAt": "2001-01-12T13:33:33.00000Z",
-                "personalDataRemoved": True,
+                "personalDataRemoved": False,
             },
             {
                 "id": 1236,
@@ -39,7 +39,13 @@ class TestDataRetentionRemoveUserData:
                 "loggedInAt": "2001-12-13T14:56:56.00000Z",
                 "personalDataRemoved": False,
             },
-        ))
+            {
+                "id": 1239,
+                "emailAddress": "<removed>@1234.net",
+                "loggedInAt": "2001-01-12T13:33:34.00000Z",
+                "personalDataRemoved": True,
+            },
+        ) if user["personalDataRemoved"] == kw.get("personal_data_removed") or kw.get("personal_data_removed") is None)
 
     def _get_email_hash_side_effect(self, email):
         return f"hashfor({email})"
@@ -55,6 +61,7 @@ class TestDataRetentionRemoveUserData:
                 {"list_id": "ce", "name": "Cork Examiner"},
             ),
             "ananias@praisegod.barebones": (),
+            "<removed>@1234.net": (),
         }[email_address]
 
     @pytest.mark.parametrize("dry_run", (False, True,))
@@ -82,9 +89,10 @@ class TestDataRetentionRemoveUserData:
             )
 
         assert data_api_client.mock_calls == [
-            mock.call.find_users_iter(),
+            mock.call.find_users_iter(personal_data_removed=False),
         ] + ([] if dry_run else [
             mock.call.remove_user_personal_data(1234, "Data Retention Script 2004-06-16T13:01:02"),
+            mock.call.remove_user_personal_data(1235, "Data Retention Script 2004-06-16T13:01:02"),
             mock.call.remove_user_personal_data(1236, "Data Retention Script 2004-06-16T13:01:02"),
         ])
 
@@ -131,7 +139,7 @@ class TestDataRetentionRemoveUserData:
                 )
 
         assert data_api_client.mock_calls == [
-            mock.call.find_users_iter(),
+            mock.call.find_users_iter(personal_data_removed=False),
             mock.call.remove_user_personal_data(1234, "Data Retention Script 2004-06-16T13:01:02"),
             # importantly missing call to remove 1236 (alaki@abe-aku.ta)'s data from the API because the call to remove
             # their email from mailchimp failed.
