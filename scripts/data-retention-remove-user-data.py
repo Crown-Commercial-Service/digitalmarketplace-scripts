@@ -53,18 +53,18 @@ if __name__ == "__main__":
         auth_token=get_auth_token('api', stage),
     )
 
-    if bool(arguments.get("<mailchimp_username>")) != bool(arguments.get("<mailchimp_api_key>")):
+    if bool(arguments.get("--mailchimp-username")) != bool(arguments.get("--mailchimp-api-key")):
         raise TypeError(
             "Either both of '--mailchimp-api-key' and '--mailchimp-username' need to be specified or neither"
         )
 
-    if arguments.get("<mailchimp_username>"):
+    if arguments.get("--mailchimp-username"):
         dm_mailchimp_client = DMMailChimpClient(
-            arguments["<mailchimp_username>"],
-            arguments["<mailchimp_api_key>"],
+            arguments["--mailchimp-username"],
+            arguments["--mailchimp-api-key"],
             logger,
         )
-        logger.info("Using Mailchimp username %s for mailing list checks", repr(arguments["<mailchimp_username>"]))
+        logger.info("Using Mailchimp username %s for mailing list checks", repr(arguments["--mailchimp-username"]))
     else:
         dm_mailchimp_client = None
         logger.warn("No Mailchimp credentials provided - skipping mailing list checks")
