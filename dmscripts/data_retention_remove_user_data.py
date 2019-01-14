@@ -47,7 +47,7 @@ def data_retention_remove_user_data(
                                 )
                 else:
                     logger.info(
-                        "%s not a member of any mailing lists",
+                        "%s (user %s) not a member of any mailing lists",
                         email_hash,
                         user["id"],
                     )
