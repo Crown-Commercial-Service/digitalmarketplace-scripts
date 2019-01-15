@@ -165,7 +165,7 @@ CONFIGS = [
         'process_fields': {
             'createdAt': format_datetime_string_as_date,
             'publishedAt': format_datetime_string_as_date,
-            'emailAddress': remove_username_from_email_address,
+            'users.0.emailAddress': remove_username_from_email_address,
             'clarificationQuestions': len,
         },
         'sort_by': 'createdAt'
@@ -294,7 +294,7 @@ CONFIGS = [
             'lot',
             'specialistRole',
             'organisation',
-            'emailAddress',
+            'users.0.emailAddress',
             'location',
             'publishedAt',
             'requirementsLength',
@@ -329,7 +329,7 @@ CONFIGS = [
         'duplicate_fields': [('id_data', 'brief_id_copy')],
         'process_fields': {
             'id_data': construct_brief_url,
-            'emailAddress': remove_username_from_email_address,
+            'users.0.emailAddress': remove_username_from_email_address,
             'requirementsLength': lambda i: i or '2 weeks',
         },
         'rename_fields': {
@@ -340,7 +340,7 @@ CONFIGS = [
             'lot': 'Category',
             'specialistRole': 'Specialist',
             'organisation': 'Organisation Name',
-            'emailAddress': 'Buyer Domain',
+            'users.0.emailAddress': 'Buyer Domain',
             'location': 'Location Of The Work',
             'publishedAt': 'Published At',
             'requirementsLength': 'Open For',
@@ -515,9 +515,10 @@ if __name__ == '__main__':
 
         # Only keep requested keys in the output CSV
         keys = [
-            k[-1] if isinstance(k, (tuple, list)) else k
-            for k in config['keys']
-            if (k[-1] if isinstance(k, (tuple, list)) else k) in data
+            j for j in (
+                ".".join(str(part) for part in k) if isinstance(k, (tuple, list)) else k
+                for k in config['keys']
+            ) if j in data
         ]
         data = data[keys]
 
