@@ -34,7 +34,7 @@ class ModelTrawler():
         def _get_nested_values(nested_keys, val):
             try:
                 return val if not len(nested_keys) else _get_nested_values(nested_keys, val[nested_keys.pop(0)])
-            except (KeyError, IndexError):
+            except (KeyError, IndexError, TypeError):
                 # objects/arrays might be empty for some returned models
                 return ''
 
