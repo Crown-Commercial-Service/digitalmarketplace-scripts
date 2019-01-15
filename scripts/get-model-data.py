@@ -435,6 +435,25 @@ CONFIGS = [
             'lockedSearchServicesCount',
         ),
     },
+    {
+        'name': 'completed_outcomes',
+        'base_model': 'outcomes',
+        'get_data_kwargs': {'completed': True},
+        'keys': (
+            'id',
+            'completedAt',
+            'result',
+            ('resultOfDirectAward', 'project', 'id',),
+            ('resultOfDirectAward', 'search', 'id',),
+            ('resultOfDirectAward', 'archivedService', 'service', 'id',),
+            ('resultOfFurtherCompetition', 'brief', 'id',),
+            ('resultOfFurtherCompetition', 'briefResponse', 'id',),
+            ('award', 'startDate',),
+            ('award', 'endDate',),
+            ('award', 'awardingOrganisationName',),
+            ('award', 'awardValue',),
+        ),
+    },
 ]
 
 if __name__ == '__main__':
