@@ -66,7 +66,7 @@ class ModelTrawler():
             filtered_dict = {}
             for key in _keys:
                 if isinstance(key, (list, tuple)):
-                    filtered_dict[key[len(key) - 1]] = _get_nested_values(list(key), model_dict)
+                    filtered_dict[".".join(str(k) for k in key)] = _get_nested_values(list(key), model_dict)
                 else:
                     filtered_dict[key] = model_dict.get(key, '')
 
