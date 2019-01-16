@@ -52,8 +52,8 @@ class TestModelTrawlerMethods:
 
         expected_model_dict = {
             'id': 1,
-            'name': 'Super cloud supplier',
-            'emailAddress': 'user@gov.uk'
+            'supplier.name': 'Super cloud supplier',
+            'users.0.emailAddress': 'user@gov.uk'
         }
 
         mt = ModelTrawler('fake_table', FakeClient())
@@ -66,8 +66,8 @@ class TestModelTrawlerMethods:
         )
 
         expected_model_data = (
-            {'id': 1, 'emailAddress': 'user@gov.uk'},
-            {'id': 2, 'emailAddress': 'user2@gov.uk'}
+            {'id': 1, 'users.0.emailAddress': 'user@gov.uk'},
+            {'id': 2, 'users.0.emailAddress': 'user2@gov.uk'}
         )
 
         with mock.patch.object(FakeClient, 'find_fake_table_iter', return_value=iter(self.model_data)):
@@ -80,7 +80,7 @@ class TestModelTrawlerMethods:
             ('users', 0, 'emailAddress')
         )
 
-        expected_model_data = ({'id': 1, 'emailAddress': 'user@gov.uk'},)
+        expected_model_data = ({'id': 1, 'users.0.emailAddress': 'user@gov.uk'},)
 
         with mock.patch.object(FakeClient, 'find_fake_table_iter', return_value=iter(self.model_data)):
             mt = ModelTrawler('fake_table', FakeClient())
