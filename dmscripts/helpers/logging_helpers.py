@@ -9,6 +9,14 @@ from dmutils.logging import CustomLogFormatter
 LOG_FORMAT = '%(asctime)s %(name)s %(levelname)s %(message)s'
 
 
+def get_logger():
+    """Get 'script' logger
+
+    :return: 'script' logger object
+    """
+    return logging.getLogger('script')
+
+
 def configure_logger(log_levels=None):
     """Configure logging handlers and return a configured 'script' logger
 
@@ -29,7 +37,7 @@ def configure_logger(log_levels=None):
         logging.getLogger(logger_name).addHandler(handler)
         logging.getLogger(logger_name).setLevel(level)
 
-    return logging.getLogger('script')
+    return get_logger()
 
 
 def merge_log_levels(added_log_levels):
