@@ -69,8 +69,8 @@ def find_suppliers_with_details_and_draft_service_counts(
 
 def find_suppliers(client, framework_slug, supplier_ids=None):
     suppliers = client.get_interested_suppliers(framework_slug)['interestedSuppliers']
-    return ({'supplier_id': supplier_id} for supplier_id in suppliers
-            if (supplier_ids is None) or (supplier_id in supplier_ids))
+    return [{'supplier_id': supplier_id} for supplier_id in suppliers
+            if (supplier_ids is None) or (supplier_id in supplier_ids)]
 
 
 def add_supplier_info(client, record):
