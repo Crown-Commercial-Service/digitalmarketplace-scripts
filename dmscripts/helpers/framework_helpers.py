@@ -1,8 +1,11 @@
 from collections import Counter
 from functools import partial
+import logging
 import re
 
 from dmapiclient import HTTPError
+
+logger = logging.getLogger("framework_helpers")
 
 
 def get_submitted_drafts(client, framework_slug, supplier_id):
@@ -61,14 +64,20 @@ def find_suppliers_with_details_and_draft_service_counts(
     map_impl=map,
 ):
     records = find_suppliers(client, framework_slug, supplier_ids)
+    length = len(records)
     records = map_impl(partial(add_supplier_info, client), records)
     records = map_impl(partial(add_framework_info, client, framework_slug), records)
     records = map_impl(partial(add_draft_counts, client, framework_slug), records)
+    records = map_watch(
+        records,
+        f"fetched details and draft counts for supplier {{count}}/{length}"
+    )
     return records
 
 
 def find_suppliers(client, framework_slug, supplier_ids=None):
     suppliers = client.get_interested_suppliers(framework_slug)['interestedSuppliers']
+    logger.debug(f"found {len(suppliers)} suppliers interested in '{framework_slug}'")
     return [{'supplier_id': supplier_id} for supplier_id in suppliers
             if (supplier_ids is None) or (supplier_id in supplier_ids)]
 
@@ -119,3 +128,23 @@ def get_full_framework_slug(framework):
         return "{}-{}".format(prefix, iteration.group(1))
     else:
         return prefix
+
+
+def map_watch(iterable, msg_format=None):
+    """Prints a debug message when you fetch an element from a list
+
+    :iterable:      a list (or tuple, generator) of items that you want to process
+    :msg_format:    message to emit to debug logger
+
+    :returns:       a generator that produces elements and emits a debug
+                    message while doing so
+    """
+    count = 0
+
+    if msg_format is None:
+        msg_format = "processing record {count}"
+
+    for e in iterable:
+        yield e
+        count += 1
+        logger.debug(msg_format.format(count=count))
