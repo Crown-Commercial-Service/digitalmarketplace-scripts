@@ -7,10 +7,9 @@ import subprocess
 from datetime import datetime
 
 from dmscripts.helpers.html_helpers import render_html
-from dmscripts.helpers import logging_helpers
-from dmscripts.helpers.logging_helpers import logging
+from dmscripts.helpers.logging_helpers import get_logger
 
-logger = logging_helpers.configure_logger({'dmapiclient.base': logging.WARNING})
+logger = get_logger()
 
 
 def save_page(html, supplier_id, output_dir, descriptive_filename_part):
@@ -21,17 +20,27 @@ def save_page(html, supplier_id, output_dir, descriptive_filename_part):
         htmlfile.write(html)
 
 
-def render_html_for_successful_suppliers(rows, framework, template_dir, output_dir):
+def render_html_for_successful_suppliers(rows, framework, template_dir, output_dir, dry_run=False):
     template_path = os.path.join(template_dir, 'framework-agreement-signature-page.html')
     template_css_path = os.path.join(template_dir, 'framework-agreement-signature-page.css')
+
     for data in rows:
         if data['pass_fail'] in ('fail', 'discretionary'):
+            logger.info(f"skipping supplier {data['supplier_id']} due to pass_fail=='{data['pass_fail']}'")
             continue
+
+        logger.info(f"generating framework agreement page for successful supplier {data['supplier_id']}")
+
         data['framework'] = framework
         data['awardedLots'] = [lot for lot in framework['frameworkAgreementDetails']['lotOrder'] if int(data[lot]) > 0]
         data['includeCountersignature'] = False
+
+        if dry_run:
+            continue
+
         html = render_html(template_path, data)
         save_page(html, data['supplier_id'], output_dir, "signature-page")
+
     shutil.copyfile(template_css_path, os.path.join(output_dir, 'framework-agreement-signature-page.css'))
 
 
