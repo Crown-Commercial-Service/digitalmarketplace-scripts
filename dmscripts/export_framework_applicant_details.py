@@ -190,7 +190,7 @@ def _pass_fail_from_record(record):
 
 
 def _format_field(field_name, field_value):
-    if field_name == 'supplierRegisteredCountry':
+    if field_name == 'supplierRegisteredCountry' and field_value:
         field_value = country_code_to_name(field_value)
 
     return field_name, field_value
