@@ -35,6 +35,11 @@ test-flake8: virtualenv requirements-dev
 test-unit: virtualenv requirements-dev
 	${VIRTUALENV_ROOT}/bin/py.test ${PYTEST_ARGS}
 
+.PHONY: functional-tests
+functional-tests: virtualenv requirements-dev
+	./functional-tests/setup.sh
+	${VIRTUALENV_ROOT}/bin/cram -v functional-tests/
+
 .PHONY: docker-build
 docker-build:
 	$(if ${RELEASE_NAME},,$(eval export RELEASE_NAME=$(shell git describe)))
