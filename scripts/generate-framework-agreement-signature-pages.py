@@ -47,11 +47,7 @@ sys.path.insert(0, ".")
 
 from docopt import docopt
 
-from dmscripts.export_framework_applicant_details import get_csv_rows
 from dmscripts.helpers.auth_helpers import get_auth_token
-from dmscripts.helpers.framework_helpers import (
-    find_suppliers_with_details_and_draft_service_counts
-)
 from dmscripts.helpers.logging_helpers import (
     configure_logger,
     logging,
@@ -62,6 +58,7 @@ from dmapiclient import DataAPIClient
 from dmutils.env_helpers import get_api_endpoint_from_stage
 
 from dmscripts.generate_framework_agreement_signature_pages import (
+    find_suppliers,
     render_html_for_successful_suppliers,
     render_pdf_for_each_html_page,
 )
@@ -107,31 +104,15 @@ if __name__ == "__main__":
 
     logger.debug(f"fetching lots for framework '{framework_slug}'")
     framework = client.get_framework(framework_slug)["frameworks"]
-    framework_lot_slugs = tuple([lot["slug"] for lot in client.get_framework(framework_slug)["frameworks"]["lots"]])
 
-    # get supplier details (returns a lazy generator)
-    logger.debug(f"fetching records for {len(supplier_ids) if supplier_ids else 'all'} suppliers")
-    records = find_suppliers_with_details_and_draft_service_counts(
-        client,
-        framework_slug,
-        supplier_ids,
-        map_impl=map_impl,
-    )
-    # we reuse code from another script to filter and flatten our supplier details
-    _, rows = get_csv_rows(
-        records,
-        framework_slug,
-        framework_lot_slugs,
-        count_statuses=("submitted",),
-        dry_run=dry_run,
-    )
+    suppliers = find_suppliers(client, framework, supplier_ids, map_impl, dry_run)
 
     # create a temporary directory for the HTML files
     with tempfile.TemporaryDirectory() as html_dir:
         # create signature pages in HTML using Jinja templates from agreements repo
         logger.debug(f"generating HTML signature pages")
         render_html_for_successful_suppliers(
-            rows, framework, agreements_dir, html_dir, dry_run)
+            suppliers, framework, agreements_dir, html_dir, dry_run)
 
         # convert HTML to PDF (this uses wkhtmltopdf under-the-hood)
         logger.debug(f"generating PDF signature pages from HTML")

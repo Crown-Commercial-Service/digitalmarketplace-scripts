@@ -8,8 +8,40 @@ from datetime import datetime
 
 from dmscripts.helpers.html_helpers import render_html
 from dmscripts.helpers.logging_helpers import get_logger
+from dmscripts.helpers.framework_helpers import (
+    find_suppliers_with_details_and_draft_service_counts
+)
+from dmscripts.export_framework_applicant_details import get_csv_rows
 
 logger = get_logger()
+
+
+def find_suppliers(client, framework, supplier_ids=None, map_impl=map, dry_run=False):
+    """Return supplier details for suppliers with framework interest
+
+    :param client: data api client
+    :type client: dmapiclient.DataAPIClient
+    :param dict framework: framework
+    :param supplier_ids: list of supplier IDs to limit return to
+    :type supplier_ids: Optional[List[Union[str, int]]]
+    """
+    # get supplier details (returns a lazy generator)
+    logger.debug(f"fetching records for {len(supplier_ids) if supplier_ids else 'all'} suppliers")
+    records = find_suppliers_with_details_and_draft_service_counts(
+        client,
+        framework["slug"],
+        supplier_ids,
+        map_impl=map_impl,
+    )
+    # we reuse code from another script to filter and flatten our supplier details
+    _, rows = get_csv_rows(
+        records,
+        framework["slug"],
+        framework_lot_slugs=tuple([lot["slug"] for lot in framework["lots"]]),
+        count_statuses=("submitted",),
+        dry_run=dry_run,
+    )
+    return rows
 
 
 def save_page(html, supplier_id, output_dir, descriptive_filename_part):
