@@ -22,7 +22,7 @@ class ModelTrawler():
         self.model_iter_method = model_iter_method
 
     def _get_allowed_models(self):
-        r = re.compile('^find_(\w*)_iter$')
+        r = re.compile(r'^find_(\w*)_iter$')
         return (r.match(attr).group(1) for attr in dir(self.client) if r.match(attr))
 
     def _model_iter(self, **kwargs):

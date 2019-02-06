@@ -1,4 +1,5 @@
 -r requirements.txt
+cram
 flake8==3.5.0
 flake8-per-file-ignores
 freezegun
@@ -8,3 +9,5 @@ lxml
 mock
 pytest
 requests-mock
+
+git+https://github.com/alphagov/digitalmarketplace-test-utils.git@2.3.0#egg=digitalmarketplace-test-utils==2.3.0

@@ -7,10 +7,41 @@ import subprocess
 from datetime import datetime
 
 from dmscripts.helpers.html_helpers import render_html
-from dmscripts.helpers import logging_helpers
-from dmscripts.helpers.logging_helpers import logging
+from dmscripts.helpers.logging_helpers import get_logger
+from dmscripts.helpers.framework_helpers import (
+    find_suppliers_with_details_and_draft_service_counts
+)
+from dmscripts.export_framework_applicant_details import get_csv_rows
 
-logger = logging_helpers.configure_logger({'dmapiclient.base': logging.WARNING})
+logger = get_logger()
+
+
+def find_suppliers(client, framework, supplier_ids=None, map_impl=map, dry_run=False):
+    """Return supplier details for suppliers with framework interest
+
+    :param client: data api client
+    :type client: dmapiclient.DataAPIClient
+    :param dict framework: framework
+    :param supplier_ids: list of supplier IDs to limit return to
+    :type supplier_ids: Optional[List[Union[str, int]]]
+    """
+    # get supplier details (returns a lazy generator)
+    logger.debug(f"fetching records for {len(supplier_ids) if supplier_ids else 'all'} suppliers")
+    records = find_suppliers_with_details_and_draft_service_counts(
+        client,
+        framework["slug"],
+        supplier_ids,
+        map_impl=map_impl,
+    )
+    # we reuse code from another script to filter and flatten our supplier details
+    _, rows = get_csv_rows(
+        records,
+        framework["slug"],
+        framework_lot_slugs=tuple([lot["slug"] for lot in framework["lots"]]),
+        count_statuses=("submitted",),
+        dry_run=dry_run,
+    )
+    return rows
 
 
 def save_page(html, supplier_id, output_dir, descriptive_filename_part):
@@ -21,17 +52,27 @@ def save_page(html, supplier_id, output_dir, descriptive_filename_part):
         htmlfile.write(html)
 
 
-def render_html_for_successful_suppliers(rows, framework, template_dir, output_dir):
+def render_html_for_successful_suppliers(rows, framework, template_dir, output_dir, dry_run=False):
     template_path = os.path.join(template_dir, 'framework-agreement-signature-page.html')
     template_css_path = os.path.join(template_dir, 'framework-agreement-signature-page.css')
+
     for data in rows:
         if data['pass_fail'] in ('fail', 'discretionary'):
+            logger.info(f"skipping supplier {data['supplier_id']} due to pass_fail=='{data['pass_fail']}'")
             continue
+
+        logger.info(f"generating framework agreement page for successful supplier {data['supplier_id']}")
+
         data['framework'] = framework
         data['awardedLots'] = [lot for lot in framework['frameworkAgreementDetails']['lotOrder'] if int(data[lot]) > 0]
         data['includeCountersignature'] = False
+
+        if dry_run:
+            continue
+
         html = render_html(template_path, data)
         save_page(html, data['supplier_id'], output_dir, "signature-page")
+
     shutil.copyfile(template_css_path, os.path.join(output_dir, 'framework-agreement-signature-page.css'))
 
 
