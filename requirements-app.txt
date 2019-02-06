@@ -2,7 +2,7 @@
 # with package version changes made in requirements-app.txt
 
 Flask==1.0.2
-itsdangerous==0.24
+itsdangerous==1.1.0
 # Pinned because requests requires <2.8 but earlier dependencies in the list will install 2.8
 idna==2.7
 
