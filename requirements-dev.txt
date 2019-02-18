@@ -1,6 +1,6 @@
 -r requirements.txt
 cram==0.7
-flake8==3.5.0
+flake8==3.7.5
 flake8-per-file-ignores
 freezegun
 ipython
