@@ -5,7 +5,7 @@ flake8-per-file-ignores==0.8.1
 freezegun==0.3.11
 ipython==7.2.0
 ipython-genutils==0.2.0
-lxml
+lxml==4.3.1
 mock
 pytest
 requests-mock
