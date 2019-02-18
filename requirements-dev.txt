@@ -3,7 +3,7 @@ cram==0.7
 flake8==3.7.5
 flake8-per-file-ignores==0.8.1
 freezegun==0.3.11
-ipython
+ipython==7.2.0
 ipython-genutils
 lxml
 mock
