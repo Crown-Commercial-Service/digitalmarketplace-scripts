@@ -36,6 +36,8 @@ function get_jenkins_env_token_name() {
     app_name="DATA_API"
   elif [[ "$1" == "search_api" ]]; then
     app_name="SEARCH_API"
+  elif [[ "$1" == "antivirus_api" ]]; then
+    app_name="ANTIVIRUS_API"
   else
     exit 3
   fi
