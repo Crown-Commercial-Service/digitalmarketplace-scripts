@@ -1,5 +1,5 @@
 -r requirements.txt
-cram
+cram==0.7
 flake8==3.5.0
 flake8-per-file-ignores
 freezegun
