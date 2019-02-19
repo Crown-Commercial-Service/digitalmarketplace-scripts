@@ -41,7 +41,7 @@ def path_without_supplier_name(path):
     folder, _, filename = path.rpartition('/')
 
     # Skip archived file versions starting with timestamps
-    if re.match('\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{6}', filename):
+    if re.match(r'\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{6}', filename):
         logger.info("Skipping old file version {}".format(path))
         return None, None
 
