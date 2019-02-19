@@ -15,7 +15,7 @@ clamd==1.0.2
 docopt==0.6.2
 jsonschema==2.6.0
 lorem==0.1.1
-pandas==0.19.1
+pandas==0.19.1  # pyup: ignore # avoid updating as it means reopening a fairly gnarly script
 python-dateutil==2.8.0
 unicodecsv==0.14.1
 xeger==0.3.4
