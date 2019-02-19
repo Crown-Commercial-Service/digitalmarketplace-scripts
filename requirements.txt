@@ -4,8 +4,6 @@
 
 Flask==1.0.2
 itsdangerous==0.24 # pyup: ignore
-# Pinned because requests requires <2.8 but earlier dependencies in the list will install 2.8
-idna==2.7
 
 git+https://github.com/madzak/python-json-logger.git@v0.1.8#egg=python-json-logger==v0.1.8
 git+https://github.com/alphagov/digitalmarketplace-utils.git@45.3.1#egg=digitalmarketplace-utils==45.3.1
