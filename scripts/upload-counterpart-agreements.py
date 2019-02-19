@@ -96,7 +96,7 @@ if __name__ == '__main__':
                 notify_fail_early=False,
                 logger=logger,
             )
-        except (OSError, IOError, S3ResponseError, EmailError, APIError) as e:
+        except (OSError, IOError, S3ResponseError, EmailError, APIError):
             # upload_counterpart_file should have already logged these so no need here
             failure_count += 1
 

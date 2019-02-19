@@ -101,12 +101,12 @@ def add_framework_info(client, framework_slug, record):
 
 
 def add_draft_services(client, framework_slug, record, lot=None, statuses=None):
-        drafts = client.find_draft_services(record["supplier_id"], framework=framework_slug)
-        drafts = [
-            draft for draft in drafts["services"]
-            if (not lot or draft["lotSlug"] == lot) and (not statuses or draft["status"] in statuses)
-        ]
-        return dict(record, services=drafts)
+    drafts = client.find_draft_services(record["supplier_id"], framework=framework_slug)
+    drafts = [
+        draft for draft in drafts["services"]
+        if (not lot or draft["lotSlug"] == lot) and (not statuses or draft["status"] in statuses)
+    ]
+    return dict(record, services=drafts)
 
 
 def add_draft_counts(client, framework_slug, record):
@@ -119,7 +119,7 @@ def add_draft_counts(client, framework_slug, record):
 
 
 def get_full_framework_slug(framework):
-    iteration = re.search('(\d+)', framework)
+    iteration = re.search(r'(\d+)', framework)
     if framework.startswith('g'):
         prefix = 'g-cloud'
     elif framework.startswith('d'):

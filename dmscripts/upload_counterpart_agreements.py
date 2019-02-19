@@ -85,7 +85,7 @@ def upload_counterpart_file(
                     }, allow_resend=True)
                 else:
                     logger.info("[Dry-run] Send notify email to %s", notify_email)
-            except EmailError as e:
+            except EmailError:
                 if notify_fail_early:
                     raise
                 else:
