@@ -3,11 +3,12 @@
 # D203: 1 blank line required before class docstring
 # E402: module level import not at top of file
 # W503: line break before binary operator
+# W504: line break after binary operator
 # C901: 'Methodname' is too complex ('n')
 exclude = venv*,__pycache__,node_modules,bower_components,.git
-ignore = D203,W503
+ignore = D203,W503,W504
 max-complexity = 19
 max-line-length = 120
 per-file-ignores =
     scripts/** : E402
-    scripts/get-model-data.py : C901
+    scripts/get-model-data.py : E402, C901
