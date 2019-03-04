@@ -1,6 +1,6 @@
 -r requirements.txt
 cram==0.7
-flake8==3.7.6
+flake8==3.7.7
 freezegun==0.3.11
 ipython==7.3.0
 ipython-genutils==0.2.0
