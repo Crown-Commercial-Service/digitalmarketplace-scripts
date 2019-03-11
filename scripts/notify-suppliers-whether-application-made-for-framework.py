@@ -21,6 +21,7 @@ from docopt import docopt
 from dmapiclient import DataAPIClient
 from dmutils.email.exceptions import EmailError
 from dmutils.dates import update_framework_with_formatted_dates
+from dmutils.email.helpers import hash_string
 from dmscripts.helpers.email_helpers import scripts_notify_client
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers import logging_helpers
@@ -30,8 +31,10 @@ from dmutils.env_helpers import get_api_endpoint_from_stage
 
 logger = logging_helpers.configure_logger({"dmapiclient": logging.INFO})
 
-NOTIFY_TEMPLATE_APPLICATION_MADE = 'de02a7e3-80f6-4391-818c-48326e1f4688'
-NOTIFY_TEMPLATE_NO_APPLICATION = '87a126b4-7909-4b63-b981-d3c3d6a558ff'
+NOTIFY_TEMPLATES = {
+    'application_made': 'de02a7e3-80f6-4391-818c-48326e1f4688',
+    'application_not_made': '87a126b4-7909-4b63-b981-d3c3d6a558ff'
+}
 
 
 if __name__ == '__main__':
@@ -56,17 +59,15 @@ if __name__ == '__main__':
     context_data = context_helper.get_users_personalisations()
     error_count = 0
     for user_email, personalisation in context_data.items():
-        logger.info(user_email)
-        template_id = (NOTIFY_TEMPLATE_APPLICATION_MADE
-                       if personalisation['applied']
-                       else NOTIFY_TEMPLATE_NO_APPLICATION)
-        if DRY_RUN:
-            logger.info("[Dry Run] Sending email {} to {}".format(template_id, user_email))
-        else:
+        template_key = 'application_made' if personalisation['applied'] else 'application_not_made'
+
+        prefix = "[Dry Run] " if DRY_RUN else ""
+        logger.info("{}Sending '{}' email to {}".format(prefix, template_key, hash_string(user_email)))
+        if not DRY_RUN:
             try:
-                mail_client.send_email(user_email, template_id, personalisation, allow_resend=False)
+                mail_client.send_email(user_email, NOTIFY_TEMPLATES[template_key], personalisation, allow_resend=False)
             except EmailError as e:
-                logger.error(u'Error sending email to {}: {}'.format(user_email, e))
+                logger.error(u'Error sending email to {}: {}'.format(hash_string(user_email), e))
                 error_count += 1
 
     sys.exit(error_count)
