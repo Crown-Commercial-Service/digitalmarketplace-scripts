@@ -21,6 +21,7 @@ from docopt import docopt
 from dmapiclient import DataAPIClient
 from dmutils.email.exceptions import EmailError
 from dmutils.dates import update_framework_with_formatted_dates
+from dmutils.email.helpers import hash_string
 from dmscripts.helpers.email_helpers import scripts_notify_client
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers import logging_helpers
@@ -56,17 +57,16 @@ if __name__ == '__main__':
     context_data = context_helper.get_users_personalisations()
     error_count = 0
     for user_email, personalisation in context_data.items():
-        logger.info(user_email)
         template_id = (NOTIFY_TEMPLATE_APPLICATION_MADE
                        if personalisation['applied']
                        else NOTIFY_TEMPLATE_NO_APPLICATION)
         if DRY_RUN:
-            logger.info("[Dry Run] Sending email {} to {}".format(template_id, user_email))
+            logger.info("[Dry Run] Sending email {} to {}".format(template_id, hash_string(user_email),))
         else:
             try:
                 mail_client.send_email(user_email, template_id, personalisation, allow_resend=False)
             except EmailError as e:
-                logger.error(u'Error sending email to {}: {}'.format(user_email, e))
+                logger.error(u'Error sending email to {}: {}'.format(hash_string(user_email), e))
                 error_count += 1
 
     sys.exit(error_count)
