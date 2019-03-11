@@ -61,9 +61,9 @@ if __name__ == '__main__':
     for user_email, personalisation in context_data.items():
         template_key = 'application_made' if personalisation['applied'] else 'application_not_made'
 
-        if DRY_RUN:
-            logger.info("[Dry Run] Sending {} email to {}".format(template_key, hash_string(user_email)))
-        else:
+        prefix = "[Dry Run] " if DRY_RUN else ""
+        logger.info("{}Sending '{}' email to {}".format(prefix, template_key, hash_string(user_email)))
+        if not DRY_RUN:
             try:
                 mail_client.send_email(user_email, NOTIFY_TEMPLATES[template_key], personalisation, allow_resend=False)
             except EmailError as e:
