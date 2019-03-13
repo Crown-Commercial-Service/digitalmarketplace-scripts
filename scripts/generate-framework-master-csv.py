@@ -4,7 +4,7 @@
 !!! This generally needs to be run right after the close of applications for a framework, and passed to product
 !!! managers & CCS.
 
-Generate a CSV (to stdout) with per-lot draft statistics for each supplier who registered interest in the framework,
+Generate a CSV with per-lot draft statistics for each supplier who registered interest in the framework,
 whether or not they made a complete application in the end.
 
 Fields included:
@@ -15,12 +15,14 @@ Fields included:
 * The number of services submitted and left in draft per lot
 
 Usage:
-    scripts/generate-framework-master-csv.py <framework_slug> <stage> <auth_token>
+    scripts/generate-framework-master-csv.py <framework_slug> <stage> <auth_token> <output-dir>
 
 Example:
-    scripts/generate-framework-master-csv.py g-cloud-8 preview myToken | tee g-cloud-8-master.csv
+    scripts/generate-framework-master-csv.py g-cloud-11 preview myToken path/to/myfolder
 """
+import os
 import sys
+from datetime import datetime
 
 from dmapiclient import DataAPIClient
 from docopt import docopt
@@ -32,13 +34,28 @@ from dmutils.env_helpers import get_api_endpoint_from_stage
 if __name__ == "__main__":
     arguments = docopt(__doc__)
 
+    output_dir = arguments['<output-dir>']
+    stage = arguments['<stage>']
+    framework_slug = arguments['<framework_slug>']
+    filename = "{}-application-export-{}-{}.csv".format(
+        framework_slug,
+        stage,
+        datetime.utcnow().strftime("%Y-%m-%d_%H.%M-")
+    )
+
+    # Create output directory if it doesn't already exist
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
     client = DataAPIClient(
-        base_url=get_api_endpoint_from_stage(arguments['<stage>']),
+        base_url=get_api_endpoint_from_stage(stage),
         auth_token=arguments['<auth_token>'],
     )
     csv_builder = GenerateMasterCSV(
         client=client,
-        target_framework_slug=arguments['<framework_slug>']
+        target_framework_slug=framework_slug
     )
     csv_builder.populate_output()
-    csv_builder.write_csv()
+
+    with open(os.path.join(output_dir, filename), 'w') as csvfile:
+        csv_builder.write_csv(outfile=csvfile)
