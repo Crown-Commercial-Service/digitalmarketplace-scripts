@@ -72,7 +72,7 @@ BAD_WORDS_COUNTER = Counter()
 
 
 def check_services_with_bad_words(
-    output_file_path, framework_slug, client, suppliers, bad_words, keys_to_check, logger, scan_drafts
+    output_file_path, framework_slug, client, suppliers, bad_words, questions_to_check, logger, scan_drafts
 ):
 
     with open(output_file_path, 'w') as csvfile:
@@ -83,7 +83,7 @@ def check_services_with_bad_words(
             services = get_services(client, supplier["supplierId"], framework_slug, scan_drafts)
 
             for service in services:
-                for key in keys_to_check:
+                for key in questions_to_check:
                     if isinstance(service.get(key), str):
                         service_field_values = [service.get(key)]
                     elif isinstance(service.get(key), list):
@@ -109,13 +109,20 @@ def check_services_with_bad_words(
                                 BAD_WORDS_COUNTER.update({word: 1})
 
 
-def scan_services_for_bad_words(client, bad_words_path, framework_slug, output_dir, keys_to_check, logger, scan_drafts):
+def scan_services_for_bad_words(
+    client, bad_words_path, framework_slug, output_dir, content_loader, logger, scan_drafts
+):
     bad_words = _get_bad_words_from_file(bad_words_path)
     suppliers = get_suppliers(client, framework_slug)
 
     output_file_path = '{}/{}-services-with-blacklisted-words.csv'.format(output_dir, framework_slug)
 
+    content_loader.load_metadata(framework_slug, ['service_questions_to_scan_for_bad_words'])
+    questions_to_check = content_loader.get_metadata(
+        framework_slug, 'service_questions_to_scan_for_bad_words', 'service_questions'
+    )
+
     check_services_with_bad_words(
-        output_file_path, framework_slug, client, suppliers, bad_words, keys_to_check, logger, scan_drafts
+        output_file_path, framework_slug, client, suppliers, bad_words, questions_to_check, logger, scan_drafts
     )
     return BAD_WORDS_COUNTER
