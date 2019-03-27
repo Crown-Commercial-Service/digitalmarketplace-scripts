@@ -24,10 +24,11 @@ def get_suppliers(client, framework_slug):
     return suppliers_on_framework
 
 
-def get_services(client, supplier_id, framework_slug):
-    services = client.find_services(supplier_id, framework=framework_slug)
-    services = services["services"]
-    return services
+def get_services(client, supplier_id, framework_slug, scan_drafts):
+    if scan_drafts:
+        return client.find_draft_services(supplier_id, framework=framework_slug)['services']
+
+    return client.find_services(supplier_id, framework=framework_slug)["services"]
 
 
 def _get_bad_words_from_file(bad_words_path):
@@ -70,18 +71,16 @@ def output_bad_words(
 BAD_WORDS_COUNTER = Counter()
 
 
-def check_services_with_bad_words(output_file_path, framework_slug, client, suppliers, bad_words, keys_to_check, logger):
+def check_services_with_bad_words(
+    output_file_path, framework_slug, client, suppliers, bad_words, keys_to_check, logger, scan_drafts
+):
 
     with open(output_file_path, 'w') as csvfile:
 
         writer = csv.DictWriter(csvfile, fieldnames=CSV_FIELD_NAMES, dialect='excel')
         writer.writeheader()
         for supplier in suppliers:
-            try:
-                services = get_services(client, supplier["supplierId"], framework_slug)
-            except Exception:
-                # Retry once; will fail the script if retry fails.
-                services = get_services(client, supplier["supplierId"], framework_slug)
+            services = get_services(client, supplier["supplierId"], framework_slug, scan_drafts)
 
             for service in services:
                 for key in keys_to_check:
@@ -110,11 +109,13 @@ def check_services_with_bad_words(output_file_path, framework_slug, client, supp
                                 BAD_WORDS_COUNTER.update({word: 1})
 
 
-def scan_services_for_bad_words(client, bad_words_path, framework_slug, output_dir, keys_to_check, logger):
+def scan_services_for_bad_words(client, bad_words_path, framework_slug, output_dir, keys_to_check, logger, scan_drafts):
     bad_words = _get_bad_words_from_file(bad_words_path)
     suppliers = get_suppliers(client, framework_slug)
 
     output_file_path = '{}/{}-services-with-blacklisted-words.csv'.format(output_dir, framework_slug)
 
-    check_services_with_bad_words(output_file_path, framework_slug, client, suppliers, bad_words, keys_to_check, logger)
+    check_services_with_bad_words(
+        output_file_path, framework_slug, client, suppliers, bad_words, keys_to_check, logger, scan_drafts
+    )
     return BAD_WORDS_COUNTER

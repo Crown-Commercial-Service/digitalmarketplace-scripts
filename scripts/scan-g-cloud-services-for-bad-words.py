@@ -5,8 +5,10 @@ This script will check all free-text fields in submitted G-Cloud services for "b
 the file at <bad_words_path> (typically blacklist.txt in https://github.com/alphagov/digitalmarketplace-bad-words),
 and generate a CSV report of any bad word found.
 
+Use the --scan-drafts option to scan draft services (supplier must still have 'onFramework' set to True).
+
 Usage:
-    scripts/scan-g-cloud-services-for-bad-words.py <stage> <bad_words_path> <framework_slug> <output_dir>
+    scripts/scan-g-cloud-services-for-bad-words.py <stage> <bad_words_path> <framework_slug> <output_dir> [--scan-drafts]
 """
 import os
 import sys
@@ -74,6 +76,7 @@ if __name__ == '__main__':
         arguments['<framework_slug>'],
         output_dir,
         KEYS_TO_CHECK,
-        logger
+        logger,
+        scan_drafts=arguments['--scan-drafts']
     )
     logger.info("BAD WORD COUNTS: {}".format(bad_word_counts))
