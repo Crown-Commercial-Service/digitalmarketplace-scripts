@@ -143,7 +143,7 @@ def generate_csv_and_upload_to_s3(
     else:
         headers, rows, download_filename = generate_supplier_csv(framework_slug, data_api_client, logger=logger)
 
-    if not rows:
+    if not download_filename:
         return False
 
     # Save CSV to output dir and upload to S3

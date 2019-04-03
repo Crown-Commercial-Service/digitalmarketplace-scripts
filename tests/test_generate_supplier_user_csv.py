@@ -234,3 +234,43 @@ def test_generate_user_csv_generates_csv_and_uploads_to_s3(upload_to_s3, generat
             'data/filename.csv', 'g-cloud-10', 'filename.csv', bucket, dry_run=False, logger='logger'
         )
     ]
+
+
+@mock.patch('dmscripts.generate_supplier_user_csv._build_csv')
+@mock.patch("dmscripts.generate_supplier_user_csv.upload_to_s3")
+def test_generate_csv_and_upload_to_s3_returns_ok_if_no_users_opted_in(upload_to_s3, build_csv):
+    bucket = mock.Mock()
+    data_api_client = mock.Mock()
+    data_api_client.export_users.return_value = {
+        "users": [
+            {
+                "application_result": "pass",
+                "application_status": "no_application",
+                "declaration_status": "unstarted",
+                "email address": "1234@example.com",
+                "framework_agreement": True,
+                "published_service_count": 4,
+                "supplier_id": 1234,
+                "user_name": "Test user 1",
+                "user_research_opted_in": False,
+                "variations_agreed": ""
+            },
+            {
+                "application_result": "pass",
+                "application_status": "no_application",
+                "declaration_status": "unstarted",
+                "email address": "5678@example.com",
+                "framework_agreement": True,
+                "published_service_count": 3,
+                "supplier_id": 5678,
+                "user_name": "Test user 2",
+                "user_research_opted_in": False,
+                "variations_agreed": ""
+            }
+        ]
+    }
+
+    ok = generate_csv_and_upload_to_s3(
+        bucket, "g-cloud-11", "users", "data", data_api_client, user_research_opted_in=True
+    )
+    assert ok
