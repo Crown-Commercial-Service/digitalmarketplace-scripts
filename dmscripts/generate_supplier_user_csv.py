@@ -9,7 +9,7 @@ def generate_supplier_csv(framework_slug, data_api_client, logger):
 
     supplier_rows = data_api_client.export_suppliers(framework_slug).get('suppliers', [])
     if not supplier_rows:
-        logger.info('No supplier data found for framework {}'.format(framework_slug))
+        logger.warn('No supplier data found for framework {}'.format(framework_slug))
         return [], [], None
 
     supplier_and_framework_headers = [
@@ -75,7 +75,7 @@ def generate_user_csv(framework_slug, data_api_client, user_research_opted_in, l
     ]
     user_rows = data_api_client.export_users(framework_slug).get('users', [])
     if not user_rows:
-        logger.info('No user data found for framework {}'.format(framework_slug))
+        logger.warn('No user data found for framework {}'.format(framework_slug))
         return [], [], None
 
     if user_research_opted_in:
@@ -143,7 +143,7 @@ def generate_csv_and_upload_to_s3(
     else:
         headers, rows, download_filename = generate_supplier_csv(framework_slug, data_api_client, logger=logger)
 
-    if not rows:
+    if not download_filename:
         return False
 
     # Save CSV to output dir and upload to S3
