@@ -68,7 +68,7 @@ if __name__ == "__main__":
     for lot, services_in_lot in lots.items():
         with open(os.path.join(OUTPUT_DIR, f'{lot}-categories-{version}.tsv'), 'w') as f:
             f.write('\t'.join(
-                ['Supplier ID', 'DUNS Number', 'Supplier Name', 'Reseller?', 'Service Name', 'Categories'])  # headers
+                ['Supplier ID', 'DUNS Number', 'Supplier Name', 'Reseller?', 'Service Name', 'Organisation Size', 'Categories'])  # headers
             )
             for service in services_in_lot:
                 supplier_data = data_api_client.get_supplier(service.get('supplierId'))['suppliers']
@@ -79,6 +79,7 @@ if __name__ == "__main__":
                     'false' if service.get('resellingType') == 'not_reseller' else 'true',
                     service.get('serviceName'),
                     service.get('id'),
+                    supplier_data.get('organisationSize'),
                     '\t'.join(service.get('serviceCategories')) if service.get('serviceCategories') else ''
                 ]
                 f.write('\t'.join(row) + '\n')
