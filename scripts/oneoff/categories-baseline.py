@@ -65,11 +65,12 @@ if __name__ == "__main__":
         'software': software_services,
         'support': support_services
     }
+    headers = [
+        'Supplier ID', 'DUNS Number', 'Supplier Name', 'Reseller?', 'Service Name', 'Organisation Size', 'Categories'
+    ]
     for lot, services_in_lot in lots.items():
         with open(os.path.join(OUTPUT_DIR, f'{lot}-categories-{version}.tsv'), 'w') as f:
-            f.write('\t'.join(
-                ['Supplier ID', 'DUNS Number', 'Supplier Name', 'Reseller?', 'Service Name', 'Organisation Size', 'Categories'])  # headers
-            )
+            f.write('\t'.join(headers))
             for service in services_in_lot:
                 supplier_data = data_api_client.get_supplier(service.get('supplierId'))['suppliers']
                 row = [
