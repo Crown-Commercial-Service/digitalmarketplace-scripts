@@ -33,6 +33,32 @@ from dmscripts.helpers.auth_helpers import get_auth_token
 from dmutils.env_helpers import get_api_endpoint_from_stage
 from docopt import docopt
 
+
+SUPPORT_CATEGORIES = {
+    'QAAndTesting': 'Quality assurance and performance testing',
+    'setupAndMigrationService': 'Setup and migration\tPlanning',
+    'securityTesting': 'Security services',
+    'ongoingSupport': 'Ongoing support',
+    'training': 'Training'
+}
+
+
+def cloud_support_categories(service_data):
+    # Cloud support categories are not stored in `serviceCategories` for ¯\_(ツ)_/¯ reasons
+    # The Elasticsearch mapping hardcodes the categories based on certain field values
+    categories = []
+    for field, category_name in SUPPORT_CATEGORIES.items():
+        if service_data.get(field):
+            categories.append(category_name)
+    return categories
+
+
+def get_categories(lot_name, service_data):
+    if lot_name == 'support':
+        return '\t'.join(cloud_support_categories(service_data))
+    return '\t'.join(service.get('serviceCategories')) if service.get('serviceCategories') else ''
+
+
 if __name__ == "__main__":
     arguments = docopt(__doc__)
 
@@ -66,7 +92,8 @@ if __name__ == "__main__":
         'support': support_services
     }
     headers = [
-        'Supplier ID', 'DUNS Number', 'Supplier Name', 'Reseller?', 'Service Name', 'Organisation Size', 'Categories'
+        'Supplier ID', 'DUNS Number', 'Supplier Name', 'Reseller?', 'Service Name', 'Organisation Size', 'Categories',
+        '\n'
     ]
     for lot, services_in_lot in lots.items():
         with open(os.path.join(OUTPUT_DIR, f'{lot}-categories-{version}.tsv'), 'w') as f:
@@ -81,6 +108,6 @@ if __name__ == "__main__":
                     service.get('serviceName'),
                     service.get('id'),
                     supplier_data.get('organisationSize'),
-                    '\t'.join(service.get('serviceCategories')) if service.get('serviceCategories') else ''
+                    get_categories(lot, service)
                 ]
                 f.write('\t'.join(row) + '\n')
