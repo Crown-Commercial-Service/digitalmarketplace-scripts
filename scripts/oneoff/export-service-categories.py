@@ -1,7 +1,7 @@
 #!/usr/bin/env python
-"""Usage: categories-baseline.py <g-cloud-version> [--output-folder=OUTPUT] [--stage=STAGE]
+"""Usage: export-service-categories.py <g-cloud-version> [--output-folder=OUTPUT] [--stage=STAGE]
 
-Basic services export, for the DM performance analyst.
+Basic services export, for use by the DM performance analyst.
 Outputs a .tsv file per lot to the given --output-folder, with columns as follows:
  - supplierId
  - dunsNumber
