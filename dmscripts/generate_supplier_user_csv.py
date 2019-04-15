@@ -141,6 +141,10 @@ def generate_csv_and_upload_to_s3(
     else:
         headers, rows, download_filename = generate_supplier_csv(framework_slug, data_api_client, logger=logger)
 
+    # no need to create an empty csv
+    if not rows:
+        return True
+
     # Save CSV to output dir and upload to S3
     file_path = csv_path(output_dir, download_filename)
     _build_csv(file_path, headers, rows)
