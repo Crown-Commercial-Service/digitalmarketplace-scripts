@@ -8,11 +8,6 @@ The `scripts` folder in this repository contains scripts that interact with the 
 [data API](https://github.com/alphagov/digitalmarketplace-api) and
 [search-api](https://github.com/alphagov/digitalmarketplace-search-api)).
 
-* `bulk-upload-ccs-documents.py`
-
-  **LEGACY** script from when CCS used to send us zip files of documents to upload, saved for now just in case it
-  might be of use again in future.
-
 * `bulk-upload-documents.py`
 
   Script for uploading framework result letters and agreement signature pages.
