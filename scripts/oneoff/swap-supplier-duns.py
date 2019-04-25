@@ -33,15 +33,17 @@ DUMMY_DUNS = '0000000002'
 
 
 def swap_duns(supplier_id_1, supplier_id_2, new_duns_1, new_duns_2):
-    if not dry_run:
-        # Supplier 2 set to dummy
-        data_api_client.update_supplier(supplier_id_2, {"dunsNumber": dummy_duns}, UPDATER)
+    if dry_run:
+        return f"Would swap suppliers {supplier_id_1} and {supplier_id_2} swapped to {new_duns_1} and {new_duns_2}"
 
-        # Supplier 1 set to new 1
-        data_api_client.update_supplier(supplier_id_1, {"dunsNumber": new_duns_1}, UPDATER)
+    # Supplier 2 set to dummy
+    data_api_client.update_supplier(supplier_id_2, {"dunsNumber": dummy_duns}, UPDATER)
 
-        # Supplier 2 set to new 2
-        data_api_client.update_supplier(supplier_id_2, {"dunsNumber": new_duns_2}, UPDATER)
+    # Supplier 1 set to new 1
+    data_api_client.update_supplier(supplier_id_1, {"dunsNumber": new_duns_1}, UPDATER)
+
+    # Supplier 2 set to new 2
+    data_api_client.update_supplier(supplier_id_2, {"dunsNumber": new_duns_2}, UPDATER)
 
     return f"Suppliers {supplier_id_1} and {supplier_id_2} swapped to {new_duns_1} and {new_duns_2} successfully"
 
