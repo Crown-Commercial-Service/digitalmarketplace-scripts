@@ -15,10 +15,10 @@ Fields included:
 * The number of services submitted and left in draft per lot
 
 Usage:
-    scripts/generate-framework-master-csv.py <framework_slug> <stage> <auth_token> <output-dir> [--excluded-supplier-ids=<excluded_supplier_ids>]
+    scripts/generate-framework-master-csv.py <framework_slug> <stage> <auth_token> <output-dir> [-e <excluded_supplier_ids>]
 
 Example:
-    scripts/generate-framework-master-csv.py g-cloud-11 preview myToken path/to/myfolder --excluded-supplier-ids=123,456,789
+    scripts/generate-framework-master-csv.py g-cloud-11 preview myToken path/to/myfolder -e 123,456,789
 """
 import os
 import sys
@@ -56,7 +56,7 @@ if __name__ == "__main__":
         target_framework_slug=framework_slug
     )
 
-    if arguments.get('<excluded_supplier_ids>', False):  # updates the generator with any IDs the user wants excluded
+    if arguments['<excluded_supplier_ids>'] is not None:  # updates the generator with any IDs the user wants excluded
         csv_builder.excluded_supplier_ids = [int(n) for n in arguments['<excluded_supplier_ids>'].split(',')]
     
     csv_builder.populate_output()
