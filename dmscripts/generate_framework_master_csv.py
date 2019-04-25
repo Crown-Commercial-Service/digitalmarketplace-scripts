@@ -25,6 +25,7 @@ class GenerateMasterCSV(GenerateCSVFromAPI):
         self.target_framework_slug = target_framework_slug
         self.framework = self.client.get_framework(target_framework_slug)['frameworks']
         self.lot_slugs = tuple(i['slug'] for i in self.framework['lots'])
+        self.excluded_supplier_ids = []
 
     def get_column_name(self, service_status, lot_slug):
         """For each lot we're working out how many submitted and non-submitted services they have.
@@ -76,6 +77,8 @@ class GenerateMasterCSV(GenerateCSVFromAPI):
         for sf in supplier_frameworks:
             # This bit takes care of the columns in static_fieldnames.
             supplier_id = sf['supplierId']
+            if supplier_id in self.excluded_supplier_ids:
+                continue  # this part excludes any supplier the executioner of the script doesn't want in the output
             declaration = sf['declaration'].get('status', '') if sf['declaration'] else ''
             supplier_info = [
                 supplier_id,
