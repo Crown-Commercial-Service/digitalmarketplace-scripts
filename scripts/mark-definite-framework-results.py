@@ -54,6 +54,7 @@ from dmutils.env_helpers import get_api_endpoint_from_stage
 if __name__ == "__main__":
     from docopt import docopt
     args = docopt(__doc__)
+
     client = DataAPIClient(get_api_endpoint_from_stage(args["<stage>"], "api"), get_auth_token('api', args['<stage>']))
     updated_by = args["--updated-by"] or getpass.getuser()
 
