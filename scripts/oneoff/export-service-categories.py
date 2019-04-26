@@ -96,7 +96,7 @@ if __name__ == "__main__":
         'support': support_services
     }
     headers = [
-        'Supplier ID', 'DUNS Number', 'Supplier Name', 'Reseller?', 'Service Name', 'Organisation Size', 'Categories',
+        'Supplier ID', 'DUNS Number', 'Supplier Name', 'Reseller?', 'Service Name', 'Service Description', 'Organisation Size', 'Categories',
         '\n'
     ]
     for lot, services_in_lot in lots.items():
@@ -108,6 +108,7 @@ if __name__ == "__main__":
                     str(service['supplierId']),
                     supplier_data.get('dunsNumber'),
                     service.get('supplierName'),
+                    service.get('serviceDescription'),
                     'false' if service.get('resellingType') == 'not_reseller' else 'true',
                     service.get('serviceName'),
                     service.get('id'),
