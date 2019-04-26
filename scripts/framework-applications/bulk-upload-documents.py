@@ -76,9 +76,9 @@ if __name__ == '__main__':
     for path in get_all_files_of_type(local_directory, file_type):
         try:
             upload_file(
-                # TODO: why do we need bucket AND bucket category here
                 bucket, dry_run, path, framework_slug, bucket_category,
-                supplier_name_dict=supplier_name_dict)
+                supplier_name_dict=supplier_name_dict
+            )
         except ValueError as e:
             print("SKIPPING: {}".format(e))
             continue

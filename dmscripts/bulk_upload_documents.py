@@ -74,6 +74,8 @@ def get_supplier_id_from_framework_file_path(path):
 
 def get_document_name_from_file_path(path):
     match = re.search(r'/\d{5,6}-(.*)', path)
+    if not match:
+        raise ValueError("Could not find valid document name in path {}".format(path))
     return match.group(1)
 
 
