@@ -83,11 +83,16 @@ def mark_definite_framework_results(
     dry_run=True,
     supplier_ids=None,
     logger=logging.getLogger("script"),
+    excluded_supplier_ids=None,
 ):
     interested_supplier_ids = supplier_ids or client.get_interested_suppliers(
         framework_slug
     ).get('interestedSuppliers', ())
     total_interested_suppliers = len(interested_supplier_ids)
+
+    # exclude suppliers with IDs the executioner defined
+    if excluded_supplier_ids is not None:
+        interested_supplier_ids = list(set(interested_supplier_ids) - set(excluded_supplier_ids))
 
     # Loop over suppliers breaking out if they pass or fail, if they make it to the end they get a discretionary pass
     for i, supplier_id in enumerate(interested_supplier_ids, start=1):

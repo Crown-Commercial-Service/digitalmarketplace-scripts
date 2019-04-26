@@ -30,7 +30,9 @@ The `scripts` folder in this repository contains scripts that interact with the 
 * `export-framework-results-reasons.py`
 
   To be run when a framework closes for applications - produces three CSV files for pass, fail and discretionary
-  results, with relevant data to be passed to CCS.
+  results, with relevant data to be passed to CCS. To exclude fake suppliers use the -e parameter with the IDs
+  separated by commas (without spaces, e.g. -e 123,456,789). There is a list of known fake supplier IDs encrypted in 
+  the private repository.
 
 * `generate-buyer-email-list.py`
 
@@ -45,7 +47,9 @@ The `scripts` folder in this repository contains scripts that interact with the 
 
   To be run when a framework closes for applications - extracts a CSV report of all suppliers who expressed an interest
   in the framework and their eventual application status (did they make an application, only fill in the declaration,
-  how many services submitted/left in draft per lot, etc.)
+  how many services submitted/left in draft per lot, etc). To exclude fake suppliers use the -e parameter with the IDs
+  separated by commas (without spaces, e.g. -e 123,456,789). There is a list of known fake supplier IDs encrypted in 
+  the private repository.
 
 * `generate-g8-agreement-signature-pages.py` and `generate-g8-counterpart-signature-pages.py`
 
@@ -85,7 +89,9 @@ The `scripts` folder in this repository contains scripts that interact with the 
 * `mark-definite-framework-results.py`
 
   Marks suppliers as having passed/failed a framework, where the result can be determined "automatically" not requiring
-  human involvement (i.e. not "discretionary" results).
+  human involvement (i.e. not "discretionary" results). To exclude fake suppliers use the --excluded-supplier-ids with 
+  the IDs separated by commas (without spaces, e.g. --excluded-supplier-ids=123,456,789). There is a list of known 
+  fake supplier IDs encrypted in the private repository.
 
 * `notify-buyers-to-award-closed-briefs.py`
 

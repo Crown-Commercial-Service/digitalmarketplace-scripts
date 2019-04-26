@@ -15,7 +15,7 @@ CSV_FIELD_NAMES = [
 
 
 def get_suppliers(client, framework_slug):
-    suppliers = client.find_framework_suppliers(framework_slug)
+    suppliers = client.find_framework_suppliers(framework_slug, with_declarations=None)
     suppliers = suppliers["supplierFrameworks"]
     if framework_slug == "g-cloud-6":
         suppliers_on_framework = suppliers

@@ -49,7 +49,8 @@ if __name__ == '__main__':
     for framework_slug in FRAMEWORKS:
         # Get all supplier frameworks who have returned their agreement
         supplier_frameworks = client.find_framework_suppliers(
-            framework_slug=framework_slug, agreement_returned=True)['supplierFrameworks']
+            framework_slug=framework_slug, agreement_returned=True, with_declarations=None
+        )['supplierFrameworks']
 
         for supplier_framework in supplier_frameworks:
             print("======================")

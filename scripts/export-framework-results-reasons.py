@@ -14,7 +14,7 @@ Produces three files;
 
 Usage:
     scripts/export-framework-results-reasons.py [-h] <stage> <framework_slug> <content_path> <output_dir>
-      <declaration_schema_path> [<supplier_id_file>]
+      <declaration_schema_path> [<supplier_id_file>][-e <excluded_supplier_ids>]
 
 Options:
     -h --help
@@ -44,6 +44,9 @@ if __name__ == '__main__':
 
     supplier_id_file = args['<supplier_id_file>']
     supplier_ids = get_supplier_ids_from_file(supplier_id_file)
+    # exclude suppliers with IDs the executioner defined
+    if args['<excluded_supplier_ids>'] is not None and supplier_ids is not None:
+        supplier_ids = list(set(supplier_ids) - set([int(n) for n in args['<excluded_supplier_ids>'].split(',')]))
 
     pool = ThreadPool(3)
 

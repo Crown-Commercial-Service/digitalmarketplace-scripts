@@ -32,6 +32,7 @@ Usage: mark-definite-framework-results.py [options] <stage> <framework_slug>
 --reassess-failed-draft-services  Don't skip draft_services with "failed" status
 -v, --verbose                     Produce more detailed console output
 --supplier-id-file=<path>         Path to file containing supplier ids to check. One ID per line.
+--excluded-supplier-ids=<esis>    Supplier IDs to be excluded.
 """
 import sys
 sys.path.insert(0, '.')
@@ -83,4 +84,5 @@ if __name__ == "__main__":
         reassess_failed_draft_services=args["--reassess-failed-draft-services"],
         dry_run=args["--dry-run"],
         supplier_ids=supplier_ids,
+        excluded_supplier_ids=args["--excluded-supplier-ids"],
     )
