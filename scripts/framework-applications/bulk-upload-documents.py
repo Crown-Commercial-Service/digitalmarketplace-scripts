@@ -25,19 +25,21 @@ This will:
    e.g.
    digital-outcomes-and-specialists-2/agreements/1234/1234-signature-page.pdf
 
- * set a "download filename" that the file will be downloaded as, which is:
+ * Optionally set a "download filename" that the file will be downloaded as, which is:
    <supplier_name>-<supplier_id>-document-name.<file_type>
    Where the <supplier_name> is determined by looking up the supplier ID from the tab-separated file
 
 Usage:
-    scripts/bulk-upload-documents.py <stage> <local_documents_directory> <framework_slug> <tsv_path> [options]
+    scripts/bulk-upload-documents.py <stage> <local_documents_directory> <framework_slug> [options]
 
 Options:
     -h --help   Show this screen.
-    --file_type=<file_type>  This is the type of file [default: pdf]
+    --tsv-path=<tsv_path>                TSV of supplier IDs and names
+    --file_type=<file_type>              This is the type of file [default: pdf]
     --bucket_category=<bucket_category>  This is the type  of bucket [default: agreements]
     --dry-run
 """
+import os
 import sys
 sys.path.insert(0, '.')
 
@@ -57,7 +59,7 @@ if __name__ == '__main__':
     local_directory = arguments['<local_documents_directory>']
     bucket_category = arguments['--bucket_category']
     file_type = arguments['--file_type']
-    tsv_path = arguments['<tsv_path>']
+    tsv_path = arguments['--tsv-path']
     dry_run = arguments['--dry-run']
 
     if dry_run:
@@ -66,9 +68,15 @@ if __name__ == '__main__':
         bucket = S3(get_bucket_name(stage, bucket_category))
 
     supplier_name_dict = get_supplier_name_dict_from_tsv(tsv_path)
+
+    if not os.path.exists(local_directory):
+        print(f"Local directory {local_directory} not found. Aborting upload.")
+        exit(1)
+
     for path in get_all_files_of_type(local_directory, file_type):
         try:
             upload_file(
+                # TODO: why do we need bucket AND bucket category here
                 bucket, dry_run, path, framework_slug, bucket_category,
                 supplier_name_dict=supplier_name_dict)
         except ValueError as e:
