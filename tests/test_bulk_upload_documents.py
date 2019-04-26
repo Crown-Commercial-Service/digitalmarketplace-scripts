@@ -109,32 +109,32 @@ class TestGetSupplierNameDictFromTSV:
 class TestUploadFile:
 
     def test_upload_file(self):
-        file_path = 'The_Business_Software_Centre-92877-signed-framework-agreement.pdf'
+        file_path = '/92877-framework-agreement.pdf'
         bucket = mock.Mock()
         with mock.patch.object(builtins, 'open', mock.mock_open(read_data='foo')):
-            upload_file(bucket, False, file_path, 'g-cloud-7', 'agreements', 'countersigned_agreement', 'pdf')
+            upload_file(bucket, False, file_path, 'g-cloud-11', 'agreements')
             assert bucket.save.call_count == 1
             bucket.save.assert_called_with(
-                'g-cloud-7/agreements/92877/92877-countersigned_agreement.pdf',
+                'g-cloud-11/agreements/92877/92877-framework-agreement.pdf',
                 mock.ANY,
                 acl='bucket-owner-full-control',
                 download_filename=None)
 
     def test_upload_file_dry_run_doesnt_upload(self):
-        file_path = 'The_Business_Software_Centre-92877-signed-framework-agreement.pdf'
-        bucket = mock.Mock()
-        with mock.patch.object(builtins, 'open', mock.mock_open(read_data='foo')):
-            upload_file(bucket, True, file_path, 'g-cloud-7', 'agreements', 'countersigned_agreement', 'pdf')
-            assert bucket.save.call_count == 0
-
-    def test_upload_file_without_document_category(self):
         file_path = '/92877-framework-agreement.pdf'
         bucket = mock.Mock()
         with mock.patch.object(builtins, 'open', mock.mock_open(read_data='foo')):
-            upload_file(bucket, False, file_path, 'g-cloud-7', 'agreements')
+            upload_file(bucket, True, file_path, 'g-cloud-11', 'agreements')
+            assert bucket.save.call_count == 0
+
+    def test_upload_file_with_document_bucket_category(self):
+        file_path = '/92877-modern-slavery-statement.pdf'
+        bucket = mock.Mock()
+        with mock.patch.object(builtins, 'open', mock.mock_open(read_data='foo')):
+            upload_file(bucket, False, file_path, 'g-cloud-11', 'documents')
             assert bucket.save.call_count == 1
             bucket.save.assert_called_with(
-                'g-cloud-7/agreements/92877/92877-framework-agreement.pdf',
+                'g-cloud-11/documents/92877/92877-modern-slavery-statement.pdf',
                 mock.ANY,
                 acl='bucket-owner-full-control',
                 download_filename=None)
@@ -144,10 +144,21 @@ class TestUploadFile:
         supplier_name_dictionary = {'35435': 'Something', '584425': 'ICNT_Consulting_Ltd'}
         bucket = mock.Mock()
         with mock.patch.object(builtins, 'open', mock.mock_open(read_data='foo')):
-            upload_file(bucket, False, file_path, 'g-cloud-7', 'agreements', supplier_name_dict=supplier_name_dictionary)  # noqa
+            upload_file(
+                bucket, False, file_path, 'g-cloud-11', 'agreements', supplier_name_dict=supplier_name_dictionary
+            )
             assert bucket.save.call_count == 1
             bucket.save.assert_called_with(
-                'g-cloud-7/agreements/35435/35435-framework-agreement.pdf',
+                'g-cloud-11/agreements/35435/35435-framework-agreement.pdf',
                 mock.ANY,
                 acl='bucket-owner-full-control',
                 download_filename='Something-35435-framework-agreement.pdf')
+
+    def test_upload_file_skips_signed_framework_agreement(self):
+        file_path = '/12345-signed-framework-agreement.pdf'
+        bucket = mock.Mock()
+        with mock.patch.object(builtins, 'open', mock.mock_open(read_data='foo')) as mock_open:
+            with pytest.raises(ValueError):
+                upload_file(bucket, False, file_path, 'g-cloud-11', 'agreements')
+            assert bucket.save.call_count == 0
+            assert mock_open.called is False
