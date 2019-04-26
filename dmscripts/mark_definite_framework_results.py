@@ -92,11 +92,7 @@ def mark_definite_framework_results(
 
     # exclude suppliers with IDs the executioner defined
     if excluded_supplier_ids is not None:
-        for excluded_supplier in excluded_supplier_ids.split(','):
-            try:
-                interested_supplier_ids.pop(interested_supplier_ids.index(int(excluded_supplier)))
-            except IndexError:  # occurs when .index() fails
-                continue
+        interested_supplier_ids = list(set(interested_supplier_ids) - set(excluded_supplier_ids))
 
     # Loop over suppliers breaking out if they pass or fail, if they make it to the end they get a discretionary pass
     for i, supplier_id in enumerate(interested_supplier_ids, start=1):

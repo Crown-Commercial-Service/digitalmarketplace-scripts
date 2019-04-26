@@ -46,11 +46,7 @@ if __name__ == '__main__':
     supplier_ids = get_supplier_ids_from_file(supplier_id_file)
     # exclude suppliers with IDs the executioner defined
     if args['<excluded_supplier_ids>'] is not None and supplier_ids is not None:
-        for excluded_supplier in args['<excluded_supplier_ids>'].split(','):
-            try:
-                supplier_ids.pop(supplier_ids.index(int(excluded_supplier)))
-            except IndexError:  # occurs when .index() fails
-                continue
+        supplier_ids = list(set(supplier_ids) - set([int(n) for n in args['<excluded_supplier_ids>'].split(',')]))
 
     pool = ThreadPool(3)
 
