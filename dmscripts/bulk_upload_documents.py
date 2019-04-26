@@ -72,6 +72,8 @@ def get_document_name_from_file_path(path):
 
 
 def get_supplier_name_dict_from_tsv(tsv_path):
+    if not tsv_path or not tsv_path.endswith('.tsv'):
+        return None
     suppliers_name_dict = {}
     with open(tsv_path, 'r') as tsvfile:
         tsv_reader = csv.reader(tsvfile, delimiter='\t')

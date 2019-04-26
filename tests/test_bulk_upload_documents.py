@@ -84,8 +84,22 @@ class TestGetSupplierNameDictFromTSV:
     @mock.patch('dmscripts.bulk_upload_documents.csv')
     def test_get_supplier_name_dict_from_tsv(self, csv):
         csv.reader.return_value = [('584425', 'ICNT_Consulting_Ltd'), ('35435', 'Something')]
-        with mock.patch.object(builtins, 'open', mock.mock_open()):
-            assert get_supplier_name_dict_from_tsv('test_csv.pdf') == {'35435': 'Something', '584425': 'ICNT_Consulting_Ltd'}  # noqa
+        with mock.patch.object(builtins, 'open', mock.mock_open()) as mock_open:
+            assert get_supplier_name_dict_from_tsv('test.tsv') == {
+                '35435': 'Something',
+                '584425': 'ICNT_Consulting_Ltd'
+            }
+            assert mock_open.call_args_list == [mock.call('test.tsv', 'r')]
+
+    def test_get_supplier_name_dict_from_tsv_requires_tsv_extension(self):
+        with mock.patch.object(builtins, 'open', mock.mock_open()) as mock_open:
+            assert get_supplier_name_dict_from_tsv('test.csv') is None
+            assert mock_open.called is False
+
+    def test_get_supplier_name_dict_from_tsv_doesnt_open_null_path(self):
+        with mock.patch.object(builtins, 'open', mock.mock_open()) as mock_open:
+            assert get_supplier_name_dict_from_tsv(None) is None
+            assert mock_open.called is False
 
 
 class TestUploadFile:
