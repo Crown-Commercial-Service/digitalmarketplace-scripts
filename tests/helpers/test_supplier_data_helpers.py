@@ -78,8 +78,8 @@ class TestSupplierFrameworkDeclarations(BaseAssessmentTest):
             )
             sfd.remove_supplier_declaration_for_expired_frameworks()
             expected_calls = [
-                mock.call(framework_slug="framework-expired-three-years-ago"),
-                mock.call(framework_slug="framework-expired-a-decade-ago")
+                mock.call(framework_slug="framework-expired-three-years-ago", with_declarations=None),
+                mock.call(framework_slug="framework-expired-a-decade-ago", with_declarations=None)
             ]
             mocked_api_client.find_framework_suppliers_iter.assert_has_calls(expected_calls, any_order=True)
 

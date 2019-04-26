@@ -23,7 +23,9 @@ class SupplierFrameworkData(object):
 
     def get_supplier_frameworks(self):
         """Return supplier frameworks."""
-        return self.client.find_framework_suppliers(self.target_framework_slug)['supplierFrameworks']
+        return self.client.find_framework_suppliers(
+            self.target_framework_slug, with_declarations=None
+        )['supplierFrameworks']
 
     def get_supplier_users(self):
         """Return a dict, {supplier id: [users]}."""
@@ -175,7 +177,9 @@ class SupplierFrameworkDeclarations:
         """
         return [
             framework_supplier['supplierId']
-            for framework_supplier in self.api_client.find_framework_suppliers_iter(framework_slug)
+            for framework_supplier in self.api_client.find_framework_suppliers_iter(
+                framework_slug, with_declarations=None
+            )
             if framework_supplier['onFramework'] is not True
         ]
 
@@ -239,7 +243,7 @@ class SupplierFrameworkDeclarations:
         old_frameworks = self._frameworks_older_than_date(date_from)
         for framework in old_frameworks:
             suppliers_with_declarations_to_clear = self.api_client.find_framework_suppliers_iter(
-                framework_slug=framework
+                framework_slug=framework, with_declarations=None
             )
             for supplier in suppliers_with_declarations_to_clear:
                 self.remove_declaration(supplier['supplierId'], framework_slug=framework)

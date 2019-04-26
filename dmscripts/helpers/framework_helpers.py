@@ -36,7 +36,9 @@ def has_supplier_submitted_services(client, framework_slug, supplier_id):
 
 def find_suppliers_on_framework(client, framework_slug):
     return (
-        supplier for supplier in client.find_framework_suppliers(framework_slug)['supplierFrameworks']
+        supplier for supplier in client.find_framework_suppliers(
+            framework_slug, with_declarations=None
+        )['supplierFrameworks']
         if supplier['onFramework']
     )
 

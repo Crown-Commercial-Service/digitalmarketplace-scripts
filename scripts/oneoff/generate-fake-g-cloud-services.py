@@ -159,7 +159,9 @@ if __name__ == '__main__':
                                           user=identity)
 
     # 2) Find some suppliers with services on a given (old) framework (e.g. g-cloud-7)
-    suppliers = data_api_client.find_framework_suppliers(framework_slug=args.old_slug)['supplierFrameworks']
+    suppliers = data_api_client.find_framework_suppliers(
+        framework_slug=args.old_slug, with_declarations=None
+    )['supplierFrameworks']
     suppliers = [x for x in suppliers if x['supplierId'] not in SUPPLIER_BLACKLIST]
     suppliers = random.sample(suppliers, args.supplier_count)
     suppliers_prepared = set()
