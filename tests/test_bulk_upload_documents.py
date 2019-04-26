@@ -71,6 +71,10 @@ class TestGetSupplierIDFromFrameworkFilePath:
     def test_get_supplier_id_from_framework_file_path_for_file(self, path):
         assert get_supplier_id_from_framework_file_path(path) == '584425'
 
+    def test_get_supplier_id_from_framework_file_path_raises_if_cannot_find_id(self):
+        with pytest.raises(ValueError):
+            get_supplier_id_from_framework_file_path('no_id_present.pdf')
+
 
 class TestGetDocumentNameFromFilePath:
 
