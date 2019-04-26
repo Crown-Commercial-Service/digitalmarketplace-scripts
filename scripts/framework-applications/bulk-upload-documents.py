@@ -8,36 +8,30 @@ PREREQUISITE: You'll need AWS credentials set up for the environment that you're
               If you have more than one set of credentials in there then be sure to set your AWS_PROFILE environment
               variable to reference the right credentials before running the script.
 
-
-This script requires a tab-separated file matching supplier ids to supplier names; the first column must be the
-supplier ID and the second column is the supplier name, e.g.:
-
-  12345    Supplier Name 1
-  123456   Supplier Name 2
-  ...
-
-This will:
+The script will:
  * scan a directory for files with a filename matching <supplier_id>-document-name.<file_type>
    NOTE: all filenames in the folder and subdirectories MUST begin with a supplier ID or the script will fail
 
  * upload them to the S3 documents bucket for <stage> with the file path:
    <framework_slug>/<bucket_category>/<supplier_id>/<supplier_id>-document-name.<file_type>
-   e.g.
-   digital-outcomes-and-specialists-2/agreements/1234/1234-signature-page.pdf
+   e.g. digital-outcomes-and-specialists-2/agreements/1234/1234-signature-page.pdf
 
  * Optionally set a "download filename" that the file will be downloaded as, which is:
    <supplier_name>-<supplier_id>-document-name.<file_type>
-   Where the <supplier_name> is determined by looking up the supplier ID from the tab-separated file
+   The <supplier_name> is determined by looking up the supplier ID from a tab-separated file of
+   supplier IDs and names, in the following format:
+        12345    Supplier Name 1
+        123456   Supplier Name 2
 
 Usage:
     scripts/bulk-upload-documents.py <stage> <local_documents_directory> <framework_slug> [options]
 
 Options:
-    -h --help   Show this screen.
+    --bucket_category=<bucket_category>  This is the type  of bucket [default: agreements]
     --tsv-path=<tsv_path>                TSV of supplier IDs and names
     --file_type=<file_type>              This is the type of file [default: pdf]
-    --bucket_category=<bucket_category>  This is the type  of bucket [default: agreements]
     --dry-run
+    -h --help   Show this screen.
 """
 import os
 import sys
