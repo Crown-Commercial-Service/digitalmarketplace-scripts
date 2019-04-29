@@ -8,36 +8,32 @@ PREREQUISITE: You'll need AWS credentials set up for the environment that you're
               If you have more than one set of credentials in there then be sure to set your AWS_PROFILE environment
               variable to reference the right credentials before running the script.
 
-
-This script requires a tab-separated file matching supplier ids to supplier names; the first column must be the
-supplier ID and the second column is the supplier name, e.g.:
-
-  12345    Supplier Name 1
-  123456   Supplier Name 2
-  ...
-
-This will:
+The script will:
  * scan a directory for files with a filename matching <supplier_id>-document-name.<file_type>
    NOTE: all filenames in the folder and subdirectories MUST begin with a supplier ID or the script will fail
 
  * upload them to the S3 documents bucket for <stage> with the file path:
    <framework_slug>/<bucket_category>/<supplier_id>/<supplier_id>-document-name.<file_type>
-   e.g.
-   digital-outcomes-and-specialists-2/agreements/1234/1234-signature-page.pdf
+   e.g. digital-outcomes-and-specialists-2/agreements/1234/1234-signature-page.pdf
 
- * set a "download filename" that the file will be downloaded as, which is:
+ * Optionally set a "download filename" that the file will be downloaded as, which is:
    <supplier_name>-<supplier_id>-document-name.<file_type>
-   Where the <supplier_name> is determined by looking up the supplier ID from the tab-separated file
+   The <supplier_name> is determined by looking up the supplier ID from a tab-separated file of
+   supplier IDs and names, in the following format:
+        12345    Supplier Name 1
+        123456   Supplier Name 2
 
 Usage:
-    scripts/bulk-upload-documents.py <stage> <local_documents_directory> <framework_slug> <tsv_path> [options]
+    scripts/bulk-upload-documents.py <stage> <local_documents_directory> <framework_slug> [options]
 
 Options:
-    -h --help   Show this screen.
-    --file_type=<file_type>  This is the type of file [default: pdf]
     --bucket_category=<bucket_category>  This is the type  of bucket [default: agreements]
+    --tsv-path=<tsv_path>                TSV of supplier IDs and names
+    --file_type=<file_type>              This is the type of file [default: pdf]
     --dry-run
+    -h --help   Show this screen.
 """
+import os
 import sys
 sys.path.insert(0, '.')
 
@@ -57,7 +53,7 @@ if __name__ == '__main__':
     local_directory = arguments['<local_documents_directory>']
     bucket_category = arguments['--bucket_category']
     file_type = arguments['--file_type']
-    tsv_path = arguments['<tsv_path>']
+    tsv_path = arguments['--tsv-path']
     dry_run = arguments['--dry-run']
 
     if dry_run:
@@ -66,11 +62,17 @@ if __name__ == '__main__':
         bucket = S3(get_bucket_name(stage, bucket_category))
 
     supplier_name_dict = get_supplier_name_dict_from_tsv(tsv_path)
+
+    if not os.path.exists(local_directory):
+        print(f"Local directory {local_directory} not found. Aborting upload.")
+        exit(1)
+
     for path in get_all_files_of_type(local_directory, file_type):
         try:
             upload_file(
                 bucket, dry_run, path, framework_slug, bucket_category,
-                supplier_name_dict=supplier_name_dict)
+                supplier_name_dict=supplier_name_dict
+            )
         except ValueError as e:
             print("SKIPPING: {}".format(e))
             continue

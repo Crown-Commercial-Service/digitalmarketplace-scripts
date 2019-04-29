@@ -8,12 +8,7 @@ The `scripts` folder in this repository contains scripts that interact with the 
 [data API](https://github.com/alphagov/digitalmarketplace-api) and
 [search-api](https://github.com/alphagov/digitalmarketplace-search-api)).
 
-* `bulk-upload-ccs-documents.py`
-
-  **LEGACY** script from when CCS used to send us zip files of documents to upload, saved for now just in case it
-  might be of use again in future.
-
-* `bulk-upload-documents.py`
+* `framework-applications/bulk-upload-documents.py`
 
   Script for uploading framework result letters and agreement signature pages.
 
@@ -113,7 +108,7 @@ The `scripts` folder in this repository contains scripts that interact with the 
   opportunity. If a supplier is interested in more than one brief that has had a question or answer posted,
   then these are grouped into a single email.
 
-* `scan-g-cloud-services-for-bad-words.py`
+* `framework-applications/scan-g-cloud-services-for-bad-words.py`
 
   Checks all free-text fields in G-Cloud services for "bad words" and generates a CSV report of any bad words found.
 
