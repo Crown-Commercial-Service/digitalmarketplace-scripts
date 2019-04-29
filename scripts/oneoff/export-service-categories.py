@@ -96,7 +96,8 @@ if __name__ == "__main__":
         'support': support_services
     }
     headers = [
-        'Supplier ID', 'DUNS Number', 'Supplier Name', 'Reseller?', 'Service Name', 'Service Description', 'Organisation Size', 'Categories',
+        'Supplier ID', 'DUNS Number', 'Supplier Name', 'Reseller?', 'Service Name',
+        'Service Description', 'Organisation Size', 'Categories',
         '\n'
     ]
     for lot, services_in_lot in lots.items():
