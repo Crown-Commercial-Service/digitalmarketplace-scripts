@@ -99,6 +99,11 @@ def check_existing_duns(supplier1, supplier2, duns1, duns2):
     return True
 
 
+def dummy_duns_in_use(dummy_duns):
+    result = data_api_client.find_suppliers(duns_number=dummy_duns)
+    return result['meta']['total']
+
+
 if __name__ == "__main__":
     arguments = docopt(__doc__)
 
@@ -110,14 +115,27 @@ if __name__ == "__main__":
     duns2 = arguments['<duns_2>']
 
     updated_by = arguments['--updated-by'] or UPDATER
-    dummy_duns = arguments['--dummy-duns'] or DUMMY_DUNS
+    dummy_duns = arguments['--dummy-duns']
     dry_run = arguments['--dry-run'] or None
 
+    data_api_client = DataAPIClient(
+        base_url=get_api_endpoint_from_stage(stage),
+        auth_token=get_auth_token('api', stage)
+    )
+
+    if dummy_duns:
+        # Check if user-supplied dummy DUNS is in use
+        if dummy_duns_in_use(dummy_duns):
+            print(f"Dummy DUNS {dummy_duns} is already in use. Please use another number.")
+            exit(1)
+    else:
+        # Check if the default dummy DUNS is in use
+        if dummy_duns_in_use(DUMMY_DUNS):
+            print(f"Default dummy DUNS {DUMMY_DUNS} is already in use. Please supply another with --dummy-duns.")
+            exit(1)
+        dummy_duns = DUMMY_DUNS
+
     if check_types(supplier1, supplier2, duns1, duns2):
-        data_api_client = DataAPIClient(
-            base_url=get_api_endpoint_from_stage(stage),
-            auth_token=get_auth_token('api', stage)
-        )
         if check_existing_duns(supplier1, supplier2, duns1, duns2):
             result = swap_duns(supplier1, supplier2, duns1, duns2)
             print(result)
