@@ -2,7 +2,7 @@
 """Usage: export-service-categories.py <g-cloud-version> [--output-folder=OUTPUT] [--stage=STAGE]
 
 Basic services export, for use by the DM performance analyst.
-Outputs a .tsv file per lot to the given --output-folder, with columns as follows:
+Outputs a .csv file per lot to the given --output-folder, with columns as follows:
  - supplierId
  - dunsNumber
  - supplierName
@@ -28,6 +28,7 @@ Options:
 
 """
 import sys
+import csv
 import os
 from dmapiclient.data import DataAPIClient
 
@@ -101,19 +102,21 @@ if __name__ == "__main__":
         '\n'
     ]
     for lot, services_in_lot in lots.items():
-        with open(os.path.join(OUTPUT_DIR, f'{lot}-categories-{version}.tsv'), 'w') as f:
-            f.write('\t'.join(headers))
+        with open(os.path.join(OUTPUT_DIR, f'{lot}-categories-{version}.csv'), 'w') as f:
+            writer = csv.writer(f, delimiter=',', quotechar='"')
+            writer.writerow(headers)
+
             for service in services_in_lot:
                 supplier_data = data_api_client.get_supplier(service.get('supplierId'))['suppliers']
                 row = [
                     str(service['supplierId']),
                     supplier_data.get('dunsNumber'),
                     service.get('supplierName'),
-                    service.get('serviceDescription'),
+                    service.get('serviceDescription').replace('\r\n', '').replace('•\t', ';'),
                     'false' if service.get('resellingType') == 'not_reseller' else 'true',
                     service.get('serviceName'),
                     service.get('id'),
                     supplier_data.get('organisationSize'),
                     get_categories(lot, service)
                 ]
-                f.write('\t'.join(row) + '\n')
+                writer.writerow(row)
