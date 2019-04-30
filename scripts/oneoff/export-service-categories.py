@@ -103,7 +103,7 @@ if __name__ == "__main__":
         '\n'
     ]
     for lot, services_in_lot in lots.items():
-        with open(os.path.join(OUTPUT_DIR, f'{lot}-categories-{version}.csv'), 'w') as f:
+        with open(os.path.join(OUTPUT_DIR, f'{lot}-categories-{version}.csv'), 'w', newline='') as f:
             writer = csv.writer(f, delimiter=',', quotechar='"')
             writer.writerow(headers)
 
