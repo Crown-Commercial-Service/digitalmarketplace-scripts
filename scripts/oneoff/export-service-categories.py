@@ -61,8 +61,8 @@ def cloud_support_categories(service_data):
 
 def get_categories(lot_name, service_data):
     if lot_name == 'support':
-        return '\t'.join(cloud_support_categories(service_data))
-    return '\t'.join(service.get('serviceCategories')) if service.get('serviceCategories') else ''
+        return cloud_support_categories(service_data)
+    return service.get('serviceCategories') if service.get('serviceCategories') else []
 
 
 if __name__ == "__main__":
@@ -99,8 +99,7 @@ if __name__ == "__main__":
     }
     headers = [
         'Supplier ID', 'DUNS Number', 'Supplier Name', 'Reseller?', 'Service Name',
-        'Service Description', 'Organisation Size', 'Categories',
-        '\n'
+        'Service Description', 'Service ID', 'Organisation Size', 'Categories'
     ]
     for lot, services_in_lot in lots.items():
         with open(os.path.join(OUTPUT_DIR, f'{lot}-categories-{version}.csv'), 'w', newline='') as f:
@@ -118,6 +117,5 @@ if __name__ == "__main__":
                     service.get('serviceDescription').replace('\r\n', '').replace('•\t', ';'),
                     service.get('id'),
                     supplier_data.get('organisationSize'),
-                    get_categories(lot, service)
-                ]
+                ] + get_categories(lot, service)
                 writer.writerow(row)
