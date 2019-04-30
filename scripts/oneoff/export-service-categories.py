@@ -113,9 +113,9 @@ if __name__ == "__main__":
                     str(service['supplierId']),
                     supplier_data.get('dunsNumber'),
                     service.get('supplierName'),
-                    service.get('serviceDescription').replace('\r\n', '').replace('•\t', ';'),
                     'false' if service.get('resellingType') == 'not_reseller' else 'true',
                     service.get('serviceName'),
+                    service.get('serviceDescription').replace('\r\n', '').replace('•\t', ';'),
                     service.get('id'),
                     supplier_data.get('organisationSize'),
                     get_categories(lot, service)
