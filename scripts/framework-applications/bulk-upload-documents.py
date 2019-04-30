@@ -37,8 +37,8 @@ import os
 import sys
 sys.path.insert(0, '.')
 
-from dmscripts.bulk_upload_documents import get_bucket_name, get_all_files_of_type, \
-    upload_file, get_supplier_name_dict_from_tsv
+from dmscripts.helpers.s3_helpers import get_bucket_name
+from dmscripts.bulk_upload_documents import get_all_files_of_type, upload_file, get_supplier_name_dict_from_tsv
 
 from docopt import docopt
 
