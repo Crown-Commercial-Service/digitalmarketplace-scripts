@@ -29,12 +29,11 @@ def set_framework_result(client, framework_slug, supplier_id, result, user):
         return "  Error inserting result for {} ({}): {}".format(supplier_id, result, str(e))
 
 
-def find_suppliers_on_framework(client, framework_slug):
+def find_suppliers_on_framework(client: DataAPIClient, framework_slug: str) -> Iterable[Mapping]:
     return (
-        supplier for supplier in client.find_framework_suppliers(
-            framework_slug, with_declarations=None
-        )['supplierFrameworks']
-        if supplier['onFramework']
+        supplier_framework
+        for supplier_framework in client.find_framework_suppliers_iter(framework_slug, with_declarations=None)
+        if supplier_framework['onFramework']
     )
 
 

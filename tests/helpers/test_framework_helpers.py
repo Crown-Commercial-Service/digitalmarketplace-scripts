@@ -59,15 +59,12 @@ def test_set_framework_result_returns_error_message_if_update_fails(mock_data_cl
 
 
 def test_find_suppliers_on_framework(mock_data_client):
-    mock_data_client.find_framework_suppliers.return_value = {
-        'extraneous_field': 'foo',
-        'supplierFrameworks': [
-            {'supplierId': 123, 'onFramework': True},
-            {'supplierId': 234, 'onFramework': False},
-            {'supplierId': 345, 'onFramework': False},
-            {'supplierId': 456, 'onFramework': True},
-        ]
-    }
+    mock_data_client.find_framework_suppliers_iter.side_effect = lambda *a, **kw: iter((
+        {'supplierId': 123, 'onFramework': True},
+        {'supplierId': 234, 'onFramework': False},
+        {'supplierId': 345, 'onFramework': False},
+        {'supplierId': 456, 'onFramework': True},
+    ))
 
     assert list(framework_helpers.find_suppliers_on_framework(mock_data_client, 'framework-slug')) == [
         {'supplierId': 123, 'onFramework': True},
