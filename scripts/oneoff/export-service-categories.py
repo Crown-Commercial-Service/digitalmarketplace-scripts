@@ -8,6 +8,7 @@ Outputs a .csv file per lot to the given --output-folder, with columns as follow
  - supplierName
  - reseller (true/false)
  - serviceName
+ - serviceDescription
  - serviceId
  - organisationSize
  - serviceCategories (tab separated list)
