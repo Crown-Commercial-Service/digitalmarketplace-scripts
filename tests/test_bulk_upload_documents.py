@@ -1,61 +1,12 @@
-import os
-import tempfile
-import shutil
-
 try:
     import __builtin__ as builtins
 except ImportError:
     import builtins
 
-from dmscripts.bulk_upload_documents import get_bucket_name, get_all_files_of_type, \
-    get_supplier_id_from_framework_file_path, upload_file, get_document_name_from_file_path, \
-    get_supplier_name_dict_from_tsv
+from dmscripts.bulk_upload_documents import get_supplier_id_from_framework_file_path, upload_file, \
+    get_document_name_from_file_path, get_supplier_name_dict_from_tsv
 import mock
 import pytest
-
-
-class TestGetBucketName:
-
-    @pytest.mark.parametrize(
-        'stage, expected_bucket_name',
-        [
-            ('local', 'digitalmarketplace-dev-uploads'),
-            ('dev', 'digitalmarketplace-dev-uploads'),
-            ('preview', 'digitalmarketplace-agreements-preview-preview'),
-            ('staging', 'digitalmarketplace-agreements-staging-staging'),
-            ('production', 'digitalmarketplace-agreements-production-production'),
-        ]
-    )
-    def test_get_bucket_name_for_agreements_documents(self, stage, expected_bucket_name):
-        assert get_bucket_name(stage, 'agreements') == expected_bucket_name
-
-    def test_get_bucket_name_returns_none_for_invalid_stage(self):
-        assert get_bucket_name('xanadu', 'agreements') is None
-
-    def test_get_bucket_name_returns_none_for_invalid_bucket_category(self):
-        assert get_bucket_name('local', 'bananas') is None
-
-
-class TestGetAllFilesOfType:
-
-    def test_get_all_files_of_type_for_flat_folder(self):
-        temp_folder_path = tempfile.mkdtemp()
-        pdf1 = open(os.path.join(temp_folder_path, 'test1.pdf'), 'w+')
-        pdf2 = open(os.path.join(temp_folder_path, 'test2.pdf'), 'w+')
-        assert len(list(get_all_files_of_type(temp_folder_path, 'pdf'))) == 2
-        pdf1.close()
-        pdf2.close()
-        shutil.rmtree(temp_folder_path)
-
-    def test_get_all_files_of_type_for_nested_folder(self):
-        temp_folder_path = tempfile.mkdtemp()
-        pdf1 = open(os.path.join(temp_folder_path, 'test1.pdf'), 'w+')
-        nested_temp_folder_path = tempfile.mkdtemp(dir=temp_folder_path)
-        pdf2 = open(os.path.join(nested_temp_folder_path, 'test2.pdf'), 'w+')
-        assert len(list(get_all_files_of_type(temp_folder_path, 'pdf'))) == 2
-        pdf1.close()
-        pdf2.close()
-        shutil.rmtree(temp_folder_path)
 
 
 class TestGetSupplierIDFromFrameworkFilePath:

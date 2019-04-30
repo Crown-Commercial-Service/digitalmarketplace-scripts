@@ -42,10 +42,11 @@ import sys
 sys.path.insert(0, '.')
 
 from dmscripts.helpers.auth_helpers import get_auth_token
-from dmscripts.bulk_upload_documents import get_bucket_name, get_all_files_of_type
+from dmscripts.helpers.file_helpers import get_all_files_of_type
 from dmscripts.upload_counterpart_agreements import upload_counterpart_file
 from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.logging_helpers import logging
+from dmscripts.helpers.s3_helpers import get_bucket_name
 from dmutils.env_helpers import get_api_endpoint_from_stage
 
 from docopt import docopt

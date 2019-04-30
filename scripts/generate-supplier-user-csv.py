@@ -32,10 +32,10 @@ import sys
 sys.path.insert(0, '.')
 
 from dmscripts.helpers.auth_helpers import get_auth_token
-from dmscripts.bulk_upload_documents import get_bucket_name
 from dmscripts.generate_supplier_user_csv import generate_csv_and_upload_to_s3
 from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.logging_helpers import logging
+from dmscripts.helpers.s3_helpers import get_bucket_name
 from dmutils.env_helpers import get_api_endpoint_from_stage
 
 from docopt import docopt
