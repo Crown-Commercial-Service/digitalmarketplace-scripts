@@ -58,22 +58,6 @@ def test_set_framework_result_returns_error_message_if_update_fails(mock_data_cl
         "  Error inserting result for 567890 (False): Unknown request failure in dmapiclient (status: 400)"
 
 
-def test_has_supplier_submitted_services_with_no_submitted_services(mock_data_client):
-    mock_data_client.find_draft_services_iter.return_value = [
-        {"id": 234, "status": "failed"},
-        {"id": 456, "status": "not-submitted"}
-    ]
-    assert framework_helpers.has_supplier_submitted_services(mock_data_client, 'g-spot-7', 567890) is False
-
-
-def test_has_supplier_submitted_services_with_submitted_services(mock_data_client):
-    mock_data_client.find_draft_services_iter.return_value = [
-        {"id": 234, "status": "submitted"},
-        {"id": 456, "status": "not-submitted"}
-    ]
-    assert framework_helpers.has_supplier_submitted_services(mock_data_client, 'g-spot-7', 567890) is True
-
-
 def test_find_suppliers_on_framework(mock_data_client):
     mock_data_client.find_framework_suppliers.return_value = {
         'extraneous_field': 'foo',

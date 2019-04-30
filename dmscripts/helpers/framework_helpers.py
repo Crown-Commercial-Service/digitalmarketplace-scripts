@@ -29,14 +29,6 @@ def set_framework_result(client, framework_slug, supplier_id, result, user):
         return "  Error inserting result for {} ({}): {}".format(supplier_id, result, str(e))
 
 
-def has_supplier_submitted_services(client, framework_slug, supplier_id):
-    submitted_drafts = get_submitted_drafts(client, framework_slug, supplier_id)
-    if len(submitted_drafts) > 0:
-        return True
-    else:
-        return False
-
-
 def find_suppliers_on_framework(client, framework_slug):
     return (
         supplier for supplier in client.find_framework_suppliers(
