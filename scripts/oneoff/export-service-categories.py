@@ -2,12 +2,13 @@
 """Usage: export-service-categories.py <g-cloud-version> [--output-folder=OUTPUT] [--stage=STAGE]
 
 Basic services export, for use by the DM performance analyst.
-Outputs a .tsv file per lot to the given --output-folder, with columns as follows:
+Outputs a .csv file per lot to the given --output-folder, with columns as follows:
  - supplierId
  - dunsNumber
  - supplierName
  - reseller (true/false)
  - serviceName
+ - serviceDescription
  - serviceId
  - organisationSize
  - serviceCategories (tab separated list)
@@ -28,6 +29,7 @@ Options:
 
 """
 import sys
+import csv
 import os
 from dmapiclient.data import DataAPIClient
 
@@ -59,8 +61,8 @@ def cloud_support_categories(service_data):
 
 def get_categories(lot_name, service_data):
     if lot_name == 'support':
-        return '\t'.join(cloud_support_categories(service_data))
-    return '\t'.join(service.get('serviceCategories')) if service.get('serviceCategories') else ''
+        return cloud_support_categories(service_data)
+    return service.get('serviceCategories') if service.get('serviceCategories') else []
 
 
 if __name__ == "__main__":
@@ -96,12 +98,14 @@ if __name__ == "__main__":
         'support': support_services
     }
     headers = [
-        'Supplier ID', 'DUNS Number', 'Supplier Name', 'Reseller?', 'Service Name', 'Organisation Size', 'Categories',
-        '\n'
+        'Supplier ID', 'DUNS Number', 'Supplier Name', 'Reseller?', 'Service Name',
+        'Service Description', 'Service ID', 'Organisation Size', 'Categories'
     ]
     for lot, services_in_lot in lots.items():
-        with open(os.path.join(OUTPUT_DIR, f'{lot}-categories-{version}.tsv'), 'w') as f:
-            f.write('\t'.join(headers))
+        with open(os.path.join(OUTPUT_DIR, f'{lot}-categories-{version}.csv'), 'w', newline='') as f:
+            writer = csv.writer(f, delimiter=',', quotechar='"')
+            writer.writerow(headers)
+
             for service in services_in_lot:
                 supplier_data = data_api_client.get_supplier(service.get('supplierId'))['suppliers']
                 row = [
@@ -110,8 +114,8 @@ if __name__ == "__main__":
                     service.get('supplierName'),
                     'false' if service.get('resellingType') == 'not_reseller' else 'true',
                     service.get('serviceName'),
+                    service.get('serviceDescription').replace('\r\n', '').replace('•\t', ';'),
                     service.get('id'),
                     supplier_data.get('organisationSize'),
-                    get_categories(lot, service)
-                ]
-                f.write('\t'.join(row) + '\n')
+                ] + get_categories(lot, service)
+                writer.writerow(row)
