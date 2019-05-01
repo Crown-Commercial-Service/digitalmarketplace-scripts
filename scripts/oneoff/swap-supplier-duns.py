@@ -3,6 +3,9 @@
 This script attempts to swap the DUNS numbers for two suppliers. This involves temporarily setting one of the suppliers
 to a fake DUNS number to satisfy the database's uniqueness constraint.
 
+!!! This script should only be run on production if there has been a specific support request from CCS confirming the
+    supplier IDs and DUNS numbers to be changed.
+
 Usage: swap-supplier-duns.py <supplier_1> <supplier_2> <duns_1> <duns_2> [options]
 
     <supplier_1>                                          Supplier ID #1
