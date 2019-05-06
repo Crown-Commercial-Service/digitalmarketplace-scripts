@@ -6,7 +6,7 @@ freezegun==0.3.11
 ipython==7.5.0
 ipython-genutils==0.2.0
 lxml==4.3.3
-mock==2.0.0
+mock==3.0.4
 pytest==4.4.1
 requests-mock==1.6.0
 
