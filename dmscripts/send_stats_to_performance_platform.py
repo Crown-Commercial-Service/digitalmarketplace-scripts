@@ -126,7 +126,7 @@ def services_by_lot(stats, framework):
     )
 
 
-def send_by_stage_stats(stats, timestamp_string, period, pp_bearer, pp_service):
+def send_by_stage_stats(stats, timestamp_string, period, pp_bearer, pp_service, dry_run):
     data_type = "applications-by-stage"
     processed_stats = applications_by_stage(stats)
     data = [{
@@ -139,10 +139,14 @@ def send_by_stage_stats(stats, timestamp_string, period, pp_bearer, pp_service):
         "period": period
     } for stage in processed_stats]
 
+    if dry_run:
+        print(f"Would send the following stage stats to Performance Platform API:")
+        print(data)
+        return 200
     return send_data(data, PERFORMANCE_PLATFORM_URL_TEMPLATES[period]['stage'].format(pp_service=pp_service), pp_bearer)
 
 
-def send_by_lot_stats(stats, timestamp_string, period, framework, pp_bearer, pp_service):
+def send_by_lot_stats(stats, timestamp_string, period, framework, pp_bearer, pp_service, dry_run):
     data_type = "applications-by-lot"
     processed_stats = services_by_lot(stats, framework)
     data = [{
@@ -155,10 +159,15 @@ def send_by_lot_stats(stats, timestamp_string, period, framework, pp_bearer, pp_
         "period": period
     } for lot in processed_stats]
 
+    if dry_run:
+        print(f"Would send the following stage stats to Performance Platform API:")
+        print(data)
+        return 200
+
     return send_data(data, PERFORMANCE_PLATFORM_URL_TEMPLATES[period]['lot'].format(pp_service=pp_service), pp_bearer)
 
 
-def send_framework_stats(data_api_client, framework_slug, period, pp_bearer, pp_service):
+def send_framework_stats(data_api_client, framework_slug, period, pp_bearer, pp_service, dry_run=False):
     stats = data_api_client.get_framework_stats(framework_slug)
     framework = data_api_client.get_framework(framework_slug)['frameworks']
     now = datetime.utcnow()
@@ -169,6 +178,9 @@ def send_framework_stats(data_api_client, framework_slug, period, pp_bearer, pp_
         if period == 'day' else
         (now - timedelta(hours=1)).strftime(HOURLY_TIME_FORMAT)
     )
-    res1 = send_by_stage_stats(stats, timestamp_string, period, pp_bearer, pp_service)
-    res2 = send_by_lot_stats(stats, timestamp_string, period, framework, pp_bearer, pp_service)
+    if dry_run:
+        print(f"Gathering {framework_slug} stats for the last {period}")
+
+    res1 = send_by_stage_stats(stats, timestamp_string, period, pp_bearer, pp_service, dry_run)
+    res2 = send_by_lot_stats(stats, timestamp_string, period, framework, pp_bearer, pp_service, dry_run)
     return res1 == res2 == 200
