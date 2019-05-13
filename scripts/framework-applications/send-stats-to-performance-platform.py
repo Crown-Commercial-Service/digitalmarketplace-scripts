@@ -3,8 +3,8 @@
 Script to fetch application statistics for a framework from the API and push them to the Performance Platform.
 
 Usage:
-    scripts/send-stats-to-performance-platform.py <framework_slug> <stage> <pp_service> (--day | --hour)
-    [<pp_bearer>] [--dry-run]
+    scripts/framework-applications/send-stats-to-performance-platform.py <framework_slug> <stage> <pp_service>
+    (--day | --hour) [<pp_bearer>] [--dry-run]
 """
 import sys
 
