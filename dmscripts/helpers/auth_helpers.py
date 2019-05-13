@@ -34,7 +34,12 @@ def get_auth_token(api, stage):
 
 
 def _get_nested_value(creds_json, env_var_path_list):
-    # Handle nested values in the credentials json
+    """
+    Handle nested values in the credentials json.
+    :param creds_json: e.g. {"performance_platform_bearer_tokens": {"g-cloud": "myToken"}}
+    :param env_var_path_list: e.g. ["performance_platform_bearer_tokens", "g-cloud"]
+    :return: e.g. "myToken"
+    """
     if len(env_var_path_list) > 1:
         return _get_nested_value(creds_json.get(env_var_path_list[0], {}), env_var_path_list[1:])
     return creds_json.get(env_var_path_list[0])
