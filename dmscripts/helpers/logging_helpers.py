@@ -1,15 +1,16 @@
 from __future__ import absolute_import
 
 import sys
+from typing import Optional, Mapping
 import logging
-from logging import DEBUG, INFO, WARNING, ERROR, CRITICAL, getLogger  # noqa
+from logging import DEBUG, INFO, WARNING, ERROR, CRITICAL, getLogger, Logger  # noqa
 
 from dmutils.logging import CustomLogFormatter
 
 LOG_FORMAT = '%(asctime)s %(name)s %(levelname)s %(message)s'
 
 
-def get_logger():
+def get_logger() -> Logger:
     """Get 'script' logger
 
     :return: 'script' logger object
@@ -17,7 +18,7 @@ def get_logger():
     return logging.getLogger('script')
 
 
-def configure_logger(log_levels=None):
+def configure_logger(log_levels: Optional[Mapping] = None) -> Logger:
     """Configure logging handlers and return a configured 'script' logger
 
     :param log_levels: a dictionary of logger name and corresponding log
@@ -40,7 +41,7 @@ def configure_logger(log_levels=None):
     return get_logger()
 
 
-def merge_log_levels(added_log_levels):
+def merge_log_levels(added_log_levels: Mapping) -> Mapping:
     log_levels = {
         'dmutils': INFO,
         'dmapiclient': INFO,

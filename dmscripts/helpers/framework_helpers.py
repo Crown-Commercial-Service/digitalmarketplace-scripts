@@ -1,18 +1,21 @@
+from typing import Iterable, Mapping, Sequence
+
 from collections import Counter
 from functools import partial
 import logging
 import re
 
-from dmapiclient import HTTPError
+from dmapiclient import DataAPIClient, HTTPError
 
 logger = logging.getLogger("framework_helpers")
 
 
-def get_submitted_drafts(client, framework_slug, supplier_id):
-    draft_services = client.find_draft_services_iter(supplier_id, framework=framework_slug)
-    submitted_drafts = [draft for draft in draft_services
-                        if draft["status"] == "submitted" and not draft.get('serviceId')]
-    return submitted_drafts
+def get_submitted_drafts(client: DataAPIClient, framework_slug: str, supplier_id: int) -> Sequence[Mapping]:
+    return tuple(
+        draft
+        for draft in client.find_draft_services_iter(supplier_id, framework=framework_slug)
+        if draft["status"] == "submitted"
+    )
 
 
 def set_framework_result(client, framework_slug, supplier_id, result, user):
@@ -26,20 +29,11 @@ def set_framework_result(client, framework_slug, supplier_id, result, user):
         return "  Error inserting result for {} ({}): {}".format(supplier_id, result, str(e))
 
 
-def has_supplier_submitted_services(client, framework_slug, supplier_id):
-    submitted_drafts = get_submitted_drafts(client, framework_slug, supplier_id)
-    if len(submitted_drafts) > 0:
-        return True
-    else:
-        return False
-
-
-def find_suppliers_on_framework(client, framework_slug):
+def find_suppliers_on_framework(client: DataAPIClient, framework_slug: str) -> Iterable[Mapping]:
     return (
-        supplier for supplier in client.find_framework_suppliers(
-            framework_slug, with_declarations=None
-        )['supplierFrameworks']
-        if supplier['onFramework']
+        supplier_framework
+        for supplier_framework in client.find_framework_suppliers_iter(framework_slug, with_declarations=None)
+        if supplier_framework['onFramework']
     )
 
 
