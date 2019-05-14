@@ -140,8 +140,7 @@ def send_by_stage_stats(stats, timestamp_string, period, pp_bearer, pp_service, 
     } for stage in processed_stats]
 
     if dry_run:
-        print(f"Would send the following stage stats to Performance Platform API:")
-        print(data)
+        logger.info("Would send the following stage stats to Performance Platform API: {data}", extra={'data': data})
         return 200
     return send_data(data, PERFORMANCE_PLATFORM_URL_TEMPLATES[period]['stage'].format(pp_service=pp_service), pp_bearer)
 
@@ -160,8 +159,7 @@ def send_by_lot_stats(stats, timestamp_string, period, framework, pp_bearer, pp_
     } for lot in processed_stats]
 
     if dry_run:
-        print(f"Would send the following stage stats to Performance Platform API:")
-        print(data)
+        logger.info("Would send the following lot stats to Performance Platform API: {data}", extra={'data': data})
         return 200
 
     return send_data(data, PERFORMANCE_PLATFORM_URL_TEMPLATES[period]['lot'].format(pp_service=pp_service), pp_bearer)
@@ -179,7 +177,10 @@ def send_framework_stats(data_api_client, framework_slug, period, pp_bearer, pp_
         (now - timedelta(hours=1)).strftime(HOURLY_TIME_FORMAT)
     )
     if dry_run:
-        print(f"Gathering {framework_slug} stats for the last {period}")
+        logger.info(
+            "Gathering {framework_slug} stats for the last {period}",
+            extra={'framework_slug': framework_slug, 'period': period}
+        )
 
     res1 = send_by_stage_stats(stats, timestamp_string, period, pp_bearer, pp_service, dry_run)
     res2 = send_by_lot_stats(stats, timestamp_string, period, framework, pp_bearer, pp_service, dry_run)
