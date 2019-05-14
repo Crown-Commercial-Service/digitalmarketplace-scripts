@@ -157,7 +157,7 @@ def test_services_by_lot():
 
 @mock.patch('dmscripts.send_stats_to_performance_platform.send_data')
 def test_send_by_stage_stats_per_day_calls_send_data_with_correct_data(send_data):
-    send_by_stage_stats(STATS_JSON, '2017-03-29T00:00:00+00:00', 'day', 'pp-bearer-token', 'gcloud')
+    send_by_stage_stats(STATS_JSON, '2017-03-29T00:00:00+00:00', 'day', 'pp-bearer-token', 'gcloud', dry_run=False)
     expected_sent_data_items = [
         {'count': 184,
          '_timestamp': '2017-03-29T00:00:00+00:00',
@@ -212,7 +212,7 @@ def test_send_by_stage_stats_per_day_calls_send_data_with_correct_data(send_data
 
 @mock.patch('dmscripts.send_stats_to_performance_platform.send_data')
 def test_send_by_stage_stats_per_hour_calls_send_data_with_correct_data(send_data):
-    send_by_stage_stats(STATS_JSON, '2017-03-29T12:00:00+00:00', 'hour', 'pp-bearer-token', 'hcloud')
+    send_by_stage_stats(STATS_JSON, '2017-03-29T12:00:00+00:00', 'hour', 'pp-bearer-token', 'hcloud', dry_run=False)
     expected_sent_data_items = [
         {'count': 184,
          '_timestamp': '2017-03-29T12:00:00+00:00',
@@ -274,6 +274,7 @@ def test_send_by_lot_stats_per_day_calls_send_data_with_correct_data(send_data):
         FRAMEWORK_JSON['frameworks'],
         'pp-bearer-token',
         'gcloud',
+        dry_run=False
     )
     expected_sent_data_items = [
         {'count': 84,
@@ -328,6 +329,7 @@ def test_send_by_lot_stats_per_hour_calls_send_data_with_correct_data(send_data)
         FRAMEWORK_JSON['frameworks'],
         'pp-bearer-token',
         'gcloud',
+        dry_run=False
     )
     expected_sent_data_items = [
         {'count': 84,
