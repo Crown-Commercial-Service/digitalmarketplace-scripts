@@ -121,6 +121,22 @@ DECLARATION_FIELDS = {
         "contactNameContractNotice",
         "contactEmailContractNotice",
     ),
+    "g-cloud-11": (
+        "primaryContact",
+        "primaryContactEmail",
+        "supplierRegisteredName",
+        "supplierRegisteredBuilding",
+        "supplierRegisteredTown",
+        "supplierRegisteredPostcode",
+        "supplierTradingStatus",
+        "supplierRegisteredCountry",
+        "supplierCompanyRegistrationNumber",
+        "supplierDunsNumber",
+        "supplierOrganisationSize",
+        "subcontracting",
+        "contactNameContractNotice",
+        "contactEmailContractNotice",
+    ),
 }
 
 
