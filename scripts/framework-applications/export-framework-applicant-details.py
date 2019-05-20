@@ -2,7 +2,7 @@
 """Export supplier "about you" information for suppliers who applied to a framework
 
 Currently will only work for the following frameworks:
-  * g-cloud-8, g-cloud-9, g-cloud-10
+  * g-cloud-8, g-cloud-9, g-cloud-10, g-cloud-11
   * digital-outcomes-and-specialists-2, digital-outcomes-and-specialists-3
 
 Support for new frameworks needs to be explicitly added to the DECLARATION_FIELDS in
