@@ -16,7 +16,7 @@ For a G-Cloud style framework (with uploaded documents to migrate) this will:
  3. Migrate these from drafts to "real" services, which includes moving documents to the live documents bucket
     and updating document URLs in the migrated version of the services
 Usage:
-    scripts/publish-draft-services.py <framework_slug> <stage> [<draft_bucket>]
+    scripts/framework-applications/publish-draft-services.py <framework_slug> <stage> [<draft_bucket>]
         [<documents_bucket>] [--dry-run] [--skip-docs-if-published] [--draft-ids=<filename>]
 
 If you specify the `--draft-ids` parameter, pass in list of newline-separated draft ids. This script will then do a
