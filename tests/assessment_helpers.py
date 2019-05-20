@@ -78,6 +78,7 @@ class BaseAssessmentTest(object):
             "irrelevantQuestion",
             "mitigatingFactors2",
             "unmentionedQuestion",
+            "mitigatingFactors3",
         )
 
     def _get_suppliers(self):
@@ -104,6 +105,9 @@ class BaseAssessmentTest(object):
                     mitigatingFactors=u"Permit, brevi manu, Supplier {}\u2019s sight is somewhat troubled".format(k),
                     mitigatingFactors2=(
                         u"Supplier {} can scarcely be prepared for every emergency that might crop up".format(k)
+                    ),
+                    mitigatingFactors3=(
+                        u"Supplier {}'s dog ate their homework".format(k)
                     ),
                 ),
             )
