@@ -2,7 +2,7 @@
 # Run `make freeze-requirements` to update requirements.txt
 # with package version changes made in requirements-app.txt
 
-Flask==1.0.2
+Flask==1.0.3
 itsdangerous==0.24 # pyup: ignore
 
 git+https://github.com/madzak/python-json-logger.git@v0.1.8#egg=python-json-logger==v0.1.8
@@ -10,7 +10,7 @@ git+https://github.com/alphagov/digitalmarketplace-utils.git@48.1.0#egg=digitalm
 git+https://github.com/alphagov/digitalmarketplace-apiclient.git@20.0.0#egg=digitalmarketplace-apiclient==20.0.0
 git+https://github.com/alphagov/digitalmarketplace-content-loader.git@5.2.0#egg=digitalmarketplace-content-loader==5.2.0
 
-awscli==1.16.152
+awscli==1.16.161
 backoff==1.8.0
 clamd==1.0.2
 docopt==0.6.2
@@ -26,8 +26,8 @@ yq==2.7.2
 asn1crypto==0.24.0
 attrs==19.1.0
 blinker==1.4
-boto3==1.9.143
-botocore==1.12.142
+boto3==1.9.151
+botocore==1.12.151
 certifi==2019.3.9
 cffi==1.12.3
 chardet==3.0.4
@@ -59,15 +59,15 @@ prometheus-client==0.2.0
 pyasn1==0.4.5
 pycparser==2.19
 PyJWT==1.7.1
-pyrsistent==0.15.1
+pyrsistent==0.15.2
 pytz==2019.1
 PyYAML==3.13
-requests==2.21.0
+requests==2.22.0
 rsa==3.4.2
 s3transfer==0.2.0
 six==1.12.0
-urllib3==1.24.3
-Werkzeug==0.15.2
+urllib3==1.25.2
+Werkzeug==0.15.4
 workdays==1.4
 WTForms==2.2.1
 xmltodict==0.12.0
