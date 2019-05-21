@@ -24,7 +24,8 @@ The script will:
         123456   Supplier Name 2
 
 Usage:
-    scripts/bulk-upload-documents.py <stage> <local_documents_directory> <framework_slug> [options]
+    scripts/framework-applications/bulk-upload-documents.py <stage> <local_documents_directory> <framework_slug>
+        [options]
 
 Options:
     --bucket_category=<bucket_category>  This is the type  of bucket [default: agreements]

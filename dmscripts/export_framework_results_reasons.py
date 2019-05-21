@@ -98,7 +98,8 @@ def discretionary_questions(record):
     failed_questions = [("failed_discretionary", record['discretionary'])]
     mitigating_factors = [
         ("mitigating factors 1", record['declaration'].get('mitigatingFactors', '')),
-        ("mitigating factors 2", record['declaration'].get('mitigatingFactors2', ''))
+        ("mitigating factors 2", record['declaration'].get('mitigatingFactors2', '')),
+        ("mitigating factors 3", record['declaration'].get('mitigatingFactors3', '')),
     ]
     return failed_questions + mitigating_factors
 

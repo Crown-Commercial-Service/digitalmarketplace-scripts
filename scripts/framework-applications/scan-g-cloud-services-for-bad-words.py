@@ -8,8 +8,8 @@ and generate a CSV report of any bad word found.
 Use the --scan-drafts option to scan draft services (supplier must still have 'onFramework' set to True).
 
 Usage:
-    scripts/scan-g-cloud-services-for-bad-words.py <stage> <frameworks-repo-root-dir> <bad_words_path>
-        <framework_slug> <output_dir> [--scan-drafts]
+    scripts/framework-applications/scan-g-cloud-services-for-bad-words.py <stage> <frameworks-repo-root-dir>
+        <bad_words_path> <framework_slug> <output_dir> [--scan-drafts]
 """
 import os
 import sys

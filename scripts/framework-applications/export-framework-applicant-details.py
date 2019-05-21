@@ -2,7 +2,7 @@
 """Export supplier "about you" information for suppliers who applied to a framework
 
 Currently will only work for the following frameworks:
-  * g-cloud-8, g-cloud-9, g-cloud-10
+  * g-cloud-8, g-cloud-9, g-cloud-10, g-cloud-11
   * digital-outcomes-and-specialists-2, digital-outcomes-and-specialists-3
 
 Support for new frameworks needs to be explicitly added to the DECLARATION_FIELDS in
@@ -10,10 +10,10 @@ dmscripts/export_framework_applicant_details.py, though in the (far) future it w
 be pulled from the frameworks themselves provided the frameworks repo knew which fields classed as "about you".
 
 Usage:
-    scripts/export-framework-applicant-details.py <stage> <framework_slug> <output_dir>
+    scripts/framework-applications/export-framework-applicant-details.py <stage> <framework_slug> <output_dir>
 
 Example:
-    scripts/export-framework-applicant-details.py dev g-cloud-8 SCRIPT_OUTPUTS
+    scripts/framework-applications/export-framework-applicant-details.py dev g-cloud-8 SCRIPT_OUTPUTS
 
 """
 import datetime

@@ -13,8 +13,8 @@ Produces three files;
    incorrectly.
 
 Usage:
-    scripts/export-framework-results-reasons.py [-h] <stage> <framework_slug> <content_path> <output_dir>
-      <declaration_schema_path> [<supplier_id_file>][-e <excluded_supplier_ids>]
+    scripts/framework-applications/export-framework-results-reasons.py [-h] <stage> <framework_slug> <content_path>
+        <output_dir> <declaration_schema_path> [<supplier_id_file>][-e <excluded_supplier_ids>]
 
 Options:
     -h --help
