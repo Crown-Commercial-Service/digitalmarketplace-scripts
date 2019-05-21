@@ -1,11 +1,16 @@
-from dmutils.email.helpers import hash_string
+from itertools import chain
+
+from dmutils.email.helpers import get_email_addresses, hash_string
 
 from dmutils.env_helpers import get_web_url_from_stage
 
 
 def get_brief_response_emails(data_api_client, brief_id):
     responses = data_api_client.find_brief_responses_iter(brief_id=brief_id, status="submitted")
-    return [response["respondToEmailAddress"] for response in responses]
+    return list(chain.from_iterable(
+        get_email_addresses(response["respondToEmailAddress"])
+        for response in responses
+    ))
 
 
 def create_context_for_brief(stage, brief):

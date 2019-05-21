@@ -22,7 +22,8 @@ WITHDRAWN_BRIEFS = (
 
 BRIEF_RESPONSES = (
     {"id": 4321, "respondToEmailAddress": "email@me.now"},
-    {"id": 4389, "respondToEmailAddress": "email@them.now"}
+    {"id": 4389, "respondToEmailAddress": "email@them.now"},
+    {"id": 4379, "respondToEmailAddress": " email@both.this, and@that.please"},
 )
 
 
@@ -35,7 +36,12 @@ EXPECTED_BRIEF_CONTEXT = {
 @mock.patch('dmapiclient.DataAPIClient', autospec=True)
 def test_get_brief_response_emails(data_api_client):
     data_api_client.find_brief_responses_iter.return_value = BRIEF_RESPONSES
-    assert tested_script.get_brief_response_emails(data_api_client, {"id": 1234}) == ["email@me.now", "email@them.now"]
+    assert tested_script.get_brief_response_emails(data_api_client, {"id": 1234}) == [
+        "email@me.now",
+        "email@them.now",
+        "email@both.this",
+        "and@that.please",
+    ]
 
 
 def test_create_context_for_brief():
@@ -66,7 +72,7 @@ def test_main_calls_correct_script_methods(
     assert create_context_for_brief.call_args_list == [mock.call("preview", WITHDRAWN_BRIEFS[0])]
     assert notify_client.send_email.call_args_list == [
         mock.call("email@me.now", "notify_template_id", EXPECTED_BRIEF_CONTEXT, allow_resend=False),
-        mock.call("email@them.now", "notify_template_id", EXPECTED_BRIEF_CONTEXT, allow_resend=False)
+        mock.call("email@them.now", "notify_template_id", EXPECTED_BRIEF_CONTEXT, allow_resend=False),
     ]
 
 
@@ -87,7 +93,9 @@ def test_main_calls_correct_external_client_methods(data_api_client, notify_clie
     assert data_api_client.find_briefs_iter.call_args_list == expected_call_args
     assert notify_client.send_email.call_args_list == [
         mock.call("email@me.now", "notify_template_id", EXPECTED_BRIEF_CONTEXT, allow_resend=False),
-        mock.call("email@them.now", "notify_template_id", EXPECTED_BRIEF_CONTEXT, allow_resend=False)
+        mock.call("email@them.now", "notify_template_id", EXPECTED_BRIEF_CONTEXT, allow_resend=False),
+        mock.call("email@both.this", "notify_template_id", EXPECTED_BRIEF_CONTEXT, allow_resend=False),
+        mock.call("and@that.please", "notify_template_id", EXPECTED_BRIEF_CONTEXT, allow_resend=False),
     ]
 
 
