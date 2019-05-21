@@ -5,10 +5,11 @@
 Sets supplier "on framework" status for all supplier IDs read from file. Each file line should contain one supplier ID.
 
 Usage:
-    scripts/update-framework-results.py <framework> <stage> (--pass | --fail) <ids_file>
+    scripts/framework-applications/update-framework-results.py <framework> <stage> (--pass | --fail) <ids_file>
 
 Example:
-    python scripts/update-framework-results.py g-cloud-8 preview --pass --api-token=myToken ./g8-suppliers.txt
+    scripts/framework-applications/update-framework-results.py g-cloud-11 preview --pass --api-token=myToken
+        ../g11-supplier-ids.txt
 
 """
 
