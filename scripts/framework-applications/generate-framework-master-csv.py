@@ -15,10 +15,12 @@ Fields included:
 * The number of services submitted and left in draft per lot
 
 Usage:
-    scripts/generate-framework-master-csv.py <framework_slug> <stage> <auth_token> <output-dir> [-e <exclude_suppliers>]
+    scripts/framework-applications/generate-framework-master-csv.py <framework_slug> <stage> <auth_token> <output-dir>
+        [-e <exclude_suppliers>]
 
 Example:
-    scripts/generate-framework-master-csv.py g-cloud-11 preview myToken path/to/myfolder -e 123,456,789
+    scripts/framework-applications/generate-framework-master-csv.py g-cloud-11 preview myToken path/to/myfolder
+        -e 123,456,789
 """
 import os
 import sys

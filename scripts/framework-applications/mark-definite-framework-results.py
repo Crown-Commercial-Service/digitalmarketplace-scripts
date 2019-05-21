@@ -22,7 +22,7 @@ not to fail this time around (or if no draft_service_schema is supplied). You ma
 suppliers. This can be done with the `supplier-id-file` option. It should be set to the path to a file containing the
 supplier ids to check, one per line.
 
-Usage: mark-definite-framework-results.py [options] <stage> <framework_slug>
+Usage: scripts/framework-applications/mark-definite-framework-results.py [options] <stage> <framework_slug>
             <declaration_definite_pass_schema_path> [<draft_service_schema_path>]
 
 --updated-by=<user_string>        Specify updated_by string to use in API requests

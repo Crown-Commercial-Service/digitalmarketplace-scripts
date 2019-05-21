@@ -3,11 +3,11 @@
 Uses the Notify API to inform suppliers of success result.
 
 Usage:
-    scripts/notify-successful-suppliers-for-framework.py <stage> <framework_slug>
+    scripts/framework-applications/notify-successful-suppliers-for-framework.py <stage> <framework_slug>
         <govuk_notify_api_key> <govuk_notify_template_id>
 
 Example:
-    scripts/notify-successful-suppliers-for-framework.py preview g-cloud-8
+    scripts/framework-applications/notify-successful-suppliers-for-framework.py preview g-cloud-11
         my-awesome-key govuk_notify_template_id
 
 Options:
