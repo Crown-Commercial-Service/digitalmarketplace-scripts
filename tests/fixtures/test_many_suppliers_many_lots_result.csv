@@ -3,3 +3,4 @@ supplier_id,supplier_dm_name,application_status,declaration_status,draft_saas,co
 456,Bens cool supplier2,application,complete,0,1,1,2,0,2
 789,Bens cool supplier3,no_application,complete,0,0,0,0,1,0
 101,Bens cool supplier3,no_application,,0,0,0,0,0,0
+202,I do not have a declaration,no_application,,0,0,0,0,0,0
