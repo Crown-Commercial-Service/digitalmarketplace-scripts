@@ -81,7 +81,7 @@ class GenerateMasterCSV(GenerateCSVFromAPI):
             supplier_id = sf['supplierId']
             if supplier_id in self.excluded_supplier_ids:
                 continue  # this part excludes any supplier the executioner of the script doesn't want in the output
-            declaration = sf['declaration'].get('status', '') if sf['declaration'] else ''
+            declaration = sf['declaration'].get('status', '') if sf.get('declaration') else ''
             supplier_info = [
                 supplier_id,
                 sf['supplierName'],

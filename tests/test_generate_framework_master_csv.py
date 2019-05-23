@@ -118,7 +118,17 @@ def test_many_suppliers_many_lots(mock_data_client):
                 'extraneous_field': 'foo',
                 'declaration': {'status': 'complete'}
             },
-            {'supplierId': 101, 'supplierName': 'Bens cool supplier3', 'extraneous_field': 'foo', 'declaration': ''}
+            {
+                'supplierId': 101,
+                'supplierName': 'Bens cool supplier3',
+                'extraneous_field': 'foo',
+                'declaration': ''
+            },
+            {
+                'supplierId': 202,
+                'supplierName': 'I do not have a declaration',
+                'extraneous_field': 'foo'
+            }
         ]
     }
 
@@ -149,12 +159,12 @@ def test_many_suppliers_many_lots(mock_data_client):
             return iter([{
                 'lot': 'test_lot2', 'lotSlug': 'test_lot2', 'status': 'not-submitted', 'extraneous_field': 'foo'
             }])
-        if supplier_id == 101:
+        if supplier_id in [101, 202]:
             # Imitates a supplier registered but with no services.
             return iter([])
         else:
             # We should not get here.
-            assert False, "The csv creator recieved an invalid supplier id."
+            assert False, "The csv creator received an invalid supplier id."
     mock_data_client.find_draft_services_iter.side_effect = service_api_side_effect
 
     csv_builder = GenerateMasterCSV(client=mock_data_client, target_framework_slug='test_framework_slug')

@@ -58,7 +58,7 @@ if __name__ == "__main__":
         target_framework_slug=framework_slug
     )
 
-    if arguments['<exclude_suppliers>'] is not None:  # updates the generator with any IDs the user wants excluded
+    if arguments.get('<exclude_suppliers>') is not None:  # updates the generator with any IDs the user wants excluded
         csv_builder.excluded_supplier_ids = [int(n) for n in arguments['<exclude_suppliers>'].split(',')]
 
     csv_builder.populate_output()
