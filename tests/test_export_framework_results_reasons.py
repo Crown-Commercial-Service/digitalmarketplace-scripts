@@ -1,6 +1,7 @@
 from unicodecsv import reader
 
 import pytest
+from freezegun import freeze_time
 from mock import Mock, patch
 
 from dmscripts.export_framework_results_reasons import export_suppliers
@@ -41,22 +42,26 @@ class _BaseExportTest(_BaseExportFrameworkResultsReasonsTest):
         expected_discretionary,
         expected_successful,
     ):
-        export_suppliers(
-            self.mock_data_client,
-            self.framework_slug,
-            self.mock_content_loader,
-            str(tmpdir.join("doesnt.exist.yet")),
-            self._declaration_definite_pass_schema(),
-            self._declaration_definite_pass_schema()["definitions"]["baseline"] if use_baseline_schema else None,
-        )
+        with freeze_time('2019-01-01 12:01:23'):
+            export_suppliers(
+                self.mock_data_client,
+                self.framework_slug,
+                self.mock_content_loader,
+                str(tmpdir.join("doesnt.exist.yet")),
+                self._declaration_definite_pass_schema(),
+                self._declaration_definite_pass_schema()["definitions"]["baseline"] if use_baseline_schema else None,
+            )
 
+        failed_filename = "h-cloud-99-suppliers-who-failed-2019-01-01-12-01.csv"
+        successful_filename = "h-cloud-99-automatically-successful-suppliers-2019-01-01-12-01.csv"
+        discretionary_filename = "h-cloud-99-suppliers-who-declared-discretionary-data-2019-01-01-12-01.csv"
         assert frozenset(p.basename for p in tmpdir.join("doesnt.exist.yet").listdir()) == frozenset((
-            "failed.csv",
-            "discretionary.csv",
-            "successful.csv",
+            failed_filename,
+            discretionary_filename,
+            successful_filename,
         ))
 
-        with tmpdir.join("doesnt.exist.yet", "failed.csv").open("rb") as f:
+        with tmpdir.join("doesnt.exist.yet", failed_filename).open("rb") as f:
             freader = reader(f, encoding="utf-8")
             lines = tuple(freader)
             assert lines[0] == [
@@ -68,7 +73,7 @@ class _BaseExportTest(_BaseExportFrameworkResultsReasonsTest):
             ]
             assert sorted(lines[1:]) == sorted(expected_failed)
 
-        with tmpdir.join("doesnt.exist.yet", "discretionary.csv").open("rb") as f:
+        with tmpdir.join("doesnt.exist.yet", discretionary_filename).open("rb") as f:
             freader = reader(f, encoding="utf-8")
             lines = tuple(freader)
             assert lines[0] == [
@@ -83,7 +88,7 @@ class _BaseExportTest(_BaseExportFrameworkResultsReasonsTest):
             ]
             assert sorted(lines[1:]) == sorted(expected_discretionary)
 
-        with tmpdir.join("doesnt.exist.yet", "successful.csv").open("rb") as f:
+        with tmpdir.join("doesnt.exist.yet", successful_filename).open("rb") as f:
             freader = reader(f, encoding="utf-8")
             lines = tuple(freader)
             assert lines[0] == [

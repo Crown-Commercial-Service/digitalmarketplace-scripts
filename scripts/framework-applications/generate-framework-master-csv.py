@@ -39,7 +39,7 @@ if __name__ == "__main__":
     output_dir = arguments['<output-dir>']
     stage = arguments['<stage>']
     framework_slug = arguments['<framework_slug>']
-    filename = "{}-application-export-{}-{}.csv".format(
+    filename = "{}-how-application-looked-at-close-{}-{}.csv".format(
         framework_slug,
         stage,
         datetime.utcnow().strftime("%Y-%m-%d_%H.%M-")

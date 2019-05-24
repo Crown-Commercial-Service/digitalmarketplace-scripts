@@ -41,7 +41,7 @@ if __name__ == '__main__':
     client = DataAPIClient(get_api_endpoint_from_stage(STAGE), get_auth_token('api', STAGE))
     now = datetime.datetime.now()
 
-    filename = FRAMEWORK + "-applicant_details-" + now.strftime("%Y-%m-%d_%H.%M-") + STAGE + ".csv"
+    filename = FRAMEWORK + "-supplier-about-you-data-" + now.strftime("%Y-%m-%d_%H.%M-") + STAGE + ".csv"
     filepath = OUTPUT_DIR + os.sep + filename
 
     # Create output directory if it doesn't already exist

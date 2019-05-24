@@ -73,7 +73,7 @@ class MultiCSVWriter(object):
         return self._csv_writers[handler.NAME]
 
     def csv_path(self, handler):
-        return os.path.join(self.output_dir, handler.NAME + '.csv')
+        return os.path.join(self.output_dir, handler.filename + '.csv')
 
     def __enter__(self):
         for handler in self.handlers:
