@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from collections import OrderedDict
+from datetime import datetime
 from itertools import chain
 import jsonschema
 import os
@@ -113,6 +114,10 @@ def contact_details(record):
 
 class SuccessfulHandler(object):
     NAME = 'successful'
+    CCS_FILENAME_FORMAT = '{}-automatically-successful-suppliers-{}'
+
+    def __init__(self, framework_slug, now):
+        self.filename = self.CCS_FILENAME_FORMAT.format(framework_slug, now)
 
     def matches(self, record):
         return record['onFramework'] is True
@@ -128,6 +133,10 @@ class SuccessfulHandler(object):
 
 class FailedHandler(object):
     NAME = 'failed'
+    CCS_FILENAME_FORMAT = '{}-suppliers-who-failed-{}'
+
+    def __init__(self, framework_slug, now):
+        self.filename = self.CCS_FILENAME_FORMAT.format(framework_slug, now)
 
     def matches(self, record):
         return record['onFramework'] is False
@@ -158,6 +167,10 @@ class FailedHandler(object):
 
 class DiscretionaryHandler(object):
     NAME = 'discretionary'
+    CCS_FILENAME_FORMAT = '{}-suppliers-who-declared-discretionary-data-{}'
+
+    def __init__(self, framework_slug, now):
+        self.filename = self.CCS_FILENAME_FORMAT.format(framework_slug, now)
 
     def matches(self, record):
         return record['onFramework'] is None
@@ -207,7 +220,12 @@ def export_suppliers(
         map_impl=map_impl,
     )
 
-    handlers = [SuccessfulHandler(), FailedHandler(), DiscretionaryHandler()]
+    now = datetime.utcnow().strftime("%Y-%m-%d-%H-%M")
+    handlers = [
+        SuccessfulHandler(framework_slug, now),
+        FailedHandler(framework_slug, now),
+        DiscretionaryHandler(framework_slug, now)
+    ]
 
     with MultiCSVWriter(output_dir, handlers) as writer:
         for i, record in enumerate(records):
