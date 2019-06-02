@@ -7,7 +7,7 @@ ipython==7.5.0
 ipython-genutils==0.2.0
 lxml==4.3.3
 mock==3.0.5
-pytest==4.5.0
+pytest==4.6.0
 requests-mock==1.6.0
 
 git+https://github.com/alphagov/digitalmarketplace-test-utils.git@2.5.0#egg=digitalmarketplace-test-utils==2.5.0
