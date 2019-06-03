@@ -6,6 +6,8 @@ from docopt import docopt
 from dmscripts.helpers.supplier_data_helpers import (
     country_code_to_name,
     get_supplier_ids_from_args,
+    AppliedToFrameworkSupplierContextForNotify,
+    SupplierFrameworkData,
 )
 from dmscripts.data_retention_remove_supplier_declarations import SupplierFrameworkDeclarations
 from tests.assessment_helpers import BaseAssessmentTest
@@ -108,6 +110,95 @@ class TestSupplierFrameworkDeclarations(BaseAssessmentTest):
                     user='Data Retention Script 2019-01-01T12:00:00')
             ]
             mocked_api_client.remove_supplier_declaration.assert_has_calls(expected_calls, any_order=True)
+
+
+class TestSupplierFrameworkData:
+    def test_get_supplier_frameworks_returns_framework_suppliers(self, mock_data_client):
+        data = SupplierFrameworkData(mock_data_client, "g-cloud-11")
+
+        mock_data_client.find_framework_suppliers_iter.return_value = [mock.sentinel.framework_suppliers]
+        assert data.get_supplier_frameworks() == [mock.sentinel.framework_suppliers]
+
+    def test_get_supplier_frameworks_can_filter_by_supplier_ids(self, mock_data_client):
+        data = SupplierFrameworkData(mock_data_client, "g-cloud-11", supplier_ids=[2])
+
+        mock_data_client.find_framework_suppliers_iter.return_value = [
+            {"supplierId": 1},
+            {"supplierId": 2},
+        ]
+        assert data.get_supplier_frameworks() == [{"supplierId": 2}]
+
+    def test_get_supplier_users_returns_dict_of_users_grouped_by_supplier(self, mock_data_client):
+        data = SupplierFrameworkData(mock_data_client, "g-cloud-11")
+
+        mock_data_client.export_users.return_value = {"users": [
+            {"id": 1, "supplier_id": 1},
+            {"id": 2, "supplier_id": 2},
+            {"id": 3, "supplier_id": 1},
+        ]}
+        assert data.get_supplier_users() == {
+            1: [{"id": 1, "supplier_id": 1}, {"id": 3, "supplier_id": 1}],
+            2: [{"id": 2, "supplier_id": 2}],
+        }
+
+    def test_get_supplier_users_can_filter_by_supplier_id(self, mock_data_client):
+        data = SupplierFrameworkData(mock_data_client, "g-cloud-11", supplier_ids=[2])
+
+        mock_data_client.export_users.return_value = {"users": [
+            {"id": 1, "supplier_id": 1},
+            {"id": 2, "supplier_id": 2},
+            {"id": 3, "supplier_id": 1},
+        ]}
+        assert data.get_supplier_users() == {
+            2: [{"id": 2, "supplier_id": 2}],
+        }
+
+    def test_populate_data_can_filter_by_supplier_ids(self, mock_data_client):
+        data = SupplierFrameworkData(mock_data_client, "g-cloud-11", supplier_ids=[2])
+
+        mock_data_client.find_framework_suppliers_iter.return_value = [
+            {"supplierId": 1},
+            {"supplierId": 2},
+        ]
+        mock_data_client.export_users.return_value = {"users": [
+            {"id": 1, "supplier_id": 1},
+            {"id": 2, "supplier_id": 2},
+            {"id": 3, "supplier_id": 1},
+        ]}
+
+        data.populate_data()
+
+        assert data.data == [{"supplierId": 2, "users": [{"id": 2, "supplier_id": 2}], "draft_services": []}]
+        assert mock_data_client.find_draft_services_iter.call_args_list == [mock.call(2, framework="g-cloud-11")]
+
+
+class TestAppliedToFrameworkSupplierContextForNotify:
+    def test_get_suppliers_with_users_personalisations_groups_users_by_supplier_id(
+        self, mock_data_client
+    ):
+        data = AppliedToFrameworkSupplierContextForNotify(
+            mock_data_client,
+            "g-cloud-11",
+            supplier_ids=[12345],
+        )
+        data.populate_data()
+
+        results = {supplier: list(users) for supplier, users in data.get_suppliers_with_users_personalisations()}
+
+        assert list(results.keys()) == [12345]
+        assert len(results[12345]) == 1
+        assert "email address" in results[12345][0][0]
+        assert "applied" in results[12345][0][1]
+
+    def test_template_personalisation_whether_supplier_has_applied_to_framework(
+        self, mock_data_client
+    ):
+        data = AppliedToFrameworkSupplierContextForNotify(
+            mock_data_client, "g-cloud-11",
+        )
+        data.populate_data()
+
+        assert all("applied" in p for p in data.get_users_personalisations().values())
 
 
 class TestCountryCodeToName:

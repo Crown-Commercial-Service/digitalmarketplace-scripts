@@ -6,6 +6,8 @@ import pytest
 from mock import Mock
 import requests_mock
 
+from dmtestutils.api_model_stubs import FrameworkStub
+
 
 FIXTURES_DIR = os.path.join(os.path.dirname(__file__), 'fixtures')
 
@@ -14,24 +16,61 @@ FIXTURES_DIR = os.path.join(os.path.dirname(__file__), 'fixtures')
 def mock_data_client():
     """Mock data client for use in tests. These can be overwritten in individual tests."""
     mock_data_client = Mock()
-    mock_data_client.get_framework.return_value = dict(frameworks=dict(lots=[
-        {'slug': 'test_lot_slug_1'},
-        {'slug': 'test_lot_slug_2'},
-    ]))
+    mock_data_client.get_framework.return_value = FrameworkStub(
+        lots=[{"slug": "test_lot_slug_1"}, {"slug": "test_lot_slug_2"}],
+    ).single_result_response()
+
     mock_data_client.find_draft_services_iter.return_value = {}
     mock_data_client.export_users.return_value = {
-        'users': [
-            {'supplier_id': 12345, 'application_status': 'application', 'extraneous_field': 'foo'},
-            {'supplier_id': 23456, 'application_status': 'no_application', 'extraneous_field': 'foo'},
-            {'supplier_id': 123, 'application_status': 'application', 'extraneous_field': 'foo'},
-            {'supplier_id': 456, 'application_status': 'application', 'extraneous_field': 'foo'},
-            {'supplier_id': 789, 'application_status': 'no_application', 'extraneous_field': 'foo'},
-            {'supplier_id': 101, 'application_status': 'no_application', 'extraneous_field': 'foo'}
+        "users": [
+            {
+                "supplier_id": 12345,
+                "application_status": "application",
+                "email address": "1@12345",
+                "extraneous_field": "foo",
+            },
+            {
+                "supplier_id": 23456,
+                "application_status": "no_application",
+                "email address": "1@23456",
+                "extraneous_field": "foo",
+            },
+            {
+                "supplier_id": 123,
+                "application_status": "application",
+                "email address": "1@123",
+                "extraneous_field": "foo",
+            },
+            {
+                "supplier_id": 456,
+                "application_status": "application",
+                "email address": "1@456",
+                "extraneous_field": "foo",
+            },
+            {
+                "supplier_id": 789,
+                "application_status": "no_application",
+                "email address": "1@789",
+                "extraneous_field": "foo",
+            },
+            {
+                "supplier_id": 101,
+                "application_status": "no_application",
+                "email address": "1@101",
+                "extraneous_field": "foo",
+            },
         ]
     }
 
-    with open(os.path.join(FIXTURES_DIR, 'test_supplier_frameworks_response.json')) as supplier_frameworks_response:
-        mock_data_client.find_framework_suppliers.return_value = json.loads(supplier_frameworks_response.read())
+    with open(
+        os.path.join(FIXTURES_DIR, "test_supplier_frameworks_response.json")
+    ) as supplier_frameworks_response:
+        mock_data_client.find_framework_suppliers.return_value = json.loads(
+            supplier_frameworks_response.read()
+        )
+        mock_data_client.find_framework_suppliers_iter.return_value = iter(
+            mock_data_client.find_framework_suppliers.return_value["supplierFrameworks"]
+        )
     return mock_data_client
 
 

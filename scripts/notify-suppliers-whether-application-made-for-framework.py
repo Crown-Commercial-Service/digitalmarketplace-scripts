@@ -1,17 +1,28 @@
 #!/usr/bin/env python
-"""Email all suppliers who registered interest in applying to a framework about whether or not they made an application.
-Uses the Notify API to send emails.
+"""
+Email all suppliers who registered interest in applying to a framework about whether or not they made an application.
+
+Uses the Notify API to send emails. This script *should not* resend emails.
 
 Usage:
-    scripts/notify-suppliers-whether-application-made-for-framework.py <stage> <framework_slug>
-        <govuk_notify_api_key> [--dry-run]
+    scripts/notify-suppliers-whether-application-made-for-framework.py [options]
+         [--supplier-id=<id> ... | --supplier-ids-from=<file>]
+         <stage> <framework> <notify_api_key>
 
 Example:
-    scripts/notify-suppliers-whether-application-made-for-framework.py preview g-cloud-9
-        my-awesome-key --dry-run
+    scripts/notify-suppliers-whether-application-made-for-framework.py --dry-run preview g-cloud-9 my-awesome-key
 
 Options:
-    -h, --help  Show this screen
+    <stage>                     Environment to run script against.
+    <framework>                 Framework slug.
+    <notify_api_key>            API key for GOV.UK Notify.
+
+    --supplier-id=<id>          ID(s) of supplier(s) to email.
+    --supplier-ids-from=<file>  Path to file containing supplier ID(s), one per line.
+
+    -n, --dry-run               Run script without sending emails.
+
+    -h, --help                  Show this screen
 """
 import sys
 
@@ -20,13 +31,15 @@ from docopt import docopt
 
 from dmapiclient import DataAPIClient
 from dmutils.email.exceptions import EmailError
-from dmutils.dates import update_framework_with_formatted_dates
 from dmutils.email.helpers import hash_string
 from dmscripts.helpers.email_helpers import scripts_notify_client
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.logging_helpers import logging
-from dmscripts.helpers.supplier_data_helpers import AppliedToFrameworkSupplierContextForNotify
+from dmscripts.helpers.supplier_data_helpers import (
+    AppliedToFrameworkSupplierContextForNotify,
+    get_supplier_ids_from_args,
+)
 from dmutils.env_helpers import get_api_endpoint_from_stage
 
 logger = logging_helpers.configure_logger({"dmapiclient": logging.INFO})
@@ -39,35 +52,39 @@ NOTIFY_TEMPLATES = {
 
 if __name__ == '__main__':
     arguments = docopt(__doc__)
+    supplier_ids = get_supplier_ids_from_args(arguments)
 
     STAGE = arguments['<stage>']
-    FRAMEWORK_SLUG = arguments['<framework_slug>']
-    GOVUK_NOTIFY_API_KEY = arguments['<govuk_notify_api_key>']
+    FRAMEWORK_SLUG = arguments['<framework>']
+    GOVUK_NOTIFY_API_KEY = arguments['<notify_api_key>']
     DRY_RUN = arguments['--dry-run']
 
     mail_client = scripts_notify_client(GOVUK_NOTIFY_API_KEY, logger=logger)
     api_client = DataAPIClient(base_url=get_api_endpoint_from_stage(STAGE),
                                auth_token=get_auth_token('api', STAGE))
 
-    framework_data = api_client.get_framework(FRAMEWORK_SLUG)['frameworks']
-    update_framework_with_formatted_dates(framework_data)
-
-    context_helper = AppliedToFrameworkSupplierContextForNotify(api_client,
-                                                                FRAMEWORK_SLUG,
-                                                                framework_data['intentionToAwardAt'])
+    context_helper = AppliedToFrameworkSupplierContextForNotify(api_client, FRAMEWORK_SLUG, supplier_ids=supplier_ids)
     context_helper.populate_data()
-    context_data = context_helper.get_users_personalisations()
+    prefix = "[Dry Run] " if DRY_RUN else ""
     error_count = 0
-    for user_email, personalisation in context_data.items():
-        template_key = 'application_made' if personalisation['applied'] else 'application_not_made'
+    for supplier_id, users in context_helper.get_suppliers_with_users_personalisations():
+        logger.info(f"{prefix}Supplier '{supplier_id}'")
 
-        prefix = "[Dry Run] " if DRY_RUN else ""
-        logger.info("{}Sending '{}' email to {}".format(prefix, template_key, hash_string(user_email)))
-        if not DRY_RUN:
+        for user, personalisation in users:
+            user_email = user["email address"]
+            template_key = 'application_made' if personalisation['applied'] else 'application_not_made'
+            template = NOTIFY_TEMPLATES[template_key]
+
+            logger.info(
+                f"{prefix}Sending '{template_key}' email to supplier '{supplier_id}' user '{hash_string(user_email)}'")
+
+            if DRY_RUN:
+                continue
+
             try:
-                mail_client.send_email(user_email, NOTIFY_TEMPLATES[template_key], personalisation, allow_resend=False)
+                mail_client.send_email(user_email, template, personalisation, allow_resend=False)
             except EmailError as e:
-                logger.error(u'Error sending email to {}: {}'.format(hash_string(user_email), e))
+                logger.error(f"Error sending email to supplier '{supplier_id}' user '{hash_string(user_email)}': {e}")
                 error_count += 1
 
     sys.exit(error_count)

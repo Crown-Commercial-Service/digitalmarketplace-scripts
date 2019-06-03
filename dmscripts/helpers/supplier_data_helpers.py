@@ -4,11 +4,14 @@ from collections import OrderedDict
 from datetime import date, timedelta, datetime
 from functools import lru_cache
 from itertools import groupby
+from operator import itemgetter
+
 import json
 
 import backoff
 import requests
 
+from dmutils.dates import update_framework_with_formatted_dates
 from dmutils.formats import DISPLAY_DATE_FORMAT, DATETIME_FORMAT
 
 
@@ -17,24 +20,34 @@ class SupplierFrameworkData(object):
 
     data = None
 
-    def __init__(self, client, target_framework_slug):
+    def __init__(self, client, target_framework_slug, *, supplier_ids=None):
+        """
+        :param client: Client object for the Digital Marketplace API
+        :param target_framework_slug str: Framework slug
+        :param supplier_ids: List of supplier IDs to filter data by
+        """
         self.client = client
         self.target_framework_slug = target_framework_slug
+        self.supplier_ids = supplier_ids
 
     def get_supplier_frameworks(self):
         """Return supplier frameworks."""
-        return self.client.find_framework_suppliers(
+        framework_suppliers = self.client.find_framework_suppliers_iter(
             self.target_framework_slug, with_declarations=None
-        )['supplierFrameworks']
+        )
+        if self.supplier_ids:
+            framework_suppliers = (s for s in framework_suppliers if s["supplierId"] in self.supplier_ids)
+        return list(framework_suppliers)
 
     def get_supplier_users(self):
         """Return a dict, {supplier id: [users]}."""
         users = self.client.export_users(self.target_framework_slug).get('users', [])
 
-        def sort_by_func(d):
-            return d['supplier_id']
-        sorted_users = sorted(users, key=sort_by_func)
-        return {k: list(g) for k, g in groupby(sorted_users, key=sort_by_func)}
+        keyfunc = itemgetter("supplier_id")
+        if self.supplier_ids:
+            users = (u for u in users if u["supplier_id"] in self.supplier_ids)
+        users = sorted(users, key=keyfunc)
+        return {k: list(g) for k, g in groupby(users, key=keyfunc)}
 
     def get_supplier_draft_service_data(self, supplier_id):
         """Given a supplier ID return a list of dictionaries for services related to framework."""
@@ -126,16 +139,22 @@ class SuccessfulSupplierContextForNotify(SupplierFrameworkData):
 class AppliedToFrameworkSupplierContextForNotify(SupplierFrameworkData):
     """Get the personalisation/ context for 'You application result - if successful email'"""
 
-    def __init__(self, client, target_framework_slug, intention_to_award_at):
+    def __init__(self, client, target_framework_slug, *, intention_to_award_at=None, supplier_ids=None):
         """Get the target framework to operate on and list the lots.
 
         :param client: Instantiated api client
-        :param target_framework_slug: Framework to fetch data for
+        :param target_framework_slug str: Framework to fetch data for
+        :param intention_to_award_at: Date at which framework agreements will be awarded
+        :param supplier_ids: List of supplier IDs to fetch data for
         """
-        super(AppliedToFrameworkSupplierContextForNotify, self).__init__(client, target_framework_slug)
+        super().__init__(client, target_framework_slug, supplier_ids=supplier_ids)
 
-        self.intention_to_award_at = intention_to_award_at
-        self.framework = client.get_framework(self.target_framework_slug)['frameworks']
+        self.framework = self.client.get_framework(self.target_framework_slug)["frameworks"]
+        update_framework_with_formatted_dates(self.framework)
+        if intention_to_award_at is None:
+            self.intention_to_award_at = self.framework["intentionToAwardAt"]
+        else:
+            self.intention_to_award_at = intention_to_award_at
 
     def get_users_personalisations(self):
         """Return {email_address: {personalisations}} for all users who expressed interest in the framework
@@ -145,6 +164,22 @@ class AppliedToFrameworkSupplierContextForNotify(SupplierFrameworkData):
             for user in supplier_framework['users']:
                 output.update(self.get_user_personalisation(user))
         return output
+
+    def get_suppliers_with_users_personalisations(self):
+        """
+        Return an iterator of supplier user email personalisations, grouped by supplier IDs.
+        :rtype: Iterator[Tuple[int, Iterator[Tuple[Dict, Dict[str, str]]]]]]
+        """
+        return (
+            (
+                int(supplier["supplierId"]),
+                (
+                    (user, self.get_user_personalisation(user)[user["email address"]])
+                    for user in supplier["users"]
+                ),
+            )
+            for supplier in self.data
+        )
 
     def get_user_personalisation(self, user):
         """Get dict of all info required by template given a user and framework."""
