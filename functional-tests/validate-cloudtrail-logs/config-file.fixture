@@ -1,0 +1,4 @@
+- account: test
+  profile:
+    name: test-cloudtrail-validate-logs
+  trail_arn: arn:aws:cloudtrail:::trail/test-cloudtrail
