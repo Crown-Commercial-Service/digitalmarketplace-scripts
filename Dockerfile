@@ -10,6 +10,14 @@ RUN wget --quiet -O /usr/local/bin/sops https://github.com/mozilla/sops/releases
     && echo 'fec5b5b5bbae922a829a6277f6d66a061d990c04132da3c82db32ccc309a22e7  /usr/local/bin/sops' | sha256sum -c - \
     && chmod 0755 /usr/local/bin/sops
 
+RUN wget --quiet -O /usr/local/bin/docopts https://github.com/docopt/docopts/releases/download/v0.6.3-alpha1/docopts \
+    && echo '45812802bef1d91d5a431c11415839d4609aa2d82cde627fad844d24e7e265e7  /usr/local/bin/docopts' | sha256sum -c - \
+    && chmod 0755 /usr/local/bin/docopts
+
+RUN wget --quiet -O /usr/local/bin/docopts.sh https://raw.githubusercontent.com/docopt/docopts/1156d73a85d5ae4810b80908dbaa46ad9222dabd/docopts.sh \
+    && echo 'd117d3290def71d6a7fdc5b67efddfc3a9299f146bb4f98f96e322222957d1ce /usr/local/bin/docopts.sh' | sha256sum -c - \
+    && chmod 0755 /usr/local/bin/docopts.sh
+
 ENV APP_DIR /app
 WORKDIR ${APP_DIR}
 
