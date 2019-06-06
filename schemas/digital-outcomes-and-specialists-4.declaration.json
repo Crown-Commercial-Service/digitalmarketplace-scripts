@@ -1,0 +1,289 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "allOf": [
+    {
+      "$ref": "#/definitions/baseline"
+    },
+    {
+      "properties": {
+        "GAAR": {
+          "enum": [
+            false
+          ]
+        },
+        "bankrupt": {
+          "enum": [
+            false
+          ]
+        },
+        "confidentialInformation": {
+          "enum": [
+            false
+          ]
+        },
+        "conflictOfInterest": {
+          "enum": [
+            false
+          ]
+        },
+        "distortedCompetition": {
+          "enum": [
+            false
+          ]
+        },
+        "distortingCompetition": {
+          "enum": [
+            false
+          ]
+        },
+        "environmentalSocialLabourLaw": {
+          "enum": [
+            false
+          ]
+        },
+        "graveProfessionalMisconduct": {
+          "enum": [
+            false
+          ]
+        },
+        "influencedContractingAuthority": {
+          "enum": [
+            false
+          ]
+        },
+        "misleadingInformation": {
+          "enum": [
+            false
+          ]
+        },
+        "modernSlaveryReportingRequirements": {
+          "enum": [
+            true
+          ]
+        },
+        "seriousMisrepresentation": {
+          "enum": [
+            false
+          ]
+        },
+        "significantOrPersistentDeficiencies": {
+          "enum": [
+            false
+          ]
+        },
+        "taxEvasion": {
+          "enum": [
+            false
+          ]
+        },
+        "unspentTaxConvictions": {
+          "enum": [
+            false
+          ]
+        },
+        "witheldSupportingDocuments": {
+          "enum": [
+            false
+          ]
+        }
+      }
+    }
+  ],
+  "definitions": {
+    "baseline": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "properties": {
+        "10WorkingDays": {
+          "enum": [
+            true
+          ]
+        },
+        "MI": {
+          "enum": [
+            true
+          ]
+        },
+        "accurateInformation": {
+          "enum": [
+            true
+          ]
+        },
+        "accuratelyDescribed": {
+          "enum": [
+            true
+          ]
+        },
+        "canProvideFromDayOne": {
+          "enum": [
+            true
+          ]
+        },
+        "civilServiceValues": {
+          "enum": [
+            true
+          ]
+        },
+        "conspiracy": {
+          "enum": [
+            false
+          ]
+        },
+        "continuousProfessionalDevelopment": {
+          "enum": [
+            true
+          ]
+        },
+        "corruptionBribery": {
+          "enum": [
+            false
+          ]
+        },
+        "customerSatisfactionProcess": {
+          "enum": [
+            true
+          ]
+        },
+        "employersInsurance": {
+          "enum": [
+            "Yes \u2013 your organisation has, or will have in place, employer\u2019s liability insurance of at least \u00a35 million and you will provide certification before the framework is awarded.",
+            "Not applicable - your organisation does not need employer\u2019s liability insurance because your organisation employs only the owner or close family members."
+          ]
+        },
+        "employmentStatus": {
+          "enum": [
+            true
+          ]
+        },
+        "environmentallyFriendly": {
+          "enum": [
+            true
+          ]
+        },
+        "equalityAndDiversity": {
+          "enum": [
+            true
+          ]
+        },
+        "evidence": {
+          "enum": [
+            true
+          ]
+        },
+        "fraudAndTheft": {
+          "enum": [
+            false
+          ]
+        },
+        "fullAccountability": {
+          "enum": [
+            true
+          ]
+        },
+        "helpBuyersComplyTechnologyCodesOfPractice": {
+          "enum": [
+            true
+          ]
+        },
+        "informationChanges": {
+          "enum": [
+            true
+          ]
+        },
+        "offerServicesYourselves": {
+          "enum": [
+            true
+          ]
+        },
+        "organisedCrime": {
+          "enum": [
+            false
+          ]
+        },
+        "outsideIR35": {
+          "enum": [
+            true
+          ]
+        },
+        "proofOfClaims": {
+          "enum": [
+            true
+          ]
+        },
+        "publishContracts": {
+          "enum": [
+            true
+          ]
+        },
+        "readUnderstoodGuidance": {
+          "enum": [
+            true
+          ]
+        },
+        "safeguardOfficialInformation": {
+          "enum": [
+            true
+          ]
+        },
+        "safeguardPersonalData": {
+          "enum": [
+            true
+          ]
+        },
+        "serviceStandard": {
+          "enum": [
+            true
+          ]
+        },
+        "skillsAndCapabilityAssessment": {
+          "enum": [
+            true
+          ]
+        },
+        "skillsAndResources": {
+          "enum": [
+            true
+          ]
+        },
+        "termsAndConditions": {
+          "enum": [
+            true
+          ]
+        },
+        "termsOfParticipation": {
+          "enum": [
+            true
+          ]
+        },
+        "terrorism": {
+          "enum": [
+            false
+          ]
+        },
+        "transparentContracting": {
+          "enum": [
+            true
+          ]
+        },
+        "understandHowToAskQuestions": {
+          "enum": [
+            true
+          ]
+        },
+        "understandTool": {
+          "enum": [
+            true
+          ]
+        },
+        "unfairCompetition": {
+          "enum": [
+            false
+          ]
+        }
+      },
+      "title": "digital-outcomes-and-specialists-4 Declaration Assessment Schema (Baseline Schema)",
+      "type": "object"
+    }
+  },
+  "title": "digital-outcomes-and-specialists-4 Declaration Assessment Schema (Definite Pass Schema)",
+  "type": "object"
+}
