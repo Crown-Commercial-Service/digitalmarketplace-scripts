@@ -80,12 +80,17 @@ if __name__ == '__main__':
             f"Must supply both <draft_bucket> and <documents_bucket> arguments for framework {FRAMEWORK_SLUG!r}"
         )
 
+    try:
+        _assets_endpoint = get_assets_endpoint_from_stage(STAGE)
+    except (KeyError, NotImplementedError):
+        _assets_endpoint = "https://dummy.endpoint"
+
     copy_documents_callable = document_keys and partial(
         copy_draft_documents,
         DRAFT_BUCKET,
         DOCUMENTS_BUCKET,
         document_keys,
-        "https://dummy.endpoint" or get_assets_endpoint_from_stage(STAGE),
+        _assets_endpoint,
     )
 
     publish_draft_services(
