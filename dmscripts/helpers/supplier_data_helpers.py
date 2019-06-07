@@ -257,6 +257,22 @@ def get_supplier_ids_from_file(supplier_id_file):
         return list(map(int, [_f for _f in [l.strip() for l in f.readlines()] if _f]))
 
 
+def get_supplier_ids_from_args(args):
+    if args["--supplier-ids-from"]:
+        supplier_ids = get_supplier_ids_from_file(args["--supplier-ids-from"])
+    elif args["--supplier-id"]:
+        try:
+            supplier_ids = (ids.split(",") for ids in args["--supplier-id"])
+            supplier_ids = (int(id) for ids in supplier_ids for id in ids)
+            supplier_ids = list(supplier_ids)
+        except ValueError:
+            raise TypeError("arguments to --supplier-id should be integers or comma-separated lists of integers")
+    else:
+        supplier_ids = None
+
+    return supplier_ids
+
+
 @lru_cache()
 @backoff.on_exception(backoff.expo, requests.exceptions.RequestException, max_tries=3)
 def country_code_to_name(country_code):
