@@ -21,4 +21,5 @@ cd "$DM_SCRIPTS_REPO" || exit 2
 # If environment is not specified tests will try local instance.
 
 [ -n "$DM_ENVIRONMENT" ] || DM_ENVIRONMENT="local"
+[ "$DM_ENVIRONMENT" = "production" ] && { >/dev/tty echo "Running functional tests against production is not allowed; skipping"; exit 80; }
 [ "$DM_ENVIRONMENT" = "local" ] || "$DM_CREDENTIALS_REPO"/sops-wrapper -v > /dev/null
