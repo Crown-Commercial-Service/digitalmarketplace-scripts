@@ -1,5 +1,6 @@
 import csv
 from dmutils.s3 import S3ResponseError
+from requests.exceptions import HTTPError
 
 from dmscripts.models.writecsv import csv_path
 
@@ -7,9 +8,17 @@ from dmscripts.models.writecsv import csv_path
 def generate_supplier_csv(framework_slug, data_api_client, logger):
     framework = data_api_client.get_framework(framework_slug).get("frameworks")
 
-    supplier_rows = data_api_client.export_suppliers(framework_slug).get('suppliers', [])
-    if not supplier_rows:
-        logger.warn('No supplier data found for framework {}'.format(framework_slug))
+    try:
+        supplier_rows = data_api_client.export_suppliers(framework_slug).get("suppliers", [])
+    except HTTPError as e:
+        if e.response.status_code == 400:
+            logger.warn(f"Framework '{framework_slug}' is not open, no supplier data is available")
+            supplier_rows = []
+        else:
+            raise
+    else:
+        if not supplier_rows:
+            logger.warn(f"No supplier data found for framework {framework_slug}")
 
     supplier_and_framework_headers = [
         "supplier_id",
@@ -72,9 +81,18 @@ def generate_user_csv(framework_slug, data_api_client, user_research_opted_in, l
         "variations_agreed",
         "published_service_count"
     ]
-    user_rows = data_api_client.export_users(framework_slug).get('users', [])
-    if not user_rows:
-        logger.warn('No user data found for framework {}'.format(framework_slug))
+
+    user_rows = []
+    try:
+        user_rows = data_api_client.export_users(framework_slug).get("users", [])
+    except HTTPError as e:
+        if e.response.status_code == 400:
+            logger.warn(f"Framework '{framework_slug}' is not open, no user data is available")
+        else:
+            raise
+    else:
+        if not user_rows:
+            logger.warn(f"No user data found for framework {framework_slug}")
 
     if user_research_opted_in:
         filename = "user-research-suppliers-on-{}".format(framework_slug)

@@ -1,6 +1,7 @@
 import builtins
 import mock
 import pytest
+from requests.exceptions import HTTPError
 
 from dmscripts.generate_supplier_user_csv import (
     generate_csv_and_upload_to_s3, generate_supplier_csv, generate_user_csv, upload_to_s3
@@ -274,3 +275,48 @@ def test_generate_csv_and_upload_to_s3_returns_ok_if_no_users_opted_in(upload_to
         bucket, "g-cloud-11", "users", "data", data_api_client, user_research_opted_in=True
     )
     assert ok
+
+
+@mock.patch("dmscripts.generate_supplier_user_csv._build_csv")
+@mock.patch("dmscripts.generate_supplier_user_csv.upload_to_s3")
+def test_warn_if_framework_is_closed(upload_to_s3, build_csv):
+    def MockHTTPError(status_code):
+        return HTTPError(response=mock.Mock(status_code=status_code))
+
+    bucket = mock.Mock()
+    logger = mock.Mock()
+
+    data_api_client = mock.Mock()
+    data_api_client.get_framework.return_value = {
+        "frameworks": {"status": "closed", "lots": [{"id": 1, "slug": "cloud-hosting"}]}
+    }
+    data_api_client.export_users.side_effect = MockHTTPError(status_code=400)
+    data_api_client.export_suppliers.side_effect = MockHTTPError(status_code=400)
+
+    ok = generate_csv_and_upload_to_s3(
+        bucket,
+        "g-cloud-11",
+        "users",
+        "data",
+        data_api_client,
+        user_research_opted_in=True,
+        logger=logger,
+    )
+    assert ok
+    logger.warn.assert_called_with(
+        "Framework 'g-cloud-11' is not open, no user data is available"
+    )
+
+    ok = generate_csv_and_upload_to_s3(
+        bucket,
+        "digital-outcomes-and-specialists-4",
+        "suppliers",
+        "data",
+        data_api_client,
+        user_research_opted_in=True,
+        logger=logger,
+    )
+    assert ok
+    logger.warn.assert_called_with(
+        "Framework 'digital-outcomes-and-specialists-4' is not open, no supplier data is available"
+    )
