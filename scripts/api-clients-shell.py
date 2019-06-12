@@ -29,7 +29,13 @@ from dmscripts.helpers.auth_helpers import get_auth_token
 from dmutils.env_helpers import get_api_endpoint_from_stage
 
 
+data = None
+search = None
+
+
 def clients_in_shell(stage, api_url, api_token, search_api_url, search_api_token):
+    global data, search
+
     print('Retrieving credentials...')
     api_token = api_token or get_auth_token('api', stage)
     search_api_token = search_api_token or get_auth_token('search_api', stage)
