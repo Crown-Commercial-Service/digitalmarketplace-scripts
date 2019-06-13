@@ -1,6 +1,6 @@
 import csv
 from dmutils.s3 import S3ResponseError
-from requests.exceptions import HTTPError
+from dmapiclient.errors import HTTPError
 
 from dmscripts.models.writecsv import csv_path
 

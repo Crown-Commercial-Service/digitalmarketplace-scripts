@@ -1,7 +1,7 @@
 import builtins
 import mock
 import pytest
-from requests.exceptions import HTTPError
+from dmapiclient.errors import HTTPError
 
 from dmscripts.generate_supplier_user_csv import (
     generate_csv_and_upload_to_s3, generate_supplier_csv, generate_user_csv, upload_to_s3
@@ -281,7 +281,7 @@ def test_generate_csv_and_upload_to_s3_returns_ok_if_no_users_opted_in(upload_to
 @mock.patch("dmscripts.generate_supplier_user_csv.upload_to_s3")
 def test_warn_if_framework_is_closed(upload_to_s3, build_csv):
     def MockHTTPError(status_code):
-        return HTTPError(response=mock.Mock(status_code=status_code))
+        return HTTPError(mock.Mock(status_code=status_code))
 
     bucket = mock.Mock()
     logger = mock.Mock()
