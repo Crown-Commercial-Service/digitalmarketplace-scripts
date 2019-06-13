@@ -176,11 +176,9 @@ class AppliedToFrameworkSupplierContextForNotify(SupplierFrameworkData):
             (
                 int(supplier["supplierId"]),
                 (
-                    (user, self.get_user_personalisation(user)[user["email address"]])
-                    for user in supplier["users"]
+                    (user, self.get_user_personalisation(user)[user["email address"]]) for user in supplier["users"]
                 ),
-            )
-            for supplier in self.data
+            ) for supplier in self.data
         )
 
     def get_user_personalisation(self, user):
