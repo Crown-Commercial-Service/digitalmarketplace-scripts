@@ -5,7 +5,7 @@ flake8==3.7.7
 freezegun==0.3.12
 ipython==7.5.0
 ipython-genutils==0.2.0
-lxml==4.3.3
+lxml==4.3.4
 mock==3.0.5
 pytest==4.6.2
 requests-mock==1.6.0
