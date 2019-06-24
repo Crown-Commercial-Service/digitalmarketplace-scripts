@@ -68,14 +68,16 @@ class SuccessfulSupplierContextForNotify(SupplierFrameworkData):
 
     STATUS_MAP = {'submitted': 'Successful', 'not-submitted': 'No application', 'failed': 'Unsuccessful'}
 
-    def __init__(self, client, target_framework_slug):
+    def __init__(self, client, target_framework_slug, *, supplier_ids=None):
         """Get the target framework to operate on and list the lots.
 
         :param client: Instantiated api client
         :param target_framework_slug: Framework to fetch data for
+        :param supplier_ids: List of supplier IDs to filter data by
         """
         self.date_today = date.today().strftime(DISPLAY_DATE_FORMAT)
-        super(SuccessfulSupplierContextForNotify, self).__init__(client, target_framework_slug)
+        super(SuccessfulSupplierContextForNotify, self).__init__(
+            client, target_framework_slug, supplier_ids=supplier_ids)
 
         self.framework = client.get_framework(self.target_framework_slug)['frameworks']
         self.framework_lots = [i['name'] for i in self.framework['lots']]
