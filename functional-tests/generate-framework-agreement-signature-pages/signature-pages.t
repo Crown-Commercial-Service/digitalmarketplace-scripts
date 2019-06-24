@@ -6,7 +6,7 @@ See the test readme for details.
 
 Successful suppliers should have signature page in output folder
 
-  $ ./scripts/generate-framework-agreement-signature-pages.py $DM_ENVIRONMENT g-cloud-10 $TMPDIR/output $DM_AGREEMENTS_REPO --supplier-id=710024 --supplier-id=710038 2> $TMPDIR/err.log || cat $TMPDIR/err.log
+  $ ./scripts/framework-applications/generate-framework-agreement-signature-pages.py $DM_ENVIRONMENT g-cloud-10 $TMPDIR/output $DM_AGREEMENTS_REPO --supplier-id=710024 --supplier-id=710038 2> $TMPDIR/err.log || cat $TMPDIR/err.log
   $ ls $TMPDIR/output
   710024-signature-page.pdf
   710038-signature-page.pdf

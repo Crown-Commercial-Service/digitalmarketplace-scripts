@@ -4,10 +4,11 @@ Generate framework agreement signature pages from supplier "about you"
 information for suppliers who successfully applied to a framework.
 
 Usage:
-    scripts/generate-framework-agreement-signature-pages.py [-v...] [options]
+    scripts/framework-applications/generate-framework-agreement-signature-pages.py
+        [-v...] [options]
         <stage> <framework> <output_dir> <agreements_repo>
         [--supplier-id=<id>... | --supplier-ids-from=<file>]
-    scripts/generate-framework-agreement-signature-pages.py (-h | --help)
+    scripts/framework-applications/generate-framework-agreement-signature-pages.py (-h | --help)
 
 Options:
     <stage>                     Environment to run script against.

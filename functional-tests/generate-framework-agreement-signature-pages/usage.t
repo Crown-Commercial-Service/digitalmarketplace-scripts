@@ -5,36 +5,39 @@ Script must be run from digitalmarketplace-scripts repo directory.
 
 Usage:
 
-  $ ./scripts/generate-framework-agreement-signature-pages.py
+  $ ./scripts/framework-applications/generate-framework-agreement-signature-pages.py
   Usage:
-      scripts/generate-framework-agreement-signature-pages.py [-v...] [options]
+      scripts/framework-applications/generate-framework-agreement-signature-pages.py
+          [-v...] [options]
           <stage> <framework> <output_dir> <agreements_repo>
           [--supplier-id=<id>... | --supplier-ids-from=<file>]
-      scripts/generate-framework-agreement-signature-pages.py (-h | --help)
+      scripts/framework-applications/generate-framework-agreement-signature-pages.py (-h | --help)
   [1]
 
 
 Invalid arguments:
 
-  $ ./scripts/generate-framework-agreement-signature-pages.py --do-the-thing garbage
+  $ ./scripts/framework-applications/generate-framework-agreement-signature-pages.py --do-the-thing garbage
   Usage:
-      scripts/generate-framework-agreement-signature-pages.py [-v...] [options]
+      scripts/framework-applications/generate-framework-agreement-signature-pages.py
+          [-v...] [options]
           <stage> <framework> <output_dir> <agreements_repo>
           [--supplier-id=<id>... | --supplier-ids-from=<file>]
-      scripts/generate-framework-agreement-signature-pages.py (-h | --help)
+      scripts/framework-applications/generate-framework-agreement-signature-pages.py (-h | --help)
   [1]
 
 Detailed help:
 
-  $ ./scripts/generate-framework-agreement-signature-pages.py -h
+  $ ./scripts/framework-applications/generate-framework-agreement-signature-pages.py -h
   Generate framework agreement signature pages from supplier "about you"
   information for suppliers who successfully applied to a framework.
   
   Usage:
-      scripts/generate-framework-agreement-signature-pages.py [-v...] [options]
+      scripts/framework-applications/generate-framework-agreement-signature-pages.py
+          [-v...] [options]
           <stage> <framework> <output_dir> <agreements_repo>
           [--supplier-id=<id>... | --supplier-ids-from=<file>]
-      scripts/generate-framework-agreement-signature-pages.py (-h | --help)
+      scripts/framework-applications/generate-framework-agreement-signature-pages.py (-h | --help)
   
   Options:
       <stage>                     Environment to run script against.
