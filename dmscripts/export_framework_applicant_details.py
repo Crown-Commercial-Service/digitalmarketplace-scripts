@@ -146,6 +146,7 @@ def get_csv_rows(
     framework_lot_slugs,
     count_statuses=("submitted", "failed",),
     dry_run=False,
+    include_central_supplier_details=False,
 ):
     """
     :param count_statuses:  tuple of draft service statuses that should be
@@ -185,7 +186,9 @@ def get_csv_rows(
     logger.info(f"found {len(records)} supplier records to process")
 
     rows_iter = (
-        _create_row(framework_slug, record, count_statuses, framework_lot_slugs, dry_run)
+        _create_row(
+            framework_slug, record, count_statuses, framework_lot_slugs, dry_run, include_central_supplier_details
+        )
         for record in records
     )
 
@@ -212,8 +215,11 @@ def _format_field(field_name, field_value):
     return field_name, field_value
 
 
-def _create_row(framework_slug, record, count_statuses, framework_lot_slugs, dry_run=False):
+def _create_row(
+    framework_slug, record, count_statuses, framework_lot_slugs, dry_run=False, include_central_supplier_details=False
+):
     """
+    Fetch supplier data from central details, contact information and declaration
     :param dry_run:     if True return row without declaration information
     """
     row = dict()
@@ -238,6 +244,23 @@ def _create_row(framework_slug, record, count_statuses, framework_lot_slugs, dry
         _format_field(field, record["declaration"].get(field, ""))
         for field in DECLARATION_FIELDS[framework_slug]
     )
+
+    # For regenerating framework agreements with updated information (instead of the declaration details)
+    if include_central_supplier_details:
+        row.update((
+            ("supplier_registered_name", record["supplier"]["registeredName"]),
+            (
+                "supplier_registration_number",
+                record["supplier"].get(
+                    'companiesHouseNumber',
+                    record["supplier"].get('otherCompanyRegistrationNumber', "")
+                )
+            ),
+            ("supplier_contact_address1", record["supplier"]["contactInformation"][0]['address1']),
+            ("supplier_contact_city", record["supplier"]["contactInformation"][0]['city']),
+            ("supplier_contact_postcode", record["supplier"]["contactInformation"][0]['postcode']),
+        ))
+
     return row
 
 
