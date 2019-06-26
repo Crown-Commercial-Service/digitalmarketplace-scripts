@@ -98,8 +98,9 @@ if __name__ == "__main__":
         'support': support_services
     }
     headers = [
-        'Supplier ID', 'DUNS Number', 'Supplier Name', 'Reseller?', 'Service Name',
-        'Service Description', 'Service ID', 'Organisation Size', 'Categories'
+        'Supplier ID', 'DUNS Number', 'Supplier Name', 'Reseller?', 'Organisation Size',
+        'Service ID', 'Service Name', 'Service Description', 'Service features', 'Service benefits',
+        'Categories'
     ]
     for lot, services_in_lot in lots.items():
         with open(os.path.join(OUTPUT_DIR, f'{lot}-categories-{version}.csv'), 'w', newline='') as f:
@@ -113,9 +114,12 @@ if __name__ == "__main__":
                     supplier_data.get('dunsNumber'),
                     service.get('supplierName'),
                     'false' if service.get('resellingType') == 'not_reseller' else 'true',
+                    supplier_data.get('organisationSize'),
+                    service.get('id'),
                     service.get('serviceName'),
                     service.get('serviceDescription').replace('\r\n', '').replace('•\t', ';'),
-                    service.get('id'),
-                    supplier_data.get('organisationSize'),
+                    ", ".join(service.get('serviceFeatures', [])),
+                    ", ".join(service.get('serviceBenefits', []))
+
                 ] + get_categories(lot, service)
                 writer.writerow(row)
