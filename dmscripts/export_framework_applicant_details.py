@@ -149,16 +149,17 @@ def get_csv_rows(
     include_central_supplier_details=False,
 ):
     """
-    :param count_statuses:  tuple of draft service statuses that should be
-                            counted. The default ("submitted", "failed") gives
-                            a count of all drafts that were originally
-                            submitted.
-    :param dry_run:         if True the records will be returned without
-                            declaration information.
+    :param count_statuses:                      tuple of draft service statuses that should be
+                                                counted. The default ("submitted", "failed") gives
+                                                a count of all drafts that were originally
+                                                submitted.
+    :param dry_run:                             if True the records will be returned without
+                                                declaration information.
+    :param include_central_supplier_details:    include contact info from supplier account (i.e. not the declaration)
 
-    :returns:               row headers and rows as a sequence of dictionaries
-                            with the headers as keys.
-    :rtype:                 tuple[tuple[str], iterable[dict]]
+    :returns:                                   row headers and rows as a sequence of dictionaries
+                                                with the headers as keys.
+    :rtype:                                     tuple[tuple[str], iterable[dict]]
     """
     headers = tuple(chain(
         (
@@ -220,7 +221,8 @@ def _create_row(
 ):
     """
     Fetch supplier data from central details, contact information and declaration
-    :param dry_run:     if True return row without declaration information
+    :param dry_run:                             if True return row without declaration information
+    :param include_central_supplier_details:    include contact info from supplier account (i.e. not the declaration)
     """
     row = dict()
     row.update((
