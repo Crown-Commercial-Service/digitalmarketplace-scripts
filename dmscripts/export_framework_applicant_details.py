@@ -236,16 +236,15 @@ def _create_row(
     :param dry_run:                             if True return row without declaration information
     :param include_central_supplier_details:    include contact info from supplier account (i.e. not the declaration)
     """
-    row = dict()
-    row.update((
-        ("supplier_id", record["supplier"]["id"]),
-        ("supplier_name", record["supplier"]["name"]),
-        ("supplier_contact_name", record["supplier"]["contactInformation"][0]['contactName']),
-        ("supplier_email", record["supplier"]["contactInformation"][0]['email']),
-        ("pass_fail", _pass_fail_from_record(record)),
-        ("countersigned_at", record["countersignedAt"]),
-        ("countersigned_path", record["countersignedPath"]),
-    ))
+    row = {
+        "supplier_id": record["supplier"]["id"],
+        "supplier_name": record["supplier"]["name"],
+        "supplier_contact_name": record["supplier"]["contactInformation"][0]['contactName'],
+        "supplier_email": record["supplier"]["contactInformation"][0]['email'],
+        "pass_fail": _pass_fail_from_record(record),
+        "countersigned_at": record["countersignedAt"],
+        "countersigned_path": record["countersignedPath"],
+    }
     row.update(
         (lot, sum(record["counts"][(lot, status)] for status in count_statuses))
         for lot in framework_lot_slugs
@@ -261,19 +260,16 @@ def _create_row(
 
     # For regenerating framework agreements with updated information (instead of the declaration details)
     if include_central_supplier_details:
-        row.update((
-            ("supplier_registered_name", record["supplier"]["registeredName"]),
-            (
-                "supplier_registration_number",
-                record["supplier"].get(
-                    'companiesHouseNumber',
-                    record["supplier"].get('otherCompanyRegistrationNumber', "")
-                )
+        row.update({
+            "supplier_registered_name": record["supplier"]["registeredName"],
+            "supplier_registration_number": record["supplier"].get(
+                'companiesHouseNumber',
+                record["supplier"].get('otherCompanyRegistrationNumber', "")
             ),
-            ("supplier_contact_address1", record["supplier"]["contactInformation"][0]['address1']),
-            ("supplier_contact_city", record["supplier"]["contactInformation"][0]['city']),
-            ("supplier_contact_postcode", record["supplier"]["contactInformation"][0]['postcode']),
-        ))
+            "supplier_contact_address1": record["supplier"]["contactInformation"][0]['address1'],
+            "supplier_contact_city": record["supplier"]["contactInformation"][0]['city'],
+            "supplier_contact_postcode": record["supplier"]["contactInformation"][0]['postcode'],
+        })
 
     return row
 
