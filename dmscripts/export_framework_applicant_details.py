@@ -139,6 +139,14 @@ DECLARATION_FIELDS = {
     ),
 }
 
+SUPPLIER_ACCOUNT_FIELDS = (
+    'supplier_registered_name',
+    'supplier_registration_number',
+    'supplier_contact_address1',
+    'supplier_contact_city',
+    'supplier_contact_postcode'
+)
+
 
 def get_csv_rows(
     records,
@@ -173,6 +181,10 @@ def get_csv_rows(
         ),
         (lot_slug for lot_slug in framework_lot_slugs),
         DECLARATION_FIELDS[framework_slug],
+        (
+            supplier_account_field for supplier_account_field in SUPPLIER_ACCOUNT_FIELDS
+            if include_central_supplier_details
+        )
     ))
 
     # filter records eagerly
