@@ -26,6 +26,7 @@ def generate_supplier_csv(framework_slug, data_api_client, logger):
         "supplier_organisation_size",
         "duns_number",
         "companies_house_number",
+        "other_company_registration_number",
         "registered_name",
         "declaration_status",
         "application_status",

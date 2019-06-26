@@ -23,6 +23,7 @@ def test_generate_supplier_csv_calls_api_and_returns_csv():
                 'duns_number': "100000001",
                 'registered_name': 'Registered Supplier Name 1',
                 'companies_house_number': None,
+                'other_company_registration_number': "555-222-111",
                 "published_services_count": {
                     "cloud-hosting": 2
                 },
@@ -57,6 +58,7 @@ def test_generate_supplier_csv_calls_api_and_returns_csv():
         "supplier_organisation_size",
         "duns_number",
         "companies_house_number",
+        "other_company_registration_number",
         "registered_name",
         "declaration_status",
         "application_status",
@@ -74,7 +76,7 @@ def test_generate_supplier_csv_calls_api_and_returns_csv():
         'address_country'
     ]
     assert rows[0] == [
-        1, 'Supplier 1', 'small', '100000001', None, 'Registered Supplier Name 1',
+        1, 'Supplier 1', 'small', '100000001', None, '555-222-111', 'Registered Supplier Name 1',
         'unstarted', 'no_application', 'no result', False, '', 2, 2,
         'Contact for Supplier 1', 'hello@example.com',
         None, '7 Gem Lane', 'Cantelot', 'SW1A 1AA', 'country:GB'
