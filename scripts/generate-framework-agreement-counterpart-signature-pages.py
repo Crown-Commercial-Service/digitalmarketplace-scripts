@@ -70,7 +70,10 @@ if __name__ == '__main__':
     html_dir = tempfile.mkdtemp()
 
     records = find_suppliers_with_details_and_draft_service_counts(client, framework_slug, supplier_ids)
-    headers, rows = get_csv_rows(records, framework_slug, framework_lot_slugs, count_statuses=("submitted",))
+    headers, rows = get_csv_rows(
+        records, framework_slug, framework_lot_slugs, count_statuses=("submitted",),
+        include_central_supplier_details=True
+    )
     render_html_for_suppliers_awaiting_countersignature(
         rows, framework, os.path.join(args['<path_to_agreements_repo>'], 'documents', framework['slug']), html_dir
     )

@@ -40,6 +40,7 @@ def find_suppliers(client, framework, supplier_ids=None, map_impl=map, dry_run=F
         framework_lot_slugs=tuple([lot["slug"] for lot in framework["lots"]]),
         count_statuses=("submitted",),
         dry_run=dry_run,
+        include_central_supplier_details=True
     )
     return rows
 

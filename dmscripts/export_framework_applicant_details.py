@@ -139,6 +139,14 @@ DECLARATION_FIELDS = {
     ),
 }
 
+SUPPLIER_ACCOUNT_FIELDS = (
+    'supplier_registered_name',
+    'supplier_registration_number',
+    'supplier_contact_address1',
+    'supplier_contact_city',
+    'supplier_contact_postcode'
+)
+
 
 def get_csv_rows(
     records,
@@ -146,18 +154,20 @@ def get_csv_rows(
     framework_lot_slugs,
     count_statuses=("submitted", "failed",),
     dry_run=False,
+    include_central_supplier_details=False,
 ):
     """
-    :param count_statuses:  tuple of draft service statuses that should be
-                            counted. The default ("submitted", "failed") gives
-                            a count of all drafts that were originally
-                            submitted.
-    :param dry_run:         if True the records will be returned without
-                            declaration information.
+    :param count_statuses:                      tuple of draft service statuses that should be
+                                                counted. The default ("submitted", "failed") gives
+                                                a count of all drafts that were originally
+                                                submitted.
+    :param dry_run:                             if True the records will be returned without
+                                                declaration information.
+    :param include_central_supplier_details:    include contact info from supplier account (i.e. not the declaration)
 
-    :returns:               row headers and rows as a sequence of dictionaries
-                            with the headers as keys.
-    :rtype:                 tuple[tuple[str], iterable[dict]]
+    :returns:                                   row headers and rows as a sequence of dictionaries
+                                                with the headers as keys.
+    :rtype:                                     tuple[tuple[str], iterable[dict]]
     """
     headers = tuple(chain(
         (
@@ -171,6 +181,10 @@ def get_csv_rows(
         ),
         (lot_slug for lot_slug in framework_lot_slugs),
         DECLARATION_FIELDS[framework_slug],
+        (
+            supplier_account_field for supplier_account_field in SUPPLIER_ACCOUNT_FIELDS
+            if include_central_supplier_details
+        )
     ))
 
     # filter records eagerly
@@ -185,7 +199,9 @@ def get_csv_rows(
     logger.info(f"found {len(records)} supplier records to process")
 
     rows_iter = (
-        _create_row(framework_slug, record, count_statuses, framework_lot_slugs, dry_run)
+        _create_row(
+            framework_slug, record, count_statuses, framework_lot_slugs, dry_run, include_central_supplier_details
+        )
         for record in records
     )
 
@@ -212,20 +228,23 @@ def _format_field(field_name, field_value):
     return field_name, field_value
 
 
-def _create_row(framework_slug, record, count_statuses, framework_lot_slugs, dry_run=False):
+def _create_row(
+    framework_slug, record, count_statuses, framework_lot_slugs, dry_run=False, include_central_supplier_details=False
+):
     """
-    :param dry_run:     if True return row without declaration information
+    Fetch supplier data from central details, contact information and declaration
+    :param dry_run:                             if True return row without declaration information
+    :param include_central_supplier_details:    include contact info from supplier account (i.e. not the declaration)
     """
-    row = dict()
-    row.update((
-        ("supplier_id", record["supplier"]["id"]),
-        ("supplier_name", record["supplier"]["name"]),
-        ("supplier_contact_name", record["supplier"]["contactInformation"][0]['contactName']),
-        ("supplier_email", record["supplier"]["contactInformation"][0]['email']),
-        ("pass_fail", _pass_fail_from_record(record)),
-        ("countersigned_at", record["countersignedAt"]),
-        ("countersigned_path", record["countersignedPath"]),
-    ))
+    row = {
+        "supplier_id": record["supplier"]["id"],
+        "supplier_name": record["supplier"]["name"],
+        "supplier_contact_name": record["supplier"]["contactInformation"][0]['contactName'],
+        "supplier_email": record["supplier"]["contactInformation"][0]['email'],
+        "pass_fail": _pass_fail_from_record(record),
+        "countersigned_at": record["countersignedAt"],
+        "countersigned_path": record["countersignedPath"],
+    }
     row.update(
         (lot, sum(record["counts"][(lot, status)] for status in count_statuses))
         for lot in framework_lot_slugs
@@ -238,6 +257,20 @@ def _create_row(framework_slug, record, count_statuses, framework_lot_slugs, dry
         _format_field(field, record["declaration"].get(field, ""))
         for field in DECLARATION_FIELDS[framework_slug]
     )
+
+    # For regenerating framework agreements with updated information (instead of the declaration details)
+    if include_central_supplier_details:
+        row.update({
+            "supplier_registered_name": record["supplier"]["registeredName"],
+            "supplier_registration_number": record["supplier"].get(
+                'companiesHouseNumber',
+                record["supplier"].get('otherCompanyRegistrationNumber', "")
+            ),
+            "supplier_contact_address1": record["supplier"]["contactInformation"][0]['address1'],
+            "supplier_contact_city": record["supplier"]["contactInformation"][0]['city'],
+            "supplier_contact_postcode": record["supplier"]["contactInformation"][0]['postcode'],
+        })
+
     return row
 
 
