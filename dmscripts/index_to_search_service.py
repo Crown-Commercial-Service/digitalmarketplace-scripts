@@ -87,6 +87,7 @@ indexers = {
 FRAMEWORK_MAPPINGS = {
     'g-cloud-9': 'services',
     'g-cloud-10': 'services-g-cloud-10',
+    'g-cloud-11': 'services-g-cloud-11',
     'digital-outcomes-and-specialists': 'briefs-digital-outcomes-and-specialists-2',
     'digital-outcomes-and-specialists-2': 'briefs-digital-outcomes-and-specialists-2',
     'digital-outcomes-and-specialists-3': 'briefs-digital-outcomes-and-specialists-2',
