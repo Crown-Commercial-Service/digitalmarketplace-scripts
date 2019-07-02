@@ -17,11 +17,11 @@ For a G-Cloud style framework (with uploaded documents to migrate) this will:
     and updating document URLs in the migrated version of the services
 Usage:
     scripts/publish-g-cloud-draft-services.py <framework_slug> <stage> <draft_bucket>
-        <documents_bucket> [--dry-run] [--draft-ids=<filename>]
+        <documents_bucket> [--dry-run] [--draft-ids=<filename>] [--republish-documents]
 
-If you specify the `--draft-ids` parameter, pass in list of newline-separated draft ids. This script will then do a
+If you specify the `--draft-ids` or --republish-documents parameters this script will then do a
 full re-publish of just those drafts (i.e. try to re-publish it, and then copy the documents across again and update
-those links).
+those links). In the case of the former you should pass in list of newline-separated draft ids.
 """
 import backoff
 import collections
@@ -161,6 +161,7 @@ if __name__ == '__main__':
     DRAFT_BUCKET = S3(arguments['<draft_bucket>'])
     DOCUMENTS_BUCKET = S3(arguments['<documents_bucket>'])
     DRY_RUN = arguments['--dry-run']
+    REPUBLISH_DOCUMENTS = arguments['--republish-documents']
     FRAMEWORK_SLUG = arguments['<framework_slug>']
     DRAFT_IDS = arguments['--draft-ids']
 
@@ -175,7 +176,9 @@ if __name__ == '__main__':
 
             for draft_id in draft_ids:
                 draft_service = client.get_draft_service(draft_id)['services']
-                supplier_framework = client.get_supplier_framework_info(draft_service['supplierId'], FRAMEWORK_SLUG)
+                supplier_framework = client.get_supplier_framework_info(
+                    draft_service['supplierId'], FRAMEWORK_SLUG
+                )['frameworkInterest']
                 if supplier_framework['onFramework']:
                     yield draft_service
 
@@ -189,7 +192,7 @@ if __name__ == '__main__':
     for draft_service in get_draft_services():
         try:
             make_draft_service_live(client, copy_document, draft_service, FRAMEWORK_SLUG, DRY_RUN,
-                                    continue_if_published=True if DRAFT_IDS else False)
+                                    continue_if_published=True if (DRAFT_IDS or REPUBLISH_DOCUMENTS) else False)
             results.update({'success': 1})
         except Exception as e:
             print("{} ERROR MIGRATING DRAFT {} TO LIVE: {}".format(datetime.now(), draft_service['id'], e))
