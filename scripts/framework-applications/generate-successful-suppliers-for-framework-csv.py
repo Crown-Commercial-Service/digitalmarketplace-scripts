@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 """
 Generates a CSV listing all suppliers who have had services published to a framework, and the lots that they were
-successful on. This report is useful for tallying the results of the framework during standstill (i.e. just before the
+successful on, outputs to the current directory.
+
+This report is useful for tallying the results of the framework during standstill (i.e. just before the
 framework goes live).
 
 NOTE: the script does not look at declaration information. If the supplier has had their draft services published, it's
