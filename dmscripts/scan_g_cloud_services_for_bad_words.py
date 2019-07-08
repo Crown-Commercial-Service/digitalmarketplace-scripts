@@ -68,9 +68,28 @@ def output_bad_words(
     writer.writerow(row)
 
 
+LOG_SUPPLIER_EVERY_N = LOG_SERVICE_EVERY_N = 10
+
+
 def check_services_with_bad_words(
     output_file_path, framework_slug, client, suppliers, bad_words, questions_to_check, logger, scan_drafts
 ):
+    supplier_count = 0
+
+    def count_supplier():
+        nonlocal supplier_count
+        if not(supplier_count % LOG_SUPPLIER_EVERY_N):
+            logger.info(f"Suppliers processed: {supplier_count}")
+        supplier_count += 1
+
+    service_count = 0
+
+    def count_service():
+        nonlocal service_count
+        if not(service_count % LOG_SERVICE_EVERY_N):
+            logger.info(f"Services processed: {service_count}")
+        service_count += 1
+
     bad_word_res = tuple((bad_word, re.compile(rf"\b{re.escape(bad_word)}\b")) for bad_word in bad_words)
     bw_counter = Counter()
 
@@ -79,9 +98,11 @@ def check_services_with_bad_words(
         writer = csv.DictWriter(csvfile, fieldnames=CSV_FIELD_NAMES, dialect='excel')
         writer.writeheader()
         for supplier in suppliers:
+            count_supplier()
             services = get_services(client, supplier["supplierId"], framework_slug, scan_drafts)
 
             for service in services:
+                count_service()
                 for key in questions_to_check:
                     if isinstance(service.get(key), str):
                         service_field_values = [service.get(key)]
