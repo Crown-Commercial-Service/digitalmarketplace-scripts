@@ -68,21 +68,41 @@ def output_bad_words(
     writer.writerow(row)
 
 
-BAD_WORDS_COUNTER = Counter()
+LOG_SUPPLIER_EVERY_N = LOG_SERVICE_EVERY_N = 10
 
 
 def check_services_with_bad_words(
     output_file_path, framework_slug, client, suppliers, bad_words, questions_to_check, logger, scan_drafts
 ):
+    supplier_count = 0
+
+    def count_supplier():
+        nonlocal supplier_count
+        if not(supplier_count % LOG_SUPPLIER_EVERY_N):
+            logger.info(f"Suppliers processed: {supplier_count}")
+        supplier_count += 1
+
+    service_count = 0
+
+    def count_service():
+        nonlocal service_count
+        if not(service_count % LOG_SERVICE_EVERY_N):
+            logger.info(f"Services processed: {service_count}")
+        service_count += 1
+
+    bad_word_res = tuple((bad_word, re.compile(rf"\b{re.escape(bad_word)}\b")) for bad_word in bad_words)
+    bw_counter = Counter()
 
     with open(output_file_path, 'w') as csvfile:
 
         writer = csv.DictWriter(csvfile, fieldnames=CSV_FIELD_NAMES, dialect='excel')
         writer.writeheader()
         for supplier in suppliers:
+            count_supplier()
             services = get_services(client, supplier["supplierId"], framework_slug, scan_drafts)
 
             for service in services:
+                count_service()
                 for key in questions_to_check:
                     if isinstance(service.get(key), str):
                         service_field_values = [service.get(key)]
@@ -92,8 +112,8 @@ def check_services_with_bad_words(
                         service_field_values = []
 
                     for service_field_value_str in service_field_values:
-                        for word in bad_words:
-                            if _get_bad_words_in_value(word, service_field_value_str):
+                        for word, word_re in bad_word_res:
+                            if word_re.search(service_field_value_str):
                                 output_bad_words(
                                     supplier["supplierId"],
                                     framework_slug,
@@ -106,7 +126,9 @@ def check_services_with_bad_words(
                                     writer,
                                     logger
                                 )
-                                BAD_WORDS_COUNTER.update({word: 1})
+                                bw_counter[word] += 1
+
+    return bw_counter
 
 
 def scan_services_for_bad_words(
@@ -122,7 +144,13 @@ def scan_services_for_bad_words(
         framework_slug, 'service_questions_to_scan_for_bad_words', 'service_questions'
     )
 
-    check_services_with_bad_words(
-        output_file_path, framework_slug, client, suppliers, bad_words, questions_to_check, logger, scan_drafts
+    return check_services_with_bad_words(
+        output_file_path,
+        framework_slug,
+        client,
+        suppliers,
+        bad_words,
+        questions_to_check,
+        logger,
+        scan_drafts,
     )
-    return BAD_WORDS_COUNTER
