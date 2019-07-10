@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Read services from the API endpoint and write to search-api for indexing.
 
 Usage:

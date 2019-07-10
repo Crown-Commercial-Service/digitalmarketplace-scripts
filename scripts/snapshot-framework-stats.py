@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Usage:
     snapshot_framework_stats.py <framework_slug> <stage>
 

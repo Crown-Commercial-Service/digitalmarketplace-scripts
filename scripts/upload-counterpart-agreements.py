@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 PREREQUISITE: You'll need AWS credentials set up for the environment that you're uploading to:

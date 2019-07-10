@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Our data retention policy is that suppliers with no users that still have personal data should have the personal data
 stripped from their contact details.

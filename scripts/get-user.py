@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Outputs details of a random active unlocked user with a given role.
 
 For supplier users, providing additional <framework> and <lot> arguments allows

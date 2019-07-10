@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Our data retention policy is that users have accounts deactivated and personal data stripped after 3 years without
 a login. This script not only does that but also removes any such users' email addresses from any of our mailing lists.

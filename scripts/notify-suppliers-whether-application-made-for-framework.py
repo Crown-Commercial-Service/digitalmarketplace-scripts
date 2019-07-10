@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Email all suppliers who registered interest in applying to a framework about whether or not they made an application.
 

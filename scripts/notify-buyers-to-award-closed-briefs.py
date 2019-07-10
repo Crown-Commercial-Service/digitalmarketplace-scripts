@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Send email notifications to buyer users to remind them to award their closed requirements.
 
 Usage:
