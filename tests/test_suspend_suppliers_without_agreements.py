@@ -1,7 +1,4 @@
-import builtins
 import mock
-import pytest
-from dmapiclient.errors import HTTPError
 
 from dmscripts.suspend_suppliers_without_agreements import (
     suspend_supplier_services, get_all_email_addresses_for_supplier
