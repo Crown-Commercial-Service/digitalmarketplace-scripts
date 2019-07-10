@@ -5,6 +5,7 @@ from dmutils.s3 import S3ResponseError
 from dmapiclient import APIError
 from dmutils.documents import generate_timestamped_document_upload_path, generate_download_filename, \
     COUNTERPART_FILENAME
+from dmutils.email.helpers import hash_string
 from dmutils.email.exceptions import EmailError
 
 from dmscripts.bulk_upload_documents import get_supplier_id_from_framework_file_path
@@ -83,9 +84,12 @@ def upload_counterpart_file(
                         "framework_name": framework["name"],
                         "supplier_name": supplier_name,
                     }, allow_resend=True)
+                    logger.debug(f"NOTIFY: sent email to supplier '{supplier_id}' user {hash_string(notify_email)}")
                 else:
                     logger.info("[Dry-run] Send notify email to %s", notify_email)
             except EmailError:
+                logger.error(
+                    f"NOTIFY: Error sending email to supplier '{supplier_id}' user {hash_string(notify_email)}")
                 if notify_fail_early:
                     raise
                 else:
