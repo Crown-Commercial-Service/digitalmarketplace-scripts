@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 If a brief has been awarded suppliers need to be notified. This
 script notifies suppliers of all awarded briefs in the previous day by default.

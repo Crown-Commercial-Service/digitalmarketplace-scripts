@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Drops you into an IPython shell with the DataAPIClient and SearchAPIClient instantiated and targetting the specified
 stage as `data` and `search` respectively.
 

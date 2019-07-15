@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Our data retention policy is that suppliers who fail to be accepted onto the framework have their declarations
 removed immediately. This reduces the likelihood of commercially sensitive data being leaked in the event of a breach

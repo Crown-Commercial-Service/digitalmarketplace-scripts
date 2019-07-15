@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 Our data retention policy is that supplier declarations are removed 3 years after a framework's expiry date.
 

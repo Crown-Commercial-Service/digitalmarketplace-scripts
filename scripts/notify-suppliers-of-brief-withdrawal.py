@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 If a brief has been withdrawn suppliers need to be notified that their applications have also been cancelled. This
 script notifies suppliers of all briefs withdrawn on a given date. Alternatively, when supplied with a given brief id

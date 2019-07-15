@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Generate data export CSVs
 
 Load model data from the API or the existing CSV, process it according

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """
 If a buyer has posted a new question/answer on a brief in the last 24 hours, send an email to any
 suppliers who have started an application, completed an application or asked a question about the
