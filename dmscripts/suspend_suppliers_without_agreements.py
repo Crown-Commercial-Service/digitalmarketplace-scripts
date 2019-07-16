@@ -22,7 +22,8 @@ def suspend_supplier_services(client, logger, framework_slug, supplier_id, frame
     :param client: API client instance
     :param framework_info: JSON
     :param dry_run: don't suspend if True
-    :return: suspended_service_count: int
+    :return: suspended_service_count
+    :rtype: int
     """
     suspended_service_count = 0
 

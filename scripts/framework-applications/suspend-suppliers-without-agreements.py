@@ -35,7 +35,6 @@ Options:
 """
 import csv
 import sys
-import os
 import pathlib
 
 from docopt import docopt
@@ -47,7 +46,7 @@ from dmscripts.helpers.logging_helpers import (
     configure_logger,
     logging,
 )
-from dmscripts.helpers.supplier_data_helpers import get_supplier_ids_from_file
+from dmscripts.helpers.supplier_data_helpers import get_supplier_ids_from_args
 
 from dmapiclient import DataAPIClient
 from dmutils.env_helpers import get_api_endpoint_from_stage
@@ -73,17 +72,7 @@ if __name__ == "__main__":
         "script": logging.DEBUG if verbose else logging.INFO,
     })
 
-    # Get all suppliers from the supplied IDs list
-    if args["--supplier-ids-from"]:
-        supplier_ids = get_supplier_ids_from_file(args["--supplier-ids-from"])
-    elif args["--supplier-id"]:
-        try:
-            supplier_ids = tuple(map(int, args["--supplier-id"]))
-        except ValueError:
-            raise TypeError("argument to --supplier-id should be an integer")
-    else:
-        logger.error("At least one supplier ID must be provided.")
-        exit(1)
+    supplier_ids = get_supplier_ids_from_args(args)
 
     client = DataAPIClient(
         get_api_endpoint_from_stage(args["<stage>"]),
@@ -98,7 +87,7 @@ if __name__ == "__main__":
 
     csv_headers = ['Supplier email', 'Supplier ID', "No. of services suspended"]
 
-    with open(os.path.join(output_dir, FILENAME), 'w') as csvfile:
+    with open(output_dir / FILENAME) as csvfile:
         writer = csv.writer(csvfile, quoting=csv.QUOTE_MINIMAL)
         writer.writerow(csv_headers)
 
