@@ -107,7 +107,7 @@ if __name__ == "__main__":
 
             # Do the suspending
             suspended_service_count = suspend_supplier_services(
-                client, logger, framework_slug, supplier_id, framework_info
+                client, logger, framework_slug, supplier_id, framework_info, dry_run
             )
 
             if suspended_service_count == 0:

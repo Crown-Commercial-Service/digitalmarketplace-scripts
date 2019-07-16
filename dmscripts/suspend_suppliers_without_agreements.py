@@ -13,7 +13,7 @@ def get_all_email_addresses_for_supplier(client, supplier_framework):
     ))
 
 
-def suspend_supplier_services(client, logger, framework_slug, supplier_id, framework_info):
+def suspend_supplier_services(client, logger, framework_slug, supplier_id, framework_info, dry_run):
     """
     The supplier ID list should have been flagged by CCS as requiring action, but double check that the supplier:
       - has some services on the framework
@@ -21,6 +21,7 @@ def suspend_supplier_services(client, logger, framework_slug, supplier_id, frame
       - has not `agreementReturned: on-hold
     :param client: API client instance
     :param framework_info: JSON
+    :param dry_run: don't suspend if True
     :return: suspended_service_count: int
     """
     suspended_service_count = 0
@@ -51,7 +52,10 @@ def suspend_supplier_services(client, logger, framework_slug, supplier_id, frame
         f"Setting {services['meta']['total']} services to '{new_service_status}' for supplier {supplier_id}."
     )
     for service in services['services']:
-        client.update_service_status(service['id'], new_service_status, "Suspend services script")
+        if dry_run:
+            logger.info(f"[DRY RUN] Would suspend service {service['id']} for supplier {supplier_id}")
+        else:
+            client.update_service_status(service['id'], new_service_status, "Suspend services script")
         suspended_service_count += 1
 
     # Return suspended service count (i.e. if > 0, some emails need to be sent)

@@ -30,7 +30,7 @@ class TestSuspendSupplierServices:
         }
 
         assert suspend_supplier_services(
-            self.data_api_client, self.logger, 'g-cloud-11', 12345, framework_interest) == 2
+            self.data_api_client, self.logger, 'g-cloud-11', 12345, framework_interest, None) == 2
 
         assert self.data_api_client.find_services.call_args_list == [
             mock.call(supplier_id=12345, framework='g-cloud-11', status='published')
@@ -54,7 +54,7 @@ class TestSuspendSupplierServices:
         self.data_api_client.find_services.return_value = {'services': []}
 
         assert suspend_supplier_services(
-            self.data_api_client, self.logger, 'g-cloud-11', 12345, framework_interest) == 0
+            self.data_api_client, self.logger, 'g-cloud-11', 12345, framework_interest, None) == 0
 
         assert self.data_api_client.find_services.call_args_list == [
             mock.call(supplier_id=12345, framework='g-cloud-11', status='published')
@@ -74,7 +74,7 @@ class TestSuspendSupplierServices:
         }
 
         assert suspend_supplier_services(
-            self.data_api_client, self.logger, 'g-cloud-11', 12345, framework_interest) == 0
+            self.data_api_client, self.logger, 'g-cloud-11', 12345, framework_interest, None) == 0
 
         assert self.data_api_client.find_services.call_args_list == []
         assert self.data_api_client.update_service_status.call_args_list == []
@@ -92,7 +92,7 @@ class TestSuspendSupplierServices:
         }
 
         assert suspend_supplier_services(
-            self.data_api_client, self.logger, 'g-cloud-11', 12345, framework_interest) == 0
+            self.data_api_client, self.logger, 'g-cloud-11', 12345, framework_interest, None) == 0
 
         assert self.data_api_client.find_services.call_args_list == []
         assert self.data_api_client.update_service_status.call_args_list == []
@@ -110,12 +110,34 @@ class TestSuspendSupplierServices:
         }
 
         assert suspend_supplier_services(
-            self.data_api_client, self.logger, 'g-cloud-11', 12345, framework_interest) == 0
+            self.data_api_client, self.logger, 'g-cloud-11', 12345, framework_interest, None) == 0
 
         assert self.data_api_client.find_services.call_args_list == []
         assert self.data_api_client.update_service_status.call_args_list == []
         assert self.logger.error.call_args_list == [
             mock.call("Supplier 12345's framework agreement is on hold.")
+        ]
+
+    def test_suspend_supplier_services_logs_instead_of_suspending_for_dry_run(self):
+        framework_interest = {
+            "frameworkInterest": {
+                "onFramework": True,
+                "agreementReturned": False,
+                "agreementStatus": None
+            }
+        }
+
+        assert suspend_supplier_services(
+            self.data_api_client, self.logger, 'g-cloud-11', 12345, framework_interest, True) == 2
+
+        assert self.data_api_client.find_services.call_args_list == [
+            mock.call(supplier_id=12345, framework='g-cloud-11', status='published')
+        ]
+        assert self.data_api_client.update_service_status.call_args_list == []
+        assert self.logger.info.call_args_list == [
+            mock.call("Setting 2 services to 'disabled' for supplier 12345."),
+            mock.call("[DRY RUN] Would suspend service 1 for supplier 12345"),
+            mock.call("[DRY RUN] Would suspend service 2 for supplier 12345")
         ]
 
 
