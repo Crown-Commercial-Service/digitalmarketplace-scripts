@@ -87,7 +87,7 @@ if __name__ == "__main__":
 
     csv_headers = ['Supplier email', 'Supplier ID', "No. of services suspended"]
 
-    with open(output_dir / FILENAME) as csvfile:
+    with open(output_dir / FILENAME, 'w') as csvfile:
         writer = csv.writer(csvfile, quoting=csv.QUOTE_MINIMAL)
         writer.writerow(csv_headers)
 
