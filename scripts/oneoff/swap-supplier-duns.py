@@ -4,16 +4,17 @@ This script attempts to swap the DUNS numbers for two suppliers. This involves t
 to a fake DUNS number to satisfy the database's uniqueness constraint.
 
 !!! This script should only be run on production if there has been a specific support request from CCS confirming the
-    supplier IDs and DUNS numbers to be changed.
+    supplier IDs and DUNS numbers to be changed. However, if it gets run by mistake, simply running it again will
+    swap the DUNS numbers back.
 
-Usage: swap-supplier-duns.py <supplier_1> <supplier_2> <duns_1> <duns_2> [options]
+Usage: swap-supplier-duns.py <supplier_1> <supplier_2> [options]
 
     <supplier_1>                                          Supplier ID #1
     <supplier_2>                                          Supplier ID #2
-    <duns_1>                                              DUNS number #1
-    <duns_2>                                              DUNS number #2
 
 Options:
+    --duns1=<duns_1>                                      DUNS number #1
+    --duns2=<duns_2>                                      DUNS number #2
     --stage=<stage>                                       Stage to target
     --updated-by=<updated-by>                             Updater email address for audit trail
     --dummy-duns=<dummy-duns>                             Dummy DUNS number
@@ -52,6 +53,10 @@ def swap_duns(supplier_id_1, supplier_id_2, new_duns_1, new_duns_2):
 
 
 def check_types(supplier1, supplier2, duns1, duns2):
+    # Skip if duns1/duns2 not supplied
+    if not (duns1 or duns2):
+        return True
+
     if not len(duns1) == 9:
         print(f"DUNS {duns1} must be 9 digits")
         return False
@@ -72,6 +77,10 @@ def check_types(supplier1, supplier2, duns1, duns2):
 
 
 def check_existing_duns(supplier1, supplier2, duns1, duns2):
+    # Skip if duns1/duns2 not supplied
+    if not (duns1 or duns2):
+        return True
+
     # Check if supplier1 already has new duns 1
     existing_supplier1 = data_api_client.get_supplier(supplier1)
     if existing_supplier1['suppliers']['dunsNumber'] == duns1:
@@ -102,6 +111,12 @@ def check_existing_duns(supplier1, supplier2, duns1, duns2):
     return True
 
 
+def fetch_existing_duns(supplier1, supplier2):
+    existing_supplier1 = data_api_client.get_supplier(supplier1)
+    existing_supplier2 = data_api_client.get_supplier(supplier2)
+    return existing_supplier1['suppliers']['dunsNumber'], existing_supplier2['suppliers']['dunsNumber']
+
+
 def dummy_duns_in_use(dummy_duns):
     result = data_api_client.find_suppliers(duns_number=dummy_duns)
     return result['meta']['total']
@@ -114,8 +129,8 @@ if __name__ == "__main__":
     stage = arguments['--stage'] or 'local'
     supplier1 = arguments['<supplier_1>']
     supplier2 = arguments['<supplier_2>']
-    duns1 = arguments['<duns_1>']
-    duns2 = arguments['<duns_2>']
+    duns1 = arguments.get('<duns_1>')
+    duns2 = arguments.get('<duns_2>')
 
     updated_by = arguments['--updated-by'] or UPDATER
     dummy_duns = arguments['--dummy-duns']
@@ -137,6 +152,10 @@ if __name__ == "__main__":
             print(f"Default dummy DUNS {DUMMY_DUNS} is already in use. Please supply another with --dummy-duns.")
             exit(1)
         dummy_duns = DUMMY_DUNS
+
+    if not (duns1 and duns2):
+        # Get the 'new' values from the other supplier
+        duns1, duns2 = fetch_existing_duns(supplier2, supplier1)
 
     if check_types(supplier1, supplier2, duns1, duns2):
         if check_existing_duns(supplier1, supplier2, duns1, duns2):
