@@ -1,4 +1,4 @@
-#!/usr/bin/env python33
+#!/usr/bin/env python3
 """
 A script to update the elasticsearch index an alias is associated with.
 
