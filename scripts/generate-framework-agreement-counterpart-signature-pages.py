@@ -1,4 +1,4 @@
-#!/usr/bin/env python33
+#!/usr/bin/env python3
 """
 
 PREREQUISITE: You'll need wkhtmltopdf installed for this to work (http://wkhtmltopdf.org/). The `default.nix` in this
