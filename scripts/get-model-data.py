@@ -70,6 +70,14 @@ DOS_SPECIALIST_ROLES = [
     "webOperations"
 ]
 DOS_SPECIALIST_ROLES_PRICE_MAX = [s + 'PriceMax' for s in DOS_SPECIALIST_ROLES]
+DOS_FRAMEWORKS = (
+    'digital-outcomes-and-specialists, '
+    'digital-outcomes-and-specialists-2, '
+    'digital-outcomes-and-specialists-3'
+)
+# TODO: figure out why G-Cloud is a string and the DOS one is a tuple
+G_CLOUD_FRAMEWORKS = 'g-cloud-8, g-cloud-9'
+
 
 CONFIGS = [
     {
@@ -99,11 +107,7 @@ CONFIGS = [
         'name': 'dos_services',
         'base_model': 'services',
         'get_data_kwargs': {
-            'framework': (
-                'digital-outcomes-and-specialists, '
-                'digital-outcomes-and-specialists-2, '
-                'digital-outcomes-and-specialists-3'
-            )
+            'framework': DOS_FRAMEWORKS,
         },
         'keys': (
             [
@@ -124,7 +128,7 @@ CONFIGS = [
     {
         'name': 'g_cloud_services',
         'base_model': 'services',
-        'get_data_kwargs': {'framework': 'g-cloud-8, g-cloud-9'},
+        'get_data_kwargs': {'framework': G_CLOUD_FRAMEWORKS},
         'keys': (
             [
                 'id',
