@@ -2,7 +2,7 @@
 # Run `make freeze-requirements` to update requirements.txt
 # with package version changes made in requirements-app.txt
 
-Flask==1.0.3
+Flask==1.0.3 # pyup: >=1.0.0,<1.1.0
 itsdangerous==0.24 # pyup: ignore
 
 git+https://github.com/madzak/python-json-logger.git@v0.1.8#egg=python-json-logger==v0.1.8
@@ -26,7 +26,7 @@ yq==2.7.2
 asn1crypto==0.24.0
 attrs==19.1.0
 blinker==1.4
-boto3==1.9.182
+boto3==1.9.201
 botocore==1.12.180
 certifi==2019.6.16
 cffi==1.12.3
@@ -36,7 +36,7 @@ colorama==0.3.9
 contextlib2==0.5.5
 cryptography==2.3.1
 defusedxml==0.6.0
-docutils==0.14
+docutils==0.15.2
 Flask-Login==0.4.1
 Flask-Script==2.0.6
 Flask-WTF==0.14.2
@@ -53,21 +53,21 @@ Markdown==2.6.11
 MarkupSafe==1.1.1
 monotonic==1.5
 notifications-python-client==5.3.0
-numpy==1.16.4
+numpy==1.17.0
 odfpy==1.4.0
 prometheus-client==0.2.0
-pyasn1==0.4.5
+pyasn1==0.4.6
 pycparser==2.19
 PyJWT==1.7.1
-pyrsistent==0.15.2
-pytz==2019.1
+pyrsistent==0.15.4
+pytz==2019.2
 PyYAML==3.13
 requests==2.22.0
 rsa==3.4.2
 s3transfer==0.2.1
 six==1.12.0
 urllib3==1.25.3
-Werkzeug==0.15.4
+Werkzeug==0.15.5
 workdays==1.4
 WTForms==2.2.1
 xmltodict==0.12.0
