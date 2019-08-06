@@ -36,6 +36,7 @@ sys.path.insert(0, '.')
 from docopt import docopt
 
 from dmapiclient import DataAPIClient
+from dmapiclient.errors import APIError, HTTPError, InvalidResponse
 
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.logging_helpers import logging, configure_logger
@@ -567,7 +568,11 @@ if __name__ == '__main__':
             continue
 
         logger.info('Processing {} data'.format(config['name']))
-        # Query
-        query_data = query_data_from_config(config, logger, limit, client, OUTPUT_DIR)
-        # Export
-        export_data_to_csv(OUTPUT_DIR, query_data)
+        try:
+            query_data = query_data_from_config(config, logger, limit, client, OUTPUT_DIR)
+            export_data_to_csv(OUTPUT_DIR, query_data, logger)
+        except (APIError, HTTPError, InvalidResponse) as exc:
+            # Log and continue with next config
+            logger.error(
+                f"Unexpected error exporting {config['name']} data: {exc}",
+            )
