@@ -77,7 +77,7 @@ DOS_FRAMEWORKS = (
     'digital-outcomes-and-specialists-3'
 )
 # TODO: figure out why G-Cloud is a string and the DOS one is a tuple
-G_CLOUD_FRAMEWORKS = 'g-cloud-8, g-cloud-9'
+G_CLOUD_FRAMEWORKS = 'g-cloud-10, g-cloud-11'
 
 
 CONFIGS = [
