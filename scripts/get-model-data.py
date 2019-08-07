@@ -36,6 +36,7 @@ sys.path.insert(0, '.')
 from docopt import docopt
 
 from dmapiclient import DataAPIClient
+from dmapiclient.errors import APIError, HTTPError, InvalidResponse
 
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.logging_helpers import logging, configure_logger
@@ -70,6 +71,14 @@ DOS_SPECIALIST_ROLES = [
     "webOperations"
 ]
 DOS_SPECIALIST_ROLES_PRICE_MAX = [s + 'PriceMax' for s in DOS_SPECIALIST_ROLES]
+DOS_FRAMEWORKS = (
+    'digital-outcomes-and-specialists, '
+    'digital-outcomes-and-specialists-2, '
+    'digital-outcomes-and-specialists-3'
+)
+# TODO: figure out why G-Cloud is a string and the DOS one is a tuple
+G_CLOUD_FRAMEWORKS = 'g-cloud-10, g-cloud-11'
+
 
 CONFIGS = [
     {
@@ -99,11 +108,7 @@ CONFIGS = [
         'name': 'dos_services',
         'base_model': 'services',
         'get_data_kwargs': {
-            'framework': (
-                'digital-outcomes-and-specialists, '
-                'digital-outcomes-and-specialists-2, '
-                'digital-outcomes-and-specialists-3'
-            )
+            'framework': DOS_FRAMEWORKS,
         },
         'keys': (
             [
@@ -124,7 +129,7 @@ CONFIGS = [
     {
         'name': 'g_cloud_services',
         'base_model': 'services',
-        'get_data_kwargs': {'framework': 'g-cloud-8, g-cloud-9'},
+        'get_data_kwargs': {'framework': G_CLOUD_FRAMEWORKS},
         'keys': (
             [
                 'id',
@@ -456,6 +461,86 @@ CONFIGS = [
     },
 ]
 
+
+def query_data_from_config(config, logger, limit, client, output_dir):
+    data = {}
+    if 'base_model' in config:
+        required_keys = list(config['keys']) + list(config.get('assign_json_subfields', {}).keys())
+        data = queries.base_model(config['base_model'], required_keys, config['get_data_kwargs'],
+                                  client=client, logger=logger, limit=limit)
+
+    elif 'model' in config:
+        data = queries.model(config['model'], directory=output_dir)
+
+    if 'joins' in config:
+        for join in config['joins']:
+            data = queries.join(data, directory=output_dir, **join)
+
+    if 'get_by_model_fk' in config:
+        data = queries.get_by_model_fk(
+            config['get_by_model_fk'],
+            config['keys'],
+            data,
+            client
+        )
+
+    # transform values that we want to transform
+    if 'assign_json_subfields' in config:
+        for field, subfields in config['assign_json_subfields'].items():
+            data = queries.assign_json_subfields(field, subfields, data)
+
+    if 'duplicate_fields' in config:
+        for field, new_name in config['duplicate_fields']:
+            data = queries.duplicate_fields(data, field, new_name)
+
+    if 'process_fields' in config:
+        data = queries.process_fields(config['process_fields'], data)
+
+    if 'add_counts' in config:
+        data = queries.add_counts(data=data, directory=output_dir, **config['add_counts'])
+
+    if 'aggregation_counts' in config:
+        for count in config['aggregation_counts']:
+            data = queries.add_aggregation_counts(data=data, **count)
+
+    if 'filter_query' in config:
+        # filter out things we don't want
+        data = queries.filter_rows(config['filter_query'], data)
+        logger.info(
+            '{} {} remaining after filtering'.format(len(data), config['name'])
+        )
+
+    if 'group_by' in config:
+        data = queries.group_by(config['group_by'], data)
+
+    # Only keep requested keys in the output CSV
+    keys = [
+        j for j in (
+            ".".join(str(part) for part in k) if isinstance(k, (tuple, list)) else k
+            for k in config['keys']
+        ) if j in data
+    ]
+    data = data[keys]
+
+    if 'rename_fields' in config:
+        data = queries.rename_fields(config['rename_fields'], data)
+
+    # sort list by some dict value
+    if 'sort_by' in config:
+        data = queries.sort_by(config['sort_by'], data)
+    if 'drop_duplicates' in config and config['drop_duplicates']:
+        data = queries.drop_duplicates(data)
+
+    return data
+
+
+def export_data_to_csv(output_dir, data, logger):
+    # write up your CSV
+    filename = csv_path(output_dir, config['name'])
+    data.to_csv(filename, index=False, encoding='utf-8')
+    logger.info('Printed `{}` with {} rows'.format(filename, len(data)))
+
+
 if __name__ == '__main__':
     arguments = docopt(__doc__)
 
@@ -481,75 +566,13 @@ if __name__ == '__main__':
         # Skip CSVs that weren't requested
         if config['name'] not in MODELS:
             continue
+
         logger.info('Processing {} data'.format(config['name']))
-
-        if 'base_model' in config:
-            required_keys = list(config['keys']) + list(config.get('assign_json_subfields', {}).keys())
-            data = queries.base_model(config['base_model'], required_keys, config['get_data_kwargs'],
-                                      client=client, logger=logger, limit=limit)
-
-        elif 'model' in config:
-            data = queries.model(config['model'], directory=OUTPUT_DIR)
-
-        if 'joins' in config:
-            for join in config['joins']:
-                data = queries.join(data, directory=OUTPUT_DIR, **join)
-
-        if 'get_by_model_fk' in config:
-            data = queries.get_by_model_fk(
-                config['get_by_model_fk'],
-                config['keys'],
-                data,
-                client
+        try:
+            query_data = query_data_from_config(config, logger, limit, client, OUTPUT_DIR)
+            export_data_to_csv(OUTPUT_DIR, query_data, logger)
+        except (APIError, HTTPError, InvalidResponse) as exc:
+            # Log and continue with next config
+            logger.error(
+                f"Unexpected error exporting {config['name']} data: {exc}",
             )
-
-        # transform values that we want to transform
-        if 'assign_json_subfields' in config:
-            for field, subfields in config['assign_json_subfields'].items():
-                data = queries.assign_json_subfields(field, subfields, data)
-
-        if 'duplicate_fields' in config:
-            for field, new_name in config['duplicate_fields']:
-                data = queries.duplicate_fields(data, field, new_name)
-
-        if 'process_fields' in config:
-            data = queries.process_fields(config['process_fields'], data)
-
-        if 'add_counts' in config:
-            data = queries.add_counts(data=data, directory=OUTPUT_DIR, **config['add_counts'])
-
-        if 'aggregation_counts' in config:
-            for count in config['aggregation_counts']:
-                data = queries.add_aggregation_counts(data=data, **count)
-
-        if 'filter_query' in config:
-            # filter out things we don't want
-            data = queries.filter_rows(config['filter_query'], data)
-            logger.info(
-                '{} {} remaining after filtering'.format(len(data), config['name'])
-            )
-
-        if 'group_by' in config:
-            data = queries.group_by(config['group_by'], data)
-
-        # Only keep requested keys in the output CSV
-        keys = [
-            j for j in (
-                ".".join(str(part) for part in k) if isinstance(k, (tuple, list)) else k
-                for k in config['keys']
-            ) if j in data
-        ]
-        data = data[keys]
-
-        if 'rename_fields' in config:
-            data = queries.rename_fields(config['rename_fields'], data)
-
-        # sort list by some dict value
-        if 'sort_by' in config:
-            data = queries.sort_by(config['sort_by'], data)
-        if 'drop_duplicates' in config and config['drop_duplicates']:
-            data = queries.drop_duplicates(data)
-        # write up your CSV
-        filename = csv_path(OUTPUT_DIR, config['name'])
-        data.to_csv(filename, index=False, encoding='utf-8')
-        logger.info('Printed `{}` with {} rows'.format(filename, len(data)))
