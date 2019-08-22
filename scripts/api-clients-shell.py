@@ -29,25 +29,6 @@ from dmscripts.helpers.auth_helpers import get_auth_token
 from dmutils.env_helpers import get_api_endpoint_from_stage
 
 
-data = None
-search = None
-
-
-def clients_in_shell(stage, api_url, api_token, search_api_url, search_api_token):
-    global data, search
-
-    print('Retrieving credentials...')
-    api_token = api_token or get_auth_token('api', stage)
-    search_api_token = search_api_token or get_auth_token('search_api', stage)
-
-    print('Creating clients...')
-    data = DataAPIClient(api_url or get_api_endpoint_from_stage(stage), api_token)  # noqa
-    search = SearchAPIClient(search_api_url or get_api_endpoint_from_stage(stage, app='search-api'), search_api_token)  # noqa
-
-    print('Dropping into shell...')
-    IPython.embed()
-
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('stage', default='development', help='The stage your clients should target',
@@ -62,5 +43,21 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    clients_in_shell(stage=args.stage.lower(), api_url=args.api_url, api_token=args.api_token,
-                     search_api_url=args.search_api_url, search_api_token=args.search_api_token)
+    stage = args.stage.lower()
+
+    print('Retrieving credentials...')
+    api_token = args.api_token or get_auth_token('api', stage)
+    search_api_token = args.search_api_token or get_auth_token('search_api', stage)
+
+    print('Creating clients...')
+    data = DataAPIClient(
+        args.api_url or get_api_endpoint_from_stage(stage),
+        api_token
+    )
+    search = SearchAPIClient(
+        args.search_api_url or get_api_endpoint_from_stage(stage, app='search-api'),
+        search_api_token
+    )
+
+    print('Dropping into shell...')
+    IPython.start_ipython(argv=[], user_ns={"data": data, "search": search})
