@@ -8,8 +8,7 @@ Usage:
     scripts/framework-applications/update-framework-results.py <framework> <stage> (--pass | --fail) <ids_file>
 
 Example:
-    scripts/framework-applications/update-framework-results.py g-cloud-11 preview --pass --api-token=myToken
-        ../g11-supplier-ids.txt
+    scripts/framework-applications/update-framework-results.py g-cloud-11 preview --pass g11-supplier-ids.txt
 
 """
 
