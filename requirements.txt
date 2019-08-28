@@ -10,7 +10,7 @@ git+https://github.com/alphagov/digitalmarketplace-utils.git@48.1.0#egg=digitalm
 git+https://github.com/alphagov/digitalmarketplace-apiclient.git@20.2.0#egg=digitalmarketplace-apiclient==20.2.0
 git+https://github.com/alphagov/digitalmarketplace-content-loader.git@5.2.0#egg=digitalmarketplace-content-loader==5.2.0
 
-awscli==1.16.220
+awscli==1.16.225
 backoff==1.8.0
 clamd==1.0.2
 docopt==0.6.2
@@ -26,8 +26,8 @@ yq==2.7.2
 asn1crypto==0.24.0
 attrs==19.1.0
 blinker==1.4
-boto3==1.9.210
-botocore==1.12.210
+boto3==1.9.217
+botocore==1.12.215
 certifi==2019.6.16
 cffi==1.12.3
 chardet==3.0.4
@@ -36,7 +36,7 @@ colorama==0.3.9
 contextlib2==0.5.5
 cryptography==2.3.1
 defusedxml==0.6.0
-docutils==0.14
+docutils==0.15.2
 Flask-Login==0.4.1
 Flask-Script==2.0.6
 Flask-WTF==0.14.2
@@ -53,7 +53,7 @@ Markdown==2.6.11
 MarkupSafe==1.1.1
 monotonic==1.5
 notifications-python-client==5.3.0
-numpy==1.17.0
+numpy==1.17.1
 odfpy==1.4.0
 prometheus-client==0.2.0
 pyasn1==0.4.6
