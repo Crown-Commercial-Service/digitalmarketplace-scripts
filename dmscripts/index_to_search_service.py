@@ -84,21 +84,24 @@ indexers = {
 
 
 # Hardcoded for now as we are unlikely to add new frameworks in the near future
-FRAMEWORK_MAPPINGS = {
+GCLOUD_MAPPINGS = {
     'g-cloud-9': 'services',
     'g-cloud-10': 'services-g-cloud-10',
-    'g-cloud-11': 'services-g-cloud-11',
-    'digital-outcomes-and-specialists': 'briefs-digital-outcomes-and-specialists-2',
-    'digital-outcomes-and-specialists-2': 'briefs-digital-outcomes-and-specialists-2',
-    'digital-outcomes-and-specialists-3': 'briefs-digital-outcomes-and-specialists-2',
+    'g-cloud-11': 'services-g-cloud-11'
 }
+# All DOS framework iterations use the same mapping, which was last changed for DOS2
+DOS_MAPPING = 'briefs-digital-outcomes-and-specialists-2'
 
 
 def search_mapping_matches_framework(mapping_name, frameworks):
     # Check that the mapping has been generated from at least one of the frameworks given in
     # the comma-separated list
-    if any(mapping_name == FRAMEWORK_MAPPINGS[fw] for fw in frameworks.split(',')):
-        return True
+    framework_list = frameworks.split(',')
+    for fw in framework_list:
+        if 'digital-outcomes-and-specialists' in fw and mapping_name == DOS_MAPPING:
+            return True
+        elif mapping_name == GCLOUD_MAPPINGS.get(fw):
+            return True
     raise ValueError("Incorrect mapping '{}' for the supplied framework(s): {}".format(mapping_name, frameworks))
 
 
