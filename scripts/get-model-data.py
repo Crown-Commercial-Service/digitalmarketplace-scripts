@@ -42,7 +42,7 @@ from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.logging_helpers import logging, configure_logger
 from dmscripts.models import queries
 from dmscripts.models.process_rules import (
-    format_datetime_string_as_date, remove_username_from_email_address, construct_brief_url, extract_id_from_user_info
+    format_datetime_string_as_date, remove_username_from_email_address, extract_id_from_user_info
 )
 from dmscripts.models.writecsv import csv_path
 from dmutils.env_helpers import get_api_endpoint_from_stage
@@ -272,94 +272,6 @@ CONFIGS = [
             'supplierOrganisationSize': 'awarded_supplierOrganisationSize',
             'supplierName': 'awarded_supplierName'
         }
-    },
-    {
-        'name': 'opportunity-data',
-        'model': 'briefs',
-        'filter_query': 'status_data in ["closed", "cancelled", "unsuccessful", "awarded"]',
-        'joins': [
-            {
-                'model_name': 'awarded_brief_responses',
-                'left_on': 'id',
-                'right_on': 'briefId',
-                'data_duplicate_suffix': '_awarded_brief_responses'
-            }, {
-                'model_name': 'brief_responses',
-                'left_on': 'id',
-                'right_on': 'briefId',
-                'data_duplicate_suffix': '_data'
-            },
-
-        ],
-        'keys': (
-            'brief_id_copy',
-            'title',
-            'id_data',
-            'frameworkSlug',
-            'lot',
-            'specialistRole',
-            'organisation',
-            'users.0.emailAddress',
-            'location',
-            'publishedAt',
-            'requirementsLength',
-            'contractLength',
-            'applicationsFromSMEs',
-            'applicationsFromLargeOrganisations',
-            'totalApplications',
-            'status_data',
-            'awarded_supplierName',
-            'awarded_supplierOrganisationSize',
-            'awarded_awardedContractValue',
-            'awarded_awardedContractStartDate',
-        ),
-        'aggregation_counts': [
-            {
-                'group_by': 'id_data',
-                'join': ('id_data', 'id_data'),
-                'count_name': 'totalApplications',
-                'query': 'id_brief_responses != ""',
-            }, {
-                'group_by': 'id_data',
-                'join': ('id_data', 'id_data'),
-                'count_name': 'applicationsFromSMEs',
-                'query': 'supplierOrganisationSize in ["micro", "small", "medium"]',
-            }, {
-                'group_by': 'id_data',
-                'join': ('id_data', 'id_data'),
-                'count_name': 'applicationsFromLargeOrganisations',
-                'query': 'supplierOrganisationSize == "large"',
-            },
-        ],
-        'duplicate_fields': [('id_data', 'brief_id_copy')],
-        'process_fields': {
-            'id_data': construct_brief_url,
-            'users.0.emailAddress': remove_username_from_email_address,
-            'requirementsLength': lambda i: i or '2 weeks',
-        },
-        'rename_fields': {
-            'brief_id_copy': 'ID',
-            'title': 'Opportunity',
-            'id_data': 'Link',
-            'frameworkSlug': 'Framework',
-            'lot': 'Category',
-            'specialistRole': 'Specialist',
-            'organisation': 'Organisation Name',
-            'users.0.emailAddress': 'Buyer Domain',
-            'location': 'Location Of The Work',
-            'publishedAt': 'Published At',
-            'requirementsLength': 'Open For',
-            'contractLength': 'Expected Contract Length',
-            'applicationsFromSMEs': 'Applications from SMEs',
-            'applicationsFromLargeOrganisations': 'Applications from Large Organisations',
-            'totalApplications': 'Total Organisations',
-            'status_data': 'Status',
-            'awarded_supplierName': 'Winning supplier',
-            'awarded_supplierOrganisationSize': 'Size of supplier',
-            'awarded_awardedContractValue': 'Contract amount',
-            'awarded_awardedContractStartDate': 'Contract start date'
-        },
-        'drop_duplicates': True,
     },
     {
         'name': 'direct_award_projects',
