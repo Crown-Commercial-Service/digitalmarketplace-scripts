@@ -183,8 +183,17 @@ class TestIndexers:
             mock.call(mock.ANY, mapping='services-g-cloud-10')
         ]
 
+    @pytest.mark.parametrize(
+        'framework_list',
+        [
+            "digital-outcomes-and-specialists",
+            "digital-outcomes-and-specialists,digital-outcomes-and-specialists-2",
+            "digital-outcomes-and-specialists,digital-outcomes-and-specialists-99",
+            "digital-outcomes-and-specialists-99",
+        ]
+    )
     @mock.patch.object(BriefIndexer, 'create_index', autospec=True)
-    def test_do_index_creates_new_index_from_briefs_mapping(self, create_index):
+    def test_do_index_creates_new_index_from_briefs_mapping_for_dos_frameworks(self, create_index, framework_list):
         do_index(
             'briefs',
             "http://search-api-url", "mySearchAPIToken",
@@ -192,7 +201,7 @@ class TestIndexers:
             mapping='briefs-digital-outcomes-and-specialists-2',
             serial=True,  # don't run in parallel for testing
             index="my-new-dos-index",
-            frameworks="digital-outcomes-and-specialists,digital-outcomes-and-specialists-2"
+            frameworks=framework_list
         )
 
         assert create_index.call_args_list == [
