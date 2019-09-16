@@ -52,7 +52,7 @@ if __name__ == '__main__':
 
     DOWNLOAD_FILE_NAME = 'opportunity-data.csv'
     file_path = os.path.join(OUTPUT_DIR, DOWNLOAD_FILE_NAME)
-    bucket_name = 'digital-marketplace-communications-{}-{}'.format(STAGE, STAGE)
+    bucket_name = 'digitalmarketplace-communications-{}-{}'.format(STAGE, STAGE)
     key_name = '{}/communications/data/{}'.format(latest_framework_slug, DOWNLOAD_FILE_NAME)
 
     logger.info('Exporting DOS opportunity data to CSV')
