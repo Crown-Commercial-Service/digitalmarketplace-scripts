@@ -55,7 +55,12 @@ if __name__ == '__main__':
             'digital-specialists': "bee802d641" if stage == "production" else "07c21f0451",
             'digital-outcomes': "5c92c78a78" if stage == "production" else "f0077c516d",
             'user-research-participants': "34ebe0bffa" if stage == "production" else "d35601203b",
-        }
+        },
+        'digital-outcomes-and-specialists-4': {
+            'digital-specialists': "29d06d5201" if stage == "production" else "07c21f0451",
+            'digital-outcomes': "4360debc5a" if stage == "production" else "f0077c516d",
+            'user-research-participants': "2538f8a0f1" if stage == "production" else "d35601203b",
+        },
     }
 
     lots = [
