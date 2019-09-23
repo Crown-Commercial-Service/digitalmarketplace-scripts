@@ -58,24 +58,6 @@ from dmutils.env_helpers import get_api_endpoint_from_stage
 logger = logging_helpers.configure_logger()
 
 
-MAILCHIMP_LIST_IDS = {
-    'digital-outcomes-and-specialists-2': {
-        'digital-specialists': "30ba9fdf39",
-        'digital-outcomes': "97952fee38",
-        'user-research-participants': "e6b93a3bce",
-    },
-    'digital-outcomes-and-specialists-3': {
-        'digital-specialists': "bee802d641",
-        'digital-outcomes': "5c92c78a78",
-        'user-research-participants': "34ebe0bffa",
-    },
-    'digital-outcomes-and-specialists-4': {
-        'digital-specialists': "29d06d5201",
-        'digital-outcomes': "4360debc5a",
-        'user-research-participants': "2538f8a0f1",
-    },
-}
-
 SANDBOX_LIST_ID = "096e52cebb"
 
 
