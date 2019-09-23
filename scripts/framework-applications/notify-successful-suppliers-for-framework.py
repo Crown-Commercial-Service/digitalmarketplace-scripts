@@ -58,7 +58,9 @@ if __name__ == '__main__':
     mail_client = scripts_notify_client(GOVUK_NOTIFY_API_KEY, logger=logger)
     api_client = DataAPIClient(base_url=get_api_endpoint_from_stage(STAGE), auth_token=get_auth_token('api', STAGE))
 
-    context_helper = SuccessfulSupplierContextForNotify(api_client, FRAMEWORK_SLUG, supplier_ids=supplier_ids)
+    context_helper = SuccessfulSupplierContextForNotify(
+        api_client, FRAMEWORK_SLUG, supplier_ids=supplier_ids, logger=logger
+    )
     context_helper.populate_data()
     context_data = context_helper.get_users_personalisations()
 
@@ -73,4 +75,4 @@ if __name__ == '__main__':
         try:
             mail_client.send_email(user_email, GOVUK_NOTIFY_TEMPLATE_ID, personalisation, allow_resend=False)
         except EmailError as e:
-            logger.error(f"Error sending email to suppluer user '{hash_string(user_email)}': {e}")
+            logger.error(f"Error sending email to supplier user '{hash_string(user_email)}': {e}")
