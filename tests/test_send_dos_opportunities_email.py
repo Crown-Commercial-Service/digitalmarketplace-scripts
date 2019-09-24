@@ -374,7 +374,7 @@ class TestSendDOSOpportunitiesEmail:
             mock.call(self.data_api_client, date(2017, 4, 7), date(2017, 4, 9))
         ]
         assert logger.info.call_args_list == [
-            mock.call("No new briefs found for DOS frameworks in the last 3 day(s)", extra={"number_of_days": 3})
+            mock.call("No new briefs found for DOS frameworks in the last 3 day(s)")
         ]
 
     @mock.patch('dmscripts.send_dos_opportunities_email.logger', autospec=True)

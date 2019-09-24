@@ -158,59 +158,51 @@ def main(data_api_client, mailchimp_client, number_of_days, framework_override, 
     # If specific framework script arg supplied, ignore other frameworks
     if framework_override:
         if not live_briefs_by_framework.get(framework_override):
-            logger.info(
-                "No new briefs found for {} in the last {} day(s)".format(framework_override, number_of_days)
-            )
+            logger.info(f"No new briefs found for {framework_override} in the last {number_of_days} day(s)")
             return True
         live_briefs_by_framework = {framework_override: live_briefs_by_framework.get(framework_override)}
 
     # If no briefs found, exit early
     if not live_briefs_by_framework:
-        logger.info(
-            "No new briefs found for DOS frameworks in the last {} day(s)".format(number_of_days),
-            extra={"number_of_days": number_of_days}
-        )
+        logger.info(f"No new briefs found for DOS frameworks in the last {number_of_days} day(s)")
         return True
 
     for framework_slug in live_briefs_by_framework.keys():
         for lot_slug, live_briefs in live_briefs_by_framework[framework_slug].items():
 
             if lot_slug_override and lot_slug != lot_slug_override:
-                logger.info("Skipping campaign for '{0}' lot on {1}".format(lot_slug, framework_slug))
+                logger.info(f"Skipping campaign for '{lot_slug}' lot on {framework_slug}")
                 continue
 
-            logger.info("{0} new briefs found for '{1}' lot on {2}".format(len(live_briefs), lot_slug, framework_slug))
+            logger.info(f"{len(live_briefs)} new briefs found for '{lot_slug}' lot on {framework_slug}")
 
             # Get the list_id for this lot/framework combination (or use list ID override if supplied as script arg)
             list_id = list_id_override or MAILCHIMP_LIST_IDS[framework_slug][lot_slug]
 
             # Create a new campaign for today's emails
-            logger.info("Creating campaign for '{0}' lot on {1}".format(lot_slug, framework_slug))
+            logger.info(f"Creating campaign for '{lot_slug}' lot on {framework_slug}")
             campaign_data = get_campaign_data(LOT_NAMES[lot_slug], list_id, live_briefs[0]['frameworkName'])
             campaign_id = mailchimp_client.create_campaign(campaign_data)
             if not campaign_id:
-                logger.warning("Unable to create campaign for '{0}' lot on {1}".format(lot_slug, framework_slug))
+                logger.warning(f"Unable to create campaign for '{lot_slug}' lot on {framework_slug}")
                 continue
 
             # Build the email content
             content_data = get_html_content(live_briefs, number_of_days)
             logger.info(
-                "Setting campaign data for '{0}' framework, '{1}' lot and '{2}' campaign id".format(
-                    framework_slug, lot_slug, campaign_id
-                )
+                f"Setting campaign data for '{framework_slug}' framework, "
+                f"'{lot_slug}' lot and '{campaign_id}' campaign id"
             )
             if not mailchimp_client.set_campaign_content(campaign_id, content_data):
-                logger.warning("Unable to set campaign data for campaign id '{0}'".format(campaign_id))
+                logger.warning(f"Unable to set campaign data for campaign id '{campaign_id}'")
                 continue
 
             # Send the emails
             logger.info(
-                "Sending campaign for '{0}' framework, '{1}' lot and '{2}' campaign id".format(
-                    framework_slug, lot_slug, campaign_id
-                )
+                f"Sending campaign for '{framework_slug}' framework, '{lot_slug}' lot and '{campaign_id}' campaign id"
             )
             if not mailchimp_client.send_campaign(campaign_id):
-                logger.warning("Unable to send campaign for campaign id '{0}'".format(campaign_id))
+                logger.warning(f"Unable to send campaign for campaign id '{campaign_id}'")
                 continue
 
     return True
