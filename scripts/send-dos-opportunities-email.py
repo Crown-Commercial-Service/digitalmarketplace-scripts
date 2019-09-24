@@ -5,9 +5,9 @@ Default behaviour is to fetch any briefs (regardless of framework/lot) published
 
 The script groups briefs by framework/lot, and for each combination, looks up the Mailchimp list ID, and creates &
 sends a new campaign.
-- If a framework_override is supplied, just find briefs for that framework
-- If a lot_override is supplied, just find briefs for that lot
-- If a list_id_override is supplied, only send emails to that list ID regardless of lot/framework
+- If a framework_slug is supplied, just find briefs for that framework
+- If a lot_slug is supplied, just find briefs for that lot
+- If a list_id is supplied, only send emails to that list ID regardless of lot/framework
 
 For testing purposes, you can override the list ID so you can send it to yourself only (use the sandbox list ID
 "096e52cebb").
@@ -37,7 +37,7 @@ Usage:
 
 Example:
     send-dos-opportunities-email.py
-        preview my.username@example.gov.uk myMailchimpKey digital-outcomes-and-specialists-3
+        preview my.username@example.gov.uk myMailchimpKey --framework_slug=digital-outcomes-and-specialists-3
         --number_of_days=3 --list_id=096e52cebb --lot_slug=digital-outcomes
 """
 

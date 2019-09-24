@@ -39,7 +39,7 @@ LOT_NAMES = {
 
 
 def get_live_briefs_between_two_dates(data_api_client, start_date, end_date):
-    """Get all briefs for a lot which were published between 2 dates."""
+    """Get all briefs which were published between 2 dates."""
     return [
         brief for brief in data_api_client.find_briefs_iter(status="live", human=True)
         if datetime.strptime(brief['publishedAt'], DATETIME_FORMAT).date() >= start_date
@@ -165,7 +165,7 @@ def main(data_api_client, mailchimp_client, number_of_days, framework_override, 
         live_briefs_by_framework = {framework_override: live_briefs_by_framework.get(framework_override)}
 
     # If no briefs found, exit early
-    if not live_briefs_by_framework.keys():
+    if not live_briefs_by_framework:
         logger.info(
             "No new briefs found for DOS frameworks in the last {} day(s)".format(number_of_days),
             extra={"number_of_days": number_of_days}
@@ -176,7 +176,7 @@ def main(data_api_client, mailchimp_client, number_of_days, framework_override, 
         for lot_slug, live_briefs in live_briefs_by_framework[framework_slug].items():
 
             if lot_slug_override and lot_slug != lot_slug_override:
-                logger.warning("Skipping campaign for '{0}' lot on {1}".format(lot_slug, framework_slug))
+                logger.info("Skipping campaign for '{0}' lot on {1}".format(lot_slug, framework_slug))
                 continue
 
             logger.info("{0} new briefs found for '{1}' lot on {2}".format(len(live_briefs), lot_slug, framework_slug))
