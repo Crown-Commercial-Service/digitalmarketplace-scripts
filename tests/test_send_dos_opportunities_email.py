@@ -219,20 +219,13 @@ class TestSendDOSOpportunitiesEmail:
         get_html_content.return_value = {"first": "content"}
         self.dm_mailchimp_client.create_campaign.return_value = "1"
 
-        assert main(
-            self.data_api_client,
-            self.dm_mailchimp_client,
-            1,
-            framework_override=None,
-            list_id_override="096e52cebb",
-            lot_slug_override=None
-        )
+        assert main(self.data_api_client, self.dm_mailchimp_client, number_of_days=1)
 
         # Creates 3 campaigns
         assert get_campaign_data.call_args_list == [
-            mock.call("Digital specialists", "096e52cebb", 'Digital Outcomes and Specialists 3'),
-            mock.call("Digital outcomes", "096e52cebb", 'Digital Outcomes and Specialists 4'),
-            mock.call("User research participants", "096e52cebb", 'Digital Outcomes and Specialists 4')
+            mock.call("Digital specialists", "bee802d641", 'Digital Outcomes and Specialists 3'),
+            mock.call("Digital outcomes", "4360debc5a", 'Digital Outcomes and Specialists 4'),
+            mock.call("User research participants", "2538f8a0f1", 'Digital Outcomes and Specialists 4')
         ]
         assert self.dm_mailchimp_client.create_campaign.call_args_list == [
             mock.call({"created": "campaign"}),
@@ -261,28 +254,16 @@ class TestSendDOSOpportunitiesEmail:
 
     def test_main_gets_live_briefs_for_one_day_by_default(self, get_live_briefs_by_framework_and_lot):
         with freeze_time('2017-04-19 08:00:00'):
-            main(
-                self.data_api_client,
-                self.dm_mailchimp_client,
-                1,
-                framework_override=None,
-                list_id_override=None,
-                lot_slug_override=None
-            )
+            main(self.data_api_client, self.dm_mailchimp_client, number_of_days=1)
+
         assert get_live_briefs_by_framework_and_lot.call_args_list == [
             mock.call(mock.ANY, date(2017, 4, 18), date(2017, 4, 18))
         ]
 
     def test_main_can_get_live_briefs_for_three_days(self, get_live_briefs_by_framework_and_lot):
         with freeze_time('2017-04-10 08:00:00'):
-            main(
-                self.data_api_client,
-                self.dm_mailchimp_client,
-                number_of_days=3,
-                framework_override=None,
-                list_id_override=None,
-                lot_slug_override=None
-            )
+            main(self.data_api_client, self.dm_mailchimp_client, number_of_days=3)
+
         assert get_live_briefs_by_framework_and_lot.call_args_list == [
             mock.call(mock.ANY, date(2017, 4, 7), date(2017, 4, 9))
         ]
@@ -307,15 +288,13 @@ class TestSendDOSOpportunitiesEmail:
         assert main(
             self.data_api_client,
             self.dm_mailchimp_client,
-            1,
-            framework_override="digital-outcomes-and-specialists-3",
-            list_id_override="096e52cebb",
-            lot_slug_override=None
+            number_of_days=1,
+            framework_override="digital-outcomes-and-specialists-3"
         )
 
         # Creates 1 campaign for Briefs 1 and 2
         assert get_campaign_data.call_args_list == [
-            mock.call("Digital specialists", "096e52cebb", 'Digital Outcomes and Specialists 3'),
+            mock.call("Digital specialists", "bee802d641", 'Digital Outcomes and Specialists 3'),
         ]
         assert get_html_content.call_args_list == [mock.call([BRIEF_1, BRIEF_2], 1)]
 
@@ -339,15 +318,13 @@ class TestSendDOSOpportunitiesEmail:
         assert main(
             self.data_api_client,
             self.dm_mailchimp_client,
-            1,
-            framework_override=None,
-            list_id_override="096e52cebb",
+            number_of_days=1,
             lot_slug_override='digital-outcomes'
         )
 
         # Creates 1 campaign for Brief 3
         assert get_campaign_data.call_args_list == [
-            mock.call("Digital outcomes", "096e52cebb", 'Digital Outcomes and Specialists 4'),
+            mock.call("Digital outcomes", "4360debc5a", 'Digital Outcomes and Specialists 4'),
         ]
         assert get_html_content.call_args_list == [mock.call([BRIEF_3], 1)]
 
@@ -356,14 +333,7 @@ class TestSendDOSOpportunitiesEmail:
         get_live_briefs_by_framework_and_lot.return_value = {}
 
         with freeze_time('2017-04-10 08:00:00'):
-            result = main(
-                self.data_api_client,
-                self.dm_mailchimp_client,
-                number_of_days=3,
-                framework_override=None,
-                list_id_override=None,
-                lot_slug_override=None
-            )
+            result = main(self.data_api_client, self.dm_mailchimp_client, number_of_days=3)
 
         assert result is True
         assert self.dm_mailchimp_client.create_campaign.call_count == 0
@@ -392,9 +362,7 @@ class TestSendDOSOpportunitiesEmail:
                 self.data_api_client,
                 self.dm_mailchimp_client,
                 number_of_days=1,
-                framework_override='digital-outcomes-and-specialists-4',
-                list_id_override=None,
-                lot_slug_override=None
+                framework_override='digital-outcomes-and-specialists-4'
             )
 
         assert result is True

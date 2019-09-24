@@ -133,7 +133,15 @@ def get_live_briefs_by_framework_and_lot(client, start_date, end_date):
     return briefs_by_fw_and_lot
 
 
-def main(data_api_client, mailchimp_client, number_of_days, framework_override, list_id_override, lot_slug_override):
+def main(
+    data_api_client,
+    mailchimp_client,
+    number_of_days,
+    *,
+    framework_override=None,
+    list_id_override=None,
+    lot_slug_override=None
+):
     """
     Default behaviour is to fetch any briefs (regardless of framework/lot) published in the last N days.
 
