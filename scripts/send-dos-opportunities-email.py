@@ -31,8 +31,9 @@ line. Note, this may come in useful if the script was to fail halfway and you wi
 failed.
 
 Usage:
-    send-dos-opportunities-email.py <stage> <mailchimp_username> <mailchimp_api_key> <framework_slug>
+    send-dos-opportunities-email.py <stage> <mailchimp_username> <mailchimp_api_key>
         [--number_of_days=<number_of_days>] [--list_id=<list_id>] [--lot_slug=<lot_slug>]
+        [--framework_slug=<framework_slug>]
 
 Example:
     send-dos-opportunities-email.py
@@ -68,8 +69,7 @@ if __name__ == "__main__":
     number_of_days = arguments.get("--number_of_days")
     list_id = arguments.get("--list_id")
     lot_slug = arguments.get("--lot_slug")
-
-    framework_slug = arguments['<framework_slug>']
+    framework_slug = arguments.get("--framework_slug")
 
     # Override number of days
     if number_of_days:
