@@ -157,7 +157,12 @@ def main(data_api_client, mailchimp_client, number_of_days, framework_override, 
 
     # If specific framework script arg supplied, ignore other frameworks
     if framework_override:
-        live_briefs_by_framework = {framework_override: live_briefs_by_framework[framework_override]}
+        if not live_briefs_by_framework.get(framework_override):
+            logger.info(
+                "No new briefs found for {} in the last {} day(s)".format(framework_override, number_of_days)
+            )
+            return True
+        live_briefs_by_framework = {framework_override: live_briefs_by_framework.get(framework_override)}
 
     # If no briefs found, exit early
     if not live_briefs_by_framework.keys():

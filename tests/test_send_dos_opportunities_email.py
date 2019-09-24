@@ -376,3 +376,35 @@ class TestSendDOSOpportunitiesEmail:
         assert logger.info.call_args_list == [
             mock.call("No new briefs found for DOS frameworks in the last 3 day(s)", extra={"number_of_days": 3})
         ]
+
+    @mock.patch('dmscripts.send_dos_opportunities_email.logger', autospec=True)
+    def test_if_no_briefs_for_supplied_framework_then_no_campaign_created_nor_sent(
+        self, logger, get_live_briefs_by_framework_and_lot
+    ):
+        get_live_briefs_by_framework_and_lot.return_value = {
+            'digital-outcomes-and-specialists-3': {
+                'digital-specialists': [BRIEF_1, BRIEF_2]
+            }
+        }
+
+        with freeze_time('2017-04-10 08:00:00'):
+            result = main(
+                self.data_api_client,
+                self.dm_mailchimp_client,
+                number_of_days=1,
+                framework_override='digital-outcomes-and-specialists-4',
+                list_id_override=None,
+                lot_slug_override=None
+            )
+
+        assert result is True
+        assert self.dm_mailchimp_client.create_campaign.call_count == 0
+        assert self.dm_mailchimp_client.set_campaign_content.call_count == 0
+        assert self.dm_mailchimp_client.send_campaign.call_count == 0
+
+        assert get_live_briefs_by_framework_and_lot.call_args_list == [
+            mock.call(self.data_api_client, date(2017, 4, 9), date(2017, 4, 9))
+        ]
+        assert logger.info.call_args_list == [
+            mock.call("No new briefs found for digital-outcomes-and-specialists-4 in the last 1 day(s)")
+        ]
