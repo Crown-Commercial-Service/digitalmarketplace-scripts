@@ -1,38 +1,44 @@
 #!/usr/bin/env python3
 
 """
-Description:
-    For every lot the script will:
-        - look for latest briefs for Digital Outcomes and Specialists
-        - if there are new briefs on that lot:
-            - it will create a Mailchimp campaign
-            - it will set the content of the campaign to be the briefs found
-            - it will send that campaign to the list_id as referenced in the `lots` variable
-        - if there are no new briefs on that lot no campaign is created or sent
+Default behaviour is to fetch any briefs (regardless of framework/lot) published in the last N days.
 
-    Number of days tells the script for how many days before current date it should include in its search for briefs
-        example:  if you run this script on a Wednesday and set number of days=1,
-                    then it will only include briefs from Tuesday (preceding day).
-        example2: if you run it on Wednesday and set number of days=3,
-                    then it will include all briefs published on Sunday, Monday and Tuesday.
-    By default, the script will send 3 days of briefs on a Monday (briefs from Fri, Sat, Sun) and 1 day on all other
-    days. This can be overrriden as described above.
+The script groups briefs by framework/lot, and for each combination, looks up the Mailchimp list ID, and creates &
+sends a new campaign.
+- If a framework_slug is supplied, just find briefs for that framework
+- If a lot_slug is supplied, just find briefs for that lot
+- If a list_id is supplied, only send emails to that list ID regardless of lot/framework
 
-    For testing purposes, you can override the list ID so you can send it to yourself only as
-    we have set up a testing list with ID "096e52cebb"
+For testing purposes, you can override the list ID so you can send it to yourself only (use the sandbox list ID
+"096e52cebb").
 
-    If you only need to send opportunities for one lot rather than all of them, you can also do this via the command
-    line. Note, this may come in useful if the script was to fail halfway and you wish to continue from the lot which
-    failed.
+For most of the year, there should only be one framework iteration with live briefs. However during the transition
+period between DOS framework iterations, we need to support both iterations.
+
+For example, on the second day of DOS4, any DOS3 briefs created the first day (before the go-live switchover) will
+still need to be emailed to DOS3 suppliers, as well as the usual DOS4 briefs sent to DOS4 suppliers.
+
+Number of days tells the script for how many days before current date it should include in its search for briefs
+    example:  if you run this script on a Wednesday and set number of days=1,
+                then it will only include briefs from Tuesday (preceding day).
+    example2: if you run it on Wednesday and set number of days=3,
+                then it will include all briefs published on Sunday, Monday and Tuesday.
+By default, the script will send 3 days of briefs on a Monday (briefs from Fri, Sat, Sun) and 1 day on all other
+days. This can be overriden as described above.
+
+If you only need to send opportunities for one lot rather than all of them, you can also do this via the command
+line. Note, this may come in useful if the script was to fail halfway and you wish to continue from the lot which
+failed.
 
 Usage:
-    send-dos-opportunities-email.py <stage> <mailchimp_username> <mailchimp_api_key> <framework_slug>
+    send-dos-opportunities-email.py <stage> <mailchimp_username> <mailchimp_api_key>
         [--number_of_days=<number_of_days>] [--list_id=<list_id>] [--lot_slug=<lot_slug>]
+        [--framework_slug=<framework_slug>]
 
 Example:
     send-dos-opportunities-email.py
-        preview user@gds.gov.uk 7483crh87h34c3 digital-outcomes-and-specialists-3
-        --number_of_days=3 --list_id=988972hse --lot_slug=digital-outcomes
+        preview my.username@example.gov.uk myMailchimpKey --framework_slug=digital-outcomes-and-specialists-3
+        --number_of_days=3 --list_id=096e52cebb --lot_slug=digital-outcomes
 """
 
 import sys
@@ -53,48 +59,21 @@ from dmutils.env_helpers import get_api_endpoint_from_stage
 logger = logging_helpers.configure_logger()
 
 
-list_ids = {
-    'digital-outcomes-and-specialists-2': {
-        'digital-specialists': "30ba9fdf39",
-        'digital-outcomes': "97952fee38",
-        'user-research-participants': "e6b93a3bce",
-    },
-    'digital-outcomes-and-specialists-3': {
-        'digital-specialists': "bee802d641",
-        'digital-outcomes': "5c92c78a78",
-        'user-research-participants': "34ebe0bffa",
-    },
-    'digital-outcomes-and-specialists-4': {
-        'digital-specialists': "29d06d5201",
-        'digital-outcomes': "4360debc5a",
-        'user-research-participants': "2538f8a0f1",
-    },
-}
+SANDBOX_LIST_ID = "096e52cebb"
+
 
 if __name__ == "__main__":
     arguments = docopt(__doc__)
-    framework_slug = arguments['<framework_slug>']
-    lots = [
-        {
-            "lot_slug": "digital-specialists",
-            "lot_name": "Digital specialists",
-            "list_id": list_ids[framework_slug]['digital-specialists']
-        },
-        {
-            "lot_slug": "digital-outcomes",
-            "lot_name": "Digital outcomes",
-            "list_id": list_ids[framework_slug]['digital-outcomes']
-        },
-        {
-            "lot_slug": "user-research-participants",
-            "lot_name": "User research participants",
-            "list_id": list_ids[framework_slug]['user-research-participants']
-        }
-    ]
+
+    stage = arguments['<stage>']
+    number_of_days = arguments.get("--number_of_days")
+    list_id = arguments.get("--list_id")
+    lot_slug = arguments.get("--lot_slug")
+    framework_slug = arguments.get("--framework_slug")
 
     # Override number of days
-    if arguments.get("--number_of_days"):
-        number_of_days = int(arguments['--number_of_days'])
+    if number_of_days:
+        number_of_days = int(number_of_days)
     else:
         day_of_week = date.today().weekday()
         if day_of_week == 0:
@@ -102,35 +81,29 @@ if __name__ == "__main__":
         else:
             number_of_days = 1
 
-    # Override list for non-production environment
-    if arguments['<stage>'] != "production":
-        logger.info(
-            "The environment is not production. Emails will be sent to test list unless you set the list id manually."
-        )
-        for lot in lots:
-            lot.update({"list_id": "096e52cebb"})
+    # Override list IDs if supplied by script arg, or if environment is not production
+    if list_id:
+        logger.info("Sending to list ID {}".format(list_id))
+        list_id_override = list_id
+    elif stage != "production":
+        logger.info("The environment is not production. Emails will be sent to test list.")
+        list_id_override = SANDBOX_LIST_ID
+    else:
+        list_id_override = None
 
-    # Override list id
-    if arguments.get("--list_id"):
-        for lot in lots:
-            lot.update({"list_id": arguments["--list_id"]})
-
-    # Override lot
-    if arguments.get("--lot_slug"):
-        lots = [lot for lot in lots if lot["lot_slug"] == arguments["--lot_slug"]]
-
-    api_url = get_api_endpoint_from_stage(arguments['<stage>'])
-    data_api_client = DataAPIClient(api_url, get_auth_token('api', arguments['<stage>']))
+    api_url = get_api_endpoint_from_stage(stage)
+    data_api_client = DataAPIClient(api_url, get_auth_token('api', stage))
 
     dm_mailchimp_client = DMMailChimpClient(arguments['<mailchimp_username>'], arguments['<mailchimp_api_key>'], logger)
 
-    for lot_data in lots:
-        ok = main(
-            data_api_client=data_api_client,
-            mailchimp_client=dm_mailchimp_client,
-            lot_data=lot_data,
-            number_of_days=number_of_days,
-            framework_slug=framework_slug,
-        )
-        if not ok:
-            sys.exit(1)
+    ok = main(
+
+        data_api_client,
+        dm_mailchimp_client,
+        number_of_days,
+        framework_override=framework_slug,
+        list_id_override=list_id,
+        lot_slug_override=lot_slug
+    )
+    if not ok:
+        sys.exit(1)
