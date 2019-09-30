@@ -1,6 +1,6 @@
 from datetime import datetime
 import io
-from jinja2 import Environment, StrictUndefined
+from jinja2 import Environment, StrictUndefined, select_autoescape
 
 from dmutils.formats import nodaydateformat, DATETIME_FORMAT
 
@@ -14,7 +14,10 @@ def dos2_date_format(datetime_string_utc):
 def render_html(template_path, data=None):
     with io.open(template_path, encoding='UTF-8') as htmlfile:
         # Use StrictUndefined so that the template render throws an error if any required variables are not passed in.
-        env = Environment(undefined=StrictUndefined)
+        env = Environment(
+            undefined=StrictUndefined,
+            autoescape=select_autoescape(enabled_extensions=('html',))
+        )
         env.filters['nodaydateformat'] = nodaydateformat
         env.filters['dos2_date_format'] = dos2_date_format
         html = htmlfile.read()
