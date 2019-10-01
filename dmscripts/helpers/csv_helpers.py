@@ -104,7 +104,7 @@ def _make_fields_from_content_question(question, record):
                 make_field_title(question.id, option["label"]),
                 count_field_in_record(question.id, option["label"], record)
             )
-    elif question.fields:
+    elif hasattr(question, 'fields'):
         for field_id in sorted(question.fields.values()):
             # Make a CSV column containing all values
             yield (
