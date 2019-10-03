@@ -47,9 +47,10 @@ def find_all_labs(client, map_impl=map):
     return services
 
 
-def write_labs_csv(services, filename):
+def write_labs_csv(services, filename, logger=None):
     writer = None
     bad_fields = ['links']
+    logger.info(f"Building CSV for User Research Studios")
 
     with open(filename, "w+") as f:
         for service in services:
@@ -80,8 +81,9 @@ if __name__ == '__main__':
 
     pool = ThreadPool(3)
 
-    logger.info(f"Finding suppliers for Digital Outcomes on {FRAMEWORK_SLUG}")
+    logger.info(f"Finding suppliers for User Research Studios on {FRAMEWORK_SLUG}")
     write_labs_csv(
         find_all_labs(client, map_impl=pool.imap),
-        os.path.join(OUTPUT_DIR, "user-research-studios.csv".format(FRAMEWORK_SLUG))
+        os.path.join(OUTPUT_DIR, "user-research-studios.csv"),
+        logger=logger
     )
