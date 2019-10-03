@@ -5,12 +5,13 @@ For a DOS-type framework this will export details of all "user-research-particip
 recruitment methods the supplier provides and the locations they can provide them in.
 
 Usage:
-    scripts/export-dos-participants.py <stage> <framework_slug> <content_path>
+    scripts/export-dos-participants.py <stage> <framework_slug> <content_path> [--verbose]
 """
 from multiprocessing.pool import ThreadPool
 import sys
 sys.path.insert(0, '.')
 
+import logging
 from dmscripts.helpers.csv_helpers import make_fields_from_content_questions
 from dmscripts.helpers.framework_helpers import find_suppliers_with_details_and_draft_services
 
@@ -20,10 +21,7 @@ from dmscripts.helpers.auth_helpers import get_auth_token
 from dmapiclient import DataAPIClient
 from dmcontent.content_loader import ContentLoader
 from dmscripts.helpers import logging_helpers
-from dmscripts.helpers.logging_helpers import logging
 from dmutils.env_helpers import get_api_endpoint_from_stage
-
-logger = logging_helpers.configure_logger({"dmapiclient": logging.WARNING})
 
 
 def find_all_participants(client, map_impl=map):
@@ -58,6 +56,11 @@ if __name__ == '__main__':
     STAGE = arguments['<stage>']
     CONTENT_PATH = arguments['<content_path>']
     FRAMEWORK_SLUG = arguments['<framework_slug>']
+    verbose = arguments['--verbose']
+
+    logger = logging_helpers.configure_logger(
+        {"dmapiclient": logging.INFO} if verbose else {"dmapiclient": logging.WARN}
+    )
 
     client = DataAPIClient(get_api_endpoint_from_stage(STAGE), get_auth_token('api', STAGE))
 
@@ -67,8 +70,10 @@ if __name__ == '__main__':
 
     pool = ThreadPool(3)
 
+    logger.info(f'Finding User Research Participants suppliers for {FRAMEWORK_SLUG}')
     records = find_all_participants(client, map_impl=pool.imap)
 
+    logger.info(f"Building CSV for {len(records)} User Research Participants suppliers")
     write_csv_with_make_row(
         records,
         make_row(content_manifest),
