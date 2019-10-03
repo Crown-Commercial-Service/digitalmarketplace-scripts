@@ -101,5 +101,5 @@ if __name__ == '__main__':
     write_csv_with_make_row(
         suppliers,
         make_row(capabilities, locations),
-        os.path.join(OUTPUT_DIR, "{}-outcomes.csv".format(FRAMEWORK_SLUG))
+        os.path.join(OUTPUT_DIR, "digital-outcomes-suppliers.csv".format(FRAMEWORK_SLUG))
     )

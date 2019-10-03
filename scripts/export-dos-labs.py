@@ -83,5 +83,5 @@ if __name__ == '__main__':
     logger.info(f"Finding suppliers for Digital Outcomes on {FRAMEWORK_SLUG}")
     write_labs_csv(
         find_all_labs(client, map_impl=pool.imap),
-        os.path.join(OUTPUT_DIR, "{}-labs.csv".format(FRAMEWORK_SLUG))
+        os.path.join(OUTPUT_DIR, "user-research-studios.csv".format(FRAMEWORK_SLUG))
     )
