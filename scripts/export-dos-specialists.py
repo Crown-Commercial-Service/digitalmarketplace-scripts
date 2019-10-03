@@ -5,9 +5,14 @@ For a DOS-type framework this will export details of all "digital-specialists" s
 specialist roles the supplier provides, the locations they can provide them in and the min and max prices per role.
 
 Usage:
-    scripts/export-dos-specialists.py <stage> <framework_slug> <content_path> [--verbose]
+    scripts/export-dos-specialists.py <stage> <framework_slug> <content_path> [options]
+
+Options:
+    -v --verbose                Print INFO level messages.
+    --output-dir=<output_dir>   Directory to write csv files to [default: output]
 """
 from multiprocessing.pool import ThreadPool
+import os
 import sys
 sys.path.insert(0, '.')
 
@@ -61,11 +66,16 @@ if __name__ == '__main__':
     STAGE = arguments['<stage>']
     CONTENT_PATH = arguments['<content_path>']
     FRAMEWORK_SLUG = arguments['<framework_slug>']
+    OUTPUT_DIR = arguments['--output-dir']
     verbose = arguments['--verbose']
 
     logger = logging_helpers.configure_logger(
         {"dmapiclient": logging.INFO} if verbose else {"dmapiclient": logging.WARN}
     )
+
+    if not os.path.exists(OUTPUT_DIR):
+        logger.info("Creating {} directory".format(OUTPUT_DIR))
+        os.makedirs(OUTPUT_DIR)
 
     client = DataAPIClient(get_api_endpoint_from_stage(STAGE), get_auth_token('api', STAGE))
 
@@ -82,5 +92,5 @@ if __name__ == '__main__':
     write_csv_with_make_row(
         suppliers,
         make_row(content_manifest),
-        "output/{}-specialists.csv".format(FRAMEWORK_SLUG)
+        os.path.join(OUTPUT_DIR, "{}-specialists.csv".format(FRAMEWORK_SLUG))
     )

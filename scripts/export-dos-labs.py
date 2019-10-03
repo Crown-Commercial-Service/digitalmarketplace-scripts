@@ -4,10 +4,15 @@
 For a DOS-type framework this will export details of all "user-research-studios" services.
 
 Usage:
-    scripts/export-dos-labs.py <stage> <framework_slug> [--verbose]
+    scripts/export-dos-labs.py <stage> <framework_slug> [options]
+
+Options:
+    -v --verbose                Print INFO level messages.
+    --output-dir=<output_dir>   Directory to write csv files to [default: output]
 """
 import itertools
 from multiprocessing.pool import ThreadPool
+import os
 import sys
 sys.path.insert(0, '.')
 
@@ -60,15 +65,23 @@ if __name__ == '__main__':
 
     STAGE = arguments['<stage>']
     FRAMEWORK_SLUG = arguments['<framework_slug>']
+    OUTPUT_DIR = arguments['--output-dir']
     verbose = arguments['--verbose']
 
     logger = logging_helpers.configure_logger(
         {"dmapiclient": logging.INFO} if verbose else {"dmapiclient": logging.WARN}
     )
 
+    if not os.path.exists(OUTPUT_DIR):
+        logger.info("Creating {} directory".format(OUTPUT_DIR))
+        os.makedirs(OUTPUT_DIR)
+
     client = DataAPIClient(get_api_endpoint_from_stage(STAGE), get_auth_token('api', STAGE))
 
     pool = ThreadPool(3)
 
     logger.info(f"Finding suppliers for Digital Outcomes on {FRAMEWORK_SLUG}")
-    write_labs_csv(find_all_labs(client, map_impl=pool.imap), "output/{}-labs.csv".format(FRAMEWORK_SLUG))
+    write_labs_csv(
+        find_all_labs(client, map_impl=pool.imap),
+        os.path.join(OUTPUT_DIR, "{}-labs.csv".format(FRAMEWORK_SLUG))
+    )
