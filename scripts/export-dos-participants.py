@@ -43,7 +43,6 @@ def make_row(content_manifest):
     question_ids = ["recruitMethods", "recruitFromList", "locations"]
     questions = [content_manifest.get_question(question_id) for question_id in question_ids]
 
-
     def inner(record):
         row = [
             ("supplier_id", record["supplier_id"]),
