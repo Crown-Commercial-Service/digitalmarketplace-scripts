@@ -3,6 +3,7 @@
 import collections
 import os
 import sys
+from datetime import date
 
 if sys.version_info > (3, 0):
     import csv
@@ -149,7 +150,7 @@ def write_csv(headers, rows_iter, filename):
             writer.writerow(dict(row))
 
 
-def write_csv_with_make_row(records, make_row, filename):
+def write_csv_with_make_row(records, make_row, filename, include_last_updated=True):
     """Write a list of records out to CSV, using a custom make_row method to convert records to rows"""
     def fieldnames(row):
         return [field[0] for field in row]
@@ -165,3 +166,6 @@ def write_csv_with_make_row(records, make_row, filename):
                 writer = csv.DictWriter(f, fieldnames=fieldnames(row))
                 writer.writeheader()
             writer.writerow(dict(row))
+
+        if include_last_updated:
+            f.write("Last updated {}".format(date.today().strftime("%d %B %Y")))

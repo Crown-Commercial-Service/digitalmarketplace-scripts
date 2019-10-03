@@ -87,5 +87,6 @@ if __name__ == '__main__':
     write_csv_with_make_row(
         records,
         make_row(content_manifest),
-        os.path.join(OUTPUT_DIR, "user-research-participants-suppliers.csv".format(FRAMEWORK_SLUG))
+        os.path.join(OUTPUT_DIR, "user-research-participants-suppliers.csv".format(FRAMEWORK_SLUG)),
+        include_last_updated=True
     )
