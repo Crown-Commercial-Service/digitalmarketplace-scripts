@@ -92,6 +92,6 @@ if __name__ == '__main__':
     write_csv_with_make_row(
         suppliers,
         make_row(content_manifest),
-        os.path.join(OUTPUT_DIR, "digital-specialists-suppliers.csv".format(FRAMEWORK_SLUG)),
+        os.path.join(OUTPUT_DIR, "digital-specialists-suppliers.csv"),
         include_last_updated=True
     )
