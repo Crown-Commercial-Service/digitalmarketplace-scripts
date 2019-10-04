@@ -3,6 +3,7 @@
 import collections
 import os
 import sys
+from datetime import date
 
 if sys.version_info > (3, 0):
     import csv
@@ -104,7 +105,7 @@ def _make_fields_from_content_question(question, record):
                 make_field_title(question.id, option["label"]),
                 count_field_in_record(question.id, option["label"], record)
             )
-    elif question.fields:
+    elif hasattr(question, 'fields'):
         for field_id in sorted(question.fields.values()):
             # Make a CSV column containing all values
             yield (
@@ -149,7 +150,7 @@ def write_csv(headers, rows_iter, filename):
             writer.writerow(dict(row))
 
 
-def write_csv_with_make_row(records, make_row, filename):
+def write_csv_with_make_row(records, make_row, filename, include_last_updated=True):
     """Write a list of records out to CSV, using a custom make_row method to convert records to rows"""
     def fieldnames(row):
         return [field[0] for field in row]
@@ -165,3 +166,6 @@ def write_csv_with_make_row(records, make_row, filename):
                 writer = csv.DictWriter(f, fieldnames=fieldnames(row))
                 writer.writeheader()
             writer.writerow(dict(row))
+
+        if include_last_updated:
+            f.write("Last updated {}".format(date.today().strftime("%d %B %Y")))

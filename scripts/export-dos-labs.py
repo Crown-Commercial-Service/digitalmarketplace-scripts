@@ -4,18 +4,25 @@
 For a DOS-type framework this will export details of all "user-research-studios" services.
 
 Usage:
-    scripts/export-dos-labs.py <stage> <framework_slug>
+    scripts/export-dos-labs.py <stage> <framework_slug> [options]
+
+Options:
+    -v --verbose                Print INFO level messages.
+    --output-dir=<output_dir>   Directory to write csv files to [default: output]
 """
 import itertools
 from multiprocessing.pool import ThreadPool
+import os
 import sys
 sys.path.insert(0, '.')
 
+import logging
 from docopt import docopt
 from dmapiclient import DataAPIClient
 
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.framework_helpers import find_suppliers_with_details_and_draft_services
+from dmscripts.helpers import logging_helpers
 from dmscripts.export_dos_labs import append_contact_information_to_services
 from dmutils.env_helpers import get_api_endpoint_from_stage
 
@@ -40,9 +47,10 @@ def find_all_labs(client, map_impl=map):
     return services
 
 
-def write_labs_csv(services, filename):
+def write_labs_csv(services, filename, logger=None):
     writer = None
     bad_fields = ['links']
+    logger.info(f"Building CSV for User Research Studios")
 
     with open(filename, "w+") as f:
         for service in services:
@@ -58,9 +66,24 @@ if __name__ == '__main__':
 
     STAGE = arguments['<stage>']
     FRAMEWORK_SLUG = arguments['<framework_slug>']
+    OUTPUT_DIR = arguments['--output-dir']
+    verbose = arguments['--verbose']
+
+    logger = logging_helpers.configure_logger(
+        {"dmapiclient": logging.INFO} if verbose else {"dmapiclient": logging.WARN}
+    )
+
+    if not os.path.exists(OUTPUT_DIR):
+        logger.info("Creating {} directory".format(OUTPUT_DIR))
+        os.makedirs(OUTPUT_DIR)
 
     client = DataAPIClient(get_api_endpoint_from_stage(STAGE), get_auth_token('api', STAGE))
 
     pool = ThreadPool(3)
 
-    write_labs_csv(find_all_labs(client, map_impl=pool.imap), "output/{}-labs.csv".format(FRAMEWORK_SLUG))
+    logger.info(f"Finding suppliers for User Research Studios on {FRAMEWORK_SLUG}")
+    write_labs_csv(
+        find_all_labs(client, map_impl=pool.imap),
+        os.path.join(OUTPUT_DIR, "user-research-studios.csv"),
+        logger=logger
+    )
