@@ -45,6 +45,7 @@ from dmscripts.models.process_rules import (
     remove_username_from_email_address,
     extract_id_from_user_info,
     query_data_from_config,
+    process_data_from_config
 )
 from dmscripts.models.writecsv import export_data_to_csv
 from dmutils.env_helpers import get_api_endpoint_from_stage
@@ -406,7 +407,8 @@ if __name__ == '__main__':
         logger.info('Processing {} data'.format(config['name']))
         try:
             query_data = query_data_from_config(config, logger, limit, client, OUTPUT_DIR)
-            export_data_to_csv(OUTPUT_DIR, config, query_data, logger)
+            processed_data = process_data_from_config(query_data, config, logger)
+            export_data_to_csv(OUTPUT_DIR, config, processed_data, logger)
         except (APIError, HTTPError, InvalidResponse) as exc:
             # Log and continue with next config
             logger.error(

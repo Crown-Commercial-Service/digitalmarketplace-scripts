@@ -6,41 +6,47 @@ from dmscripts.models.process_rules import (
     format_datetime_string_as_date,
     remove_username_from_email_address,
     extract_id_from_user_info,
-    query_data_from_config
+    query_data_from_config,
+    process_data_from_config
 )
 from dmapiclient import DataAPIClient
 
 
-def test_format_datetime_string_as_date():
-    initial_date = "2016-10-08T12:00:00.00000Z"
-    formatted_date = "2016-10-08"
-    assert format_datetime_string_as_date(initial_date) == formatted_date
+class TestFormatDatetimeStringAsDate:
+
+    def test_format_datetime_string_as_date(self):
+        initial_date = "2016-10-08T12:00:00.00000Z"
+        formatted_date = "2016-10-08"
+        assert format_datetime_string_as_date(initial_date) == formatted_date
+
+    def test_format_datetime_string_as_date_raises_error_if_initial_date_format_incorrect(self):
+        initial_dates = (
+            "2016-10-08T12:00:00.00000",
+            "2016-10-08T12:00:00",
+            "2016-10-08"
+        )
+        for date in initial_dates:
+            with pytest.raises(ValueError) as excinfo:
+                format_datetime_string_as_date(date)
+
+            assert "time data '{}' does not match format".format(date) in str(excinfo.value)
 
 
-def test_format_datetime_string_as_date_raises_error_if_initial_date_format_incorrect():
-    initial_dates = (
-        "2016-10-08T12:00:00.00000",
-        "2016-10-08T12:00:00",
-        "2016-10-08"
-    )
-    for date in initial_dates:
-        with pytest.raises(ValueError) as excinfo:
-            format_datetime_string_as_date(date)
+class TestRemoveUsernameFromEmailAddress:
 
-        assert "time data '{}' does not match format".format(date) in str(excinfo.value)
+    def test_remove_username_from_email_address(self):
+        initial_email_address = "user.name@domain.com"
+        formatted_email_address = "domain.com"
+        assert remove_username_from_email_address(initial_email_address) == formatted_email_address
 
 
-def test_remove_username_from_email_address():
-    initial_email_address = "user.name@domain.com"
-    formatted_email_address = "domain.com"
-    assert remove_username_from_email_address(initial_email_address) == formatted_email_address
+class TestExtractIDFromUserInfo:
 
+    def test_extract_id_from_user_info(self):
+        user_list = [{'id': x} for x in range(3)]
+        extracted_ids = extract_id_from_user_info(user_list)
 
-def test_extract_id_from_user_info():
-    user_list = [{'id': x} for x in range(3)]
-    extracted_ids = extract_id_from_user_info(user_list)
-
-    assert extracted_ids == '0,1,2'
+        assert extracted_ids == '0,1,2'
 
 
 class TestQueryDataFromConfig:
@@ -162,24 +168,47 @@ class TestQueryDataFromConfig:
         result = query_data_from_config(
             config, logger=mock.ANY, limit=100, client=client, output_dir="data"
         )
-        assert list(result.columns) == ['briefId', 'awardedContractStartDate', 'awardedContractValue']
-        assert result.values.tolist()[0] == ['1', '2019-01-01', '10000']
 
-    @mock.patch('dmscripts.models.queries.model')
-    def test_query_data_from_config_renames_fields(self, model):
+        assert list(result.columns) == ['awardDetails', 'briefId', 'awardedContractStartDate', 'awardedContractValue']
+        assert result.values.tolist()[0] == [
+            {'awardedContractStartDate': '2019-01-01', 'awardedContractValue': '10000'}, '1', '2019-01-01', '10000'
+        ]
+
+
+class TestProcessDataFromConfig:
+
+    def test_process_data_from_config_renames_fields(self):
         config = {
             'name': 'successful_brief_responses',
             'model': 'brief_responses',
             'keys': ('briefId', 'status_briefs',),
             'rename_fields': {'status_briefs': 'status'}
         }
-        client = mock.Mock(autospec=DataAPIClient)
 
-        expected_query_result = pandas.DataFrame([{'briefId': '1', 'status_briefs': 'closed'}])
-        model.side_effect = [expected_query_result]
+        query_data = pandas.DataFrame([{'briefId': '1', 'status_briefs': 'closed'}])
 
-        result = query_data_from_config(
-            config, logger=mock.ANY, limit=100, client=client, output_dir="data"
-        )
+        result = process_data_from_config(query_data, config, logger=mock.ANY)
+
         assert list(result.columns) == ['briefId', 'status']
         assert result.values.tolist()[0] == ['1', 'closed']
+
+    def test_process_data_from_config_applies_sorting(self):
+        config = {
+            'name': 'successful_brief_responses',
+            'model': 'brief_responses',
+            'keys': ('briefId', 'submittedAt', 'nonSortedField'),
+            'sort_by': ['briefId', 'submittedAt']
+        }
+
+        query_data = pandas.DataFrame([
+            {'briefId': '1', 'submittedAt': '2019-02-01', 'nonSortedField': 'foo'},
+            {'briefId': '3', 'submittedAt': '2019-04-01', 'nonSortedField': 'bar'},
+            {'briefId': '3', 'submittedAt': '2019-03-01', 'nonSortedField': 'baz'},
+        ])
+
+        result = process_data_from_config(query_data, config, logger=mock.ANY)
+
+        assert list(result.columns) == ['briefId', 'submittedAt', 'nonSortedField']
+        assert result.values.tolist()[0] == ['1', '2019-02-01', 'foo']
+        assert result.values.tolist()[1] == ['3', '2019-03-01', 'baz']
+        assert result.values.tolist()[2] == ['3', '2019-04-01', 'bar']

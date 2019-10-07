@@ -79,6 +79,18 @@ def query_data_from_config(config, logger, limit, client, output_dir):
     if 'group_by' in config:
         data = queries.group_by(config['group_by'], data)
 
+    return data
+
+
+def process_data_from_config(data, config, logger):
+    """
+    Applies any post-query tidying to the data. No 'db' actions involved.
+    :param data: a pandas data frame
+    :param config: JSON config from top level script
+    :param logger: logger instance
+    :return: 'cleaned' pandas data frame
+    """
+
     # Only keep requested keys in the output CSV
     keys = [
         j for j in (
