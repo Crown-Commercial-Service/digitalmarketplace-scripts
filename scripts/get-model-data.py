@@ -74,7 +74,8 @@ DOS_SPECIALIST_ROLES_PRICE_MAX = [s + 'PriceMax' for s in DOS_SPECIALIST_ROLES]
 DOS_FRAMEWORKS = (
     'digital-outcomes-and-specialists, '
     'digital-outcomes-and-specialists-2, '
-    'digital-outcomes-and-specialists-3'
+    'digital-outcomes-and-specialists-3, '
+    'digital-outcomes-and-specialists-4'
 )
 # TODO: figure out why G-Cloud is a string and the DOS one is a tuple
 G_CLOUD_FRAMEWORKS = 'g-cloud-10, g-cloud-11'
