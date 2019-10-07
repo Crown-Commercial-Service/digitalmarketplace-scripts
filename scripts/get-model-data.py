@@ -382,7 +382,12 @@ def query_data_from_config(config, logger, limit, client, output_dir):
                                   client=client, logger=logger, limit=limit)
 
     elif 'model' in config:
-        data = queries.model(config['model'], directory=output_dir)
+        try:
+            data = queries.model(config['model'], directory=output_dir)
+        except FileNotFoundError as exc:
+            # Some reports rely on a previous model's CSV being present - skip if it's not there
+            logger.error(f"{exc}, skipping report for {config['name']}")
+            return None
 
     if 'joins' in config:
         for join in config['joins']:
@@ -449,8 +454,11 @@ def query_data_from_config(config, logger, limit, client, output_dir):
 def export_data_to_csv(output_dir, data, logger):
     # write up your CSV
     filename = csv_path(output_dir, config['name'])
-    data.to_csv(filename, index=False, encoding='utf-8')
-    logger.info('Printed `{}` with {} rows'.format(filename, len(data)))
+    try:
+        data.to_csv(filename, index=False, encoding='utf-8')
+        logger.info('Printed `{}` with {} rows'.format(filename, len(data)))
+    except AttributeError as exc:
+        logger.error(f"Unable to write to CSV for {filename}: {exc}")
 
 
 if __name__ == '__main__':
