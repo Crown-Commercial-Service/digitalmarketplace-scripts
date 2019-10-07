@@ -54,20 +54,11 @@ def query_data_from_config(config, logger, limit, client, output_dir):
         for field, subfields in config['assign_json_subfields'].items():
             data = queries.assign_json_subfields(field, subfields, data)
 
-    # TODO: figure out if this is still needed
-    if 'duplicate_fields' in config:
-        for field, new_name in config['duplicate_fields']:
-            data = queries.duplicate_fields(data, field, new_name)
-
     if 'process_fields' in config:
         data = queries.process_fields(config['process_fields'], data)
 
     if 'add_counts' in config:
         data = queries.add_counts(data=data, directory=output_dir, **config['add_counts'])
-
-    if 'aggregation_counts' in config:
-        for count in config['aggregation_counts']:
-            data = queries.add_aggregation_counts(data=data, **count)
 
     if 'filter_query' in config:
         # filter out things we don't want
@@ -106,9 +97,5 @@ def process_data_from_config(data, config, logger):
     # sort list by some dict value
     if 'sort_by' in config:
         data = queries.sort_by(config['sort_by'], data)
-
-    # TODO: figure out if this is still needed
-    if 'drop_duplicates' in config and config['drop_duplicates']:
-        data = queries.drop_duplicates(data)
 
     return data
