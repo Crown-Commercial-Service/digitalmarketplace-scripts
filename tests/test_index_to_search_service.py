@@ -70,11 +70,11 @@ class TestIndexers:
         ]
 
     def test_service_indexer_request_items_calls_data_api_client_with_frameworks(self):
-        self.data_api_client.return_value.find_services_iter.return_value = ['service1', 'service2']
+        self.data_api_client.return_value.find_services_iter.return_value = iter(('service1', 'service2',))
         indexer = ServiceIndexer(
             'services', self.data_api_client.return_value, self.search_api_client.return_value, 'myIndex'
         )
-        assert indexer.request_items('framework1,framework2') == ['service1', 'service2']
+        assert tuple(indexer.request_items('framework1,framework2')) == ('service1', 'service2',)
         assert self.data_api_client.return_value.find_services_iter.call_args_list == [
             mock.call(framework='framework1,framework2')
         ]
@@ -93,7 +93,7 @@ class TestIndexers:
         ]
 
     def test_service_indexer_index_items_calls_search_api_index_for_published_services(self):
-        self.data_api_client.return_value.find_services_iter.return_value = ['service1', 'service2']
+        self.data_api_client.return_value.find_services_iter.return_value = iter(('service1', 'service2',))
         indexer = ServiceIndexer(
             'services', self.data_api_client.return_value, self.search_api_client.return_value, 'myIndex'
         )
@@ -104,7 +104,7 @@ class TestIndexers:
         ]
 
     def test_service_indexer_index_items_calls_search_api_delete_for_published_services(self):
-        self.data_api_client.return_value.find_services_iter.return_value = ['service1', 'service2']
+        self.data_api_client.return_value.find_services_iter.return_value = iter(('service1', 'service2',))
         indexer = ServiceIndexer(
             'services', self.data_api_client.return_value, self.search_api_client.return_value, 'myIndex'
         )
@@ -119,7 +119,7 @@ class TestIndexers:
     @mock.patch.object(BriefIndexer, 'request_items', autospec=True)
     def test_do_index_creates_brief_indexer_class_and_indexes_items(self, request_items, index_item, indexer_init):
         indexer_init.return_value = None
-        request_items.return_value = ['brief1', 'brief2']
+        request_items.return_value = iter(('brief1', 'brief2',))
         do_index(
             'briefs',
             "http://search-api-url", "mySearchAPIToken",
@@ -152,7 +152,7 @@ class TestIndexers:
     @mock.patch.object(ServiceIndexer, 'request_items', autospec=True)
     def test_do_index_creates_service_indexer_class_and_indexes_items(self, request_items, index_item, indexer_init):
         indexer_init.return_value = None
-        request_items.return_value = ['service1', 'service2']
+        request_items.return_value = iter(('service1', 'service2',))
         do_index(
             'services',
             "http://search-api-url", "mySearchAPIToken",
