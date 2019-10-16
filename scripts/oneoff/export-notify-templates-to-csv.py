@@ -32,6 +32,7 @@ NOTIFY_TEMPLATE_KEYS = [
     'created_by',
     'updated_at',
     'version',
+    'personalisation',
     'body',
 ]
 
@@ -62,7 +63,7 @@ if __name__ == '__main__':
     resp = client.get_all_templates()
 
     with open(path, 'w') as f:
-        writer = csv.writer(f, delimiter=',', quotechar='"')
-        writer.writerow(headers)
-        for r in resp['templates']:
-            writer.writerow([r[header] for header in headers])
+        writer = csv.DictWriter(f, fieldnames=headers)
+        writer.writeheader()
+        for template_json in resp['templates']:
+            writer.writerow({key: value for key, value in template_json.items() if key in headers})
