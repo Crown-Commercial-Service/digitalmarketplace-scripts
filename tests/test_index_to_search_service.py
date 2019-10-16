@@ -50,13 +50,23 @@ class TestIndexers:
             assert e.message == 'disaster'
 
     def test_brief_indexer_request_items_calls_data_api_client_with_frameworks(self):
-        self.data_api_client.return_value.find_briefs_iter.return_value = ['brief1', 'brief2']
+        self.data_api_client.return_value.find_briefs_iter.side_effect = lambda *args, **kwargs: {
+            "live,cancelled,unsuccessful,awarded,closed": iter(('brief1', 'brief2',)),
+            "withdrawn": iter(('brief3',)),
+        }[kwargs.get("status")]
         indexer = BriefIndexer(
             'briefs', self.data_api_client.return_value, self.search_api_client.return_value, 'myIndex'
         )
-        assert indexer.request_items('framework1,framework2') == ['brief1', 'brief2']
-        assert self.data_api_client.return_value.find_briefs_iter.call_args_list == [
-            mock.call(framework='framework1,framework2')
+        assert tuple(indexer.request_items('framework1,framework2')) == ('brief1', 'brief2', 'brief3',)
+        assert self.data_api_client.mock_calls == [
+            mock.call().find_briefs_iter(
+                framework='framework1,framework2',
+                status="live,cancelled,unsuccessful,awarded,closed",
+            ),
+            mock.call().find_briefs_iter(
+                framework='framework1,framework2',
+                status="withdrawn",
+            ),
         ]
 
     def test_service_indexer_request_items_calls_data_api_client_with_frameworks(self):
@@ -70,7 +80,10 @@ class TestIndexers:
         ]
 
     def test_brief_indexer_index_items_calls_search_api_client(self):
-        self.data_api_client.return_value.find_briefs_iter.return_value = ['brief1', 'brief2']
+        self.data_api_client.return_value.find_briefs_iter.side_effect = lambda *args, **kwargs: {
+            "live,cancelled,unsuccessful,awarded,closed": iter(('brief1', 'brief2',)),
+            "withdrawn": iter(('brief3',)),
+        }[kwargs.get("status")]
         indexer = BriefIndexer(
             'briefs', self.data_api_client.return_value, self.search_api_client.return_value, 'myIndex'
         )
