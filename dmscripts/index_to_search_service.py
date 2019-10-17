@@ -1,4 +1,5 @@
 from datetime import datetime
+from itertools import chain
 from multiprocessing.pool import ThreadPool
 
 import dmapiclient
@@ -60,8 +61,17 @@ class IndexerBase(object):
 
 class BriefIndexer(IndexerBase):
     def request_items(self, frameworks):
-        # despite the name, `framework` takes a string containing a comma-separated list of framework slugs
-        return self.data_client.find_briefs_iter(framework=frameworks)
+        # this is done as two separate calls because the bulk of the results should be deliverable in a compressed
+        # response (which we want as it tends to be more reliable), however we still need to send "withdrawn" briefs
+        # to the search api as this is the only way such briefs get removed from the search results. the api will
+        # likely refuse to compress these but that's fine as there aren't many of them.
+        return chain(
+            self.data_client.find_briefs_iter(
+                framework=frameworks,
+                status="live,cancelled,unsuccessful,awarded,closed",
+            ),
+            self.data_client.find_briefs_iter(framework=frameworks, status="withdrawn"),
+        )
 
     def include_in_index(self, item):
         # Even draft briefs will be in the index, for now at least
