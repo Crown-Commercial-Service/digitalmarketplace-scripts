@@ -20,4 +20,4 @@ pandas==0.19.1  # pyup: ignore # avoid updating as it means reopening a fairly g
 python-dateutil==2.8.0
 unicodecsv==0.14.1
 xeger==0.3.5
-yq==2.7.2
+yq==2.8.0
