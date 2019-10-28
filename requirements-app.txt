@@ -10,7 +10,7 @@ git+https://github.com/alphagov/digitalmarketplace-utils.git@48.1.0#egg=digitalm
 git+https://github.com/alphagov/digitalmarketplace-apiclient.git@20.2.0#egg=digitalmarketplace-apiclient==20.2.0
 git+https://github.com/alphagov/digitalmarketplace-content-loader.git@5.2.0#egg=digitalmarketplace-content-loader==5.2.0
 
-awscli==1.16.263
+awscli==1.16.266
 backoff==1.8.1
 clamd==1.0.2
 docopt==0.6.2
@@ -20,4 +20,4 @@ pandas==0.19.1  # pyup: ignore # avoid updating as it means reopening a fairly g
 python-dateutil==2.8.0
 unicodecsv==0.14.1
 xeger==0.3.5
-yq==2.7.2
+yq==2.8.0
