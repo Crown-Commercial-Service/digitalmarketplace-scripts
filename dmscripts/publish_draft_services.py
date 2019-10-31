@@ -111,13 +111,11 @@ def copy_draft_documents(
         client.update_service(service_id, document_updates, user='publish_draft_services.py')
 
 
-def _publish_draft_service(
+def publish_draft_service(
     client,
     draft_service,
-    framework_slug,
-    copy_documents_callable=None,
+    _assets_endpoint,
     dry_run=True,
-    skip_docs_if_published=True,
 ):
     get_logger().info("supplier %s: draft %s: publishing", draft_service["supplierId"], draft_service['id'])
 
@@ -167,9 +165,6 @@ def _publish_draft_service(
             else:
                 raise e
 
-    if copy_documents_callable:
-        copy_documents_callable(client, framework_slug, draft_service, service_id, dry_run)
-
 
 def _get_draft_services_iter(client, framework_slug, draft_ids_file=None):
     supplier_frameworks = find_suppliers_on_framework(client, framework_slug)
@@ -203,17 +198,31 @@ def _get_draft_services_iter(client, framework_slug, draft_ids_file=None):
 def publish_draft_services(
     client,
     framework_slug,
-    copy_documents_callable=None,
+    DRAFT_BUCKET,
+    DOCUMENTS_BUCKET,
+    document_keys,
+    _assets_endpoint,
     draft_ids_file=None,
     dry_run=True,
     skip_docs_if_published=True,
+    copy_documents=True
 ):
     for draft_service in _get_draft_services_iter(client, framework_slug, draft_ids_file=draft_ids_file):
-        _publish_draft_service(
+        service_id, previously_published = publish_draft_service(
             client,
             draft_service,
-            framework_slug,
-            copy_documents_callable=copy_documents_callable,
+            _assets_endpoint,
             dry_run=dry_run,
-            skip_docs_if_published=skip_docs_if_published,
         )
+        if copy_documents and not (skip_docs_if_published and previously_published):
+            copy_draft_documents(
+                DRAFT_BUCKET,
+                DOCUMENTS_BUCKET,
+                document_keys,
+                _assets_endpoint,
+                client,
+                framework_slug,
+                draft_service,
+                service_id,
+                dry_run
+            )

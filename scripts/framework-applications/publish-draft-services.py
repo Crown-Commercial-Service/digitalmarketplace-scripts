@@ -36,7 +36,7 @@ from dmutils.env_helpers import get_api_endpoint_from_stage, get_assets_endpoint
 
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.logging_helpers import configure_logger
-from dmscripts.publish_draft_services import publish_draft_services, copy_draft_documents
+from dmscripts.publish_draft_services import publish_draft_services
 
 _document_keys_by_framework_family = {
     "g-cloud": (
@@ -85,19 +85,15 @@ if __name__ == '__main__':
     except (KeyError, NotImplementedError):
         _assets_endpoint = "https://dummy.endpoint"
 
-    copy_documents_callable = document_keys and partial(
-        copy_draft_documents,
+    publish_draft_services(
+        client,
+        FRAMEWORK_SLUG,
         DRAFT_BUCKET,
         DOCUMENTS_BUCKET,
         document_keys,
         _assets_endpoint,
-    )
-
-    publish_draft_services(
-        client,
-        FRAMEWORK_SLUG,
-        copy_documents_callable,
-        DRAFT_IDS_FILE,
-        DRY_RUN,
-        SKIP_DOCS_IF_PUBLISHED,
+        draft_ids_file=DRAFT_IDS_FILE,
+        dry_run=DRY_RUN,
+        skip_docs_if_published=SKIP_DOCS_IF_PUBLISHED,
+        copy_documents=bool(document_keys)
     )
