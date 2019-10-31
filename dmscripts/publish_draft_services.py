@@ -112,7 +112,6 @@ def copy_draft_documents(
 def publish_draft_service(
     client,
     draft_service,
-    _assets_endpoint,
     dry_run=True,
 ):
     get_logger().info("supplier %s: draft %s: publishing", draft_service["supplierId"], draft_service['id'])
@@ -209,7 +208,6 @@ def publish_draft_services(
         service_id, previously_published = publish_draft_service(
             client,
             draft_service,
-            _assets_endpoint,
             dry_run=dry_run,
         )
         if copy_documents and not (skip_docs_if_published and previously_published):
