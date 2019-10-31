@@ -14,7 +14,8 @@ from dmscripts.publish_draft_services import publish_draft_services, copy_draft_
 
 @pytest.mark.parametrize("dry_run", (False, True,))
 @pytest.mark.parametrize("skip_docs_if_published", (False, True,))
-def test_publish_draft_services(skip_docs_if_published, dry_run):
+@mock.patch('dmscripts.publish_draft_services.copy_draft_documents')
+def test_publish_draft_services(copy_draft_documents, skip_docs_if_published, dry_run):
     draft_service_kwargs_by_supplier = {
         supplier_id: tuple(
             {
@@ -94,15 +95,19 @@ def test_publish_draft_services(skip_docs_if_published, dry_run):
         495012,
     )
 
-    mock_copy_documents_callable = mock.Mock()
+    mock_copy_draft_documents = mock.Mock()
 
     publish_draft_services(
         mock_data_api_client,
         "g-cloud-123",
-        mock_copy_documents_callable,
+        'draft-bucket',
+        'documents-bucket',
+        ('123', '456'),
+        'https://boyish.gam/bols/',
         draft_ids_file=None,
         dry_run=dry_run,
         skip_docs_if_published=skip_docs_if_published,
+        copy_documents=True
     )
 
     assert mock_data_api_client.find_framework_suppliers_iter.called is True
@@ -126,9 +131,13 @@ def test_publish_draft_services(skip_docs_if_published, dry_run):
     # would only be called as a result of a publish_draft_service call going wrong
     assert mock_data_api_client.get_draft_service.called is (not dry_run)
 
-    assert mock_copy_documents_callable.mock_calls == [
+    assert copy_draft_documents.mock_calls == [
         x for x in (
             mock.call(
+                'draft-bucket',
+                'documents-bucket',
+                ('123', '456'),
+                'https://boyish.gam/bols/',
                 ExactIdentity(mock_data_api_client),
                 "g-cloud-123",
                 DraftServiceStub(**draft_service_kwargs_by_id[495102]).response(),
@@ -136,11 +145,14 @@ def test_publish_draft_services(skip_docs_if_published, dry_run):
                 dry_run
             ),
             mock.call(
+                'draft-bucket',
+                'documents-bucket',
+                ('123', '456'),
+                'https://boyish.gam/bols/',
                 ExactIdentity(mock_data_api_client),
                 "g-cloud-123",
                 DraftServiceStub(
                     **draft_service_kwargs_by_id[495012],
-                    **({} if dry_run else {"serviceId": "1112223334"})
                 ).response(),
                 # if it's a dry_run, then the script never discovers its already-assigned id 1112223334
                 AnyStringMatching(r"555.*") if dry_run else "1112223334",
@@ -149,6 +161,10 @@ def test_publish_draft_services(skip_docs_if_published, dry_run):
                 # either way
             ) if dry_run or not skip_docs_if_published else None,
             mock.call(
+                'draft-bucket',
+                'documents-bucket',
+                ('123', '456'),
+                'https://boyish.gam/bols/',
                 ExactIdentity(mock_data_api_client),
                 "g-cloud-123",
                 DraftServiceStub(**draft_service_kwargs_by_id[492004]).response(),
@@ -156,6 +172,10 @@ def test_publish_draft_services(skip_docs_if_published, dry_run):
                 dry_run
             ),
             mock.call(
+                'draft-bucket',
+                'documents-bucket',
+                ('123', '456'),
+                'https://boyish.gam/bols/',
                 ExactIdentity(mock_data_api_client),
                 "g-cloud-123",
                 DraftServiceStub(**draft_service_kwargs_by_id[492044]).response(),
@@ -163,6 +183,10 @@ def test_publish_draft_services(skip_docs_if_published, dry_run):
                 dry_run
             ) if not skip_docs_if_published else None,
             mock.call(
+                'draft-bucket',
+                'documents-bucket',
+                ('123', '456'),
+                'https://boyish.gam/bols/',
                 ExactIdentity(mock_data_api_client),
                 "g-cloud-123",
                 DraftServiceStub(**draft_service_kwargs_by_id[492444]).response(),
@@ -170,6 +194,10 @@ def test_publish_draft_services(skip_docs_if_published, dry_run):
                 dry_run
             ),
             mock.call(
+                'draft-bucket',
+                'documents-bucket',
+                ('123', '456'),
+                'https://boyish.gam/bols/',
                 ExactIdentity(mock_data_api_client),
                 "g-cloud-123",
                 DraftServiceStub(**draft_service_kwargs_by_id[497005]).response(),
