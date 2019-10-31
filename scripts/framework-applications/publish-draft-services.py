@@ -23,7 +23,6 @@ If you specify the `--draft-ids` parameter, pass in list of newline-separated dr
 full re-publish of just those drafts (i.e. try to re-publish it, and then copy the documents across again and update
 those links).
 """
-from functools import partial
 import sys
 
 sys.path.insert(0, '.')
