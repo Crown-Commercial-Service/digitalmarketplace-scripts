@@ -95,8 +95,6 @@ def test_publish_draft_services(copy_draft_documents, skip_docs_if_published, dr
         495012,
     )
 
-    mock_copy_draft_documents = mock.Mock()
-
     publish_draft_services(
         mock_data_api_client,
         "g-cloud-123",
