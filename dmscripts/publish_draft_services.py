@@ -55,8 +55,6 @@ def _copy_document(draft_bucket, documents_bucket, draft_document_path, live_doc
         )
 
 
-# this function exposed as importable - the intention is that a user of this module will wrap up a custom version
-# of this function and supply that to publish_draft_services as copy_documents_callable
 @backoff.on_exception(backoff.expo, S3ResponseError, max_tries=5)
 def copy_draft_documents(
     draft_bucket,
