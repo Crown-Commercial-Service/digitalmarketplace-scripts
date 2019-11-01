@@ -55,8 +55,6 @@ def _copy_document(draft_bucket, documents_bucket, draft_document_path, live_doc
         )
 
 
-# this function exposed as importable - the intention is that a user of this module will wrap up a custom version
-# of this function and supply that to publish_draft_services as copy_documents_callable
 @backoff.on_exception(backoff.expo, S3ResponseError, max_tries=5)
 def copy_draft_documents(
     draft_bucket,
@@ -111,17 +109,15 @@ def copy_draft_documents(
         client.update_service(service_id, document_updates, user='publish_draft_services.py')
 
 
-def _publish_draft_service(
+def publish_draft_service(
     client,
     draft_service,
-    framework_slug,
-    copy_documents_callable=None,
     dry_run=True,
-    skip_docs_if_published=True,
 ):
     get_logger().info("supplier %s: draft %s: publishing", draft_service["supplierId"], draft_service['id'])
 
     if draft_service.get("serviceId"):
+        # This draft service already has a service id, it has already been published.
         service_id = draft_service["serviceId"]
         get_logger().warning(
             "supplier %s: draft %s: skipped publishing - already has service id: %s",
@@ -129,8 +125,7 @@ def _publish_draft_service(
             draft_service['id'],
             service_id,
         )
-        if skip_docs_if_published:
-            return
+        return service_id, True
     elif dry_run:
         service_id = str(random.randint(55500000, 55599999))
         get_logger().info(
@@ -139,6 +134,7 @@ def _publish_draft_service(
             draft_service['id'],
             service_id,
         )
+        return service_id, False
     else:
         try:
             services = client.publish_draft_service(draft_service['id'], user='publish_draft_services.py')
@@ -149,6 +145,7 @@ def _publish_draft_service(
                 draft_service['id'],
                 service_id,
             )
+            return service_id, False
 
         except dmapiclient.HTTPError as e:
             if e.status_code == 400 and str(e).startswith('Cannot re-publish a submitted service'):
@@ -161,14 +158,9 @@ def _publish_draft_service(
                     draft_service['id'],
                     draft_service['serviceId'],
                 )
-                if skip_docs_if_published:
-                    return
-                # fall through to copy documents
+                return service_id, True
             else:
                 raise e
-
-    if copy_documents_callable:
-        copy_documents_callable(client, framework_slug, draft_service, service_id, dry_run)
 
 
 def _get_draft_services_iter(client, framework_slug, draft_ids_file=None):
@@ -203,17 +195,30 @@ def _get_draft_services_iter(client, framework_slug, draft_ids_file=None):
 def publish_draft_services(
     client,
     framework_slug,
-    copy_documents_callable=None,
+    DRAFT_BUCKET,
+    DOCUMENTS_BUCKET,
+    document_keys,
+    _assets_endpoint,
     draft_ids_file=None,
     dry_run=True,
     skip_docs_if_published=True,
+    copy_documents=True
 ):
     for draft_service in _get_draft_services_iter(client, framework_slug, draft_ids_file=draft_ids_file):
-        _publish_draft_service(
+        service_id, previously_published = publish_draft_service(
             client,
             draft_service,
-            framework_slug,
-            copy_documents_callable=copy_documents_callable,
             dry_run=dry_run,
-            skip_docs_if_published=skip_docs_if_published,
         )
+        if copy_documents and not (skip_docs_if_published and previously_published):
+            copy_draft_documents(
+                DRAFT_BUCKET,
+                DOCUMENTS_BUCKET,
+                document_keys,
+                _assets_endpoint,
+                client,
+                framework_slug,
+                draft_service,
+                service_id,
+                dry_run
+            )
