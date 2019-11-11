@@ -34,10 +34,22 @@ The 'frameworkAgreementDetails' JSON object from the API should look something l
 which should be at `digitalmarketplace-credentials/signatures/<name>.png`
 
 Usage:
-    scripts/generate-framework-agreement-counterpart-signature-pages.py <stage> <framework_slug>
-    <path_to_agreements_repo> <output_folder> [<supplier_id_file>]
+    scripts/generate-framework-agreement-counterpart-signature-pages.py [options]
+        [--supplier-id=<id> ... | --supplier-ids-from=<file>]
+        <stage> <framework_slug> <path_to_agreements_repo> <output_folder>
 
+Options:
+    <stage>                     Environment to run script against.
+    <framework>                 Framework slug.
+    <path_to_agreements_repo>   Path to directory with agreements repo.
+    <output_folder>             Path to output PDFs.
+
+    --supplier-id=<id>          ID(s) of supplier(s) to email.
+    --supplier-ids-from=<file>  Path to file containing supplier ID(s), one per line.
+
+    -h, --help                  Show this screen
 """
+
 import os
 import shutil
 import sys
@@ -49,7 +61,7 @@ from docopt import docopt
 from dmscripts.export_framework_applicant_details import get_csv_rows
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.framework_helpers import find_suppliers_with_details_and_draft_service_counts
-from dmscripts.helpers.supplier_data_helpers import get_supplier_ids_from_file
+from dmscripts.helpers.supplier_data_helpers import get_supplier_ids_from_args
 from dmscripts.generate_framework_agreement_signature_pages import (
     render_html_for_suppliers_awaiting_countersignature, render_pdf_for_each_html_page
 )
@@ -65,8 +77,7 @@ if __name__ == '__main__':
     framework = client.get_framework(framework_slug)['frameworks']
     framework_lot_slugs = tuple([lot['slug'] for lot in client.get_framework(framework_slug)['frameworks']['lots']])
 
-    supplier_id_file = args['<supplier_id_file>']
-    supplier_ids = get_supplier_ids_from_file(supplier_id_file)
+    supplier_ids = get_supplier_ids_from_args(args)
     html_dir = tempfile.mkdtemp()
 
     records = find_suppliers_with_details_and_draft_service_counts(client, framework_slug, supplier_ids)
