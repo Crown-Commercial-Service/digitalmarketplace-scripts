@@ -68,7 +68,7 @@ class SuccessfulSupplierContextForNotify(SupplierFrameworkData):
 
     STATUS_MAP = {'submitted': 'Successful', 'not-submitted': 'No application', 'failed': 'Unsuccessful'}
 
-    def __init__(self, client, target_framework_slug, *, supplier_ids=None):
+    def __init__(self, client, target_framework_slug, *, supplier_ids=None, logger=None):
         """Get the target framework to operate on and list the lots.
 
         :param client: Instantiated api client
@@ -81,6 +81,7 @@ class SuccessfulSupplierContextForNotify(SupplierFrameworkData):
 
         self.framework = client.get_framework(self.target_framework_slug)['frameworks']
         self.framework_lots = [i['name'] for i in self.framework['lots']]
+        self.logger = logger
 
     def get_users_personalisations(self):
         """Return {email_address: {personalisations}} for users eligible for the
@@ -88,6 +89,10 @@ class SuccessfulSupplierContextForNotify(SupplierFrameworkData):
         """
         output = {}
         for supplier_framework in filter(lambda i: i['onFramework'], self.data):
+            if self.logger:
+                self.logger.info(
+                    'Building user personalisations for supplier {}'.format(supplier_framework['supplierId'])
+                )
             for user in supplier_framework['users']:
                 output.update(self.get_user_personalisation(user, supplier_framework))
         return output
