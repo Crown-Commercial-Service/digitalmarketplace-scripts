@@ -130,10 +130,92 @@ function remove_old_callback_token() {
   echo "Done."
 }
 
+function change_ft_account_passwords() {
+  create_credentials_update_branch
+
+  echo "Changing Functional Test DMP account passwords for ${STAGE}."
+
+  admin_manager_pass_path=pass/digitalmarketplace.service.gov.uk/admin-manager
+  export STAGE_LOWER
+
+  if [[ $STAGE_LOWER = "production" ]] ; then
+    # if we're changing the admin manager password, we're also going to have to update it in $admin_manager_pass_path,
+    # so note the email address to look out for
+    admin_manager_email=$(./sops-wrapper -d $admin_manager_pass_path | sed -En -e "s/^login:\s+//p")
+  fi
+
+  # find all values of fields named _email which have an equivalent _password variable
+  for ACCOUNT_EMAIL in $(./sops-wrapper -d jenkins-vars/jenkins.yaml|yq -crM '[[(.smoulder_test_variables, .smoke_test_variables, .functional_test_variables)[env.STAGE_LOWER]|values|to_entries]|flatten|.[]|select(.key|endswith("_email")).value]|unique|.[]') ; do
+    export ACCOUNT_EMAIL
+    # passwords for a particular email address need to be common across test variants becuase they
+    # share the same instance
+    new_password=$(generate_api_token)
+
+    for VARIANT in smoulder_test_variables smoke_test_variables functional_test_variables ; do
+      export VARIANT
+      # for each field ending in _password whose equivalent _email-ending field has the value $ACCOUNT_EMAIL
+      for password_field in  $(./sops-wrapper -d jenkins-vars/jenkins.yaml|yq -crM '.[env.VARIANT][env.STAGE_LOWER] as $vars|$vars|to_entries|.[]|select((.key|endswith("_email")) and .value == env.ACCOUNT_EMAIL).key|sub("_email$"; "_password")|select($vars[.])') ; do
+        ./sops-wrapper --set "[\"${VARIANT}\"][\"${STAGE_LOWER}\"][\"${password_field}\"] \"${new_password}\"" jenkins-vars/jenkins.yaml
+      done
+    done
+
+    if [[ $STAGE_LOWER = "production" && $admin_manager_email = $ACCOUNT_EMAIL ]] ; then
+      # also update this password in $admin_manager_pass_path - it's the same account
+      ./sops-wrapper -d $admin_manager_pass_path | tail -n +2 | cat <(echo $new_password) - | ./sops-wrapper -e /dev/stdin > $admin_manager_pass_path.tmp
+      # sops doesn't like reading & writing to the same file at the same time
+      mv $admin_manager_pass_path.tmp $admin_manager_pass_path
+    fi
+  done
+
+  commit_and_create_github_pr "Change functional test DMP account passwords for ${STAGE}" "## Summary\r\nChanges all functional test/smoke test/smoulder test DMP account passwords for ${STAGE}.\r\n\r\nOnce this is merged you will want to get a move on with synchronizing with jenkins and the DMP accounts as smoke tests will likely be broken until this process is complete."
+
+  echo "Done."
+}
+
+function sync_ft_account_passwords() {
+
+  if [ -z "${DM_CREDENTIALS_REPO}" ]; then
+    echo "Required environment variable DM_CREDENTIALS_REPO is undefined."
+    exit 1
+  fi
+
+  echo "Synchronizing Functional Test DMP account passwords for ${STAGE}."
+
+  # a piece of magic from https://stackoverflow.com/a/246128 to determine the location of this bash script (so
+  # we can find its sibling python script
+  source_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+  already_seen=()
+  export STAGE STAGE_LOWER DM_CREDENTIALS_REPO
+
+  for VARIANT in smoulder_test_variables smoke_test_variables functional_test_variables ; do
+    export VARIANT
+    for EMAIL_FIELD in $(${DM_CREDENTIALS_REPO}/sops-wrapper -d ${DM_CREDENTIALS_REPO}/jenkins-vars/jenkins.yaml|yq -crM '.[env.VARIANT][env.STAGE_LOWER] as $vars|$vars|values|keys|.[]|select(endswith("_email"))|select($vars[.|sub("_email$"; "_password")])') ; do
+      export EMAIL_FIELD
+      export ACCOUNT_EMAIL=$(${DM_CREDENTIALS_REPO}/sops-wrapper -d ${DM_CREDENTIALS_REPO}/jenkins-vars/jenkins.yaml|yq -crM '.[env.VARIANT][env.STAGE_LOWER][env.EMAIL_FIELD]')
+
+      # bash does not have a real "array contains" test. not kidding.
+      if [[ ! " ${already_seen[*]} " =~ " ${ACCOUNT_EMAIL} " ]]; then
+        export ACCOUNT_PASSWORD=$(${DM_CREDENTIALS_REPO}/sops-wrapper -d ${DM_CREDENTIALS_REPO}/jenkins-vars/jenkins.yaml|yq -crM '.[env.VARIANT][env.STAGE_LOWER][env.EMAIL_FIELD|sub("_email"; "_password")]')
+
+        echo "Setting password for ${ACCOUNT_EMAIL}"
+        $source_dir/set-user-password-by-email-address.py || [[ $? = 2 ]]  # continue if account wasn't found
+
+        already_seen+=($ACCOUNT_EMAIL)
+      else
+        echo "Already set ${ACCOUNT_EMAIL}"
+      fi
+    done
+  done
+
+  echo "Done."
+}
+
 case ${COMMAND} in
   ADD-NEW) add_new_tokens;;
   REMOVE-OLD) remove_old_tokens;;
   ADD-NEW-CALLBACK) add_new_callback_token;;
   REMOVE-OLD-CALLBACK) remove_old_callback_token;;
-  *) echo "Syntax: ./scripts/rotate-api-tokens.sh [add-new|remove-old|add-new-callback|remove-old-callback] [preview|staging|production]";;
+  CHANGE-FT-ACCOUNT-PASSWORDS) change_ft_account_passwords;;
+  SYNC-FT-ACCOUNT-PASSWORDS) sync_ft_account_passwords;;
+  *) echo "Syntax: ./scripts/rotate-api-tokens.sh [add-new|remove-old|add-new-callback|remove-old-callback|change-ft-account-passwords|sync-ft-account-passwords] [preview|staging|production]";;
 esac
