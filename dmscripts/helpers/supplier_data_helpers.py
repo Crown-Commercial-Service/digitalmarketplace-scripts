@@ -93,7 +93,13 @@ class SuccessfulSupplierContextForNotify(SupplierFrameworkData):
                 self.logger.info(
                     'Building user personalisations for supplier {}'.format(supplier_framework['supplierId'])
                 )
-            for user in supplier_framework['users']:
+            primary_email_address = supplier_framework.get('declaration', {}).get('primaryContactEmail')
+            if primary_email_address:  # if the primary email is also a user it will be overwritten in the output dict
+                if 'users' in supplier_framework:
+                    supplier_framework['users'].append({'email address': primary_email_address})
+                else:
+                    supplier_framework['users'] = [{'email address': primary_email_address}, ]
+            for user in supplier_framework.get('users', []):
                 output.update(self.get_user_personalisation(user, supplier_framework))
         return output
 
