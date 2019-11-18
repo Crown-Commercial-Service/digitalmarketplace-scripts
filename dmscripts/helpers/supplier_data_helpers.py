@@ -97,7 +97,9 @@ class SuccessfulSupplierContextForNotify(SupplierFrameworkData):
                 output.update(self.get_user_personalisation(user, supplier_framework))
             primary_email_address = supplier_framework.get('declaration', {}).get('primaryContactEmail')
             if primary_email_address and primary_email_address not in output:
-                supplier_framework['users'].append({'email address': primary_email_address})
+                output.update(
+                    self.get_user_personalisation({'email address': primary_email_address}, supplier_framework)
+                )
         return output
 
     def get_lot_dict(self, supplier_framework):
