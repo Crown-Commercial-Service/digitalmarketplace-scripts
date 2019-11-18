@@ -8,7 +8,7 @@
 # If running locally through Docker, you will probably also need to mount your ~/.aws folder at `/root/.aws` for SOPS to be able to decrypt credentials. But be careful with this due to file permissions.
 # If running on Jenkins, AWS allows SOPS to decrypt credentials using its EC2 instance profile - even within Docker.
 #
-# Syntax: ./scripts/rotate-api-tokens.sh [add-new|remove-old] [preview|staging|production]
+# Syntax: ./scripts/rotate-api-tokens.sh [add-new|remove-old|add-new-callback|remove-old-callback] [preview|staging|production]
 
 set -e
 
@@ -23,7 +23,7 @@ if [ -z "${GITHUB_ACCESS_TOKEN}" ]; then
 fi
 
 if [[ "${STAGE}" != "PREVIEW" && "${STAGE}" != "STAGING" && "${STAGE}" != "PRODUCTION" ]]; then
-  echo "Syntax: ./scripts/rotate-api-tokens.sh [add-new|remove-old] [preview|staging|production]"
+  echo "Syntax: ./scripts/rotate-api-tokens.sh [add-new|remove-old|add-new-callback|remove-old-callback] [preview|staging|production]"
   exit 2
 fi
 
