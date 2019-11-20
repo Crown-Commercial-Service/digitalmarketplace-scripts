@@ -34,6 +34,7 @@ in (with args; {
       pkgs.openssl
       pkgs.cacert
       pkgs.sops
+      pkgs.jq
       ((import ./aws-auth.nix) (with pkgs; { inherit stdenv fetchFromGitHub makeWrapper jq awscli openssl; }))
     ] ++ pkgs.stdenv.lib.optionals (!pkgs.stdenv.isDarwin) [
       # package not available on darwin for now - sorry you're on your own...
