@@ -6,9 +6,9 @@ itsdangerous==0.24 # pyup: ignore
 Werkzeug==0.15.6 # pyup: <0.16.0
 
 git+https://github.com/madzak/python-json-logger.git@v0.1.8#egg=python-json-logger==v0.1.8
-git+https://github.com/alphagov/digitalmarketplace-utils.git@49.0.0#egg=digitalmarketplace-utils==49.0.0
-git+https://github.com/alphagov/digitalmarketplace-apiclient.git@20.2.0#egg=digitalmarketplace-apiclient==20.2.0
-git+https://github.com/alphagov/digitalmarketplace-content-loader.git@7.0.0#egg=digitalmarketplace-content-loader==7.0.0
+git+https://github.com/alphagov/digitalmarketplace-utils.git@50.0.1#egg=digitalmarketplace-utils==50.0.1
+git+https://github.com/alphagov/digitalmarketplace-apiclient.git@21.4.1#egg=digitalmarketplace-apiclient==21.4.1
+git+https://github.com/alphagov/digitalmarketplace-content-loader.git@7.1.1#egg=digitalmarketplace-content-loader==7.1.1
 
 awscli==1.16.272
 backoff==1.8.1
