@@ -4,7 +4,6 @@
 
 Flask==1.0.4 # pyup: >=1.0.0,<1.1.0
 itsdangerous==0.24 # pyup: ignore
-Werkzeug==0.15.6 # pyup: <0.16.0
 
 git+https://github.com/madzak/python-json-logger.git@v0.1.8#egg=python-json-logger==v0.1.8
 git+https://github.com/alphagov/digitalmarketplace-utils.git@50.0.1#egg=digitalmarketplace-utils==50.0.1
@@ -71,6 +70,7 @@ rsa==3.4.2
 s3transfer==0.2.1
 six==1.13.0
 urllib3==1.25.7
+Werkzeug==0.16.0
 workdays==1.4
 WTForms==2.2.1
 xmltodict==0.12.0
