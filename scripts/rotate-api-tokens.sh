@@ -28,7 +28,7 @@ if [[ "${STAGE}" != "PREVIEW" && "${STAGE}" != "STAGING" && "${STAGE}" != "PRODU
 fi
 
 function generate_api_token() {
-  echo $(python3 -c "import random, string; print(''.join(random.SystemRandom().choice(string.ascii_letters + string.digits) for _ in range(56)))")
+  echo $(python3 -c "import random, string; print(''.join(random.SystemRandom().choice(string.ascii_letters + string.digits) for _ in range(${1:-56})))")
 }
 
 function get_jenkins_env_token_name() {
@@ -148,8 +148,9 @@ function change_ft_account_passwords() {
   for ACCOUNT_EMAIL in $(./sops-wrapper -d jenkins-vars/jenkins.yaml|yq -crM '[[(.smoulder_test_variables, .smoke_test_variables, .functional_test_variables)[env.STAGE_LOWER]|values|to_entries]|flatten|.[]|select(.key|endswith("_email")).value]|unique|.[]') ; do
     export ACCOUNT_EMAIL
     # passwords for a particular email address need to be common across test variants becuase they
-    # share the same instance
-    new_password=$(generate_api_token)
+    # share the same instance. limit to 40 chars because our frontends attempt to enforce a limit of... 50? - let's not
+    # complicate things.
+    new_password=$(generate_api_token 40)
 
     for VARIANT in smoulder_test_variables smoke_test_variables functional_test_variables ; do
       export VARIANT
