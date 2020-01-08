@@ -1,12 +1,14 @@
 from logging import Logger
 import mock
 import pytest
+from freezegun import freeze_time
 
 from dmutils.email import DMNotifyClient
 from dmscripts.notify_suppliers_with_incomplete_applications import (
     notify_suppliers_with_incomplete_applications,
     MESSAGES,
 )
+from dmtestutils.api_model_stubs import FrameworkStub
 
 
 FRAMEWORK_SUPPLIERS_TEST_CASES = [
@@ -131,11 +133,22 @@ def test_message_combinations(
     """
     mail_client_mock = mail_client_constructor_mock.return_value = mock.Mock(spec=DMNotifyClient)
     mail_client_mock.logger = mock.Mock(spec=Logger)
+
+    data_api_client_mock().get_framework.return_value = FrameworkStub(
+        applications_close_at="2025-07-01T16:00:00.000000Z"
+    ).single_result_response()
     data_api_client_mock().find_draft_services_iter.return_value = draft_services_case
     data_api_client_mock().find_framework_suppliers_iter.return_value = framework_supplier_case
     data_api_client_mock().find_users.return_value = users_case
-    notify_suppliers_with_incomplete_applications('g-cloud-10', 'preview', 'notify_api_key', False)
+
+    with freeze_time('2025-06-24 16:00:00'):
+        # Test localisation during BST, 1 week before the deadline
+        notify_suppliers_with_incomplete_applications('g-cloud-10', 'preview', 'notify_api_key', False)
+
     assert mail_client_mock.send_email.call_count == len(expected_mails)
     for i, call in enumerate(mail_client_mock.send_email.call_args_list):
         assert call[0][2]['message'] == expected_message
+        assert call[0][2]['framework_name'] == "G-Cloud 10"
+        assert call[0][2]['framework_slug'] == "g-cloud-10"
+        assert call[0][2]['application_deadline'] == "5pm BST, Tuesday 1 July 2025"
         assert call[0][0] == expected_mails[i]

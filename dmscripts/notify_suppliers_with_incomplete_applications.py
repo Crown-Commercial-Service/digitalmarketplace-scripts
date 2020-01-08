@@ -5,6 +5,7 @@ from dmscripts.helpers.logging_helpers import configure_logger, logging
 from dmutils.email.exceptions import EmailError
 from dmutils.email.helpers import hash_string
 from dmutils.env_helpers import get_api_endpoint_from_stage
+from dmutils.formats import utctoshorttimelongdateformat
 
 
 NOTIFY_TEMPLATE_ID = '25c7c763-fe51-418f-8e51-130c391edc35'
@@ -16,7 +17,7 @@ MESSAGES = [
 ]
 
 
-def send_notification(mail_client, message, email, supplier_id, dry_run):
+def send_notification(mail_client, message, framework, email, supplier_id, dry_run):
     prefix = "[Dry Run] " if dry_run else ""
     mail_client.logger.info(
         f"{prefix}Sending email to supplier '{supplier_id}' "
@@ -25,7 +26,15 @@ def send_notification(mail_client, message, email, supplier_id, dry_run):
     if not dry_run:
         try:
             mail_client.send_email(
-                email, NOTIFY_TEMPLATE_ID, {'message': message}, allow_resend=False
+                email,
+                NOTIFY_TEMPLATE_ID,
+                {
+                    'message': message,
+                    'framework_name': framework['name'],
+                    'framework_slug': framework['slug'],
+                    'application_deadline': utctoshorttimelongdateformat(framework['applicationsCloseAtUTC'])
+                },
+                allow_resend=False
             )
         except EmailError as e:
             mail_client.logger.error(
@@ -36,7 +45,7 @@ def send_notification(mail_client, message, email, supplier_id, dry_run):
     return 0
 
 
-def notify_suppliers_with_incomplete_applications(framework, stage, notify_api_key, dry_run):
+def notify_suppliers_with_incomplete_applications(framework_slug, stage, notify_api_key, dry_run):
     logger = configure_logger({"dmapiclient": logging.INFO})
     mail_client = scripts_notify_client(notify_api_key, logger=logger)
     data_api_client = DataAPIClient(
@@ -44,7 +53,9 @@ def notify_suppliers_with_incomplete_applications(framework, stage, notify_api_k
     )
     error_count = 0
 
-    for sf in data_api_client.find_framework_suppliers_iter(framework):
+    framework = data_api_client.get_framework(framework_slug)['frameworks']
+
+    for sf in data_api_client.find_framework_suppliers_iter(framework_slug):
         message = ''
         if not sf.get('applicationCompanyDetailsConfirmed', None):
             message += MESSAGES[0]
@@ -52,7 +63,7 @@ def notify_suppliers_with_incomplete_applications(framework, stage, notify_api_k
             message += MESSAGES[1]
 
         submitted_draft_services, unsubmitted_draft_services = 0, 0
-        for service in data_api_client.find_draft_services_iter(sf['supplierId'], framework=framework):
+        for service in data_api_client.find_draft_services_iter(sf['supplierId'], framework=framework_slug):
             if service.get('status') == 'not-submitted':
                 unsubmitted_draft_services += 1
                 break
@@ -64,11 +75,23 @@ def notify_suppliers_with_incomplete_applications(framework, stage, notify_api_k
         if message:
             primary_email = sf.get('declaration', {'primaryContactEmail': None}).get('primaryContactEmail', None)
             if primary_email:
-                error_count += send_notification(mail_client, message, primary_email, sf['supplierId'], dry_run)
+                error_count += send_notification(
+                    mail_client,
+                    message,
+                    framework,
+                    primary_email,
+                    sf['supplierId'],
+                    dry_run
+                )
             for user in data_api_client.find_users(supplier_id=sf['supplierId']).get('users', []):
                 if user['active']:
                     error_count += send_notification(
-                        mail_client, message, user['emailAddress'], sf['supplierId'], dry_run
+                        mail_client,
+                        message,
+                        framework,
+                        user['emailAddress'],
+                        sf['supplierId'],
+                        dry_run
                     )
 
     return error_count
