@@ -30,7 +30,7 @@ FRAMEWORK_SUPPLIERS_TEST_CASES = [
             'declaration': {'status': 'started', 'primaryContactEmail': 'abc@example.com'}
         }],
         ['abc@example.com', ],  # output, list of email addresses
-        MESSAGES[1],  # output, expected message fragment
+        MESSAGES['incomplete_declaration'],  # output, expected message fragment
     ],
     [
         # input
@@ -40,7 +40,7 @@ FRAMEWORK_SUPPLIERS_TEST_CASES = [
             'declaration': {'status': 'started'}
         }],
         [],  # output, list of email addresses
-        MESSAGES[1],  # output, expected message fragment
+        MESSAGES['incomplete_declaration'],  # output, expected message fragment
     ],
     [
         # input
@@ -50,7 +50,7 @@ FRAMEWORK_SUPPLIERS_TEST_CASES = [
             'declaration': {}
         }],
         [],  # output, list of email addresses
-        MESSAGES[1],  # output, expected message fragment
+        MESSAGES['incomplete_declaration'],  # output, expected message fragment
     ],
     [
         # input
@@ -60,7 +60,8 @@ FRAMEWORK_SUPPLIERS_TEST_CASES = [
             'declaration': {}
         }],
         [],  # output, list of email addresses
-        MESSAGES[0] + MESSAGES[1],  # output, expected message fragment
+        # output, expected message fragment
+        MESSAGES['unconfirmed_company_details'] + MESSAGES['incomplete_declaration'],
     ],
 ]
 
@@ -69,17 +70,17 @@ DRAFT_SERVICES_TEST_CASES = [
         # input
         [],
         # output, email message fragment
-        MESSAGES[2],
+        MESSAGES['no_services'],
     ],
     [
         [{'status': 'not-submitted'}],
         # output, email message fragment
-        MESSAGES[2],
+        MESSAGES['no_services'],
     ],
     [
         [{'status': 'submitted'}, {'status': 'not-submitted'}],
         # output, email message fragment
-        MESSAGES[2],
+        MESSAGES['unsubmitted_services'].format(1),
     ],
     [
         [{'status': 'submitted'}],
