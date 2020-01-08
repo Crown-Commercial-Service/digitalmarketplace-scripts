@@ -3,8 +3,8 @@
 Notify all users of all suppliers that have any interest in the framework identified by <framework_slug> that new
 clarification question answers have been published.
 
-Usage: notify-suppliers-of-new_clarification-questions.py <stage> <framework_slug> <govuk_notify_api_key>
-    <govuk_notify_template_id> [--dry-run] [--verbose]
+Usage: notify-suppliers-of-new-fw-cq-answers.py <stage> <framework_slug> <govuk_notify_api_key>
+    <govuk_notify_template_id> [--dry-run] [--resume-run-id=<run_id>]
 
 Options:
     --stage=<stage>                                       Stage to target
@@ -17,8 +17,8 @@ Options:
     -h, --help                                            Show this screen
 
 Examples:
-    ./scripts/notify-suppliers-of-new-clarification-questions.py preview g-cloud-99 notifyToken t3mp1at3id
-    ./scripts/notify-suppliers-of-new-clarification-questions.py preview g-cloud-99 notifyToken t3mp1at3id --dry-run \
+    ./scripts/notify-suppliers-of-new-fw-cq-answers.py preview g-cloud-99 notifyToken t3mp1at3id
+    ./scripts/notify-suppliers-of-new-fw-cq-answers.py preview g-cloud-99 notifyToken t3mp1at3id --dry-run \
        --verbose --resume-run-id=00010203-0405-0607-0809-0a0b0c0d0e0f
 
 """
