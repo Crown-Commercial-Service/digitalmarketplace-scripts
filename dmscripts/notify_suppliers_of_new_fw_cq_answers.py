@@ -20,7 +20,7 @@ def notify_suppliers_of_new_fw_cq_answers(
     logger: Logger,
     run_id: Optional[UUID] = None,
 ) -> int:
-    run_is_new = bool(run_id)
+    run_is_new = not run_id
     run_id = run_id or uuid4()
     logger.info(f"{'Starting' if run_is_new else 'Resuming'} run id {{run_id}}", extra={"run_id": str(run_id)})
 
