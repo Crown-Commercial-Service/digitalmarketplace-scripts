@@ -49,13 +49,16 @@ def send_notification(mail_client, message, framework, email, supplier_id, dry_r
 
 def notify_suppliers_with_incomplete_applications(framework_slug, stage, notify_api_key, dry_run):
     logger = configure_logger({"dmapiclient": logging.INFO})
-    mail_client = scripts_notify_client(notify_api_key, logger=logger)
     data_api_client = DataAPIClient(
         base_url=get_api_endpoint_from_stage(stage), auth_token=get_auth_token('api', stage)
     )
-    error_count = 0
 
     framework = data_api_client.get_framework(framework_slug)['frameworks']
+    if framework['status'] != 'open':
+        raise ValueError("Suppliers cannot amend applications unless the framework is open.")
+
+    mail_client = scripts_notify_client(notify_api_key, logger=logger)
+    error_count = 0
 
     for sf in data_api_client.find_framework_suppliers_iter(framework_slug):
         message = ''

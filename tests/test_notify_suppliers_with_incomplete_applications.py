@@ -136,7 +136,8 @@ def test_message_combinations(
     mail_client_mock.logger = mock.Mock(spec=Logger)
 
     data_api_client_mock().get_framework.return_value = FrameworkStub(
-        applications_close_at="2025-07-01T16:00:00.000000Z"
+        applications_close_at="2025-07-01T16:00:00.000000Z",
+        status="open"
     ).single_result_response()
     data_api_client_mock().find_draft_services_iter.return_value = draft_services_case
     data_api_client_mock().find_framework_suppliers_iter.return_value = framework_supplier_case
@@ -153,3 +154,17 @@ def test_message_combinations(
         assert call[0][2]['framework_slug'] == "g-cloud-10"
         assert call[0][2]['application_deadline'] == "5pm BST, Tuesday 1 July 2025"
         assert call[0][0] == expected_mails[i]
+
+
+@pytest.mark.parametrize('framework_status', ['coming', 'pending', 'standstill', 'live', 'expired'])
+@mock.patch('dmscripts.notify_suppliers_with_incomplete_applications.DataAPIClient', autospec=True)
+def test_notify_suppliers_with_incomplete_applications_fails_for_non_open_frameworks(data_api_client, framework_status):
+    data_api_client().get_framework.return_value = FrameworkStub(
+        applications_close_at="2025-07-01T16:00:00.000000Z",
+        status=framework_status
+    ).single_result_response()
+
+    with pytest.raises(ValueError) as exc:
+        notify_suppliers_with_incomplete_applications('g-cloud-10', 'local', 'notify_api_key', False)
+
+    assert str(exc.value) == "Suppliers cannot amend applications unless the framework is open."
