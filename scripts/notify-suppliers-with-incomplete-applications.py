@@ -6,8 +6,8 @@ of the looming deadline.
 The script will notify suppliers that have:
 
 1) unconfirmed company details
-2) incomplete declarations
-3) no completed services
+2) an incomplete declaration
+3) no completed services, or any incomplete services
 
 Uses the Notify API to send emails.
 

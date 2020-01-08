@@ -12,7 +12,7 @@ NOTIFY_TEMPLATE_ID = '25c7c763-fe51-418f-8e51-130c391edc35'
 MESSAGES = [
     '* confirm your company details\n',
     '* finish your supplier declaration\n',
-    '* mark at least one of your services as complete\n',
+    '* mark your services as complete\n',
 ]
 
 
@@ -50,12 +50,15 @@ def notify_suppliers_with_incomplete_applications(framework, stage, notify_api_k
             message += MESSAGES[0]
         if not sf.get('declaration', {'status': None}).get('status', None) == 'complete':
             message += MESSAGES[1]
-        has_submitted_at_least_one_service = False
+
+        submitted_draft_services, unsubmitted_draft_services = 0, 0
         for service in data_api_client.find_draft_services_iter(sf['supplierId'], framework=framework):
-            if service.get('status') == 'submitted':
-                has_submitted_at_least_one_service = True
+            if service.get('status') == 'not-submitted':
+                unsubmitted_draft_services += 1
                 break
-        if not has_submitted_at_least_one_service:
+            if service.get('status') == 'submitted':
+                submitted_draft_services += 1
+        if unsubmitted_draft_services > 0 or submitted_draft_services == 0:
             message += MESSAGES[2]
 
         if message:

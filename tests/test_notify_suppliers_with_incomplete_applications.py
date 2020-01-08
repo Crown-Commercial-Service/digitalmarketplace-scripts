@@ -70,12 +70,17 @@ DRAFT_SERVICES_TEST_CASES = [
         MESSAGES[2],
     ],
     [
-        [{'status': 'not-submitted', }],
+        [{'status': 'not-submitted'}],
         # output, email message fragment
         MESSAGES[2],
     ],
     [
         [{'status': 'submitted'}, {'status': 'not-submitted'}],
+        # output, email message fragment
+        MESSAGES[2],
+    ],
+    [
+        [{'status': 'submitted'}],
         # output, email message fragment
         '',
     ],
