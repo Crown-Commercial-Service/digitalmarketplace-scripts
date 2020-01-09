@@ -1,12 +1,14 @@
 from logging import Logger
 import mock
 import pytest
+from freezegun import freeze_time
 
 from dmutils.email import DMNotifyClient
 from dmscripts.notify_suppliers_with_incomplete_applications import (
     notify_suppliers_with_incomplete_applications,
     MESSAGES,
 )
+from dmtestutils.api_model_stubs import FrameworkStub
 
 
 FRAMEWORK_SUPPLIERS_TEST_CASES = [
@@ -28,7 +30,7 @@ FRAMEWORK_SUPPLIERS_TEST_CASES = [
             'declaration': {'status': 'started', 'primaryContactEmail': 'abc@example.com'}
         }],
         ['abc@example.com', ],  # output, list of email addresses
-        MESSAGES[1],  # output, expected message fragment
+        MESSAGES['incomplete_declaration'],  # output, expected message fragment
     ],
     [
         # input
@@ -38,7 +40,7 @@ FRAMEWORK_SUPPLIERS_TEST_CASES = [
             'declaration': {'status': 'started'}
         }],
         [],  # output, list of email addresses
-        MESSAGES[1],  # output, expected message fragment
+        MESSAGES['incomplete_declaration'],  # output, expected message fragment
     ],
     [
         # input
@@ -48,7 +50,7 @@ FRAMEWORK_SUPPLIERS_TEST_CASES = [
             'declaration': {}
         }],
         [],  # output, list of email addresses
-        MESSAGES[1],  # output, expected message fragment
+        MESSAGES['incomplete_declaration'],  # output, expected message fragment
     ],
     [
         # input
@@ -58,7 +60,8 @@ FRAMEWORK_SUPPLIERS_TEST_CASES = [
             'declaration': {}
         }],
         [],  # output, list of email addresses
-        MESSAGES[0] + MESSAGES[1],  # output, expected message fragment
+        # output, expected message fragment
+        MESSAGES['unconfirmed_company_details'] + MESSAGES['incomplete_declaration'],
     ],
 ]
 
@@ -67,15 +70,20 @@ DRAFT_SERVICES_TEST_CASES = [
         # input
         [],
         # output, email message fragment
-        MESSAGES[2],
+        MESSAGES['no_services'],
     ],
     [
-        [{'status': 'not-submitted', }],
+        [{'status': 'not-submitted'}],
         # output, email message fragment
-        MESSAGES[2],
+        MESSAGES['no_services'],
     ],
     [
         [{'status': 'submitted'}, {'status': 'not-submitted'}],
+        # output, email message fragment
+        MESSAGES['unsubmitted_services'].format(1),
+    ],
+    [
+        [{'status': 'submitted'}],
         # output, email message fragment
         '',
     ],
@@ -126,11 +134,37 @@ def test_message_combinations(
     """
     mail_client_mock = mail_client_constructor_mock.return_value = mock.Mock(spec=DMNotifyClient)
     mail_client_mock.logger = mock.Mock(spec=Logger)
+
+    data_api_client_mock().get_framework.return_value = FrameworkStub(
+        applications_close_at="2025-07-01T16:00:00.000000Z",
+        status="open"
+    ).single_result_response()
     data_api_client_mock().find_draft_services_iter.return_value = draft_services_case
     data_api_client_mock().find_framework_suppliers_iter.return_value = framework_supplier_case
     data_api_client_mock().find_users.return_value = users_case
-    notify_suppliers_with_incomplete_applications('g-cloud-10', 'preview', 'notify_api_key', False)
+
+    with freeze_time('2025-06-24 16:00:00'):
+        # Test localisation during BST, 1 week before the deadline
+        notify_suppliers_with_incomplete_applications('g-cloud-10', 'preview', 'notify_api_key', False)
+
     assert mail_client_mock.send_email.call_count == len(expected_mails)
     for i, call in enumerate(mail_client_mock.send_email.call_args_list):
         assert call[0][2]['message'] == expected_message
+        assert call[0][2]['framework_name'] == "G-Cloud 10"
+        assert call[0][2]['framework_slug'] == "g-cloud-10"
+        assert call[0][2]['application_deadline'] == "5pm BST, Tuesday 1 July 2025"
         assert call[0][0] == expected_mails[i]
+
+
+@pytest.mark.parametrize('framework_status', ['coming', 'pending', 'standstill', 'live', 'expired'])
+@mock.patch('dmscripts.notify_suppliers_with_incomplete_applications.DataAPIClient', autospec=True)
+def test_notify_suppliers_with_incomplete_applications_fails_for_non_open_frameworks(data_api_client, framework_status):
+    data_api_client().get_framework.return_value = FrameworkStub(
+        applications_close_at="2025-07-01T16:00:00.000000Z",
+        status=framework_status
+    ).single_result_response()
+
+    with pytest.raises(ValueError) as exc:
+        notify_suppliers_with_incomplete_applications('g-cloud-10', 'local', 'notify_api_key', False)
+
+    assert str(exc.value) == "Suppliers cannot amend applications unless the framework is open."
