@@ -407,6 +407,11 @@ if __name__ == '__main__':
         logger.info('Processing {} data'.format(config['name']))
         try:
             query_data = query_data_from_config(config, logger, limit, client, OUTPUT_DIR)
+
+            # skip if CSV is missing
+            if query_data is None:
+                continue
+
             processed_data = process_data_from_config(query_data, config, logger)
             export_data_to_csv(OUTPUT_DIR, config, processed_data, logger)
         except (APIError, HTTPError, InvalidResponse) as exc:
