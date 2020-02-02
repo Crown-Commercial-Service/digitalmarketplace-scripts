@@ -11,7 +11,7 @@ git+https://github.com/alphagov/digitalmarketplace-apiclient.git@20.2.0#egg=digi
 git+https://github.com/alphagov/digitalmarketplace-content-loader.git@7.0.0#egg=digitalmarketplace-content-loader==7.0.0
 
 awscli==1.17.9
-backoff==1.8.1
+backoff==1.10.0
 clamd==1.0.2
 docopt==0.6.2
 jsonschema==3.1.1
