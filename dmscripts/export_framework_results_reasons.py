@@ -16,10 +16,17 @@ DRAFT_STATUSES = [
 ]
 
 
+def get_error_key(error):
+    try:
+        return error.path[0]
+    except (AttributeError, TypeError, IndexError):
+        raise ValueError(f"Unexpected validation error: {error!r}")
+
+
 def get_validation_errors(candidate, schema):
     validator = jsonschema.Draft4Validator(schema)
     errors = validator.iter_errors(candidate)
-    error_keys = [error.path[0] for error in errors]
+    error_keys = [get_error_key(error) for error in errors]
     return error_keys
 
 

@@ -384,3 +384,21 @@ class TestExportOnFrameworkNoBaseline(BaseAssessmentOnFrameworksAsThoughNoBaseli
             expected_discretionary,
             expected_successful,
         )
+
+
+class TestExportUnexpectedValidationError(_BaseExportTest):
+    def _get_supplier_frameworks(self):
+        sfs = super()._get_supplier_frameworks()
+        del sfs[1234]["declaration"]["omnipresent"]
+        return sfs
+
+    @pytest.mark.parametrize("use_baseline_schema", (False, True,))
+    def test_failed_export(self, tmpdir, use_baseline_schema):
+        with pytest.raises(ValueError, match=r".*Unexpected validation error.*omnipresent.*"):
+            return self._test_export_inner(
+                tmpdir,
+                use_baseline_schema,
+                [],
+                [],
+                [],
+            )
