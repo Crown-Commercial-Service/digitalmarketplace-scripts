@@ -24,16 +24,21 @@ class BaseAssessmentTest(object):
             ],
             "definitions": {
                 "baseline": {
-                    "$schema": "http://json-schema.org/draft-04/schema#",
-                    "type": "object",
-                    "properties": {
-                        "shouldBeFalseStrict": {"enum": [False]},
-                        "shouldBeTrueStrict": {"enum": [True]},
-                        "shouldMatchPatternStrict": {
-                            "type": "string",
-                            "pattern": "^H\\.? *E\\.? *L\\.? *Y\\.? *S?",
+                    "allOf": [
+                        {
+                            "$schema": "http://json-schema.org/draft-04/schema#",
+                            "type": "object",
+                            "properties": {
+                                "shouldBeFalseStrict": {"enum": [False]},
+                                "shouldBeTrueStrict": {"enum": [True]},
+                                "shouldMatchPatternStrict": {
+                                    "type": "string",
+                                    "pattern": "^H\\.? *E\\.? *L\\.? *Y\\.? *S?",
+                                },
+                            },
+                            "required": ["omnipresent"],
                         },
-                    },
+                    ],
                 },
             },
         }
@@ -125,6 +130,7 @@ class BaseAssessmentTest(object):
                         "shouldBeTrueStrict": True,
                         "shouldMatchPatternStrict": "HE L Y   S",
                         "irrelevantQuestion": "Irrelevant answer",
+                        "omnipresent": "ether",
                     },
                 },
                 2345: {
@@ -134,12 +140,14 @@ class BaseAssessmentTest(object):
                         "shouldBeTrueLax": True,
                         "shouldMatchPatternLax": "Good pattern",
                         "shouldBeFalseStrict": None,  # <- subtle but important test here
+                        "omnipresent": "ether",
                     },
                 },
                 3456: {
                     "onFramework": False,
                     "declaration": {
                         "status": "complete",
+                        "omnipresent": "ether",
                     },
                 },
                 4321: {
@@ -150,6 +158,7 @@ class BaseAssessmentTest(object):
                         "shouldMatchPatternLax": "Good   Pattern",
                         "shouldMatchPatternStrict": "H.E. L.  Y",
                         "irrelevantStupidQuestion": "Irrelevant stupid answer",
+                        "omnipresent": "ether",
                     },
                 },
                 4567: {
@@ -165,6 +174,7 @@ class BaseAssessmentTest(object):
                         "status": "complete",
                         "shouldBeFalseLax": True,
                         "shouldMatchPatternStrict": "HEL Y...",
+                        "omnipresent": "ether",
                     },
                 },
                 6543: {
@@ -172,6 +182,7 @@ class BaseAssessmentTest(object):
                     "declaration": {
                         "status": "complete",
                         "shouldBeTrueStrict": True,
+                        "omnipresent": "ether",
                     },
                 },
                 7654: {
@@ -179,6 +190,7 @@ class BaseAssessmentTest(object):
                     "declaration": {
                         "status": "complete",
                         "shouldBeFalseLax": True,
+                        "omnipresent": "ether",
                     },
                 },
                 8765: {
@@ -188,6 +200,7 @@ class BaseAssessmentTest(object):
                         "shouldBeFalseLax": False,
                         "shouldBeTrueStrict": True,
                         "shouldMatchPatternLax": "Good    pattern",
+                        "omnipresent": "ether",
                     },
                 },
             }.items()
