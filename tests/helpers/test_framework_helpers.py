@@ -83,6 +83,7 @@ def test_find_suppliers_with_details_and_draft_services(mock_data_client):
             'frameworkInterest': {
                 'declaration': {'status': 'complete'},
                 'onFramework': True,
+                'frameworkSlug': 'g-things-1',
                 'countersignedPath': None,
                 'countersignedAt': None,
             }
@@ -91,6 +92,7 @@ def test_find_suppliers_with_details_and_draft_services(mock_data_client):
             'frameworkInterest': {
                 'declaration': {'status': 'started'},
                 'onFramework': False,
+                'frameworkSlug': 'g-things-1',
                 'countersignedPath': None,
                 'countersignedAt': None,
             }
@@ -99,6 +101,7 @@ def test_find_suppliers_with_details_and_draft_services(mock_data_client):
             'frameworkInterest': {
                 'declaration': {'status': 'complete'},
                 'onFramework': True,
+                'frameworkSlug': 'g-things-1',
                 'countersignedPath': 'some/path',
                 'countersignedAt': '2017-01-02T03:04:05.000006Z',
             }
@@ -140,7 +143,8 @@ def test_find_suppliers_with_details_and_draft_services(mock_data_client):
                 'declaration': {'status': 'complete'},
                 'countersignedPath': '',
                 'countersignedAt': '',
-                'onFramework': True
+                'onFramework': True,
+                'frameworkSlug': 'g-things-1',
             },
             {
                 'supplier': 'supplier 3',
@@ -158,7 +162,8 @@ def test_find_suppliers_with_details_and_draft_services(mock_data_client):
                 'declaration': {'status': 'started'},
                 'countersignedPath': '',
                 'countersignedAt': '',
-                'onFramework': False
+                'onFramework': False,
+                'frameworkSlug': 'g-things-1',
             },
             {
                 'supplier': 'supplier 2',
@@ -176,7 +181,9 @@ def test_find_suppliers_with_details_and_draft_services(mock_data_client):
                 'declaration': {'status': 'complete'},
                 'countersignedPath': 'some/path',
                 'countersignedAt': '2017-01-02T03:04:05.000006Z',
-                'onFramework': True}
+                'onFramework': True,
+                'frameworkSlug': 'g-things-1',
+            }
         ]
 
 
@@ -190,6 +197,7 @@ def test_find_suppliers_with_details_and_draft_service_counts(mock_data_client):
         (4, 'framework-slug'): {
             'frameworkInterest': {
                 'declaration': {'status': 'complete'},
+                'frameworkSlug': 'g-things-1',
                 'onFramework': True,
                 'countersignedPath': None,
                 'countersignedAt': None,
@@ -198,6 +206,7 @@ def test_find_suppliers_with_details_and_draft_service_counts(mock_data_client):
         (3, 'framework-slug'): {
             'frameworkInterest': {
                 'declaration': {'status': 'started'},
+                'frameworkSlug': 'g-things-1',
                 'onFramework': False,
                 'countersignedPath': None,
                 'countersignedAt': None,
@@ -206,6 +215,7 @@ def test_find_suppliers_with_details_and_draft_service_counts(mock_data_client):
         (2, 'framework-slug'): {
             'frameworkInterest': {
                 'declaration': {'status': 'complete'},
+                'frameworkSlug': 'g-things-1',
                 'onFramework': True,
                 'countersignedPath': 'some/path',
                 'countersignedAt': '2017-01-02T03:04:05.000006Z',
@@ -241,7 +251,8 @@ def test_find_suppliers_with_details_and_draft_service_counts(mock_data_client):
                     ('saas', 'not-submitted'): 1}
             ),
             'countersignedAt': '',
-            'onFramework': True
+            'onFramework': True,
+            'frameworkSlug': 'g-things-1',
         },
         {
             'supplier': {'id': 3, 'name': 'supplier 3'},
@@ -257,7 +268,8 @@ def test_find_suppliers_with_details_and_draft_service_counts(mock_data_client):
                     ('saas', 'not-submitted'): 1}
             ),
             'countersignedAt': '',
-            'onFramework': False
+            'onFramework': False,
+            'frameworkSlug': 'g-things-1',
         },
         {
             'supplier': {'id': 2, 'name': 'supplier 2'},
@@ -273,7 +285,8 @@ def test_find_suppliers_with_details_and_draft_service_counts(mock_data_client):
                     ('saas', 'not-submitted'): 1}
             ),
             'countersignedAt': '2017-01-02T03:04:05.000006Z',
-            'onFramework': True
+            'onFramework': True,
+            'frameworkSlug': 'g-things-1',
         }
     ]
 
@@ -319,6 +332,7 @@ def test_add_framework_info(mock_data_client, on_framework):
     mock_data_client.get_supplier_framework_info.return_value = {
         'frameworkInterest': {
             'declaration': {'status': 'complete'},
+            'frameworkSlug': 'g-things-1',
             'onFramework': on_framework,
             'countersignedPath': None,
             'countersignedAt': None,
@@ -331,6 +345,7 @@ def test_add_framework_info(mock_data_client, on_framework):
     assert record == {
         'supplier_id': 123,
         'foo': 'bar',
+        'frameworkSlug': 'g-things-1',
         'onFramework': on_framework,
         'declaration': {
             'status': 'complete',

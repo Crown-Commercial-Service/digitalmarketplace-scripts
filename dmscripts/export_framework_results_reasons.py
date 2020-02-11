@@ -5,6 +5,8 @@ from itertools import chain
 import jsonschema
 import os
 
+from dmutils.env_helpers import get_web_url_from_stage
+
 from dmscripts.helpers.csv_helpers import MultiCSVWriter
 from dmscripts.helpers.framework_helpers import find_suppliers_with_details_and_draft_service_counts
 
@@ -119,6 +121,12 @@ def contact_details(record):
     ]
 
 
+def admin_link(record):
+    base = get_web_url_from_stage('production')
+    admin_path = f"{base}/suppliers/{record['supplier']['id']}/edit/declarations/{record['frameworkSlug']}"
+    return [('admin_link', admin_path)]
+
+
 class SuccessfulHandler(object):
     NAME = 'successful'
     CCS_FILENAME_FORMAT = '{}-automatically-successful-suppliers-{}'
@@ -133,9 +141,10 @@ class SuccessfulHandler(object):
         return True
 
     def create_row(self, record):
-        return \
-            supplier_info(record) + \
+        return (
+            supplier_info(record) +
             contact_details(record)
+        )
 
 
 class FailedHandler(object):
@@ -166,10 +175,12 @@ class FailedHandler(object):
         return True
 
     def create_row(self, record):
-        return \
-            supplier_info(record) + \
-            failed_mandatory_questions(record) + \
-            contact_details(record)
+        return (
+            supplier_info(record) +
+            failed_mandatory_questions(record) +
+            contact_details(record) +
+            admin_link(record)
+        )
 
 
 class DiscretionaryHandler(object):
@@ -186,10 +197,12 @@ class DiscretionaryHandler(object):
         return True
 
     def create_row(self, record):
-        return \
-            supplier_info(record) + \
-            discretionary_questions(record) + \
-            contact_details(record)
+        return (
+            supplier_info(record) +
+            discretionary_questions(record) +
+            contact_details(record) +
+            admin_link(record)
+        )
 
 
 def get_questions_numbers_from_framework(framework_slug, content_loader):
