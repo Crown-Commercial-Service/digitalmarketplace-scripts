@@ -90,6 +90,7 @@ def add_framework_info(client, framework_slug, record):
     supplier_framework = client.get_supplier_framework_info(record['supplier_id'], framework_slug)['frameworkInterest']
     return dict(record,
                 onFramework=supplier_framework['onFramework'],
+                frameworkSlug=supplier_framework['frameworkSlug'],
                 declaration=supplier_framework['declaration'] or {},
                 countersignedPath=supplier_framework['countersignedPath'] or "",
                 countersignedAt=supplier_framework['countersignedAt'] or "",

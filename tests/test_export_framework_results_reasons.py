@@ -70,6 +70,7 @@ class _BaseExportTest(_BaseExportFrameworkResultsReasonsTest):
                 "failed_mandatory",
                 "contact_name",
                 "contact_email",
+                "admin_link",
             ]
             assert sorted(lines[1:]) == sorted(expected_failed)
 
@@ -85,6 +86,7 @@ class _BaseExportTest(_BaseExportFrameworkResultsReasonsTest):
                 "mitigating factors 3",
                 "contact_name",
                 "contact_email",
+                "admin_link",
             ]
             assert sorted(lines[1:]) == sorted(expected_discretionary)
 
@@ -115,6 +117,7 @@ class TestExportOnFrameworkBaseline(_BaseExportTest):
                     "Q1 - shouldBeFalseStrict",
                     u"Supplier 2345 Empl\u00f6yee 123",
                     "supplier.2345.h-cloud-99@example.com",
+                    'https://www.digitalmarketplace.service.gov.uk/suppliers/2345/edit/declarations/h-cloud-99',
                 ],
                 [
                     "Supplier 3456 generic name",
@@ -122,6 +125,7 @@ class TestExportOnFrameworkBaseline(_BaseExportTest):
                     "No passed lot",
                     u"Supplier 3456 Empl\u00f6yee 123",
                     "supplier.3456.h-cloud-99@example.com",
+                    'https://www.digitalmarketplace.service.gov.uk/suppliers/3456/edit/declarations/h-cloud-99',
                 ],
             ),
             (
@@ -134,6 +138,7 @@ class TestExportOnFrameworkBaseline(_BaseExportTest):
                     "Supplier 1234's dog ate their homework",
                     u"Supplier 1234 Empl\u00f6yee 123",
                     "supplier.1234.h-cloud-99@example.com",
+                    'https://www.digitalmarketplace.service.gov.uk/suppliers/1234/edit/declarations/h-cloud-99',
                 ],
                 [
                     "Supplier 7654 generic name",
@@ -144,6 +149,7 @@ class TestExportOnFrameworkBaseline(_BaseExportTest):
                     "Supplier 7654's dog ate their homework",
                     u"Supplier 7654 Empl\u00f6yee 123",
                     "supplier.7654.h-cloud-99@example.com",
+                    'https://www.digitalmarketplace.service.gov.uk/suppliers/7654/edit/declarations/h-cloud-99',
                 ],
             ),
             (
@@ -177,6 +183,7 @@ class TestExportOnFrameworkBaseline(_BaseExportTest):
                     "Q1 - shouldBeFalseStrict",
                     u"Supplier 2345 Empl\u00f6yee 123",
                     "supplier.2345.h-cloud-99@example.com",
+                    'https://www.digitalmarketplace.service.gov.uk/suppliers/2345/edit/declarations/h-cloud-99',
                 ],
                 [
                     "Supplier 3456 generic name",
@@ -184,6 +191,7 @@ class TestExportOnFrameworkBaseline(_BaseExportTest):
                     "No passed lot",
                     u"Supplier 3456 Empl\u00f6yee 123",
                     "supplier.3456.h-cloud-99@example.com",
+                    'https://www.digitalmarketplace.service.gov.uk/suppliers/3456/edit/declarations/h-cloud-99',
                 ],
             ),
             (
@@ -196,6 +204,7 @@ class TestExportOnFrameworkBaseline(_BaseExportTest):
                     "Supplier 1234's dog ate their homework",
                     u"Supplier 1234 Empl\u00f6yee 123",
                     "supplier.1234.h-cloud-99@example.com",
+                    'https://www.digitalmarketplace.service.gov.uk/suppliers/1234/edit/declarations/h-cloud-99',
                 ],
                 [
                     "Supplier 7654 generic name",
@@ -206,6 +215,7 @@ class TestExportOnFrameworkBaseline(_BaseExportTest):
                     "Supplier 7654's dog ate their homework",
                     u"Supplier 7654 Empl\u00f6yee 123",
                     "supplier.7654.h-cloud-99@example.com",
+                    'https://www.digitalmarketplace.service.gov.uk/suppliers/7654/edit/declarations/h-cloud-99',
                 ],
             ),
             (
@@ -256,6 +266,7 @@ class TestExportOnFrameworkNoBaseline(BaseAssessmentOnFrameworksAsThoughNoBaseli
                     "No passed lot",
                     u"Supplier 3456 Empl\u00f6yee 123",
                     "supplier.3456.h-cloud-99@example.com",
+                    "https://www.digitalmarketplace.service.gov.uk/suppliers/3456/edit/declarations/h-cloud-99"
                 ],
             ),
             (
@@ -268,6 +279,7 @@ class TestExportOnFrameworkNoBaseline(BaseAssessmentOnFrameworksAsThoughNoBaseli
                     "Supplier 1234's dog ate their homework",
                     u"Supplier 1234 Empl\u00f6yee 123",
                     "supplier.1234.h-cloud-99@example.com",
+                    "https://www.digitalmarketplace.service.gov.uk/suppliers/1234/edit/declarations/h-cloud-99",
                 ],
                 [
                     "Supplier 2345 generic name",
@@ -278,6 +290,7 @@ class TestExportOnFrameworkNoBaseline(BaseAssessmentOnFrameworksAsThoughNoBaseli
                     "Supplier 2345's dog ate their homework",
                     u"Supplier 2345 Empl\u00f6yee 123",
                     "supplier.2345.h-cloud-99@example.com",
+                    "https://www.digitalmarketplace.service.gov.uk/suppliers/2345/edit/declarations/h-cloud-99",
                 ],
                 [
                     "Supplier 7654 generic name",
@@ -288,6 +301,7 @@ class TestExportOnFrameworkNoBaseline(BaseAssessmentOnFrameworksAsThoughNoBaseli
                     "Supplier 7654's dog ate their homework",
                     u"Supplier 7654 Empl\u00f6yee 123",
                     "supplier.7654.h-cloud-99@example.com",
+                    "https://www.digitalmarketplace.service.gov.uk/suppliers/7654/edit/declarations/h-cloud-99",
                 ],
             ),
             (
@@ -320,6 +334,7 @@ class TestExportOnFrameworkNoBaseline(BaseAssessmentOnFrameworksAsThoughNoBaseli
                     "No passed lot",
                     u"Supplier 3456 Empl\u00f6yee 123",
                     "supplier.3456.h-cloud-99@example.com",
+                    "https://www.digitalmarketplace.service.gov.uk/suppliers/3456/edit/declarations/h-cloud-99",
                 ],
             ),
             (
@@ -332,6 +347,8 @@ class TestExportOnFrameworkNoBaseline(BaseAssessmentOnFrameworksAsThoughNoBaseli
                     "Supplier 1234's dog ate their homework",
                     u"Supplier 1234 Empl\u00f6yee 123",
                     "supplier.1234.h-cloud-99@example.com",
+                    "https://www.digitalmarketplace.service.gov.uk/suppliers/1234/edit/declarations/h-cloud-99",
+
                 ],
                 [
                     "Supplier 2345 generic name",
@@ -342,6 +359,8 @@ class TestExportOnFrameworkNoBaseline(BaseAssessmentOnFrameworksAsThoughNoBaseli
                     "Supplier 2345's dog ate their homework",
                     u"Supplier 2345 Empl\u00f6yee 123",
                     "supplier.2345.h-cloud-99@example.com",
+                    "https://www.digitalmarketplace.service.gov.uk/suppliers/2345/edit/declarations/h-cloud-99",
+
                 ],
                 [
                     "Supplier 7654 generic name",
@@ -352,6 +371,8 @@ class TestExportOnFrameworkNoBaseline(BaseAssessmentOnFrameworksAsThoughNoBaseli
                     "Supplier 7654's dog ate their homework",
                     u"Supplier 7654 Empl\u00f6yee 123",
                     "supplier.7654.h-cloud-99@example.com",
+                    "https://www.digitalmarketplace.service.gov.uk/suppliers/7654/edit/declarations/h-cloud-99",
+
                 ],
             ),
             (
