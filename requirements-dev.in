@@ -1,0 +1,13 @@
+-c requirements.txt
+
+cram
+flake8
+freezegun
+ipython
+ipython-genutils
+lxml
+mock<4.0.0
+pytest
+requests-mock
+
+git+https://github.com/alphagov/digitalmarketplace-test-utils.git@2.5.0#egg=digitalmarketplace-test-utils
