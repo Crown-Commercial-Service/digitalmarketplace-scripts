@@ -4,12 +4,11 @@
 
 Flask==1.0.4 # pyup: >=1.0.0,<1.1.0
 itsdangerous==0.24 # pyup: ignore
-Werkzeug==0.15.6 # pyup: <0.16.0
 
 git+https://github.com/madzak/python-json-logger.git@v0.1.8#egg=python-json-logger==v0.1.8
-git+https://github.com/alphagov/digitalmarketplace-utils.git@49.0.0#egg=digitalmarketplace-utils==49.0.0
-git+https://github.com/alphagov/digitalmarketplace-apiclient.git@20.2.0#egg=digitalmarketplace-apiclient==20.2.0
-git+https://github.com/alphagov/digitalmarketplace-content-loader.git@7.0.0#egg=digitalmarketplace-content-loader==7.0.0
+git+https://github.com/alphagov/digitalmarketplace-utils.git@51.5.0#egg=digitalmarketplace-utils==51.5.0
+git+https://github.com/alphagov/digitalmarketplace-apiclient.git@21.0.0#egg=digitalmarketplace-apiclient==21.0.0
+git+https://github.com/alphagov/digitalmarketplace-content-loader.git@7.3.0#egg=digitalmarketplace-content-loader==7.3.0
 
 awscli==1.18.5
 backoff==1.10.0
@@ -71,6 +70,7 @@ rsa==3.4.2
 s3transfer==0.3.3
 six==1.14.0
 urllib3==1.25.8
+Werkzeug==1.0.0
 workdays==1.4
 WTForms==2.2.1
 xmltodict==0.12.0
