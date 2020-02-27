@@ -4,6 +4,13 @@
 This script iterates through a CSV and updates a supplier with one of three values: DUNS number, company registration
 number, or company name.
 
+The CSV should be in the following format:
+
+Supplier ID, Field Name for update      , New Value
+700100     , DUNS Number                , 999888777
+700123     , Company registration number, 09928299
+700123     , Company registration name  , MySupplier Ltd
+
 The DUNS number is an interesting problem, as there are cases where suppliers have used a number that belongs to another
 supplier. When the rightful owner attempts to add it, they are told they can't as it's already in use. This is due to a
 UNIQUE restriction on the database column. For now, those cases will simply be logged and you'll need to work out what
@@ -44,7 +51,7 @@ def update_supplier_attribute(row):
         "Company registration number": update_company_number,
         "Company registered name": update_company_name,
     }
-    supplier_id = row.get("DMP record ID")
+    supplier_id = row.get("Supplier ID")
     new_value = row.get("New Value")
     field_to_change = row.get("Field Name for update")
     print(f'Updating {row.get("Field Name for update")} to {row.get("New Value")}')
@@ -95,7 +102,7 @@ if __name__ == "__main__":
             if not dry_run:
                 update_supplier_attribute(row)
             else:
-                supplier_id = int(row.get("DMP record ID"))
+                supplier_id = int(row.get("Supplier ID"))
                 try:
                     supplier_to_change = data_api_client.get_supplier(supplier_id)['suppliers']
                     name = supplier_to_change.get('registeredName')
@@ -105,7 +112,7 @@ if __name__ == "__main__":
                     print(f'HTTPError: {e}')
                     non_existent_suppliers.append(supplier_id)
                 print(
-                    f'Would update supplier id: {row.get("DMP record ID")} with new {row.get("Field Name for update")},'
+                    f'Would update supplier id: {row.get("Supplier ID")} with new {row.get("Field Name for update")},'
                     f'value {row.get("New Value")}'
                 )
                 print(f'There are {len(non_existent_suppliers)} non-existent suppliers')
