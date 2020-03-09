@@ -8,8 +8,8 @@ from dmtestutils.api_model_stubs import FrameworkStub, SupplierFrameworkStub
 from dmtestutils.comparisons import AnyStringMatching
 from dmutils.email import DMNotifyClient, EmailError
 
-from dmscripts.notify_suppliers_of_new_fw_cq_answers import \
-    notify_suppliers_of_new_fw_cq_answers
+from dmscripts.notify_fw_interested_suppliers import \
+    notify_fw_interested_suppliers
 
 
 _supplier_frameworks = (
@@ -64,37 +64,9 @@ _supplier_users_by_supplier = {
 }
 
 
-@pytest.mark.parametrize("framework_status", ("coming", "pending", "live", "standstill",))
-def test_non_open_framework(framework_status):
-    mock_data_api_client = mock.create_autospec(DataAPIClient, instance=True)
-    mock_data_api_client.get_framework.return_value = FrameworkStub(
-        slug="g-cloud-99",
-        status=framework_status,
-    ).single_result_response()
-    mock_notify_client = mock.create_autospec(DMNotifyClient, instance=True)
-    mock_logger = mock.create_autospec(logging.Logger, instance=True)
-
-    with pytest.raises(ValueError, match=r"\bopen\b"):
-        notify_suppliers_of_new_fw_cq_answers(
-            data_api_client=mock_data_api_client,
-            notify_client=mock_notify_client,
-            notify_template_id="8877eeff",
-            framework_slug="g-cloud-99",
-            dry_run=False,
-            stage="production",
-            logger=mock_logger,
-        )
-
-    assert mock_data_api_client.mock_calls == [
-        mock.call.get_framework("g-cloud-99")
-    ]
-
-    assert mock_notify_client.mock_calls == []
-
-
 @pytest.mark.parametrize("dry_run", (False, True))
 @pytest.mark.parametrize("run_id", (None, uuid.UUID("00010203-0405-0607-0809-0a0b0c0d0e0f")))
-@mock.patch("dmscripts.notify_suppliers_of_new_fw_cq_answers.uuid4")
+@mock.patch("dmscripts.notify_fw_interested_suppliers.uuid4")
 def test_happy_paths(mock_uuid4, run_id, dry_run):
     mock_uuid4.return_value = uuid.UUID("12345678-1234-5678-1234-567812345678")
 
@@ -120,7 +92,7 @@ def test_happy_paths(mock_uuid4, run_id, dry_run):
 
     mock_logger = mock.create_autospec(logging.Logger, instance=True)
 
-    assert notify_suppliers_of_new_fw_cq_answers(
+    assert notify_fw_interested_suppliers(
         data_api_client=mock_data_api_client,
         notify_client=mock_notify_client,
         notify_template_id="8877eeff",
@@ -243,7 +215,7 @@ def test_sending_failure_continues():
 
     mock_logger = mock.create_autospec(logging.Logger, instance=True)
 
-    assert notify_suppliers_of_new_fw_cq_answers(
+    assert notify_fw_interested_suppliers(
         data_api_client=mock_data_api_client,
         notify_client=mock_notify_client,
         notify_template_id="8877eeff",

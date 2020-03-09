@@ -10,7 +10,7 @@ from dmutils.email.helpers import hash_string
 from dmutils.env_helpers import get_web_url_from_stage
 
 
-def notify_suppliers_of_new_fw_cq_answers(
+def notify_fw_interested_suppliers(
     data_api_client: DataAPIClient,
     notify_client: DMNotifyClient,
     notify_template_id: str,
@@ -25,9 +25,6 @@ def notify_suppliers_of_new_fw_cq_answers(
     logger.info(f"{'Starting' if run_is_new else 'Resuming'} run id {{run_id}}", extra={"run_id": str(run_id)})
 
     framework = data_api_client.get_framework(framework_slug)["frameworks"]
-
-    if framework["status"] != "open":
-        raise ValueError(f"Framework {framework_slug!r} is not open (status is {framework['status']!r})")
 
     failure_count = 0
 
