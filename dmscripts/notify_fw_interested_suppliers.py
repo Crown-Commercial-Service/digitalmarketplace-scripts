@@ -1,3 +1,4 @@
+from itertools import chain
 from logging import Logger
 from typing import Optional
 from uuid import UUID, uuid4
@@ -8,6 +9,22 @@ from dmutils.email import DMNotifyClient
 from dmutils.email.exceptions import EmailError
 from dmutils.email.helpers import hash_string
 from dmutils.env_helpers import get_web_url_from_stage
+from dmutils import formats
+
+
+_date_formats = (
+    "displaytimeformat",
+    "dateformat",
+    "datetimeformat",
+)
+
+
+def _formatted_dates_from_framework(framework):
+    return dict(chain.from_iterable(
+        (
+            (f"{key[:-3]}_{date_format}", getattr(formats, date_format)(iso_timestamp)) for date_format in _date_formats
+        ) for key, iso_timestamp in framework.items() if key.endswith("UTC")
+    ))
 
 
 def notify_fw_interested_suppliers(
@@ -25,6 +42,13 @@ def notify_fw_interested_suppliers(
     logger.info(f"{'Starting' if run_is_new else 'Resuming'} run id {{run_id}}", extra={"run_id": str(run_id)})
 
     framework = data_api_client.get_framework(framework_slug)["frameworks"]
+    framework_context = {
+        "framework_name": framework["name"],
+        "updates_url": f"{get_web_url_from_stage(stage)}/suppliers/frameworks/{framework['slug']}/updates",
+        "framework_dashboard_url": f"{get_web_url_from_stage(stage)}/suppliers/frameworks/{framework['slug']}/",
+        "clarification_questions_closed": "no" if framework["clarificationQuestionsOpen"] else "yes",
+        **_formatted_dates_from_framework(framework),
+    }
 
     failure_count = 0
 
@@ -56,14 +80,7 @@ def notify_fw_interested_suppliers(
                         notify_client.send_email(
                             user["emailAddress"],
                             notify_template_id,
-                            {
-                                "framework_name": framework["name"],
-                                "updates_url":
-                                    f"{get_web_url_from_stage(stage)}/suppliers/frameworks/{framework['slug']}/updates",
-                                "clarification_questions_closed": (
-                                    "no" if framework["clarificationQuestionsOpen"] else "yes"
-                                ),
-                            },
+                            framework_context,
                             allow_resend=False,
                             reference=notify_ref,
                         )

@@ -104,6 +104,30 @@ def test_happy_paths(mock_uuid4, run_id, dry_run):
     ) == 0
 
     expected_run_id = str(run_id or "12345678-1234-5678-1234-567812345678")
+    expected_context = {
+        'framework_name': 'G-Cloud 99',
+        'updates_url': 'https://www.digitalmarketplace.service.gov.uk/suppliers/frameworks/g-cloud-99/updates',
+        'framework_dashboard_url': 'https://www.digitalmarketplace.service.gov.uk/suppliers/frameworks/g-cloud-99/',
+        'clarification_questions_closed': 'no',
+        'clarificationsCloseAt_displaytimeformat': '12:00am GMT',
+        'clarificationsCloseAt_dateformat': 'Saturday 1 January 2000',
+        'clarificationsCloseAt_datetimeformat': 'Saturday 1 January 2000 at 12:00am GMT',
+        'clarificationsPublishAt_displaytimeformat': '12:00am GMT',
+        'clarificationsPublishAt_dateformat': 'Sunday 2 January 2000',
+        'clarificationsPublishAt_datetimeformat': 'Sunday 2 January 2000 at 12:00am GMT',
+        'applicationsCloseAt_displaytimeformat': '12:00am GMT',
+        'applicationsCloseAt_dateformat': 'Monday 3 January 2000',
+        'applicationsCloseAt_datetimeformat': 'Monday 3 January 2000 at 12:00am GMT',
+        'intentionToAwardAt_displaytimeformat': '12:00am GMT',
+        'intentionToAwardAt_dateformat': 'Tuesday 4 January 2000',
+        'intentionToAwardAt_datetimeformat': 'Tuesday 4 January 2000 at 12:00am GMT',
+        'frameworkLiveAt_displaytimeformat': '12:00am GMT',
+        'frameworkLiveAt_dateformat': 'Wednesday 5 January 2000',
+        'frameworkLiveAt_datetimeformat': 'Wednesday 5 January 2000 at 12:00am GMT',
+        'frameworkExpiresAt_displaytimeformat': '12:00am GMT',
+        'frameworkExpiresAt_dateformat': 'Thursday 6 January 2000',
+        'frameworkExpiresAt_datetimeformat': 'Thursday 6 January 2000 at 12:00am GMT',
+    }
 
     assert mock_uuid4.mock_calls == ([mock.call()] if run_id is None else [])
     assert mock_data_api_client.mock_calls == [
@@ -124,11 +148,7 @@ def test_happy_paths(mock_uuid4, run_id, dry_run):
         ) if dry_run else mock.call.send_email(
             'one@peasoup.net',
             '8877eeff',
-            {
-                'framework_name': 'G-Cloud 99',
-                'updates_url': 'https://www.digitalmarketplace.service.gov.uk/suppliers/frameworks/g-cloud-99/updates',
-                'clarification_questions_closed': "no",
-            },
+            expected_context,
             allow_resend=False,
             reference=f"one@peasoup.net,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
         )),
@@ -141,11 +161,7 @@ def test_happy_paths(mock_uuid4, run_id, dry_run):
         ) if dry_run else mock.call.send_email(
             'two@peasoup.net',
             '8877eeff',
-            {
-                'framework_name': 'G-Cloud 99',
-                'updates_url': 'https://www.digitalmarketplace.service.gov.uk/suppliers/frameworks/g-cloud-99/updates',
-                'clarification_questions_closed': "no",
-            },
+            expected_context,
             allow_resend=False,
             reference=f"two@peasoup.net,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
         )),
@@ -158,11 +174,7 @@ def test_happy_paths(mock_uuid4, run_id, dry_run):
         ) if dry_run else mock.call.send_email(
             'two@shirts.co.ua',
             '8877eeff',
-            {
-                'framework_name': 'G-Cloud 99',
-                'updates_url': 'https://www.digitalmarketplace.service.gov.uk/suppliers/frameworks/g-cloud-99/updates',
-                'clarification_questions_closed': "no",
-            },
+            expected_context,
             allow_resend=False,
             reference=f"two@shirts.co.ua,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
         )),
@@ -175,11 +187,7 @@ def test_happy_paths(mock_uuid4, run_id, dry_run):
         ) if dry_run else mock.call.send_email(
             'three@shirts.co.ua',
             '8877eeff',
-            {
-                'framework_name': 'G-Cloud 99',
-                'updates_url': 'https://www.digitalmarketplace.service.gov.uk/suppliers/frameworks/g-cloud-99/updates',
-                'clarification_questions_closed': "no",
-            },
+            expected_context,
             allow_resend=False,
             reference=f"three@shirts.co.ua,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
         )),
