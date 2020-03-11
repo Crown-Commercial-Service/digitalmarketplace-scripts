@@ -46,11 +46,13 @@ def log_human_readable_stats(stats):
             else:
                 started += stat['count']
 
+    logger.info("*********** STATS ***********")
     logger.info(f"Started: {started}")
     logger.info(f"Made declaration: {made_declaration}")
     logger.info(f"Added services: {added_services}")
     logger.info(f"Completed: {completed}")
     logger.info(f"Total applications: {total_applications}")
+    logger.info("*****************************")
 
 
 def snapshot_framework_stats(api_endpoint, api_token, framework_slug):
