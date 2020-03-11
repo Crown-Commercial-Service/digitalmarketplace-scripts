@@ -7,71 +7,71 @@
 argcomplete==1.11.1       # via yq
 asn1crypto==1.3.0         # via cryptography
 attrs==19.3.0             # via jsonschema
-awscli==1.18.5
-backoff==1.10.0
+awscli==1.18.16           # via -r requirements.in
+backoff==1.10.0           # via -r requirements.in
 blinker==1.4              # via gds-metrics
-boto3==1.12.6
-botocore==1.15.5          # via awscli, boto3, s3transfer
+boto3==1.12.6             # via digitalmarketplace-utils
+botocore==1.15.16         # via awscli, boto3, s3transfer
 certifi==2019.11.28       # via requests
 cffi==1.14.0              # via cryptography
 chardet==3.0.4            # via requests
-clamd==1.0.2
+clamd==1.0.2              # via -r requirements.in
 click==7.0                # via flask
 colorama==0.4.3           # via awscli
-contextlib2==0.6.0.post1
-cryptography==2.3.1
+contextlib2==0.6.0.post1  # via digitalmarketplace-utils
+cryptography==2.3.1       # via digitalmarketplace-utils
 defusedxml==0.6.0         # via odfpy
-git+https://github.com/alphagov/digitalmarketplace-apiclient.git@21.0.0#egg=digitalmarketplace-apiclient
-git+https://github.com/alphagov/digitalmarketplace-content-loader.git@7.3.0#egg=digitalmarketplace-content-loader
-git+https://github.com/alphagov/digitalmarketplace-utils.git@51.5.0#egg=digitalmarketplace-utils
-docopt==0.6.2
+git+https://github.com/alphagov/digitalmarketplace-apiclient.git@21.0.0#egg=digitalmarketplace-apiclient  # via -r requirements.in
+git+https://github.com/alphagov/digitalmarketplace-content-loader.git@7.3.0#egg=digitalmarketplace-content-loader  # via -r requirements.in
+git+https://github.com/alphagov/digitalmarketplace-utils.git@51.5.0#egg=digitalmarketplace-utils  # via -r requirements.in, digitalmarketplace-content-loader
+docopt==0.6.2             # via -r requirements.in, notifications-python-client
 docutils==0.15.2          # via awscli, botocore
-flask-gzip==0.2
-flask-login==0.5.0
-flask-script==2.0.6
-flask-wtf==0.14.3
-flask==1.0.4
-fleep==1.0.1
+flask-gzip==0.2           # via digitalmarketplace-utils
+flask-login==0.5.0        # via digitalmarketplace-utils
+flask-script==2.0.6       # via digitalmarketplace-utils
+flask-wtf==0.14.3         # via digitalmarketplace-utils
+flask==1.0.4              # via -r requirements.in, digitalmarketplace-content-loader, digitalmarketplace-utils, flask-gzip, flask-login, flask-script, flask-wtf, gds-metrics
+fleep==1.0.1              # via digitalmarketplace-utils
 future==0.18.2            # via notifications-python-client
-gds-metrics==0.2.0
-govuk-country-register==0.5.0
+gds-metrics==0.2.0        # via digitalmarketplace-utils
+govuk-country-register==0.5.0  # via digitalmarketplace-utils
 idna==2.9                 # via cryptography, requests
 importlib-metadata==1.5.0  # via argcomplete, jsonschema
-inflection==0.3.1
-itsdangerous==0.24
-jinja2==2.11.1            # via flask
+inflection==0.3.1         # via digitalmarketplace-content-loader
+itsdangerous==0.24        # via -r requirements.in, flask, flask-wtf
+jinja2==2.10.3            # via digitalmarketplace-content-loader, flask
 jmespath==0.9.5           # via boto3, botocore
-jsonschema==3.2.0
-lorem==0.1.1
-mailchimp3==3.0.6
-markdown==2.6.11
+jsonschema==3.2.0         # via -r requirements.in
+lorem==0.1.1              # via -r requirements.in
+mailchimp3==3.0.6         # via digitalmarketplace-utils
+markdown==2.6.11          # via digitalmarketplace-content-loader
 markupsafe==1.1.1         # via jinja2
 monotonic==1.5            # via notifications-python-client
-notifications-python-client==5.5.1
-numpy==1.17.4
-odfpy==1.4.1
-pandas==0.19.1
+notifications-python-client==5.5.1  # via digitalmarketplace-utils
+numpy==1.17.4             # via -r requirements.in, pandas
+odfpy==1.4.1              # via digitalmarketplace-utils
+pandas==0.19.1            # via -r requirements.in
 prometheus-client==0.2.0  # via gds-metrics
 pyasn1==0.4.8             # via rsa
 pycparser==2.19           # via cffi
 pyjwt==1.7.1              # via notifications-python-client
 pyrsistent==0.15.7        # via jsonschema
-python-dateutil==2.8.1
-git+https://github.com/madzak/python-json-logger.git@v0.1.8#egg=python-json-logger
-pytz==2019.3              # via pandas
-pyyaml==5.2               # via awscli, yq
-requests==2.23.0          # via mailchimp3, notifications-python-client
+python-dateutil==2.8.1    # via -r requirements.in, botocore, pandas
+git+https://github.com/madzak/python-json-logger.git@v0.1.8#egg=python-json-logger  # via -r requirements.in, digitalmarketplace-utils
+pytz==2019.3              # via digitalmarketplace-utils, pandas
+pyyaml==5.2               # via awscli, digitalmarketplace-content-loader, yq
+requests==2.23.0          # via digitalmarketplace-apiclient, digitalmarketplace-utils, mailchimp3, notifications-python-client
 rsa==3.4.2                # via awscli
 s3transfer==0.3.3         # via awscli, boto3
 six==1.14.0               # via cryptography, jsonschema, pyrsistent, python-dateutil
-unicodecsv==0.14.1
+unicodecsv==0.14.1        # via -r requirements.in, digitalmarketplace-utils
 urllib3==1.25.8           # via botocore, requests
-werkzeug==1.0.0           # via flask
-workdays==1.4
+werkzeug==1.0.0           # via digitalmarketplace-utils, flask
+workdays==1.4             # via digitalmarketplace-utils
 wtforms==2.2.1            # via flask-wtf
-xeger==0.3.5
+xeger==0.3.5              # via -r requirements.in
 xmltodict==0.12.0         # via yq
-yq==2.10.0
+yq==2.10.0                # via -r requirements.in
 zipp==3.0.0               # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
