@@ -3,6 +3,8 @@ import logging
 import mock
 import uuid
 
+from freezegun import freeze_time
+
 from dmapiclient import DataAPIClient
 from dmtestutils.api_model_stubs import FrameworkStub, SupplierFrameworkStub
 from dmtestutils.comparisons import AnyStringMatching
@@ -71,10 +73,13 @@ def test_happy_paths(mock_uuid4, run_id, dry_run):
     mock_uuid4.return_value = uuid.UUID("12345678-1234-5678-1234-567812345678")
 
     mock_data_api_client = mock.create_autospec(DataAPIClient, instance=True)
-    mock_data_api_client.get_framework.return_value = FrameworkStub(
+    framework_response = FrameworkStub(
         slug="g-cloud-99",
         status="open",
     ).single_result_response()
+    framework_response["frameworks"]["intentionToAwardAtUTC"] = "2000-06-29T16:00:00.0000Z"
+    framework_response["frameworks"]["frameworkLiveAtUTC"] = "2000-06-29T16:30:00.0000Z"
+    mock_data_api_client.get_framework.return_value = framework_response
     mock_data_api_client.find_framework_suppliers_iter.side_effect = lambda *a, **k: iter(_supplier_frameworks)
     mock_data_api_client.find_users_iter.side_effect = lambda *a, **k: iter(
         _supplier_users_by_supplier[k["supplier_id"]]
@@ -92,16 +97,17 @@ def test_happy_paths(mock_uuid4, run_id, dry_run):
 
     mock_logger = mock.create_autospec(logging.Logger, instance=True)
 
-    assert notify_fw_interested_suppliers(
-        data_api_client=mock_data_api_client,
-        notify_client=mock_notify_client,
-        notify_template_id="8877eeff",
-        framework_slug="g-cloud-99",
-        dry_run=dry_run,
-        stage="production",
-        logger=mock_logger,
-        run_id=run_id,
-    ) == 0
+    with freeze_time('2000-06-29 02:55:55'):
+        assert notify_fw_interested_suppliers(
+            data_api_client=mock_data_api_client,
+            notify_client=mock_notify_client,
+            notify_template_id="8877eeff",
+            framework_slug="g-cloud-99",
+            dry_run=dry_run,
+            stage="production",
+            logger=mock_logger,
+            run_id=run_id,
+        ) == 0
 
     expected_run_id = str(run_id or "12345678-1234-5678-1234-567812345678")
     expected_context = {
@@ -118,12 +124,14 @@ def test_happy_paths(mock_uuid4, run_id, dry_run):
         'applicationsCloseAt_displaytimeformat': '12:00am GMT',
         'applicationsCloseAt_dateformat': 'Monday 3 January 2000',
         'applicationsCloseAt_datetimeformat': 'Monday 3 January 2000 at 12:00am GMT',
-        'intentionToAwardAt_displaytimeformat': '12:00am GMT',
-        'intentionToAwardAt_dateformat': 'Tuesday 4 January 2000',
-        'intentionToAwardAt_datetimeformat': 'Tuesday 4 January 2000 at 12:00am GMT',
-        'frameworkLiveAt_displaytimeformat': '12:00am GMT',
-        'frameworkLiveAt_dateformat': 'Wednesday 5 January 2000',
-        'frameworkLiveAt_datetimeformat': 'Wednesday 5 January 2000 at 12:00am GMT',
+        'intentionToAwardAt_displaytimeformat': '5:00pm BST',
+        'intentionToAwardAt_timetoday': 'Today at 5pm BST',
+        'intentionToAwardAt_dateformat': 'Thursday 29 June 2000',
+        'intentionToAwardAt_datetimeformat': 'Thursday 29 June 2000 at 5:00pm BST',
+        'frameworkLiveAt_displaytimeformat': '5:30pm BST',
+        'frameworkLiveAt_dateformat': 'Thursday 29 June 2000',
+        'frameworkLiveAt_datetimeformat': 'Thursday 29 June 2000 at 5:30pm BST',
+        # no frameworkLiveAt_timetoday because it's non-hour-exact
         'frameworkExpiresAt_displaytimeformat': '12:00am GMT',
         'frameworkExpiresAt_dateformat': 'Thursday 6 January 2000',
         'frameworkExpiresAt_datetimeformat': 'Thursday 6 January 2000 at 12:00am GMT',

@@ -1,7 +1,9 @@
+from datetime import date
 from itertools import chain
 from logging import Logger
 from typing import Optional
 from uuid import UUID, uuid4
+from warnings import warn
 
 from dmapiclient import DataAPIClient
 
@@ -19,10 +21,35 @@ _date_formats = (
 )
 
 
+def _maybe_time_today(key, iso_timestamp):
+    """
+    If the given timestamp matches today's local date and is hour-exact, return an additional sequence containing
+    a `_timetoday` string for this timestamp
+    """
+    localized_dt = formats.get_localized_datetime(iso_timestamp)
+    if localized_dt.date() == date.today():
+        if localized_dt.minute == localized_dt.second == localized_dt.microsecond == 0:
+            return ((
+                f"{key}_timetoday",
+                f'Today at {localized_dt.strftime("%I%p %Z").replace("AM", "am").replace("PM", "pm").lstrip("0")}',
+            ),)
+
+        warn(f"Not emitting {key}_timetoday because timestamp is not hour-exact: {iso_timestamp!r}")
+
+    # omit this piece of context, if used with any template which requires it, the notify call should
+    # result in an error, hopefully alerting the user to the problem (i.e. it's the wrong day or the timestamp
+    # isn't appropriate)
+    return ()
+
+
 def _formatted_dates_from_framework(framework):
     return dict(chain.from_iterable(
-        (
-            (f"{key[:-3]}_{date_format}", getattr(formats, date_format)(iso_timestamp)) for date_format in _date_formats
+        chain(
+            (
+                (f"{key[:-3]}_{date_format}", getattr(formats, date_format)(iso_timestamp),)
+                for date_format in _date_formats
+            ),
+            _maybe_time_today(key[:-3], iso_timestamp),
         ) for key, iso_timestamp in framework.items() if key.endswith("UTC")
     ))
 
@@ -55,7 +82,7 @@ def notify_fw_interested_suppliers(
     for supplier_framework in data_api_client.find_framework_suppliers_iter(framework_slug):
         for user in data_api_client.find_users_iter(supplier_id=supplier_framework["supplierId"]):
             if user["active"]:
-                # generating ref separately so we can exclude certain parameters from the personalization dict
+                # generating ref separately so we can exclude certain parameters from the context dict
                 notify_ref = notify_client.get_reference(
                     user["emailAddress"],
                     notify_template_id,
