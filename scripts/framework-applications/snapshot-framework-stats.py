@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """
 Fetches application stats for a given framework (suppliers, services and users) from the API.
-The response is stored in an audit event and the output is saved to a JSON file.
+The response is stored in an audit event and, if an ouput file is supplied, saved to a JSON file.
 
 Usage:
-    snapshot_framework_stats.py <stage> <framework_slug> <filename>
+    snapshot_framework_stats.py <stage> <framework_slug> [--outfile=filename]
 
 Example:
-    ./snapshot_framework_stats.py development g-cloud-12 myfile.json
+    ./snapshot_framework_stats.py development g-cloud-12 --outfile=myfile.json
+    ./snapshot_framework_stats.py development g-cloud-12
 """
 
 from docopt import docopt
@@ -72,10 +73,12 @@ def snapshot_framework_stats(client, framework_slug):
 
 if __name__ == '__main__':
     arguments = docopt(__doc__)
+
     client = dmapiclient.DataAPIClient(
         get_api_endpoint_from_stage(arguments['<stage>']),
         get_auth_token('api', arguments['<stage>']),
     )
     stats = snapshot_framework_stats(client, arguments['<framework_slug>'])
-    with open(arguments['<filename>'], 'w') as outfile:
-        json.dump(stats, outfile)
+    if arguments['--outfile'] is not None:
+        with open(arguments['--outfile'], 'w') as outfile:
+            json.dump(stats, outfile)
