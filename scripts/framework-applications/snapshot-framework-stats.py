@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-"""Usage:
+"""
+Fetches application stats for a given framework (suppliers, services and users) from the API.
+The response is stored in an audit event and the output is saved to a JSON file.
+
+Usage:
     snapshot_framework_stats.py <stage> <framework_slug> <filename>
 
 Example:
-    ./snapshot_framework_stats.py production g-cloud-12 myfile.json
+    ./snapshot_framework_stats.py development g-cloud-12 myfile.json
 """
 
 from docopt import docopt
