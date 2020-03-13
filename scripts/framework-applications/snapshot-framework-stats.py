@@ -1,12 +1,18 @@
 #!/usr/bin/env python3
-"""Usage:
-    snapshot_framework_stats.py <framework_slug> <stage>
+"""
+Fetches application stats for a given framework (suppliers, services and users) from the API.
+The response is stored in an audit event and, if an ouput file is supplied, saved to a JSON file.
+
+Usage:
+    snapshot_framework_stats.py <stage> <framework_slug> [--outfile=filename]
 
 Example:
-    ./snapshot_framework_stats.py g-cloud-7 dev
+    ./snapshot_framework_stats.py development g-cloud-12 --outfile=myfile.json
+    ./snapshot_framework_stats.py development g-cloud-12
 """
 
 from docopt import docopt
+import json
 import logging
 import sys
 
@@ -20,10 +26,6 @@ from dmutils.env_helpers import get_api_endpoint_from_stage
 
 logger = logging.getLogger('script')
 logging.basicConfig(level=logging.INFO)
-
-
-def get_stats(data_client, framework_slug):
-    return data_client.get_framework_stats(framework_slug)
 
 
 def log_human_readable_stats(stats):
@@ -55,11 +57,9 @@ def log_human_readable_stats(stats):
     logger.info("*****************************")
 
 
-def snapshot_framework_stats(api_endpoint, api_token, framework_slug):
-    data_client = dmapiclient.DataAPIClient(api_endpoint, api_token)
-
-    stats = get_stats(data_client, framework_slug)
-    data_client.create_audit_event(
+def snapshot_framework_stats(client, framework_slug):
+    stats = client.get_framework_stats(framework_slug)
+    client.create_audit_event(
         AuditTypes.snapshot_framework_stats,
         data=stats,
         object_type='frameworks',
@@ -67,14 +67,18 @@ def snapshot_framework_stats(api_endpoint, api_token, framework_slug):
     )
     log_human_readable_stats(stats)
 
-    logger.info("Framework stats snapshot saved")
+    logger.info("Framework stats snapshot saved as audit event")
+    return stats
 
 
 if __name__ == '__main__':
     arguments = docopt(__doc__)
 
-    snapshot_framework_stats(
+    client = dmapiclient.DataAPIClient(
         get_api_endpoint_from_stage(arguments['<stage>']),
         get_auth_token('api', arguments['<stage>']),
-        arguments['<framework_slug>'],
     )
+    stats = snapshot_framework_stats(client, arguments['<framework_slug>'])
+    if arguments['--outfile'] is not None:
+        with open(arguments['--outfile'], 'w') as outfile:
+            json.dump(stats, outfile)
