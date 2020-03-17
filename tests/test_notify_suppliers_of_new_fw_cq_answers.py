@@ -3,15 +3,13 @@ import logging
 import mock
 import uuid
 
-from freezegun import freeze_time
-
 from dmapiclient import DataAPIClient
 from dmtestutils.api_model_stubs import FrameworkStub, SupplierFrameworkStub
 from dmtestutils.comparisons import AnyStringMatching
 from dmutils.email import DMNotifyClient, EmailError
 
-from dmscripts.notify_fw_interested_suppliers import \
-    notify_fw_interested_suppliers
+from dmscripts.notify_suppliers_of_new_fw_cq_answers import \
+    notify_suppliers_of_new_fw_cq_answers
 
 
 _supplier_frameworks = (
@@ -66,20 +64,45 @@ _supplier_users_by_supplier = {
 }
 
 
+@pytest.mark.parametrize("framework_status", ("coming", "pending", "live", "standstill",))
+def test_non_open_framework(framework_status):
+    mock_data_api_client = mock.create_autospec(DataAPIClient, instance=True)
+    mock_data_api_client.get_framework.return_value = FrameworkStub(
+        slug="g-cloud-99",
+        status=framework_status,
+    ).single_result_response()
+    mock_notify_client = mock.create_autospec(DMNotifyClient, instance=True)
+    mock_logger = mock.create_autospec(logging.Logger, instance=True)
+
+    with pytest.raises(ValueError, match=r"\bopen\b"):
+        notify_suppliers_of_new_fw_cq_answers(
+            data_api_client=mock_data_api_client,
+            notify_client=mock_notify_client,
+            notify_template_id="8877eeff",
+            framework_slug="g-cloud-99",
+            dry_run=False,
+            stage="production",
+            logger=mock_logger,
+        )
+
+    assert mock_data_api_client.mock_calls == [
+        mock.call.get_framework("g-cloud-99")
+    ]
+
+    assert mock_notify_client.mock_calls == []
+
+
 @pytest.mark.parametrize("dry_run", (False, True))
 @pytest.mark.parametrize("run_id", (None, uuid.UUID("00010203-0405-0607-0809-0a0b0c0d0e0f")))
-@mock.patch("dmscripts.notify_fw_interested_suppliers.uuid4")
+@mock.patch("dmscripts.notify_suppliers_of_new_fw_cq_answers.uuid4")
 def test_happy_paths(mock_uuid4, run_id, dry_run):
     mock_uuid4.return_value = uuid.UUID("12345678-1234-5678-1234-567812345678")
 
     mock_data_api_client = mock.create_autospec(DataAPIClient, instance=True)
-    framework_response = FrameworkStub(
+    mock_data_api_client.get_framework.return_value = FrameworkStub(
         slug="g-cloud-99",
         status="open",
     ).single_result_response()
-    framework_response["frameworks"]["intentionToAwardAtUTC"] = "2000-06-29T16:00:00.0000Z"
-    framework_response["frameworks"]["frameworkLiveAtUTC"] = "2000-06-29T16:30:00.0000Z"
-    mock_data_api_client.get_framework.return_value = framework_response
     mock_data_api_client.find_framework_suppliers_iter.side_effect = lambda *a, **k: iter(_supplier_frameworks)
     mock_data_api_client.find_users_iter.side_effect = lambda *a, **k: iter(
         _supplier_users_by_supplier[k["supplier_id"]]
@@ -97,45 +120,18 @@ def test_happy_paths(mock_uuid4, run_id, dry_run):
 
     mock_logger = mock.create_autospec(logging.Logger, instance=True)
 
-    with freeze_time('2000-06-29 02:55:55'):
-        assert notify_fw_interested_suppliers(
-            data_api_client=mock_data_api_client,
-            notify_client=mock_notify_client,
-            notify_template_id="8877eeff",
-            framework_slug="g-cloud-99",
-            dry_run=dry_run,
-            stage="production",
-            logger=mock_logger,
-            run_id=run_id,
-        ) == 0
+    assert notify_suppliers_of_new_fw_cq_answers(
+        data_api_client=mock_data_api_client,
+        notify_client=mock_notify_client,
+        notify_template_id="8877eeff",
+        framework_slug="g-cloud-99",
+        dry_run=dry_run,
+        stage="production",
+        logger=mock_logger,
+        run_id=run_id,
+    ) == 0
 
     expected_run_id = str(run_id or "12345678-1234-5678-1234-567812345678")
-    expected_context = {
-        'framework_name': 'G-Cloud 99',
-        'updates_url': 'https://www.digitalmarketplace.service.gov.uk/suppliers/frameworks/g-cloud-99/updates',
-        'framework_dashboard_url': 'https://www.digitalmarketplace.service.gov.uk/suppliers/frameworks/g-cloud-99/',
-        'clarification_questions_closed': 'no',
-        'clarificationsCloseAt_displaytimeformat': '12:00am GMT',
-        'clarificationsCloseAt_dateformat': 'Saturday 1 January 2000',
-        'clarificationsCloseAt_datetimeformat': 'Saturday 1 January 2000 at 12:00am GMT',
-        'clarificationsPublishAt_displaytimeformat': '12:00am GMT',
-        'clarificationsPublishAt_dateformat': 'Sunday 2 January 2000',
-        'clarificationsPublishAt_datetimeformat': 'Sunday 2 January 2000 at 12:00am GMT',
-        'applicationsCloseAt_displaytimeformat': '12:00am GMT',
-        'applicationsCloseAt_dateformat': 'Monday 3 January 2000',
-        'applicationsCloseAt_datetimeformat': 'Monday 3 January 2000 at 12:00am GMT',
-        'intentionToAwardAt_displaytimeformat': '5:00pm BST',
-        'intentionToAwardAt_timetoday': 'Today at 5pm BST',
-        'intentionToAwardAt_dateformat': 'Thursday 29 June 2000',
-        'intentionToAwardAt_datetimeformat': 'Thursday 29 June 2000 at 5:00pm BST',
-        'frameworkLiveAt_displaytimeformat': '5:30pm BST',
-        'frameworkLiveAt_dateformat': 'Thursday 29 June 2000',
-        'frameworkLiveAt_datetimeformat': 'Thursday 29 June 2000 at 5:30pm BST',
-        # no frameworkLiveAt_timetoday because it's non-hour-exact
-        'frameworkExpiresAt_displaytimeformat': '12:00am GMT',
-        'frameworkExpiresAt_dateformat': 'Thursday 6 January 2000',
-        'frameworkExpiresAt_datetimeformat': 'Thursday 6 January 2000 at 12:00am GMT',
-    }
 
     assert mock_uuid4.mock_calls == ([mock.call()] if run_id is None else [])
     assert mock_data_api_client.mock_calls == [
@@ -156,7 +152,11 @@ def test_happy_paths(mock_uuid4, run_id, dry_run):
         ) if dry_run else mock.call.send_email(
             'one@peasoup.net',
             '8877eeff',
-            expected_context,
+            {
+                'framework_name': 'G-Cloud 99',
+                'updates_url': 'https://www.digitalmarketplace.service.gov.uk/suppliers/frameworks/g-cloud-99/updates',
+                'clarification_questions_closed': "no",
+            },
             allow_resend=False,
             reference=f"one@peasoup.net,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
         )),
@@ -169,7 +169,11 @@ def test_happy_paths(mock_uuid4, run_id, dry_run):
         ) if dry_run else mock.call.send_email(
             'two@peasoup.net',
             '8877eeff',
-            expected_context,
+            {
+                'framework_name': 'G-Cloud 99',
+                'updates_url': 'https://www.digitalmarketplace.service.gov.uk/suppliers/frameworks/g-cloud-99/updates',
+                'clarification_questions_closed': "no",
+            },
             allow_resend=False,
             reference=f"two@peasoup.net,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
         )),
@@ -182,7 +186,11 @@ def test_happy_paths(mock_uuid4, run_id, dry_run):
         ) if dry_run else mock.call.send_email(
             'two@shirts.co.ua',
             '8877eeff',
-            expected_context,
+            {
+                'framework_name': 'G-Cloud 99',
+                'updates_url': 'https://www.digitalmarketplace.service.gov.uk/suppliers/frameworks/g-cloud-99/updates',
+                'clarification_questions_closed': "no",
+            },
             allow_resend=False,
             reference=f"two@shirts.co.ua,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
         )),
@@ -195,7 +203,11 @@ def test_happy_paths(mock_uuid4, run_id, dry_run):
         ) if dry_run else mock.call.send_email(
             'three@shirts.co.ua',
             '8877eeff',
-            expected_context,
+            {
+                'framework_name': 'G-Cloud 99',
+                'updates_url': 'https://www.digitalmarketplace.service.gov.uk/suppliers/frameworks/g-cloud-99/updates',
+                'clarification_questions_closed': "no",
+            },
             allow_resend=False,
             reference=f"three@shirts.co.ua,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
         )),
@@ -231,7 +243,7 @@ def test_sending_failure_continues():
 
     mock_logger = mock.create_autospec(logging.Logger, instance=True)
 
-    assert notify_fw_interested_suppliers(
+    assert notify_suppliers_of_new_fw_cq_answers(
         data_api_client=mock_data_api_client,
         notify_client=mock_notify_client,
         notify_template_id="8877eeff",

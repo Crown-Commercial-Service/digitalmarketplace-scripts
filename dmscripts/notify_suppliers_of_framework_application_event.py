@@ -54,7 +54,7 @@ def _formatted_dates_from_framework(framework):
     ))
 
 
-def notify_fw_interested_suppliers(
+def notify_suppliers_of_framework_application_event(
     data_api_client: DataAPIClient,
     notify_client: DMNotifyClient,
     notify_template_id: str,
