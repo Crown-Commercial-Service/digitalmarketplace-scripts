@@ -52,11 +52,12 @@ Options:
     -h, --help                                            Show this screen
 
 Examples:
-    ./scripts/framework-applications/notify-suppliers-of-framework-application-event.py
+    ./scripts/framework-applications/notify-suppliers-of-framework-application-event.py \
         preview g-cloud-99 notifyToken t3mp1at3id
-    ./scripts/framework-applications/notify-suppliers-of-framework-application-event.py
-        preview g-cloud-99 notifyToken t3mp1at3id --dry-run --verbose
-        --resume-run-id=00010203-0405-0607-0809-0a0b0c0d0e0f
+
+    ./scripts/framework-applications/notify-suppliers-of-framework-application-event.py \
+        preview g-cloud-99 notifyToken t3mp1at3id \
+        --dry-run --verbose --resume-run-id=00010203-0405-0607-0809-0a0b0c0d0e0f
 
 """
 
