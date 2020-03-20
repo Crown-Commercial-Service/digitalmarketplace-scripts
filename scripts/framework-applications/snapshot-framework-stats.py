@@ -40,7 +40,7 @@ def log_human_readable_stats(stats):
         if stat['has_completed_services']:
             if stat['declaration_status'] == 'complete':
                 completed += stat['count']
-            elif stat['declaration_status'] == 'started':
+            else:
                 added_services += stat['count']
         else:
             if stat['declaration_status'] == 'complete':
