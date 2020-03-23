@@ -23,6 +23,7 @@ from dmapiclient import DataAPIClient
 
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.logging_helpers import logging, configure_logger
+from dmscripts.helpers.s3_helpers import get_bucket_name
 from dmscripts.export_dos_opportunities import (
     get_latest_dos_framework, get_brief_data, write_rows_to_csv, upload_file_to_s3
 )
@@ -52,16 +53,16 @@ if __name__ == '__main__':
 
     DOWNLOAD_FILE_NAME = 'opportunity-data.csv'
     file_path = os.path.join(OUTPUT_DIR, DOWNLOAD_FILE_NAME)
-    bucket_name = 'digitalmarketplace-communications-{}-{}'.format(STAGE, STAGE)
+    bucket_name = get_bucket_name(STAGE, 'communications')
     key_name = '{}/communications/data/{}'.format(latest_framework_slug, DOWNLOAD_FILE_NAME)
 
     logger.info('Exporting DOS opportunity data to CSV')
 
     # Get the data
-    rows = get_brief_data(client)
+    rows = get_brief_data(client, logger)
 
     # Construct CSV
-    write_rows_to_csv(rows, file_path)
+    write_rows_to_csv(rows, file_path, logger)
 
     # Grab bucket
     bucket = S3(bucket_name)
