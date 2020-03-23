@@ -1,5 +1,7 @@
 -c requirements.txt
 
+pip-tools
+
 cram
 flake8
 freezegun
