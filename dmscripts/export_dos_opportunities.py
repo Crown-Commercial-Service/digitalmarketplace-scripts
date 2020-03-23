@@ -60,16 +60,19 @@ def get_latest_dos_framework(client):
     return 'digital-outcomes-and-specialists'
 
 
-def get_brief_data(client):
+def get_brief_data(client, logger):
+    logger.info("Fetching closed briefs from API")
     briefs = client.find_briefs_iter(status="closed,awarded,unsuccessful,cancelled", with_users=True)
     rows = []
     for brief in briefs:
+        logger.info(f"Fetching brief responses for Brief ID {brief['id']}")
         brief_responses = client.find_brief_responses_iter(brief_id=brief['id'])
         rows.append(_build_row(brief, brief_responses))
     return rows
 
 
-def write_rows_to_csv(rows, file_path):
+def write_rows_to_csv(rows, file_path, logger):
+    logger.info(f"Writing rows to {file_path}")
     with open(file_path, 'w') as csv_file:
         writer = csv.writer(csv_file, delimiter=',', quotechar='"')
         writer.writerow(DOS_OPPORTUNITY_HEADERS)

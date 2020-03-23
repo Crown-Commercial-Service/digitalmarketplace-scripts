@@ -70,7 +70,9 @@ def test_get_brief_data():
         BriefResponseStub().response()
     ]
 
-    rows = get_brief_data(client)
+    logger = mock.Mock()
+
+    rows = get_brief_data(client, logger)
 
     assert rows == [
         [
@@ -102,6 +104,10 @@ def test_get_brief_data():
     ]
     assert client.find_brief_responses_iter.call_args_list == [
         mock.call(brief_id=12345)
+    ]
+    assert logger.info.call_args_list == [
+        mock.call('Fetching closed briefs from API'),
+        mock.call('Fetching brief responses for Brief ID 12345')
     ]
 
 

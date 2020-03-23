@@ -58,10 +58,10 @@ if __name__ == '__main__':
     logger.info('Exporting DOS opportunity data to CSV')
 
     # Get the data
-    rows = get_brief_data(client)
+    rows = get_brief_data(client, logger)
 
     # Construct CSV
-    write_rows_to_csv(rows, file_path)
+    write_rows_to_csv(rows, file_path, logger)
 
     # Grab bucket
     bucket = S3(bucket_name)
