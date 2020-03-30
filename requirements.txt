@@ -59,7 +59,7 @@ pyrsistent==0.15.7        # via jsonschema
 python-dateutil==2.8.1    # via -r requirements.in, botocore, pandas
 git+https://github.com/madzak/python-json-logger.git@v0.1.8#egg=python-json-logger==0.1.8  # via -r requirements.in, digitalmarketplace-utils
 pytz==2019.3              # via digitalmarketplace-utils, pandas
-pyyaml==5.2               # via awscli, digitalmarketplace-content-loader, yq
+pyyaml==5.3.1             # via awscli, digitalmarketplace-content-loader, yq
 requests==2.23.0          # via digitalmarketplace-apiclient, digitalmarketplace-utils, mailchimp3, notifications-python-client
 rsa==3.4.2                # via awscli
 s3transfer==0.3.3         # via awscli, boto3
