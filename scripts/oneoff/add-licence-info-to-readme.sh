@@ -56,7 +56,7 @@ EOF
   )
   echo "${LICENCE_TEXT}" >> "README.md"
 
-  commit_and_create_github_pr "Update README with LICENCE info" "As per GDS Way guidelines"
+  commit_and_create_github_pr "Update README with LICENCE info" "As per [GDS Way](https://gds-way.cloudapps.digital/manuals/readme-guidance.html#writing-readmes) guidelines."
 
   echo "Done."
 }
