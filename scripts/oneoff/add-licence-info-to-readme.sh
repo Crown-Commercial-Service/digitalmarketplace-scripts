@@ -4,6 +4,8 @@
 # It's intended to be run locally from a developer's top level directory, containing the checked-out repos.
 # You'll need the GITHUB_ACCESS_TOKEN environment variable.
 #
+# Note that the script changes the git config to use the dm-ssp-jenkins user - remember to change it back afterwards!
+#
 # Syntax: ./digitalmarketplace-scripts/scripts/oneoff/add-licence-info-to-readme.sh [repo_name]
 
 set -e
