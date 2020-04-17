@@ -1,11 +1,11 @@
 #!/bin/bash
-# This script will create a PR against the dm-aws repository, toggling the maintenance mode variable as appropriate.
+# This script will create a PR against the dm-aws repository, setting the maintenance mode variable as appropriate.
 #
-# Syntax: ./scripts/maintenance-mode-pr.sh [on|off] [preview|staging|production]
+# Syntax: ./scripts/maintenance-mode-pr.sh [live|maintenance|recovery] [preview|staging|production]
 
 set -e
 
-COMMAND=$(echo "${1}" | tr "[:lower:]" "[:upper:]")
+MODE=$(echo "${1}" | tr "[:upper:]" "[:lower:]")
 STAGE=$(echo "${2}" | tr "[:lower:]" "[:upper:]")
 STAGE_LOWER=$(echo "${STAGE}" | tr "[:upper:]" "[:lower:]")
 GIT_MAINTENANCE_MODE_BRANCH_NAME=$(date +"%Y-%m-%dT%H-%M-%S-maintenance-mode")
@@ -16,7 +16,12 @@ if [ -z "${GITHUB_ACCESS_TOKEN}" ]; then
 fi
 
 if [[ "${STAGE}" != "PREVIEW" && "${STAGE}" != "STAGING" && "${STAGE}" != "PRODUCTION" ]]; then
-  echo "Syntax: ./scripts/maintenance-mode-pr.sh [on|off] [preview|staging|production]"
+  echo "Syntax: ./scripts/maintenance-mode-pr.sh [live|maintenance|recovery] [preview|staging|production]"
+  exit 2
+fi
+
+if [[ "${MODE}" != "live" && "${MODE}" != "maintenance" && "${MODE}" != "recovery" ]]; then
+  echo "Syntax: ./scripts/maintenance-mode-pr.sh [live|maintenance|recovery] [preview|staging|production]"
   exit 2
 fi
 
@@ -43,14 +48,10 @@ function commit_and_create_github_pr()
 function set_maintenance_mode()
 {
     create_maintenance_mode_branch
-    sed -i.bak "s/^maintenance_mode: .*$/maintenance_mode: $2/" "vars/${STAGE_LOWER}.yml"
+    sed -i.bak "s/^maintenance_mode: .*$/maintenance_mode: ${MODE}/" "vars/${STAGE_LOWER}.yml"
     rm "vars/${STAGE_LOWER}.yml.bak"
-    commit_and_create_github_pr "Toggle maintenance mode $1" "## Summary\r\nTurn $1 maintenance mode for the ${STAGE} environment."
+    commit_and_create_github_pr "Set maintenance mode to ${MODE}" "## Summary\r\nSet maintenance mode to '${MODE}' for the ${STAGE} environment."
     echo "Done."
 }
 
-case ${COMMAND} in
-  ON) set_maintenance_mode "ON" "maintenance";;
-  OFF) set_maintenance_mode "OFF" "live";;
-  *) echo "Syntax: ./scripts/maintenance-mode-pr.sh [on|off] [preview|staging|production]";;
-esac
+set_maintenance_mode
