@@ -9,7 +9,7 @@ git+https://github.com/alphagov/digitalmarketplace-utils.git@51.6.0#egg=digitalm
 git+https://github.com/alphagov/digitalmarketplace-apiclient.git@21.0.0#egg=digitalmarketplace-apiclient==21.0.0
 git+https://github.com/alphagov/digitalmarketplace-content-loader.git@7.3.0#egg=digitalmarketplace-content-loader==7.3.0
 
-awscli==1.18.39
+awscli==1.18.41
 backoff==1.10.0
 clamd==1.0.2
 docopt==0.6.2
