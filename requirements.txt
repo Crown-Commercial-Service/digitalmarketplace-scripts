@@ -15,7 +15,6 @@ botocore==1.15.41         # via awscli, boto3, s3transfer
 certifi==2019.11.28       # via requests
 cffi==1.14.0              # via cryptography
 chardet==3.0.4            # via requests
-clamd==1.0.2              # via -r requirements.in
 click==7.0                # via flask
 colorama==0.4.3           # via awscli
 contextlib2==0.6.0.post1  # via digitalmarketplace-utils
@@ -48,17 +47,15 @@ markdown==2.6.11          # via digitalmarketplace-content-loader
 markupsafe==1.1.1         # via jinja2
 monotonic==1.5            # via notifications-python-client
 notifications-python-client==5.5.1  # via digitalmarketplace-utils
-numpy==1.17.4             # via -r requirements.in, pandas
 odfpy==1.4.1              # via digitalmarketplace-utils
-pandas==0.19.1            # via -r requirements.in
 prometheus-client==0.2.0  # via gds-metrics
 pyasn1==0.4.8             # via rsa
 pycparser==2.19           # via cffi
 pyjwt==1.7.1              # via notifications-python-client
 pyrsistent==0.15.7        # via jsonschema
-python-dateutil==2.8.1    # via -r requirements.in, botocore, pandas
+python-dateutil==2.8.1    # via -r requirements.in, botocore
 git+https://github.com/madzak/python-json-logger.git@v0.1.8#egg=python-json-logger==0.1.8  # via -r requirements.in, digitalmarketplace-utils
-pytz==2019.3              # via digitalmarketplace-utils, pandas
+pytz==2019.3              # via digitalmarketplace-utils
 pyyaml==5.3.1             # via awscli, digitalmarketplace-content-loader, yq
 requests==2.23.0          # via digitalmarketplace-apiclient, digitalmarketplace-utils, mailchimp3, notifications-python-client
 rsa==3.4.2                # via awscli
