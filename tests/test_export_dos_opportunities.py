@@ -71,97 +71,103 @@ class TestRemoveUsernameFromEmailAddress:
         assert remove_username_from_email_address(initial_email_address) == formatted_email_address
 
 
-def test_get_latest_dos_framework():
-    client = mock.Mock(spec=DataAPIClient)
-    client.find_frameworks.return_value = {
-        'frameworks': [
-            FrameworkStub(status='expired', slug='g-cloud-10', family='g-cloud').response(),
-            FrameworkStub(status='live', slug='g-cloud-11', family='g-cloud').response(),
-            FrameworkStub(
-                status='expired',
-                slug='digital-outcomes-and-specialists-2',
-                family='digital-outcomes-and-specialists'
-            ).response(),
-            FrameworkStub(
-                status='live',
-                slug='digital-outcomes-and-specialists-3',
-                family='digital-outcomes-and-specialists'
-            ).response(),
+class TestGetLatestDOSFramework:
+
+    def test_get_latest_dos_framework(self):
+        client = mock.Mock(spec=DataAPIClient)
+        client.find_frameworks.return_value = {
+            'frameworks': [
+                FrameworkStub(status='expired', slug='g-cloud-10', family='g-cloud').response(),
+                FrameworkStub(status='live', slug='g-cloud-11', family='g-cloud').response(),
+                FrameworkStub(
+                    status='expired',
+                    slug='digital-outcomes-and-specialists-2',
+                    family='digital-outcomes-and-specialists'
+                ).response(),
+                FrameworkStub(
+                    status='live',
+                    slug='digital-outcomes-and-specialists-3',
+                    family='digital-outcomes-and-specialists'
+                ).response(),
+            ]
+        }
+
+        assert get_latest_dos_framework(client) == 'digital-outcomes-and-specialists-3'
+        assert client.find_frameworks.call_args_list == [
+            mock.call()
         ]
-    }
-
-    assert get_latest_dos_framework(client) == 'digital-outcomes-and-specialists-3'
-    assert client.find_frameworks.call_args_list == [
-        mock.call()
-    ]
 
 
-def test_get_brief_data():
-    client = mock.Mock(spec=DataAPIClient)
-    client.find_briefs_iter.return_value = [example_brief]
-    client.find_brief_responses_iter.return_value = [
-        example_winning_brief_response,
-        BriefResponseStub().response()
-    ]
+class TestGetBriefData:
 
-    logger = mock.Mock()
-
-    rows = get_brief_data(client, logger)
-
-    assert rows == [
-        [
-            12345,
-            'My Brilliant Brief',
-            'https://digitalmarketplace.service.gov.uk/digital-outcomes-and-specialists/opportunities/12345',
-            'digital-outcomes-and-specialists-3',
-            'digital-specialists',
-            'technicalArchitect',
-            "HM Dept of Doing Stuff",
-            "example.gov.uk",
-            "London",
-            "2019-01-01",
-            "2 weeks",
-            "6 months",
-            2,
-            0,
-            2,
-            "awarded",
-            "Foo Inc",
-            "small",
-            "2345678",
-            "2019-06-02"
+    def test_get_brief_data(self):
+        client = mock.Mock(spec=DataAPIClient)
+        client.find_briefs_iter.return_value = [example_brief]
+        client.find_brief_responses_iter.return_value = [
+            example_winning_brief_response,
+            BriefResponseStub().response()
         ]
-    ]
 
-    assert client.find_briefs_iter.call_args_list == [
-        mock.call(status="closed,awarded,unsuccessful,cancelled", with_users=True)
-    ]
-    assert client.find_brief_responses_iter.call_args_list == [
-        mock.call(brief_id=12345)
-    ]
-    assert logger.info.call_args_list == [
-        mock.call('Fetching closed briefs from API'),
-        mock.call('Fetching brief responses for Brief ID 12345')
-    ]
+        logger = mock.Mock()
+
+        rows = get_brief_data(client, logger)
+
+        assert rows == [
+            [
+                12345,
+                'My Brilliant Brief',
+                'https://digitalmarketplace.service.gov.uk/digital-outcomes-and-specialists/opportunities/12345',
+                'digital-outcomes-and-specialists-3',
+                'digital-specialists',
+                'technicalArchitect',
+                "HM Dept of Doing Stuff",
+                "example.gov.uk",
+                "London",
+                "2019-01-01",
+                "2 weeks",
+                "6 months",
+                2,
+                0,
+                2,
+                "awarded",
+                "Foo Inc",
+                "small",
+                "2345678",
+                "2019-06-02"
+            ]
+        ]
+
+        assert client.find_briefs_iter.call_args_list == [
+            mock.call(status="closed,awarded,unsuccessful,cancelled", with_users=True)
+        ]
+        assert client.find_brief_responses_iter.call_args_list == [
+            mock.call(brief_id=12345)
+        ]
+        assert logger.info.call_args_list == [
+            mock.call('Fetching closed briefs from API'),
+            mock.call('Fetching brief responses for Brief ID 12345')
+        ]
 
 
-@pytest.mark.parametrize('dry_run', ['True', 'False'])
-def test_upload_file_to_s3(dry_run):
-    bucket = mock.Mock()
-    bucket.bucket_name = 'mybucket'
-    logger = mock.Mock()
+class TestUploadFileToS3:
 
-    with mock.patch.object(builtins, 'open', mock.mock_open()) as mock_open:
-        upload_file_to_s3(
-            "local/path", bucket, "remote/key/name", "opportunity-data.csv", dry_run, logger
-        )
+    @pytest.mark.parametrize('dry_run', ['True', 'False'])
+    def test_upload_file_to_s3(self, dry_run):
+        bucket = mock.Mock()
+        bucket.bucket_name = 'mybucket'
+        logger = mock.Mock()
 
-    assert mock_open.called is True
-    assert bucket.save.call_args_list == ([] if dry_run else [
-        mock.call("remote/key/name", "local/path", acl='public-read', download_filename="opportunity-data.csv")
-    ])
-    assert logger.info.call_args_list == ([
-        mock.call("[Dry-run]UPLOAD: local/path to mybucket::opportunity-data.csv")
-    ] if dry_run else [
-        mock.call("UPLOAD: local/path to mybucket::opportunity-data.csv")
-    ])
+        with mock.patch.object(builtins, 'open', mock.mock_open()) as mock_open:
+            upload_file_to_s3(
+                "local/path", bucket, "remote/key/name", "opportunity-data.csv", dry_run, logger
+            )
+
+        assert mock_open.called is True
+        assert bucket.save.call_args_list == ([] if dry_run else [
+            mock.call("remote/key/name", "local/path", acl='public-read', download_filename="opportunity-data.csv")
+        ])
+        assert logger.info.call_args_list == ([
+            mock.call("[Dry-run]UPLOAD: local/path to mybucket::opportunity-data.csv")
+        ] if dry_run else [
+            mock.call("UPLOAD: local/path to mybucket::opportunity-data.csv")
+        ])
