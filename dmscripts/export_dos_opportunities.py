@@ -1,5 +1,6 @@
 import csv
-from dmscripts.models.process_rules import remove_username_from_email_address, format_datetime_string_as_date
+from datetime import datetime
+from dmutils.formats import DATE_FORMAT, DATETIME_FORMAT
 
 # This URL is framework agnostic
 PUBLIC_BRIEF_URL = "https://digitalmarketplace.service.gov.uk/digital-outcomes-and-specialists/opportunities/{}"
@@ -11,6 +12,14 @@ DOS_OPPORTUNITY_HEADERS = [
     "Applications from Large Organisations", "Total Organisations", "Status", "Winning supplier",
     "Size of supplier", "Contract amount", "Contract start date"
 ]
+
+
+def format_datetime_string_as_date(dt):
+    return datetime.strptime(dt, DATETIME_FORMAT).strftime(DATE_FORMAT) if dt else None
+
+
+def remove_username_from_email_address(ea):
+    return '{}'.format(ea.split('@').pop()) if ea else None
 
 
 def _build_row(brief, brief_responses):
