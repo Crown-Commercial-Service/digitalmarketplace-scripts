@@ -13,7 +13,7 @@ from dmscripts.helpers.user_helpers import (
 )
 
 
-def get_user(api_url, api_token, stage, role, framework, lot):
+def get_user(api_url, api_token, stage, role, framework, lot, *, brief_status=None):
     if not api_url:
         api_url = get_api_endpoint_from_stage(stage)
 
@@ -32,7 +32,7 @@ def get_user(api_url, api_token, stage, role, framework, lot):
         framework = get_full_framework_slug(framework)
         print('Framework: {}'.format(framework))
         if framework.startswith("digital-outcomes-and-specialists"):
-            print("Has requirements: True")
-            return get_random_buyer_with_brief(api_client, framework, lot)
+            print(f"Has requirements: {brief_status or 'True'}")
+            return get_random_buyer_with_brief(api_client, framework, lot, brief_status=brief_status)
     else:
         return get_random_user(api_client, role)
