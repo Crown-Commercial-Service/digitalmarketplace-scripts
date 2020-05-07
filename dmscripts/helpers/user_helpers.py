@@ -19,11 +19,14 @@ def get_supplier_id(api_client, framework, lot):
     return random.choice(services)['supplierId']
 
 
-def get_random_buyer_with_brief(api_client, framework, lot):
+def get_random_buyer_with_brief(api_client, framework, lot, *, brief_status=None):
+    if brief_status is None:
+        brief_status = "live,cancelled,unsuccessful,closed,awarded"
+
     briefs = api_client.find_briefs(
         framework=framework,
         lot=lot,
-        status="live,cancelled,unsuccessful,closed,awarded",
+        status=brief_status,
         with_users=True,
     )["briefs"]
 

@@ -5,14 +5,18 @@ For supplier users, providing additional <framework> and <lot> arguments allows
 filtering by suppliers who have published services on the given framewok and lot.
 
 Usage:
-    get-user.py <role> [<framework>] [<lot>] [options]
+    get-user.py [options] <role> [<framework>] [<lot>]
 
     --api-url=<api_url>     API URL (overrides --stage)
     --api-token=<api_token  API Token (overrides --stage)
     --stage=<stage>         Stage to target; automatically derive/decrypt api url and token [default: development]
 
+    --brief-status=<status>  Status can be one of draft,live,withdrawn,
+                             cancelled,unsuccessful,closed,awarded
+
 Example:
     ./get-user.py supplier g9 cloud-hosting
+    ./get-user.py buyer dos4 --brief-status=closed  # get a buyer user with closed briefs on DOS4
     ./get-user.py admin
     ./get-user.py --stage=preview supplier g-cloud-9
     ./get-user.py --stage=staging supplier dos2 digital-outcomes
@@ -34,6 +38,7 @@ if __name__ == "__main__":
         role=arguments['<role>'].lower(),
         framework=arguments['<framework>'].lower() if arguments['<framework>'] else None,
         lot=arguments['<lot>'].lower() if arguments['<lot>'] else None,
+        brief_status=arguments['--brief-status'].lower() if arguments['--brief-status'] else None,
     )
 
     print("\n".join(": ".join(u) for u in [
