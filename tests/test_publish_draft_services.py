@@ -12,6 +12,153 @@ from dmutils.s3 import S3
 from dmscripts.publish_draft_services import publish_draft_services, copy_draft_documents, publish_draft_service
 
 
+@mock.patch('dmscripts.publish_draft_services._get_draft_services_iter')
+@mock.patch('dmscripts.publish_draft_services.publish_draft_service')
+@mock.patch('dmscripts.publish_draft_services.copy_draft_documents')
+class TestPublishAndCopyDraftServices:
+
+    def setup(self):
+        self.mock_data_api_client = mock.create_autospec(DataAPIClient)
+        self.draft_services_iter = []
+
+        self.live_assets_endpoint = "https://boyish.gam/bols/"
+        self.document_keys = ('123', '456')
+        self.draft_service1 = DraftServiceStub(framework_slug="g-cloud-123", id=123).response()
+        self.draft_service2 = DraftServiceStub(framework_slug="g-cloud-123", id=456).response()
+
+    def find_draft_services_iter_side_effect(self, *args, **kwargs):
+        return self.draft_service1, self.draft_service2
+
+    @pytest.mark.parametrize("draft_ids_file", ("1, 2, 3", None))
+    @pytest.mark.parametrize("dry_run", (False, True,))
+    def test_publish_draft_services_happy_path(
+        self, copy_draft_documents, publish_draft_service, _get_draft_services_iter, dry_run, draft_ids_file
+    ):
+        _get_draft_services_iter.side_effect = self.find_draft_services_iter_side_effect
+        # Assume the drafts have not been previously published
+        publish_draft_service.return_value = ("serviceID", False)
+
+        publish_draft_services(
+            self.mock_data_api_client,
+            "g-cloud-123",
+            'draft-bucket',
+            'documents-bucket',
+            self.document_keys,
+            self.live_assets_endpoint,
+            draft_ids_file=draft_ids_file,
+            dry_run=dry_run,
+        )
+
+        assert publish_draft_service.mock_calls == [
+            mock.call(
+                self.mock_data_api_client,
+                self.draft_service1,
+                dry_run=dry_run,
+            ),
+            mock.call(
+                self.mock_data_api_client,
+                self.draft_service2,
+                dry_run=dry_run,
+            )
+        ]
+        assert copy_draft_documents.mock_calls == [
+            mock.call(
+                'draft-bucket',
+                'documents-bucket',
+                self.document_keys,
+                self.live_assets_endpoint,
+                self.mock_data_api_client,
+                "g-cloud-123",
+                self.draft_service1,
+                "serviceID",
+                dry_run
+            ),
+            mock.call(
+                'draft-bucket',
+                'documents-bucket',
+                self.document_keys,
+                self.live_assets_endpoint,
+                self.mock_data_api_client,
+                "g-cloud-123",
+                self.draft_service2,
+                "serviceID",
+                dry_run
+            ),
+        ]
+        assert _get_draft_services_iter.mock_calls == [
+            mock.call(
+                self.mock_data_api_client,
+                'g-cloud-123',
+                draft_ids_file=draft_ids_file
+            )
+        ]
+
+    @pytest.mark.parametrize("skip_docs_flag", (False, True,))
+    @pytest.mark.parametrize("dry_run", (False, True,))
+    def test_publish_draft_services_does_not_copy_if_copy_flag_false(
+        self, copy_draft_documents, publish_draft_service, _get_draft_services_iter, dry_run, skip_docs_flag
+    ):
+        _get_draft_services_iter.side_effect = self.find_draft_services_iter_side_effect
+        # Not yet published
+        publish_draft_service.return_value = ("serviceID", False)
+
+        publish_draft_services(
+            self.mock_data_api_client,
+            "g-cloud-123",
+            'draft-bucket',
+            'documents-bucket',
+            self.document_keys,
+            self.live_assets_endpoint,
+            dry_run=dry_run,
+            skip_docs_if_published=skip_docs_flag,
+            copy_documents=False
+        )
+        assert len(copy_draft_documents.mock_calls) == 0
+
+    @pytest.mark.parametrize("draft_ids_file", ("1, 2, 3", None))
+    @pytest.mark.parametrize("dry_run", (False, True,))
+    def test_publish_draft_services_skips_copying_if_draft_already_published(
+        self, copy_draft_documents, publish_draft_service, _get_draft_services_iter, dry_run, draft_ids_file
+    ):
+        _get_draft_services_iter.side_effect = self.find_draft_services_iter_side_effect
+        # Already published
+        publish_draft_service.return_value = ("serviceID", True)
+
+        publish_draft_services(
+            self.mock_data_api_client,
+            "g-cloud-123",
+            'draft-bucket',
+            'documents-bucket',
+            self.document_keys,
+            self.live_assets_endpoint,
+            draft_ids_file=draft_ids_file,
+            dry_run=dry_run,
+        )
+        assert len(copy_draft_documents.mock_calls) == 0
+
+    @pytest.mark.parametrize("draft_ids_file", ("1, 2, 3", None))
+    @pytest.mark.parametrize("dry_run", (False, True,))
+    def test_publish_draft_services_does_not_skip_copying_published_docs_if_skip_flag_false(
+        self, copy_draft_documents, publish_draft_service, _get_draft_services_iter, dry_run, draft_ids_file
+    ):
+        _get_draft_services_iter.side_effect = self.find_draft_services_iter_side_effect
+        # Already published
+        publish_draft_service.return_value = ("serviceID", True)
+
+        publish_draft_services(
+            self.mock_data_api_client,
+            "g-cloud-123",
+            'draft-bucket',
+            'documents-bucket',
+            self.document_keys,
+            self.live_assets_endpoint,
+            draft_ids_file=draft_ids_file,
+            dry_run=dry_run,
+            skip_docs_if_published=False,
+        )
+        assert len(copy_draft_documents.mock_calls) == 2
+
+
 @pytest.mark.parametrize("dry_run", (False, True,))
 @pytest.mark.parametrize("skip_docs_if_published", (False, True,))
 @mock.patch('dmscripts.publish_draft_services.copy_draft_documents')
