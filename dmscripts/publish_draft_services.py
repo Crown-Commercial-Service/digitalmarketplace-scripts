@@ -115,6 +115,7 @@ def publish_draft_service(
     dry_run=True,
 ):
     get_logger().info("supplier %s: draft %s: publishing", draft_service["supplierId"], draft_service['id'])
+    previously_published = False
 
     if draft_service.get("serviceId"):
         # This draft service already has a service id, it has already been published.
@@ -125,7 +126,7 @@ def publish_draft_service(
             draft_service['id'],
             service_id,
         )
-        return service_id, True
+        previously_published = True
     elif dry_run:
         service_id = str(random.randint(55500000, 55599999))
         get_logger().info(
@@ -134,7 +135,6 @@ def publish_draft_service(
             draft_service['id'],
             service_id,
         )
-        return service_id, False
     else:
         try:
             services = client.publish_draft_service(draft_service['id'], user='publish_draft_services.py')
@@ -145,7 +145,6 @@ def publish_draft_service(
                 draft_service['id'],
                 service_id,
             )
-            return service_id, False
 
         except dmapiclient.HTTPError as e:
             if e.status_code == 400 and str(e).startswith('Cannot re-publish a submitted service'):
@@ -158,9 +157,11 @@ def publish_draft_service(
                     draft_service['id'],
                     draft_service['serviceId'],
                 )
-                return service_id, True
+                previously_published = True
             else:
                 raise e
+
+    return service_id, previously_published
 
 
 def _get_draft_services_iter(client, framework_slug, draft_ids_file=None):
