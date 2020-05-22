@@ -69,7 +69,7 @@ class TestPublishAndCopyDraftServices:
                 'documents-bucket',
                 self.document_keys,
                 self.live_assets_endpoint,
-                self.mock_data_api_client,
+                ExactIdentity(self.mock_data_api_client),
                 "g-cloud-123",
                 self.draft_service1,
                 "serviceID",
@@ -80,7 +80,7 @@ class TestPublishAndCopyDraftServices:
                 'documents-bucket',
                 self.document_keys,
                 self.live_assets_endpoint,
-                self.mock_data_api_client,
+                ExactIdentity(self.mock_data_api_client),
                 "g-cloud-123",
                 self.draft_service2,
                 "serviceID",
@@ -89,7 +89,7 @@ class TestPublishAndCopyDraftServices:
         ]
         assert get_draft_services_iter.mock_calls == [
             mock.call(
-                self.mock_data_api_client,
+                ExactIdentity(self.mock_data_api_client),
                 'g-cloud-123',
                 draft_ids_file=draft_ids_file
             )
