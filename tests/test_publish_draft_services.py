@@ -9,10 +9,12 @@ from dmtestutils.comparisons import ExactIdentity, AnyStringMatching
 from dmtestutils.mocking import assert_args_and_return, assert_args_and_return_iter_over
 from dmutils.s3 import S3
 
-from dmscripts.publish_draft_services import publish_draft_services, copy_draft_documents, publish_draft_service
+from dmscripts.publish_draft_services import (
+    publish_draft_services, copy_draft_documents, publish_draft_service, get_draft_services_iter
+)
 
 
-@mock.patch('dmscripts.publish_draft_services._get_draft_services_iter')
+@mock.patch('dmscripts.publish_draft_services.get_draft_services_iter')
 @mock.patch('dmscripts.publish_draft_services.publish_draft_service')
 @mock.patch('dmscripts.publish_draft_services.copy_draft_documents')
 class TestPublishAndCopyDraftServices:
@@ -32,9 +34,9 @@ class TestPublishAndCopyDraftServices:
     @pytest.mark.parametrize("draft_ids_file", ("1, 2, 3", None))
     @pytest.mark.parametrize("dry_run", (False, True,))
     def test_publish_draft_services_happy_path(
-        self, copy_draft_documents, publish_draft_service, _get_draft_services_iter, dry_run, draft_ids_file
+        self, copy_draft_documents, publish_draft_service, get_draft_services_iter, dry_run, draft_ids_file
     ):
-        _get_draft_services_iter.side_effect = self.find_draft_services_iter_side_effect
+        get_draft_services_iter.side_effect = self.find_draft_services_iter_side_effect
         # Assume the drafts have not been previously published
         publish_draft_service.return_value = ("serviceID", False)
 
@@ -85,7 +87,7 @@ class TestPublishAndCopyDraftServices:
                 dry_run
             ),
         ]
-        assert _get_draft_services_iter.mock_calls == [
+        assert get_draft_services_iter.mock_calls == [
             mock.call(
                 self.mock_data_api_client,
                 'g-cloud-123',
@@ -96,9 +98,9 @@ class TestPublishAndCopyDraftServices:
     @pytest.mark.parametrize("skip_docs_flag", (False, True,))
     @pytest.mark.parametrize("dry_run", (False, True,))
     def test_publish_draft_services_does_not_copy_if_copy_flag_false(
-        self, copy_draft_documents, publish_draft_service, _get_draft_services_iter, dry_run, skip_docs_flag
+        self, copy_draft_documents, publish_draft_service, get_draft_services_iter, dry_run, skip_docs_flag
     ):
-        _get_draft_services_iter.side_effect = self.find_draft_services_iter_side_effect
+        get_draft_services_iter.side_effect = self.find_draft_services_iter_side_effect
         # Not yet published
         publish_draft_service.return_value = ("serviceID", False)
 
@@ -118,9 +120,9 @@ class TestPublishAndCopyDraftServices:
     @pytest.mark.parametrize("draft_ids_file", ("1, 2, 3", None))
     @pytest.mark.parametrize("dry_run", (False, True,))
     def test_publish_draft_services_skips_copying_if_draft_already_published(
-        self, copy_draft_documents, publish_draft_service, _get_draft_services_iter, dry_run, draft_ids_file
+        self, copy_draft_documents, publish_draft_service, get_draft_services_iter, dry_run, draft_ids_file
     ):
-        _get_draft_services_iter.side_effect = self.find_draft_services_iter_side_effect
+        get_draft_services_iter.side_effect = self.find_draft_services_iter_side_effect
         # Already published
         publish_draft_service.return_value = ("serviceID", True)
 
@@ -139,9 +141,9 @@ class TestPublishAndCopyDraftServices:
     @pytest.mark.parametrize("draft_ids_file", ("1, 2, 3", None))
     @pytest.mark.parametrize("dry_run", (False, True,))
     def test_publish_draft_services_does_not_skip_copying_published_docs_if_skip_flag_false(
-        self, copy_draft_documents, publish_draft_service, _get_draft_services_iter, dry_run, draft_ids_file
+        self, copy_draft_documents, publish_draft_service, get_draft_services_iter, dry_run, draft_ids_file
     ):
-        _get_draft_services_iter.side_effect = self.find_draft_services_iter_side_effect
+        get_draft_services_iter.side_effect = self.find_draft_services_iter_side_effect
         # Already published
         publish_draft_service.return_value = ("serviceID", True)
 

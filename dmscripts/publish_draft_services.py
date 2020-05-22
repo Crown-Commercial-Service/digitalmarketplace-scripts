@@ -164,7 +164,7 @@ def publish_draft_service(
     return service_id, previously_published
 
 
-def _get_draft_services_iter(client, framework_slug, draft_ids_file=None):
+def get_draft_services_iter(client, framework_slug, draft_ids_file=None):
     supplier_frameworks = find_suppliers_on_framework(client, framework_slug)
 
     if draft_ids_file:
@@ -205,7 +205,7 @@ def publish_draft_services(
     skip_docs_if_published=True,
     copy_documents=True
 ):
-    for draft_service in _get_draft_services_iter(client, framework_slug, draft_ids_file=draft_ids_file):
+    for draft_service in get_draft_services_iter(client, framework_slug, draft_ids_file=draft_ids_file):
         service_id, previously_published = publish_draft_service(
             client,
             draft_service,
