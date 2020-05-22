@@ -168,6 +168,7 @@ class TestGetDraftServicesIter:
                 SupplierFrameworkStub(supplier_id=878004, framework_slug="g-cloud-123", on_framework=False).response(),
                 SupplierFrameworkStub(supplier_id=878040, framework_slug="g-cloud-123", on_framework=True).response(),
                 SupplierFrameworkStub(supplier_id=878400, framework_slug="g-cloud-123", on_framework=True).response(),
+                SupplierFrameworkStub(supplier_id=878401, framework_slug="g-cloud-123", on_framework=True).response(),
             ),
             "g-cloud-123",
             with_declarations=None
@@ -188,18 +189,26 @@ class TestGetDraftServicesIter:
         self.draft_service4 = DraftServiceStub(
             framework_slug="g-cloud-123", id=101, supplierId=878400, status='submitted'
         ).response()
+        self.draft_service5 = DraftServiceStub(
+            framework_slug="g-cloud-123", id=202, supplierId=878401, status='submitted'
+        ).response()
 
-        self.mock_data_api_client.find_draft_services_iter.side_effect = [
-            [self.draft_service2],
+        self.mock_data_api_client.find_draft_services_by_framework_iter.side_effect = [
             [self.draft_service3, self.draft_service4],
+            [self.draft_service5]
         ]
 
     def test_get_draft_services_fetches_drafts_for_framework_suppliers_only(self):
         drafts = get_draft_services_iter(self.mock_data_api_client, 'g-cloud-123')
-
         assert list(drafts) == [
             self.draft_service3,
             self.draft_service4,
+            self.draft_service5,
+        ]
+        assert self.mock_data_api_client.find_draft_services_by_framework_iter.call_args_list == [
+            mock.call('g-cloud-123', status='submitted', supplier_id=878040),
+            mock.call('g-cloud-123', status='submitted', supplier_id=878400),
+            mock.call('g-cloud-123', status='submitted', supplier_id=878401),
         ]
 
     def test_get_draft_services_for_draft_ids_file_includes_not_submitted_services(self):

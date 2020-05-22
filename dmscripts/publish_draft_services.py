@@ -1,4 +1,3 @@
-from itertools import chain
 import random
 import re
 from urllib.parse import urljoin
@@ -6,7 +5,7 @@ from urllib.parse import urljoin
 import backoff
 
 import dmapiclient
-from dmscripts.helpers.framework_helpers import find_suppliers_on_framework, get_submitted_drafts
+from dmscripts.helpers.framework_helpers import find_suppliers_on_framework
 from dmscripts.helpers.logging_helpers import get_logger
 from dmutils.s3 import S3ResponseError
 
@@ -188,9 +187,10 @@ def get_draft_services_iter(client, framework_slug, draft_ids_file=None):
             yield draft_service
 
     else:
-        yield from chain.from_iterable(
-            get_submitted_drafts(client, framework_slug, sf['supplierId']) for sf in supplier_frameworks
-        )
+        for sf in supplier_frameworks:
+            yield from client.find_draft_services_by_framework_iter(
+                framework_slug, status='submitted', supplier_id=sf['supplierId']
+            )
 
 
 def publish_draft_services(
