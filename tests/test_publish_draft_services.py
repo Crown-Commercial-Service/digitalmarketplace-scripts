@@ -328,35 +328,18 @@ class TestPublishDraftService:
         ]
 
 
-@pytest.mark.parametrize("dry_run", (False, True,))
-def test_copy_draft_documents(dry_run):
-    mock_draft_bucket = mock.create_autospec(S3, bucket_name="ducky")
-    mock_draft_bucket.path_exists.return_value = True
+class TestCopyDraftDocuments:
 
-    mock_documents_bucket = mock.create_autospec(S3, bucket_name="puddeny-pie")
+    def setup(self):
+        self.mock_draft_bucket = mock.create_autospec(S3, bucket_name="ducky")
+        self.mock_draft_bucket.path_exists.return_value = True
 
-    def mock_documents_bucket_copy_side_effect(src_bucket, src_key, target_key, **kwargs):
-        # let's say somehow this already exists
-        if target_key == "g-cloud-123/documents/171400/2229090909-kidney.pdf":
-            raise ValueError("Target key already exists in S3.")
-        return mock.Mock()
-    mock_documents_bucket.copy.side_effect = mock_documents_bucket_copy_side_effect
+        self.mock_documents_bucket = mock.create_autospec(S3, bucket_name="puddeny-pie")
+        self.mock_documents_bucket.copy.side_effect = self.mock_documents_bucket_copy_side_effect
 
-    mock_data_api_client = mock.create_autospec(DataAPIClient)
+        self.mock_data_api_client = mock.create_autospec(DataAPIClient)
 
-    copy_draft_documents(
-        mock_draft_bucket,
-        mock_documents_bucket,
-        (
-            "chinChopperURL",
-            "beeoTeeTomURL",
-            "madcapURL",
-            "boldAsBrassURL",
-        ),
-        "https://boyish.gam/bols/",
-        mock_data_api_client,
-        "g-cloud-123",
-        DraftServiceStub(
+        self.draft_service = DraftServiceStub(
             id=379001,
             framework_slug="g-cloud-123",
             supplier_id="171400",
@@ -366,55 +349,100 @@ def test_copy_draft_documents(dry_run):
                 "beeoTeeTomURL": "https://gin.ger.br/ead/g-cloud-123/submissions/171400/379001-kidney.pdf",
                 "madcapURL": "https://gin.ger.br/ead/g-cloud-123/submissions/171400/379001-liver.odt",
                 "boldAsBrassURL": "https://gin.ger.br/ead/g-cloud-123/submissions/171400/379001-mashed.pdf",
-            },
-        ).response(),
-        "2229090909",
-        dry_run=dry_run,
-    )
+            }
+        ).response()
+        self.document_keys = (
+            "chinChopperURL",
+            "beeoTeeTomURL",
+            "madcapURL",
+            "boldAsBrassURL",
+        )
+        self.live_assets_endpoint = "https://boyish.gam/bols/"
 
-    assert mock_draft_bucket.mock_calls == [
-        mock.call.path_exists("g-cloud-123/submissions/171400/379001-steak.pdf"),
-        mock.call.path_exists("g-cloud-123/submissions/171400/379001-kidney.pdf"),
-        mock.call.path_exists("g-cloud-123/submissions/171400/379001-liver.odt"),
-        mock.call.path_exists("g-cloud-123/submissions/171400/379001-mashed.pdf"),
-    ]
+    def mock_documents_bucket_copy_side_effect(self, src_bucket, src_key, target_key, **kwargs):
+        # Raise an error if this document already exists in the target bucket
+        if target_key == "g-cloud-123/documents/171400/2229090909-kidney.pdf":
+            raise ValueError("Target key already exists in S3.")
+        return mock.Mock()
 
-    assert mock_documents_bucket.mock_calls == [] if dry_run else [
-        mock.call.copy(
-            acl="public-read",
-            src_bucket="ducky",
-            src_key="g-cloud-123/submissions/171400/379001-steak.pdf",
-            target_key="g-cloud-123/documents/171400/2229090909-steak.pdf",
-        ),
-        mock.call.copy(
-            acl="public-read",
-            src_bucket="ducky",
-            src_key="g-cloud-123/submissions/171400/379001-kidney.pdf",
-            target_key="g-cloud-123/documents/171400/2229090909-kidney.pdf",
-        ),
-        mock.call.copy(
-            acl="public-read",
-            src_bucket="ducky",
-            src_key="g-cloud-123/submissions/171400/379001-liver.odt",
-            target_key="g-cloud-123/documents/171400/2229090909-liver.odt",
-        ),
-        mock.call.copy(
-            acl="public-read",
-            src_bucket="ducky",
-            src_key="g-cloud-123/submissions/171400/379001-mashed.pdf",
-            target_key="g-cloud-123/documents/171400/2229090909-mashed.pdf",
-        ),
-    ]
-
-    assert mock_data_api_client.mock_calls == [] if dry_run else [
-        mock.call.update_service(
+    def test_copy_draft_documents_only_logs_on_dry_run(self):
+        copy_draft_documents(
+            self.mock_draft_bucket,
+            self.mock_documents_bucket,
+            self.document_keys,
+            self.live_assets_endpoint,
+            self.mock_data_api_client,
+            "g-cloud-123",
+            self.draft_service,
             "2229090909",
-            {
-                "chinChopperURL": "https://boyish.gam/bols/g-cloud-123/documents/171400/2229090909-steak.pdf",
-                "beeoTeeTomURL": "https://boyish.gam/bols/g-cloud-123/documents/171400/2229090909-kidney.pdf",
-                "madcapURL": "https://boyish.gam/bols/g-cloud-123/documents/171400/2229090909-liver.odt",
-                "boldAsBrassURL": "https://boyish.gam/bols/g-cloud-123/documents/171400/2229090909-mashed.pdf",
-            },
-            "publish_draft_services.py",
-        ),
-    ]
+        )
+
+        assert self.mock_draft_bucket.mock_calls == [
+            mock.call.path_exists("g-cloud-123/submissions/171400/379001-steak.pdf"),
+            mock.call.path_exists("g-cloud-123/submissions/171400/379001-kidney.pdf"),
+            mock.call.path_exists("g-cloud-123/submissions/171400/379001-liver.odt"),
+            mock.call.path_exists("g-cloud-123/submissions/171400/379001-mashed.pdf"),
+        ]
+
+        assert self.mock_documents_bucket.mock_calls == []
+        assert self.mock_data_api_client.mock_calls == []
+
+    def test_copy_draft_documents_copies_documents_between_s3_buckets(self):
+        copy_draft_documents(
+            self.mock_draft_bucket,
+            self.mock_documents_bucket,
+            self.document_keys,
+            self.live_assets_endpoint,
+            self.mock_data_api_client,
+            "g-cloud-123",
+            self.draft_service,
+            "2229090909",
+            dry_run=False,
+        )
+
+        assert self.mock_draft_bucket.mock_calls == [
+            mock.call.path_exists("g-cloud-123/submissions/171400/379001-steak.pdf"),
+            mock.call.path_exists("g-cloud-123/submissions/171400/379001-kidney.pdf"),
+            mock.call.path_exists("g-cloud-123/submissions/171400/379001-liver.odt"),
+            mock.call.path_exists("g-cloud-123/submissions/171400/379001-mashed.pdf"),
+        ]
+
+        assert self.mock_documents_bucket.mock_calls == [
+            mock.call.copy(
+                acl="public-read",
+                src_bucket="ducky",
+                src_key="g-cloud-123/submissions/171400/379001-steak.pdf",
+                target_key="g-cloud-123/documents/171400/2229090909-steak.pdf",
+            ),
+            mock.call.copy(
+                acl="public-read",
+                src_bucket="ducky",
+                src_key="g-cloud-123/submissions/171400/379001-kidney.pdf",
+                target_key="g-cloud-123/documents/171400/2229090909-kidney.pdf",
+            ),
+            mock.call.copy(
+                acl="public-read",
+                src_bucket="ducky",
+                src_key="g-cloud-123/submissions/171400/379001-liver.odt",
+                target_key="g-cloud-123/documents/171400/2229090909-liver.odt",
+            ),
+            mock.call.copy(
+                acl="public-read",
+                src_bucket="ducky",
+                src_key="g-cloud-123/submissions/171400/379001-mashed.pdf",
+                target_key="g-cloud-123/documents/171400/2229090909-mashed.pdf",
+            ),
+        ]
+
+        assert self.mock_data_api_client.mock_calls == [
+            mock.call.update_service(
+                "2229090909",
+                {
+                    "chinChopperURL": "https://boyish.gam/bols/g-cloud-123/documents/171400/2229090909-steak.pdf",
+                    "beeoTeeTomURL": "https://boyish.gam/bols/g-cloud-123/documents/171400/2229090909-kidney.pdf",
+                    "madcapURL": "https://boyish.gam/bols/g-cloud-123/documents/171400/2229090909-liver.odt",
+                    "boldAsBrassURL": "https://boyish.gam/bols/g-cloud-123/documents/171400/2229090909-mashed.pdf",
+                },
+                user="publish_draft_services.py",
+            ),
+        ]
