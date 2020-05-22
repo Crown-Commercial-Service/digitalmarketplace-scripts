@@ -161,6 +161,76 @@ class TestPublishAndCopyDraftServices:
         assert len(copy_draft_documents.mock_calls) == 2
 
 
+class TestGetDraftServicesIter:
+
+    def setup(self):
+        self.mock_data_api_client = mock.create_autospec(DataAPIClient)
+        self.mock_data_api_client.find_framework_suppliers_iter.side_effect = assert_args_and_return_iter_over(
+            (
+                SupplierFrameworkStub(supplier_id=878004, framework_slug="g-cloud-123", on_framework=False).response(),
+                SupplierFrameworkStub(supplier_id=878040, framework_slug="g-cloud-123", on_framework=True).response(),
+                SupplierFrameworkStub(supplier_id=878400, framework_slug="g-cloud-123", on_framework=True).response(),
+            ),
+            "g-cloud-123",
+            with_declarations=None
+        )
+        # 1: submitted, supplier not on framework
+        # 2: not submitted, supplier on framework
+        # 3 & 4: submitted, supplier on framework
+        # 5: submitted, supplier on framework
+        self.draft_service1 = DraftServiceStub(
+            framework_slug="g-cloud-123", id=123, supplierId=878004, status='submitted'
+        ).response()
+        self.draft_service2 = DraftServiceStub(
+            framework_slug="g-cloud-123", id=456, supplierId=878040, status='not-submitted'
+        ).response()
+        self.draft_service3 = DraftServiceStub(
+            framework_slug="g-cloud-123", id=789, supplierId=878400, status='submitted'
+        ).response()
+        self.draft_service4 = DraftServiceStub(
+            framework_slug="g-cloud-123", id=101, supplierId=878400, status='submitted'
+        ).response()
+
+        self.mock_data_api_client.find_draft_services_iter.side_effect = [
+            [self.draft_service2],
+            [self.draft_service3, self.draft_service4],
+        ]
+
+    def test_get_draft_services_fetches_drafts_for_framework_suppliers_only(self):
+        drafts = get_draft_services_iter(self.mock_data_api_client, 'g-cloud-123')
+
+        assert list(drafts) == [
+            self.draft_service3,
+            self.draft_service4,
+        ]
+
+    def test_get_draft_services_for_draft_ids_file_includes_not_submitted_services(self):
+        self.mock_data_api_client.get_draft_service.side_effect = [
+            {"services": self.draft_service2},
+            {"services": self.draft_service3}
+        ]
+        draft_ids_file = """
+            {0}
+            {1}
+            """.format(self.draft_service2['id'], self.draft_service3['id'])
+        drafts = get_draft_services_iter(self.mock_data_api_client, 'g-cloud-123', draft_ids_file=draft_ids_file)
+
+        assert list(drafts) == [
+            self.draft_service2,
+            self.draft_service3
+        ]
+
+    def test_get_draft_services_for_draft_ids_file_raises_on_supplier_id_mismatch(self):
+        self.mock_data_api_client.get_draft_service.side_effect = [
+            {"services": self.draft_service1}
+        ]
+
+        with pytest.raises(ValueError) as excinfo:
+            list(get_draft_services_iter(self.mock_data_api_client, 'g-cloud-123', draft_ids_file="1"))
+
+        assert str(excinfo.value) == "Draft service 1's supplier (878004) not on framework 'g-cloud-123'"
+
+
 @pytest.mark.parametrize("dry_run", (False, True,))
 @pytest.mark.parametrize("skip_docs_if_published", (False, True,))
 @mock.patch('dmscripts.publish_draft_services.copy_draft_documents')
