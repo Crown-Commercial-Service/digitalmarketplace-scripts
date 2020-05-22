@@ -9,7 +9,7 @@ from dmtestutils.comparisons import ExactIdentity, AnyStringMatching
 from dmtestutils.mocking import assert_args_and_return, assert_args_and_return_iter_over
 from dmutils.s3 import S3
 
-from dmscripts.publish_draft_services import publish_draft_services, copy_draft_documents
+from dmscripts.publish_draft_services import publish_draft_services, copy_draft_documents, publish_draft_service
 
 
 @pytest.mark.parametrize("dry_run", (False, True,))
@@ -204,6 +204,128 @@ def test_publish_draft_services(copy_draft_documents, skip_docs_if_published, dr
             ),
         ) if x is not None
     ]
+
+
+class TestPublishDraftService:
+
+    def setup(self):
+        self.mock_data_api_client = mock.create_autospec(DataAPIClient)
+        self.mock_data_api_client.publish_draft_service.return_value = {
+            "services": {
+                "id": "500400300"
+            }
+        }
+        self.mock_data_api_client.get_draft_service.return_value = {
+            "serviceId": "500400200",
+            "supplierId": 999,
+            "id": 987654
+        }
+
+        self.draft_service = {
+            "supplierId": 999,
+            "id": 987654
+        }
+
+    @pytest.mark.parametrize("dry_run", (False, True,))
+    @mock.patch('dmscripts.publish_draft_services.get_logger')
+    def test_publish_draft_service_with_service_id_logs_warning(self, logger_mock, dry_run):
+        draft_service_with_existing_id = {
+            "serviceId": "12345678",
+            "supplierId": 999,
+            "id": 987654
+        }
+        assert publish_draft_service(
+            self.mock_data_api_client,
+            draft_service_with_existing_id
+        ) == ("12345678", True)
+
+        assert logger_mock.return_value.info.call_args_list == [
+            mock.call("supplier %s: draft %s: publishing", 999, 987654)
+        ]
+        assert logger_mock.return_value.warning.call_args_list == [
+            mock.call(
+                "supplier %s: draft %s: skipped publishing - already has service id: %s",
+                999,
+                987654,
+                "12345678"
+            )
+        ]
+
+    @mock.patch('dmscripts.publish_draft_services.random')
+    @mock.patch('dmscripts.publish_draft_services.get_logger')
+    def test_publish_draft_service_with_dry_run_only_logs(self, logger_mock, random):
+        random.randint.return_value = "55500001"
+
+        assert publish_draft_service(
+            self.mock_data_api_client,
+            self.draft_service,
+            dry_run=True,
+        ) == ("55500001", False)
+
+        assert logger_mock.return_value.info.call_args_list == [
+            mock.call("supplier %s: draft %s: publishing", 999, 987654),
+            mock.call(
+                "supplier %s: draft %s: dry run: generating random test service id: %s",
+                999,
+                987654,
+                "55500001"
+            )
+        ]
+
+    @mock.patch('dmscripts.publish_draft_services.get_logger')
+    def test_publish_draft_service_happy_path(self, logger_mock):
+
+        assert publish_draft_service(
+            self.mock_data_api_client,
+            self.draft_service,
+            dry_run=False,
+        ) == ("500400300", False)
+
+        assert self.mock_data_api_client.publish_draft_service.call_args_list == [
+            mock.call(987654, user='publish_draft_services.py')
+        ]
+        assert self.mock_data_api_client.get_draft_service.call_args_list == []
+        assert logger_mock.return_value.info.call_args_list == [
+            mock.call("supplier %s: draft %s: publishing", 999, 987654),
+            mock.call(
+                "supplier %s: draft %s: published - new service id: %s",
+                999,
+                987654,
+                "500400300"
+            )
+        ]
+
+    @mock.patch('dmscripts.publish_draft_services.get_logger')
+    def test_publish_draft_service_retries_republish_api_error(self, logger_mock):
+        mock_response = mock.Mock(status_code=400)
+        mock_response.json.return_value = {"error": "Cannot re-publish a submitted service"}
+        self.mock_data_api_client.publish_draft_service.side_effect = HTTPError(
+            response=mock_response
+        )
+
+        assert publish_draft_service(
+            self.mock_data_api_client,
+            self.draft_service,
+            dry_run=False,
+        ) == ("500400200", True)
+
+        assert self.mock_data_api_client.publish_draft_service.call_args_list == [
+            mock.call(987654, user='publish_draft_services.py')
+        ]
+        assert self.mock_data_api_client.get_draft_service.call_args_list == [
+            mock.call(987654)
+        ]
+        assert logger_mock.return_value.info.call_args_list == [
+            mock.call("supplier %s: draft %s: publishing", 999, 987654)
+        ]
+        assert logger_mock.return_value.warning.call_args_list == [
+            mock.call(
+                "supplier %s: draft %s: failed publishing - has service id: %s",
+                999,
+                987654,
+                "500400200",
+            )
+        ]
 
 
 @pytest.mark.parametrize("dry_run", (False, True,))
