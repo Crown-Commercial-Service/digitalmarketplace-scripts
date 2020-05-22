@@ -333,10 +333,7 @@ class TestCopyDraftDocuments:
     def setup(self):
         self.mock_draft_bucket = mock.create_autospec(S3, bucket_name="ducky")
         self.mock_draft_bucket.path_exists.return_value = True
-
         self.mock_documents_bucket = mock.create_autospec(S3, bucket_name="puddeny-pie")
-        self.mock_documents_bucket.copy.side_effect = self.mock_documents_bucket_copy_side_effect
-
         self.mock_data_api_client = mock.create_autospec(DataAPIClient)
 
         self.draft_service = DraftServiceStub(
@@ -387,7 +384,7 @@ class TestCopyDraftDocuments:
         assert self.mock_documents_bucket.mock_calls == []
         assert self.mock_data_api_client.mock_calls == []
 
-    def test_copy_draft_documents_copies_documents_between_s3_buckets(self):
+    def test_copy_draft_documents_happy_path(self):
         copy_draft_documents(
             self.mock_draft_bucket,
             self.mock_documents_bucket,
@@ -446,3 +443,106 @@ class TestCopyDraftDocuments:
                 user="publish_draft_services.py",
             ),
         ]
+
+    def test_copy_draft_documents_raises_on_supplier_id_mismatch(self):
+        draft_service_with_bad_document_path = DraftServiceStub(
+            id=379001,
+            framework_slug="g-cloud-123",
+            supplier_id="171400",
+            service_id="2229090909",
+            **{
+                "chinChopperURL": "https://gin.ger.br/ead/g-cloud-123/submissions/999999/379001-steak.pdf",
+                "beeoTeeTomURL": "https://gin.ger.br/ead/g-cloud-123/submissions/171400/379001-kidney.pdf",
+            }
+        ).response()
+
+        with pytest.raises(ValueError) as excinfo:
+            copy_draft_documents(
+                self.mock_draft_bucket,
+                self.mock_documents_bucket,
+                self.document_keys,
+                self.live_assets_endpoint,
+                self.mock_data_api_client,
+                "g-cloud-123",
+                draft_service_with_bad_document_path,
+                "2229090909",
+                dry_run=False,
+            )
+
+        assert str(excinfo.value) == "supplier id mismatch: '999999' != '171400'"
+        assert self.mock_documents_bucket.mock_calls == []
+        assert self.mock_data_api_client.mock_calls == []
+
+    def test_copy_draft_documents_raises_on_draft_service_id_mismatch(self):
+        draft_service_with_bad_document_path = DraftServiceStub(
+            id=379001,
+            framework_slug="g-cloud-123",
+            supplier_id="171400",
+            service_id="2229090909",
+            **{
+                "chinChopperURL": "https://gin.ger.br/ead/g-cloud-123/submissions/171400/999999-steak.pdf",
+                "beeoTeeTomURL": "https://gin.ger.br/ead/g-cloud-123/submissions/171400/379001-kidney.pdf",
+            }
+        ).response()
+
+        with pytest.raises(ValueError) as excinfo:
+            copy_draft_documents(
+                self.mock_draft_bucket,
+                self.mock_documents_bucket,
+                self.document_keys,
+                self.live_assets_endpoint,
+                self.mock_data_api_client,
+                "g-cloud-123",
+                draft_service_with_bad_document_path,
+                "2229090909",
+                dry_run=False,
+            )
+
+        assert str(excinfo.value) == "draft id mismatch: '999999' != '379001'"
+        assert self.mock_documents_bucket.mock_calls == []
+        assert self.mock_data_api_client.mock_calls == []
+
+    def test_copy_draft_documents_ignores_error_if_document_exists_in_target_bucket(self):
+        self.mock_documents_bucket.copy.side_effect = self.mock_documents_bucket_copy_side_effect
+
+        copy_draft_documents(
+            self.mock_draft_bucket,
+            self.mock_documents_bucket,
+            self.document_keys,
+            self.live_assets_endpoint,
+            self.mock_data_api_client,
+            "g-cloud-123",
+            self.draft_service,
+            "2229090909",
+            dry_run=False,
+        )
+        # Service is updated as normal
+        assert self.mock_data_api_client.mock_calls == [
+            mock.call.update_service(
+                "2229090909",
+                {
+                    "chinChopperURL": "https://boyish.gam/bols/g-cloud-123/documents/171400/2229090909-steak.pdf",
+                    "beeoTeeTomURL": "https://boyish.gam/bols/g-cloud-123/documents/171400/2229090909-kidney.pdf",
+                    "madcapURL": "https://boyish.gam/bols/g-cloud-123/documents/171400/2229090909-liver.odt",
+                    "boldAsBrassURL": "https://boyish.gam/bols/g-cloud-123/documents/171400/2229090909-mashed.pdf",
+                },
+                user="publish_draft_services.py",
+            ),
+        ]
+
+    def test_copy_draft_documents_raises_on_other_copy_error(self):
+        self.mock_documents_bucket.copy.side_effect = ValueError("Unexpected S3 error.")
+        with pytest.raises(ValueError) as excinfo:
+            copy_draft_documents(
+                self.mock_draft_bucket,
+                self.mock_documents_bucket,
+                self.document_keys,
+                self.live_assets_endpoint,
+                self.mock_data_api_client,
+                "g-cloud-123",
+                self.draft_service,
+                "2229090909",
+                dry_run=False,
+            )
+
+        assert str(excinfo.value) == "Unexpected S3 error."
