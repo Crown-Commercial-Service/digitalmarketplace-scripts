@@ -173,6 +173,7 @@ def get_draft_services_iter(client, framework_slug, draft_ids_file=None):
 
         for draft_id in draft_ids:
             draft_service = client.get_draft_service(draft_id)['services']
+
             if int(draft_service['supplierId']) not in supplier_id_set:
                 raise ValueError(
                     f"Draft service {draft_id}'s supplier ({draft_service['supplierId']}) not on "

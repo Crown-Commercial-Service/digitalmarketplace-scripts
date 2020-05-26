@@ -162,13 +162,21 @@ class TestPublishAndCopyDraftServices:
 class TestGetDraftServicesIter:
 
     def setup(self):
+        self.supplier1 = SupplierFrameworkStub(
+            supplier_id=878004, framework_slug="g-cloud-123", on_framework=False).response()
+        self.supplier2 = SupplierFrameworkStub(
+            supplier_id=878040, framework_slug="g-cloud-123", on_framework=True).response()
+        self.supplier3 = SupplierFrameworkStub(
+            supplier_id=878400, framework_slug="g-cloud-123", on_framework=True).response()
+        self.supplier4 = SupplierFrameworkStub(
+            supplier_id=878401, framework_slug="g-cloud-123", on_framework=True).response()
         self.mock_data_api_client = mock.create_autospec(DataAPIClient)
         self.mock_data_api_client.find_framework_suppliers_iter.side_effect = assert_args_and_return_iter_over(
             (
-                SupplierFrameworkStub(supplier_id=878004, framework_slug="g-cloud-123", on_framework=False).response(),
-                SupplierFrameworkStub(supplier_id=878040, framework_slug="g-cloud-123", on_framework=True).response(),
-                SupplierFrameworkStub(supplier_id=878400, framework_slug="g-cloud-123", on_framework=True).response(),
-                SupplierFrameworkStub(supplier_id=878401, framework_slug="g-cloud-123", on_framework=True).response(),
+                self.supplier1,
+                self.supplier2,
+                self.supplier3,
+                self.supplier4
             ),
             "g-cloud-123",
             with_declarations=None
@@ -178,24 +186,39 @@ class TestGetDraftServicesIter:
         # 3 & 4: submitted, supplier on framework
         # 5: submitted, supplier on framework
         self.draft_service1 = DraftServiceStub(
-            framework_slug="g-cloud-123", id=123, supplierId=878004, status='submitted'
+            framework_slug="g-cloud-123",
+            id=123,
+            supplierId=self.supplier1['supplierId'],
+            status='submitted'
         ).response()
         self.draft_service2 = DraftServiceStub(
-            framework_slug="g-cloud-123", id=456, supplierId=878040, status='not-submitted'
+            framework_slug="g-cloud-123",
+            id=456,
+            supplierId=self.supplier2['supplierId'],
+            status='not-submitted'
         ).response()
         self.draft_service3 = DraftServiceStub(
-            framework_slug="g-cloud-123", id=789, supplierId=878400, status='submitted'
+            framework_slug="g-cloud-123",
+            id=789,
+            supplierId=self.supplier3['supplierId'],
+            status='submitted'
         ).response()
         self.draft_service4 = DraftServiceStub(
-            framework_slug="g-cloud-123", id=101, supplierId=878400, status='submitted'
+            framework_slug="g-cloud-123",
+            id=101,
+            supplierId=self.supplier4['supplierId'], status='submitted'
         ).response()
         self.draft_service5 = DraftServiceStub(
-            framework_slug="g-cloud-123", id=202, supplierId=878401, status='submitted'
+            framework_slug="g-cloud-123",
+            id=202,
+            supplierId=self.supplier4['supplierId'],
+            status='submitted'
         ).response()
 
         self.mock_data_api_client.find_draft_services_by_framework_iter.side_effect = [
-            [self.draft_service3, self.draft_service4],
-            [self.draft_service5]
+            [],  # Supplier 2 has no submitted services
+            [self.draft_service3, self.draft_service4],  # Supplier 3
+            [self.draft_service5]  # Supplier 4
         ]
 
     def test_get_draft_services_fetches_drafts_for_framework_suppliers_only(self):
@@ -216,10 +239,7 @@ class TestGetDraftServicesIter:
             {"services": self.draft_service2},
             {"services": self.draft_service3}
         ]
-        draft_ids_file = """
-            {0}
-            {1}
-            """.format(self.draft_service2['id'], self.draft_service3['id'])
+        draft_ids_file = [str(self.draft_service2['id']), str(self.draft_service3['id'])]
         drafts = get_draft_services_iter(self.mock_data_api_client, 'g-cloud-123', draft_ids_file=draft_ids_file)
 
         assert list(drafts) == [
