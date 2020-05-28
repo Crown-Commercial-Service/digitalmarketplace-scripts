@@ -116,7 +116,7 @@ class TestGetBriefData:
             [
                 12345,
                 'My Brilliant Brief',
-                'https://digitalmarketplace.service.gov.uk/digital-outcomes-and-specialists/opportunities/12345',
+                'https://www.digitalmarketplace.service.gov.uk/digital-outcomes-and-specialists/opportunities/12345',
                 'digital-outcomes-and-specialists-3',
                 'digital-specialists',
                 'technicalArchitect',

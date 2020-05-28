@@ -3,7 +3,7 @@ from datetime import datetime
 from dmutils.formats import DATE_FORMAT, DATETIME_FORMAT
 
 # This URL is framework agnostic
-PUBLIC_BRIEF_URL = "https://digitalmarketplace.service.gov.uk/digital-outcomes-and-specialists/opportunities/{}"
+PUBLIC_BRIEF_URL = "https://www.digitalmarketplace.service.gov.uk/digital-outcomes-and-specialists/opportunities/{}"
 
 DOS_OPPORTUNITY_HEADERS = [
     "ID", "Opportunity", "Link", "Framework", "Category", "Specialist",
