@@ -1,0 +1,325 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "allOf": [
+    {
+      "$ref": "#/definitions/baseline"
+    },
+    {
+      "properties": {
+        "GAAR": {
+          "enum": [
+            false
+          ]
+        },
+        "bankrupt": {
+          "enum": [
+            false
+          ]
+        },
+        "confidentialInformation": {
+          "enum": [
+            false
+          ]
+        },
+        "conflictOfInterest": {
+          "enum": [
+            false
+          ]
+        },
+        "distortedCompetition": {
+          "enum": [
+            false
+          ]
+        },
+        "distortingCompetition": {
+          "enum": [
+            false
+          ]
+        },
+        "environmentalSocialLabourLaw": {
+          "enum": [
+            false
+          ]
+        },
+        "graveProfessionalMisconduct": {
+          "enum": [
+            false
+          ]
+        },
+        "influencedContractingAuthority": {
+          "enum": [
+            false
+          ]
+        },
+        "misleadingInformation": {
+          "enum": [
+            false
+          ]
+        },
+        "modernSlaveryReportingRequirements": {
+          "enum": [
+            true
+          ]
+        },
+        "seriousMisrepresentation": {
+          "enum": [
+            false
+          ]
+        },
+        "significantOrPersistentDeficiencies": {
+          "enum": [
+            false
+          ]
+        },
+        "taxEvasion": {
+          "enum": [
+            false
+          ]
+        },
+        "unspentTaxConvictions": {
+          "enum": [
+            false
+          ]
+        },
+        "witheldSupportingDocuments": {
+          "enum": [
+            false
+          ]
+        }
+      }
+    }
+  ],
+  "definitions": {
+    "baseline": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "allOf": [
+        {
+          "properties": {
+            "10WorkingDays": {
+              "enum": [
+                true
+              ]
+            },
+            "MI": {
+              "enum": [
+                true
+              ]
+            },
+            "accurateInformation": {
+              "enum": [
+                true
+              ]
+            },
+            "accuratelyDescribed": {
+              "enum": [
+                true
+              ]
+            },
+            "canProvideFromDayOne": {
+              "enum": [
+                true
+              ]
+            },
+            "conspiracy": {
+              "enum": [
+                false
+              ]
+            },
+            "corruptionBribery": {
+              "enum": [
+                false
+              ]
+            },
+            "dunsNumberCompanyRegistrationNumber": {
+              "enum": [
+                true
+              ]
+            },
+            "employersInsurance": {
+              "enum": [
+                "Yes \u2013 your organisation has, or will have in place, employer\u2019s liability insurance of at least \u00a35 million and you will provide certification before the framework is awarded.",
+                "Not applicable - your organisation does not need employer\u2019s liability insurance because your organisation employs only the owner or close family members."
+              ]
+            },
+            "environmentallyFriendly": {
+              "enum": [
+                true
+              ]
+            },
+            "equalityAndDiversity": {
+              "enum": [
+                true
+              ]
+            },
+            "fraudAndTheft": {
+              "enum": [
+                false
+              ]
+            },
+            "fullAccountability": {
+              "enum": [
+                true
+              ]
+            },
+            "helpBuyersComplyTechnologyCodesOfPractice": {
+              "enum": [
+                true
+              ]
+            },
+            "informationChanges": {
+              "enum": [
+                true
+              ]
+            },
+            "offerServicesYourselves": {
+              "enum": [
+                true
+              ]
+            },
+            "organisedCrime": {
+              "enum": [
+                false
+              ]
+            },
+            "proofOfClaims": {
+              "enum": [
+                true
+              ]
+            },
+            "publishContracts": {
+              "enum": [
+                true
+              ]
+            },
+            "readUnderstoodGuidance": {
+              "enum": [
+                true
+              ]
+            },
+            "servicesDoNotInclude": {
+              "enum": [
+                true
+              ]
+            },
+            "servicesHaveOrSupportCloudHostingCloudSoftware": {
+              "enum": [
+                "Yes",
+                "My organisation isn't submitting cloud hosting (lot 1) or cloud software (lot 2) services"
+              ]
+            },
+            "servicesHaveOrSupportCloudSupport": {
+              "enum": [
+                "Yes",
+                "My organisation isn't submitting cloud support (lot 3) services"
+              ]
+            },
+            "termsAndConditions": {
+              "enum": [
+                true
+              ]
+            },
+            "termsOfParticipation": {
+              "enum": [
+                true
+              ]
+            },
+            "terrorism": {
+              "enum": [
+                false
+              ]
+            },
+            "understandHowToAskQuestions": {
+              "enum": [
+                true
+              ]
+            },
+            "understandTool": {
+              "enum": [
+                true
+              ]
+            },
+            "unfairCompetition": {
+              "enum": [
+                true
+              ]
+            }
+          }
+        },
+        {
+          "anyOf": [
+            {
+              "properties": {
+                "servicesHaveOrSupportCloudHostingCloudSoftware": {
+                  "enum": [
+                    "Yes"
+                  ]
+                }
+              }
+            },
+            {
+              "properties": {
+                "servicesHaveOrSupportCloudSupport": {
+                  "enum": [
+                    "Yes"
+                  ]
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "required": [
+        "10WorkingDays",
+        "MI",
+        "accurateInformation",
+        "accuratelyDescribed",
+        "canProvideFromDayOne",
+        "conspiracy",
+        "corruptionBribery",
+        "dunsNumberCompanyRegistrationNumber",
+        "employersInsurance",
+        "environmentallyFriendly",
+        "equalityAndDiversity",
+        "fraudAndTheft",
+        "fullAccountability",
+        "helpBuyersComplyTechnologyCodesOfPractice",
+        "informationChanges",
+        "offerServicesYourselves",
+        "organisedCrime",
+        "proofOfClaims",
+        "publishContracts",
+        "readUnderstoodGuidance",
+        "servicesDoNotInclude",
+        "servicesHaveOrSupportCloudHostingCloudSoftware",
+        "servicesHaveOrSupportCloudSupport",
+        "termsAndConditions",
+        "termsOfParticipation",
+        "terrorism",
+        "understandHowToAskQuestions",
+        "understandTool",
+        "unfairCompetition"
+      ],
+      "title": "g-cloud-12 Declaration Assessment Schema (Baseline Schema)",
+      "type": "object"
+    }
+  },
+  "required": [
+    "GAAR",
+    "bankrupt",
+    "confidentialInformation",
+    "conflictOfInterest",
+    "distortedCompetition",
+    "distortingCompetition",
+    "environmentalSocialLabourLaw",
+    "graveProfessionalMisconduct",
+    "influencedContractingAuthority",
+    "misleadingInformation",
+    "seriousMisrepresentation",
+    "significantOrPersistentDeficiencies",
+    "taxEvasion",
+    "unspentTaxConvictions",
+    "witheldSupportingDocuments"
+  ],
+  "title": "g-cloud-12 Declaration Assessment Schema (Definite Pass Schema)",
+  "type": "object"
+}
