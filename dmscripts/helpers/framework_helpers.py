@@ -1,4 +1,4 @@
-from typing import Iterable, Mapping, Sequence
+from typing import Iterable, Mapping
 
 from collections import Counter
 from functools import partial
@@ -8,14 +8,6 @@ import re
 from dmapiclient import DataAPIClient, HTTPError
 
 logger = logging.getLogger("framework_helpers")
-
-
-def get_submitted_drafts(client: DataAPIClient, framework_slug: str, supplier_id: int) -> Sequence[Mapping]:
-    return tuple(
-        draft
-        for draft in client.find_draft_services_iter(supplier_id, framework=framework_slug)
-        if draft["status"] == "submitted"
-    )
 
 
 def set_framework_result(client, framework_slug, supplier_id, result, user):

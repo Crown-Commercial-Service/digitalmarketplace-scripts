@@ -6,39 +6,6 @@ from dmapiclient import HTTPError
 import dmscripts.helpers.framework_helpers as framework_helpers
 
 
-def test_get_submitted_drafts_calls_with_correct_arguments(mock_data_client):
-    mock_data_client.find_draft_services_iter.return_value = iter([])
-    framework_helpers.get_submitted_drafts(mock_data_client, 'digital-biscuits-and-cakes', 12345)
-    mock_data_client.find_draft_services_iter.assert_called_with(12345, framework='digital-biscuits-and-cakes')
-
-
-def test_get_submitted_drafts_returns_submitted_draft_services_only(mock_data_client):
-    mock_data_client.find_draft_services_iter.return_value = iter((
-        {"id": 123, "status": "submitted"},
-        {"id": 234, "status": "failed"},
-        {"id": 345, "status": "submitted"},
-        {"id": 456, "status": "draft"},
-    ))
-    result = framework_helpers.get_submitted_drafts(mock_data_client, 12345, 'digital-biscuits-and-cakes')
-    assert result == (
-        {"id": 123, "status": "submitted"},
-        {"id": 345, "status": "submitted"},
-    )
-
-
-def test_get_submitted_drafts_returns_submitted_draft_services_even_with_service_ids(mock_data_client):
-    mock_data_client.find_draft_services_iter.return_value = iter((
-        {"id": 1, "status": "not-submitted"},
-        {"id": 2, "status": "submitted", "serviceId": "ALREADY_A_LIVE_SERVICE"},
-        {"id": 3, "status": "submitted"},
-    ))
-    result = framework_helpers.get_submitted_drafts(mock_data_client, 12345, 'digital-biscuits-and-cakes')
-    assert result == (
-        {"id": 2, "status": "submitted", "serviceId": "ALREADY_A_LIVE_SERVICE"},
-        {"id": 3, "status": "submitted"},
-    )
-
-
 def test_set_framework_result_calls_with_correct_arguments(mock_data_client):
     assert framework_helpers.set_framework_result(mock_data_client, 'g-whizz-6', 123456, True, 'user') == \
         "  Result set OK: 123456 - PASS"

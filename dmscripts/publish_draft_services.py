@@ -1,4 +1,3 @@
-from itertools import chain
 import random
 import re
 from urllib.parse import urljoin
@@ -6,7 +5,7 @@ from urllib.parse import urljoin
 import backoff
 
 import dmapiclient
-from dmscripts.helpers.framework_helpers import find_suppliers_on_framework, get_submitted_drafts
+from dmscripts.helpers.framework_helpers import find_suppliers_on_framework
 from dmscripts.helpers.logging_helpers import get_logger
 from dmutils.s3 import S3ResponseError
 
@@ -115,6 +114,7 @@ def publish_draft_service(
     dry_run=True,
 ):
     get_logger().info("supplier %s: draft %s: publishing", draft_service["supplierId"], draft_service['id'])
+    previously_published = False
 
     if draft_service.get("serviceId"):
         # This draft service already has a service id, it has already been published.
@@ -125,7 +125,7 @@ def publish_draft_service(
             draft_service['id'],
             service_id,
         )
-        return service_id, True
+        previously_published = True
     elif dry_run:
         service_id = str(random.randint(55500000, 55599999))
         get_logger().info(
@@ -134,7 +134,6 @@ def publish_draft_service(
             draft_service['id'],
             service_id,
         )
-        return service_id, False
     else:
         try:
             services = client.publish_draft_service(draft_service['id'], user='publish_draft_services.py')
@@ -145,7 +144,6 @@ def publish_draft_service(
                 draft_service['id'],
                 service_id,
             )
-            return service_id, False
 
         except dmapiclient.HTTPError as e:
             if e.status_code == 400 and str(e).startswith('Cannot re-publish a submitted service'):
@@ -158,12 +156,14 @@ def publish_draft_service(
                     draft_service['id'],
                     draft_service['serviceId'],
                 )
-                return service_id, True
+                previously_published = True
             else:
                 raise e
 
+    return service_id, previously_published
 
-def _get_draft_services_iter(client, framework_slug, draft_ids_file=None):
+
+def get_draft_services_iter(client, framework_slug, draft_ids_file=None):
     supplier_frameworks = find_suppliers_on_framework(client, framework_slug)
 
     if draft_ids_file:
@@ -173,6 +173,7 @@ def _get_draft_services_iter(client, framework_slug, draft_ids_file=None):
 
         for draft_id in draft_ids:
             draft_service = client.get_draft_service(draft_id)['services']
+
             if int(draft_service['supplierId']) not in supplier_id_set:
                 raise ValueError(
                     f"Draft service {draft_id}'s supplier ({draft_service['supplierId']}) not on "
@@ -187,9 +188,10 @@ def _get_draft_services_iter(client, framework_slug, draft_ids_file=None):
             yield draft_service
 
     else:
-        yield from chain.from_iterable(
-            get_submitted_drafts(client, framework_slug, sf['supplierId']) for sf in supplier_frameworks
-        )
+        for sf in supplier_frameworks:
+            yield from client.find_draft_services_by_framework_iter(
+                framework_slug, status='submitted', supplier_id=sf['supplierId']
+            )
 
 
 def publish_draft_services(
@@ -204,7 +206,7 @@ def publish_draft_services(
     skip_docs_if_published=True,
     copy_documents=True
 ):
-    for draft_service in _get_draft_services_iter(client, framework_slug, draft_ids_file=draft_ids_file):
+    for draft_service in get_draft_services_iter(client, framework_slug, draft_ids_file=draft_ids_file):
         service_id, previously_published = publish_draft_service(
             client,
             draft_service,
