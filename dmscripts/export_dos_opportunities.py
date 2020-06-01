@@ -10,7 +10,7 @@ DOS_OPPORTUNITY_HEADERS = [
     "Organisation Name", "Buyer Domain", "Location Of The Work",
     "Published At", "Open For", "Expected Contract Length", "Applications from SMEs",
     "Applications from Large Organisations", "Total Organisations", "Status", "Winning supplier",
-    "Size of supplier", "Contract amount", "Contract start date"
+    "Size of supplier", "Contract amount", "Contract start date", "Clarification questions"
 ]
 
 
@@ -56,7 +56,8 @@ def _build_row(brief, brief_responses):
         winner['supplierName'] if winner else '',
         winner['supplierOrganisationSize'] if winner else '',
         winner['awardDetails']['awardedContractValue'] if winner else '',
-        winner['awardDetails']['awardedContractStartDate'] if winner else ''
+        winner['awardDetails']['awardedContractStartDate'] if winner else '',
+        len(brief['clarificationQuestions'])
     ]
 
 
@@ -71,7 +72,8 @@ def get_latest_dos_framework(client):
 
 def get_brief_data(client, logger):
     logger.info("Fetching closed briefs from API")
-    briefs = client.find_briefs_iter(status="closed,awarded,unsuccessful,cancelled", with_users=True)
+    briefs = client.find_briefs_iter(status="closed,awarded,unsuccessful,cancelled", with_users=True,
+                                     with_clarification_questions=True)
     rows = []
     for brief in briefs:
         logger.info(f"Fetching brief responses for Brief ID {brief['id']}")
