@@ -12,7 +12,6 @@ from dmscripts.export_dos_opportunities import (
     remove_username_from_email_address
 )
 
-
 example_brief = {
     "id": 12345,
     "title": "My Brilliant Brief",
@@ -26,9 +25,15 @@ example_brief = {
     "status": "awarded",
     "users": [
         {"emailAddress": "shouldnt-be-visible@example.gov.uk"}
+    ],
+    "clarificationQuestions": [
+        {
+            "answer": "sometimes.",
+            "publishedAt": "2016-05-05T16:19:15.618981Z",
+            "question": "Is the sky blue?"
+        }
     ]
 }
-
 
 # TODO: replace with BriefResponseStub once awardedContractStartDate format is fixed
 example_winning_brief_response = {
@@ -133,12 +138,14 @@ class TestGetBriefData:
                 "Foo Inc",
                 "small",
                 "2345678",
-                "2019-06-02"
+                "2019-06-02",
+                1
             ]
         ]
 
         assert client.find_briefs_iter.call_args_list == [
-            mock.call(status="closed,awarded,unsuccessful,cancelled", with_users=True)
+            mock.call(status="closed,awarded,unsuccessful,cancelled", with_users=True,
+                      with_clarification_questions=True)
         ]
         assert client.find_brief_responses_iter.call_args_list == [
             mock.call(brief_id=12345)
