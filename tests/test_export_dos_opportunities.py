@@ -17,7 +17,7 @@ example_brief = {
     "title": "My Brilliant Brief",
     "frameworkSlug": "digital-outcomes-and-specialists-3",
     "lotSlug": "digital-specialists",
-    "specialist": "technicalArchitect",
+    "specialistRole": "technicalArchitect",
     "organisation": "HM Dept of Doing Stuff",
     "location": "London",
     "publishedAt": "2019-01-01T00:00:00.123456Z",

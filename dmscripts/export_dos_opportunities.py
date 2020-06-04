@@ -42,7 +42,7 @@ def _build_row(brief, brief_responses):
         PUBLIC_BRIEF_URL.format(brief['id']),
         brief['frameworkSlug'],
         brief['lotSlug'],
-        brief.get('specialist', ""),
+        brief.get('specialistRole', ""),
         brief['organisation'],
         remove_username_from_email_address(brief['users'][0]['emailAddress']),
         brief['location'],
