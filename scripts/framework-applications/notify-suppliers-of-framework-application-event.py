@@ -83,7 +83,7 @@ if __name__ == "__main__":
 
     logger = logging_helpers.configure_logger({"dmapiclient": logging.INFO})
 
-    run_id = None if not arguments.get("<run_id>") else UUID(arguments["<run_id>"])
+    run_id = None if not arguments.get("--resume-run-id") else UUID(arguments["--resume-run-id"])
 
     failure_count = notify_suppliers_of_framework_application_event(
         data_api_client=DataAPIClient(
