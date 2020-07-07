@@ -68,8 +68,8 @@ def get_campaign_data(lot_name, list_id, framework_name):
             "fb_comments": False
         },
         "tracking": {
-            "opens": True,
-            "html_clicks": True,
+            "opens": False,
+            "html_clicks": False,
             "text_clicks": False,
             "goal_tracking": False,
             "ecomm360": False
