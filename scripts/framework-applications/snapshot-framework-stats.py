@@ -60,13 +60,13 @@ def log_human_readable_stats(stats):
 
 def snapshot_framework_stats(client, framework_slug):
     stats = client.get_framework_stats(framework_slug)
-    stats['date_generated'] = datetime.datetime.now().replace(microsecond=0).isoformat()
     client.create_audit_event(
         AuditTypes.snapshot_framework_stats,
         data=stats,
         object_type='frameworks',
         object_id=framework_slug
     )
+    stats['date_generated'] = datetime.datetime.now().replace(microsecond=0).isoformat()
     log_human_readable_stats(stats)
 
     logger.info("Framework stats snapshot saved as audit event")
