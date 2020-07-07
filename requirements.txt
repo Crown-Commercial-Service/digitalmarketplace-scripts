@@ -22,7 +22,7 @@ cryptography==2.3.1       # via digitalmarketplace-utils
 defusedxml==0.6.0         # via odfpy
 git+https://github.com/alphagov/digitalmarketplace-apiclient.git@21.6.0#egg=digitalmarketplace-apiclient==21.6.0  # via -r requirements.in
 git+https://github.com/alphagov/digitalmarketplace-content-loader.git@7.3.0#egg=digitalmarketplace-content-loader==7.3.0  # via -r requirements.in
-git+https://github.com/alphagov/digitalmarketplace-utils.git@51.6.0#egg=digitalmarketplace-utils==51.6.0  # via -r requirements.in, digitalmarketplace-content-loader
+git+https://github.com/alphagov/digitalmarketplace-utils.git@52.7.0#egg=digitalmarketplace-utils==52.7.0  # via -r requirements.in, digitalmarketplace-content-loader
 docopt==0.6.2             # via -r requirements.in, notifications-python-client
 docutils==0.15.2          # via awscli, botocore
 flask-gzip==0.2           # via digitalmarketplace-utils
