@@ -142,8 +142,6 @@ class TestNotifySuppliersOfFrameworkApplicationEvent:
                 run_id=None,
             ) == 0
 
-        expected_run_id = "12345678-1234-5678-1234-567812345678"
-
         assert mock_uuid4.mock_calls == [mock.call()]
         assert self.mock_data_api_client.mock_calls == [
             mock.call.get_framework("g-cloud-99"),
@@ -153,60 +151,67 @@ class TestNotifySuppliersOfFrameworkApplicationEvent:
             mock.call.find_users_iter(supplier_id=303133),
             mock.call.find_users_iter(supplier_id=313233),
         ]
-        assert self.mock_notify_client.mock_calls == [
-            mock.call.get_reference("one@peasoup.net", "8877eeff", {
-                'framework_slug': 'g-cloud-99',
-                'run_id': expected_run_id,
-            }),
-            (mock.call.has_been_sent(
-                f"one@peasoup.net,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}"
-            ) if dry_run else mock.call.send_email(
-                'one@peasoup.net',
-                '8877eeff',
-                self.expected_context,
-                allow_resend=False,
-                reference=f"one@peasoup.net,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
-            )),
-            mock.call.get_reference("two@peasoup.net", "8877eeff", {
-                'framework_slug': 'g-cloud-99',
-                'run_id': expected_run_id,
-            }),
-            (mock.call.has_been_sent(
-                f"two@peasoup.net,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
-            ) if dry_run else mock.call.send_email(
-                'two@peasoup.net',
-                '8877eeff',
-                self.expected_context,
-                allow_resend=False,
-                reference=f"two@peasoup.net,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
-            )),
-            mock.call.get_reference("two@shirts.co.ua", "8877eeff", {
-                'framework_slug': 'g-cloud-99',
-                'run_id': expected_run_id,
-            }),
-            (mock.call.has_been_sent(
-                f"two@shirts.co.ua,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
-            ) if dry_run else mock.call.send_email(
-                'two@shirts.co.ua',
-                '8877eeff',
-                self.expected_context,
-                allow_resend=False,
-                reference=f"two@shirts.co.ua,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
-            )),
+
+        expected_run_id = "12345678-1234-5678-1234-567812345678"
+        assert self.mock_notify_client.get_reference.call_args_list == [
+            mock.call("one@peasoup.net", "8877eeff", {'framework_slug': 'g-cloud-99', 'run_id': expected_run_id}),
+            mock.call("two@peasoup.net", "8877eeff", {'framework_slug': 'g-cloud-99', 'run_id': expected_run_id}),
+            mock.call("two@shirts.co.ua", "8877eeff", {'framework_slug': 'g-cloud-99', 'run_id': expected_run_id}),
             mock.call.get_reference("three@shirts.co.ua", "8877eeff", {
                 'framework_slug': 'g-cloud-99',
                 'run_id': expected_run_id,
             }),
-            (mock.call.has_been_sent(
-                f"three@shirts.co.ua,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
-            ) if dry_run else mock.call.send_email(
-                'three@shirts.co.ua',
-                '8877eeff',
-                self.expected_context,
-                allow_resend=False,
-                reference=f"three@shirts.co.ua,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
-            )),
         ]
+        if dry_run:
+            assert self.mock_notify_client.has_been_sent.call_args_list == [
+                mock.call(
+                    f"one@peasoup.net,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}"
+                ),
+                mock.call(
+                    f"two@peasoup.net,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                ),
+                mock.call(
+                    f"two@shirts.co.ua,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                ),
+                mock.call(
+                    f"three@shirts.co.ua,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                )
+            ]
+        else:
+            assert self.mock_notify_client.send_email.call_args_list == [
+                mock.call(
+                    'one@peasoup.net',
+                    '8877eeff',
+                    self.expected_context,
+                    allow_resend=False,
+                    reference=f"one@peasoup.net,8877eeff,"
+                              f"{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                ),
+                mock.call(
+                    'two@peasoup.net',
+                    '8877eeff',
+                    self.expected_context,
+                    allow_resend=False,
+                    reference=f"two@peasoup.net,8877eeff,"
+                              f"{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                ),
+                mock.call(
+                    'two@shirts.co.ua',
+                    '8877eeff',
+                    self.expected_context,
+                    allow_resend=False,
+                    reference=f"two@shirts.co.ua,8877eeff,"
+                              f"{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                ),
+                mock.call(
+                    'three@shirts.co.ua',
+                    '8877eeff',
+                    self.expected_context,
+                    allow_resend=False,
+                    reference=f"three@shirts.co.ua,8877eeff,"
+                              f"{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                )
+            ]
 
     @pytest.mark.parametrize("dry_run", (False, True))
     @mock.patch("dmscripts.notify_suppliers_of_framework_application_event.uuid4")
@@ -226,8 +231,6 @@ class TestNotifySuppliersOfFrameworkApplicationEvent:
                 run_id=run_id,
             ) == 0
 
-        expected_run_id = str(run_id)
-
         assert mock_uuid4.mock_calls == []
         assert self.mock_data_api_client.mock_calls == [
             mock.call.get_framework("g-cloud-99"),
@@ -237,60 +240,67 @@ class TestNotifySuppliersOfFrameworkApplicationEvent:
             mock.call.find_users_iter(supplier_id=303133),
             mock.call.find_users_iter(supplier_id=313233),
         ]
-        assert self.mock_notify_client.mock_calls == [
-            mock.call.get_reference("one@peasoup.net", "8877eeff", {
-                'framework_slug': 'g-cloud-99',
-                'run_id': expected_run_id,
-            }),
-            (mock.call.has_been_sent(
-                f"one@peasoup.net,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}"
-            ) if dry_run else mock.call.send_email(
-                'one@peasoup.net',
-                '8877eeff',
-                self.expected_context,
-                allow_resend=False,
-                reference=f"one@peasoup.net,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
-            )),
-            mock.call.get_reference("two@peasoup.net", "8877eeff", {
-                'framework_slug': 'g-cloud-99',
-                'run_id': expected_run_id,
-            }),
-            (mock.call.has_been_sent(
-                f"two@peasoup.net,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
-            ) if dry_run else mock.call.send_email(
-                'two@peasoup.net',
-                '8877eeff',
-                self.expected_context,
-                allow_resend=False,
-                reference=f"two@peasoup.net,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
-            )),
-            mock.call.get_reference("two@shirts.co.ua", "8877eeff", {
-                'framework_slug': 'g-cloud-99',
-                'run_id': expected_run_id,
-            }),
-            (mock.call.has_been_sent(
-                f"two@shirts.co.ua,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
-            ) if dry_run else mock.call.send_email(
-                'two@shirts.co.ua',
-                '8877eeff',
-                self.expected_context,
-                allow_resend=False,
-                reference=f"two@shirts.co.ua,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
-            )),
+
+        expected_run_id = str(run_id)
+        assert self.mock_notify_client.get_reference.call_args_list == [
+            mock.call("one@peasoup.net", "8877eeff", {'framework_slug': 'g-cloud-99', 'run_id': expected_run_id}),
+            mock.call("two@peasoup.net", "8877eeff", {'framework_slug': 'g-cloud-99', 'run_id': expected_run_id}),
+            mock.call("two@shirts.co.ua", "8877eeff", {'framework_slug': 'g-cloud-99', 'run_id': expected_run_id}),
             mock.call.get_reference("three@shirts.co.ua", "8877eeff", {
                 'framework_slug': 'g-cloud-99',
                 'run_id': expected_run_id,
             }),
-            (mock.call.has_been_sent(
-                f"three@shirts.co.ua,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
-            ) if dry_run else mock.call.send_email(
-                'three@shirts.co.ua',
-                '8877eeff',
-                self.expected_context,
-                allow_resend=False,
-                reference=f"three@shirts.co.ua,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
-            )),
         ]
+        if dry_run:
+            assert self.mock_notify_client.has_been_sent.call_args_list == [
+                mock.call(
+                    f"one@peasoup.net,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}"
+                ),
+                mock.call(
+                    f"two@peasoup.net,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                ),
+                mock.call(
+                    f"two@shirts.co.ua,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                ),
+                mock.call(
+                    f"three@shirts.co.ua,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                )
+            ]
+        else:
+            assert self.mock_notify_client.send_email.call_args_list == [
+                mock.call(
+                    'one@peasoup.net',
+                    '8877eeff',
+                    self.expected_context,
+                    allow_resend=False,
+                    reference=f"one@peasoup.net,8877eeff,"
+                              f"{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                ),
+                mock.call(
+                    'two@peasoup.net',
+                    '8877eeff',
+                    self.expected_context,
+                    allow_resend=False,
+                    reference=f"two@peasoup.net,8877eeff,"
+                              f"{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                ),
+                mock.call(
+                    'two@shirts.co.ua',
+                    '8877eeff',
+                    self.expected_context,
+                    allow_resend=False,
+                    reference=f"two@shirts.co.ua,8877eeff,"
+                              f"{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                ),
+                mock.call(
+                    'three@shirts.co.ua',
+                    '8877eeff',
+                    self.expected_context,
+                    allow_resend=False,
+                    reference=f"three@shirts.co.ua,8877eeff,"
+                              f"{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                )
+            ]
 
         assert dry_run == (
             mock.call.debug(
