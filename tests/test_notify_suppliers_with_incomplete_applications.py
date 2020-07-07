@@ -118,59 +118,59 @@ for fs in FRAMEWORK_SUPPLIERS_TEST_CASES:
             )
 
 
-@pytest.mark.parametrize(
-    'draft_services_case,framework_supplier_case,users_case,expected_mails,expected_message', message_test_cases
-)
-@mock.patch('dmscripts.notify_suppliers_with_incomplete_applications.scripts_notify_client', autospec=True)
-def test_message_combinations(
-    mail_client_constructor_mock,
-    draft_services_case, framework_supplier_case, users_case, expected_mails, expected_message
-):
-    """
-    Test if the correct number of email are sent and with the correct message.
-    """
-    data_api_client_mock = mock.create_autospec(DataAPIClient)
+class TestNotifySuppliersWithIncompleteApplications:
 
-    mail_client_mock = mail_client_constructor_mock.return_value = mock.Mock(spec=DMNotifyClient)
-    mail_client_mock.logger = mock.Mock(spec=Logger)
+    def setup(self):
+        self.data_api_client_mock = mock.create_autospec(DataAPIClient)
+        self.data_api_client_mock.get_framework.return_value = FrameworkStub(
+            applications_close_at="2025-07-01T16:00:00.000000Z",
+            status="open"
+        ).single_result_response()
 
-    logging_mock = mock.create_autospec(Logger, instance=True)
+        self.logging_mock = mock.create_autospec(Logger, instance=True)
 
-    data_api_client_mock.get_framework.return_value = FrameworkStub(
-        applications_close_at="2025-07-01T16:00:00.000000Z",
-        status="open"
-    ).single_result_response()
-    data_api_client_mock.find_draft_services_iter.return_value = draft_services_case
-    data_api_client_mock.find_framework_suppliers_iter.return_value = framework_supplier_case
-    data_api_client_mock.find_users.return_value = users_case
+    @pytest.mark.parametrize(
+        'draft_services_case,framework_supplier_case,users_case,expected_mails,expected_message', message_test_cases
+    )
+    @mock.patch('dmscripts.notify_suppliers_with_incomplete_applications.scripts_notify_client', autospec=True)
+    def test_message_combinations(
+        self, mail_client_constructor_mock,
+        draft_services_case, framework_supplier_case, users_case, expected_mails, expected_message
+    ):
+        """
+        Test if the correct number of emails are sent and with the correct message.
+        """
+        self.data_api_client_mock.find_draft_services_iter.return_value = draft_services_case
+        self.data_api_client_mock.find_framework_suppliers_iter.return_value = framework_supplier_case
+        self.data_api_client_mock.find_users.return_value = users_case
 
-    with freeze_time('2025-06-24 16:00:00'):
-        # Test localisation during BST, 1 week before the deadline
-        notify_suppliers_with_incomplete_applications(
-            'g-cloud-10', data_api_client_mock, 'notify_api_key', False, logging_mock
-        )
+        mail_client_mock = mail_client_constructor_mock.return_value = mock.Mock(spec=DMNotifyClient)
+        mail_client_mock.logger = mock.Mock(spec=Logger)
 
-    assert mail_client_mock.send_email.call_count == len(expected_mails)
-    for i, call in enumerate(mail_client_mock.send_email.call_args_list):
-        assert call[0][2]['message'] == expected_message
-        assert call[0][2]['framework_name'] == "G-Cloud 10"
-        assert call[0][2]['framework_slug'] == "g-cloud-10"
-        assert call[0][2]['application_deadline'] == "5pm BST, Tuesday 1 July 2025"
-        assert call[0][0] == expected_mails[i]
+        with freeze_time('2025-06-24 16:00:00'):
+            # Test localisation during BST, 1 week before the deadline
+            notify_suppliers_with_incomplete_applications(
+                'g-cloud-10', self.data_api_client_mock, 'notify_api_key', False, self.logging_mock
+            )
 
+        assert mail_client_mock.send_email.call_count == len(expected_mails)
+        for i, call in enumerate(mail_client_mock.send_email.call_args_list):
+            assert call[0][2]['message'] == expected_message
+            assert call[0][2]['framework_name'] == "G-Cloud 10"
+            assert call[0][2]['framework_slug'] == "g-cloud-10"
+            assert call[0][2]['application_deadline'] == "5pm BST, Tuesday 1 July 2025"
+            assert call[0][0] == expected_mails[i]
 
-@pytest.mark.parametrize('framework_status', ['coming', 'pending', 'standstill', 'live', 'expired'])
-def test_notify_suppliers_with_incomplete_applications_fails_for_non_open_frameworks(framework_status):
-    data_api_client = mock.create_autospec(DataAPIClient)
-    data_api_client.get_framework.return_value = FrameworkStub(
-        applications_close_at="2025-07-01T16:00:00.000000Z",
-        status=framework_status
-    ).single_result_response()
-    logging_mock = mock.create_autospec(Logger, instance=True)
+    @pytest.mark.parametrize('framework_status', ['coming', 'pending', 'standstill', 'live', 'expired'])
+    def test_notify_suppliers_with_incomplete_applications_fails_for_non_open_frameworks(self, framework_status):
+        self.data_api_client_mock.get_framework.return_value = FrameworkStub(
+            applications_close_at="2025-07-01T16:00:00.000000Z",
+            status=framework_status
+        ).single_result_response()
 
-    with pytest.raises(ValueError) as exc:
-        notify_suppliers_with_incomplete_applications(
-            'g-cloud-10', data_api_client, 'notify_api_key', False, logging_mock
-        )
+        with pytest.raises(ValueError) as exc:
+            notify_suppliers_with_incomplete_applications(
+                'g-cloud-10', self.data_api_client_mock, 'notify_api_key', False, self.logging_mock
+            )
 
-    assert str(exc.value) == "Suppliers cannot amend applications unless the framework is open."
+        assert str(exc.value) == "Suppliers cannot amend applications unless the framework is open."
