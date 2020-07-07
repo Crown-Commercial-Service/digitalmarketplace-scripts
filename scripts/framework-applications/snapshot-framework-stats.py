@@ -15,6 +15,7 @@ from docopt import docopt
 import json
 import logging
 import sys
+import datetime
 
 import dmapiclient
 from dmapiclient.audit import AuditTypes
@@ -59,6 +60,7 @@ def log_human_readable_stats(stats):
 
 def snapshot_framework_stats(client, framework_slug):
     stats = client.get_framework_stats(framework_slug)
+    stats['date_generated'] = datetime.datetime.now().replace(microsecond=0).isoformat()
     client.create_audit_event(
         AuditTypes.snapshot_framework_stats,
         data=stats,
