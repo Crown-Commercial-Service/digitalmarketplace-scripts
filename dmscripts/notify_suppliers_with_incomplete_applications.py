@@ -1,9 +1,6 @@
-from dmapiclient import DataAPIClient
-from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.email_helpers import scripts_notify_client
 from dmutils.email.exceptions import EmailError
 from dmutils.email.helpers import hash_string
-from dmutils.env_helpers import get_api_endpoint_from_stage
 from dmutils.formats import utctoshorttimelongdateformat
 
 
@@ -67,12 +64,8 @@ def build_message(sf, framework_slug, data_api_client):
 
 
 def notify_suppliers_with_incomplete_applications(
-    framework_slug, stage, notify_api_key, dry_run, logger, supplier_ids=None
+    framework_slug, data_api_client, notify_api_key, dry_run, logger, supplier_ids=None
 ):
-    data_api_client = DataAPIClient(
-        base_url=get_api_endpoint_from_stage(stage), auth_token=get_auth_token('api', stage)
-    )
-
     framework = data_api_client.get_framework(framework_slug)['frameworks']
     if framework['status'] != 'open':
         raise ValueError("Suppliers cannot amend applications unless the framework is open.")

@@ -34,6 +34,9 @@ sys.path.insert(0, '.')
 
 import logging
 from dmscripts.helpers import logging_helpers
+from dmapiclient import DataAPIClient
+from dmscripts.helpers.auth_helpers import get_auth_token
+from dmutils.env_helpers import get_api_endpoint_from_stage
 from dmscripts.notify_suppliers_with_incomplete_applications import notify_suppliers_with_incomplete_applications
 
 
@@ -46,10 +49,15 @@ if __name__ == '__main__':
     if doc_opt_arguments['--supplier-ids']:
         list_of_supplier_ids = list(map(int, doc_opt_arguments['--supplier-ids'].split(',')))
 
+    stage = doc_opt_arguments['<stage>']
+    data_api_client = DataAPIClient(
+        base_url=get_api_endpoint_from_stage(stage), auth_token=get_auth_token('api', stage)
+    )
+
     sys.exit(
         notify_suppliers_with_incomplete_applications(
             doc_opt_arguments['<framework>'],
-            doc_opt_arguments['<stage>'],
+            data_api_client,
             doc_opt_arguments['<notify_api_key>'],
             doc_opt_arguments['--dry-run'],
             logger,
