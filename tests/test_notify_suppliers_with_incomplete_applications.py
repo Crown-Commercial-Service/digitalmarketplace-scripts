@@ -161,6 +161,42 @@ class TestNotifySuppliersWithIncompleteApplications:
             assert call[0][2]['application_deadline'] == "5pm BST, Tuesday 1 July 2025"
             assert call[0][0] == expected_mails[i]
 
+    @pytest.mark.parametrize(
+        'draft_services_case,framework_supplier_case,users_case,expected_mails,expected_message', message_test_cases
+    )
+    @mock.patch('dmscripts.notify_suppliers_with_incomplete_applications.scripts_notify_client', autospec=True)
+    def test_emails_only_sent_to_restricted_set_of_supplier_ids(
+        self, mail_client_constructor_mock,
+        draft_services_case, framework_supplier_case, users_case, expected_mails, expected_message
+    ):
+        """
+        Test if the correct number of emails are sent and with the correct message.
+        """
+        self.data_api_client_mock.find_draft_services_iter.return_value = draft_services_case
+        self.data_api_client_mock.find_framework_suppliers_iter.return_value = framework_supplier_case
+        self.data_api_client_mock.find_users.return_value = users_case
+
+        mail_client_mock = mail_client_constructor_mock.return_value = mock.Mock(spec=DMNotifyClient)
+        mail_client_mock.logger = mock.Mock(spec=Logger)
+
+        # First three supplier IDs from FRAMEWORK_SUPPLIERS_TEST_CASES above
+        failed_supplier_ids = [0, 1, 2]
+
+        notify_suppliers_with_incomplete_applications(
+            'g-cloud-10',
+            self.data_api_client_mock,
+            'notify_api_key',
+            False,
+            self.logging_mock,
+            supplier_ids=failed_supplier_ids
+        )
+
+        if framework_supplier_case[0]['supplierId'] in failed_supplier_ids:
+            # Only supplierIDs 0, 1 and 2 should have received emails
+            assert mail_client_mock.send_email.call_count == len(expected_mails)
+        else:
+            assert mail_client_mock.send_email.call_count == 0
+
     @pytest.mark.parametrize('framework_status', ['coming', 'pending', 'standstill', 'live', 'expired'])
     def test_notify_suppliers_with_incomplete_applications_fails_for_non_open_frameworks(self, framework_status):
         self.data_api_client_mock.get_framework.return_value = FrameworkStub(
