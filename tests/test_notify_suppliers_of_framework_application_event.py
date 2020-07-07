@@ -88,7 +88,7 @@ class TestNotifySuppliersOfFrameworkApplicationEvent:
         self.mock_notify_client.get_reference.side_effect = lambda *a: ",".join(str(x) for x in a)
         self.mock_notify_client.has_been_sent.side_effect = (
             # this one ref is considered to be already sent
-            lambda reference: reference == (
+            lambda reference, use_recent_cache: reference == (
                 "two@shirts.co.ua,8877eeff,{'framework_slug': 'g-cloud-99', 'run_id': "
                 "'00010203-0405-0607-0809-0a0b0c0d0e0f'}"
             )
@@ -165,16 +165,20 @@ class TestNotifySuppliersOfFrameworkApplicationEvent:
         if dry_run:
             assert self.mock_notify_client.has_been_sent.call_args_list == [
                 mock.call(
-                    f"one@peasoup.net,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}"
+                    f"one@peasoup.net,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                    use_recent_cache=True
                 ),
                 mock.call(
                     f"two@peasoup.net,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                    use_recent_cache=True
                 ),
                 mock.call(
                     f"two@shirts.co.ua,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                    use_recent_cache=True
                 ),
                 mock.call(
                     f"three@shirts.co.ua,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                    use_recent_cache=True
                 )
             ]
         else:
@@ -186,6 +190,7 @@ class TestNotifySuppliersOfFrameworkApplicationEvent:
                     allow_resend=False,
                     reference=f"one@peasoup.net,8877eeff,"
                               f"{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                    use_recent_cache=True
                 ),
                 mock.call(
                     'two@peasoup.net',
@@ -194,6 +199,7 @@ class TestNotifySuppliersOfFrameworkApplicationEvent:
                     allow_resend=False,
                     reference=f"two@peasoup.net,8877eeff,"
                               f"{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                    use_recent_cache=True
                 ),
                 mock.call(
                     'two@shirts.co.ua',
@@ -202,6 +208,7 @@ class TestNotifySuppliersOfFrameworkApplicationEvent:
                     allow_resend=False,
                     reference=f"two@shirts.co.ua,8877eeff,"
                               f"{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                    use_recent_cache=True
                 ),
                 mock.call(
                     'three@shirts.co.ua',
@@ -210,6 +217,7 @@ class TestNotifySuppliersOfFrameworkApplicationEvent:
                     allow_resend=False,
                     reference=f"three@shirts.co.ua,8877eeff,"
                               f"{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                    use_recent_cache=True
                 )
             ]
 
@@ -254,16 +262,20 @@ class TestNotifySuppliersOfFrameworkApplicationEvent:
         if dry_run:
             assert self.mock_notify_client.has_been_sent.call_args_list == [
                 mock.call(
-                    f"one@peasoup.net,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}"
+                    f"one@peasoup.net,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                    use_recent_cache=False
                 ),
                 mock.call(
                     f"two@peasoup.net,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                    use_recent_cache=False
                 ),
                 mock.call(
                     f"two@shirts.co.ua,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                    use_recent_cache=False
                 ),
                 mock.call(
                     f"three@shirts.co.ua,8877eeff,{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                    use_recent_cache=False
                 )
             ]
         else:
@@ -275,6 +287,7 @@ class TestNotifySuppliersOfFrameworkApplicationEvent:
                     allow_resend=False,
                     reference=f"one@peasoup.net,8877eeff,"
                               f"{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                    use_recent_cache=False
                 ),
                 mock.call(
                     'two@peasoup.net',
@@ -283,6 +296,7 @@ class TestNotifySuppliersOfFrameworkApplicationEvent:
                     allow_resend=False,
                     reference=f"two@peasoup.net,8877eeff,"
                               f"{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                    use_recent_cache=False
                 ),
                 mock.call(
                     'two@shirts.co.ua',
@@ -291,6 +305,7 @@ class TestNotifySuppliersOfFrameworkApplicationEvent:
                     allow_resend=False,
                     reference=f"two@shirts.co.ua,8877eeff,"
                               f"{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                    use_recent_cache=False
                 ),
                 mock.call(
                     'three@shirts.co.ua',
@@ -299,6 +314,7 @@ class TestNotifySuppliersOfFrameworkApplicationEvent:
                     allow_resend=False,
                     reference=f"three@shirts.co.ua,8877eeff,"
                               f"{{'framework_slug': 'g-cloud-99', 'run_id': '{expected_run_id}'}}",
+                    use_recent_cache=False
                 )
             ]
 

@@ -92,7 +92,7 @@ def notify_suppliers_of_framework_application_event(
                     },
                 )
                 if dry_run:
-                    if notify_client.has_been_sent(notify_ref):
+                    if notify_client.has_been_sent(notify_ref, use_recent_cache=run_is_new):
                         logger.debug(
                             "[DRY RUN] Would NOT send notification to {email_hash} (already sent)",
                             extra={"email_hash": hash_string(user["emailAddress"])},
@@ -110,6 +110,7 @@ def notify_suppliers_of_framework_application_event(
                             framework_context,
                             allow_resend=False,
                             reference=notify_ref,
+                            use_recent_cache=run_is_new,
                         )
                     except EmailError as e:
                         failure_count += 1
