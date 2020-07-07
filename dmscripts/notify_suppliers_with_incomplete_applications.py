@@ -1,7 +1,6 @@
 from dmapiclient import DataAPIClient
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.email_helpers import scripts_notify_client
-from dmscripts.helpers.logging_helpers import configure_logger, logging
 from dmutils.email.exceptions import EmailError
 from dmutils.email.helpers import hash_string
 from dmutils.env_helpers import get_api_endpoint_from_stage
@@ -67,8 +66,9 @@ def build_message(sf, framework_slug, data_api_client):
     return message
 
 
-def notify_suppliers_with_incomplete_applications(framework_slug, stage, notify_api_key, dry_run, supplier_ids=None):
-    logger = configure_logger({"dmapiclient": logging.INFO})
+def notify_suppliers_with_incomplete_applications(
+    framework_slug, stage, notify_api_key, dry_run, logger, supplier_ids=None
+):
     data_api_client = DataAPIClient(
         base_url=get_api_endpoint_from_stage(stage), auth_token=get_auth_token('api', stage)
     )

@@ -135,6 +135,8 @@ def test_message_combinations(
     mail_client_mock = mail_client_constructor_mock.return_value = mock.Mock(spec=DMNotifyClient)
     mail_client_mock.logger = mock.Mock(spec=Logger)
 
+    logging_mock = mock.create_autospec(Logger, instance=True)
+
     data_api_client_mock().get_framework.return_value = FrameworkStub(
         applications_close_at="2025-07-01T16:00:00.000000Z",
         status="open"
@@ -145,7 +147,7 @@ def test_message_combinations(
 
     with freeze_time('2025-06-24 16:00:00'):
         # Test localisation during BST, 1 week before the deadline
-        notify_suppliers_with_incomplete_applications('g-cloud-10', 'preview', 'notify_api_key', False)
+        notify_suppliers_with_incomplete_applications('g-cloud-10', 'preview', 'notify_api_key', False, logging_mock)
 
     assert mail_client_mock.send_email.call_count == len(expected_mails)
     for i, call in enumerate(mail_client_mock.send_email.call_args_list):
@@ -163,8 +165,9 @@ def test_notify_suppliers_with_incomplete_applications_fails_for_non_open_framew
         applications_close_at="2025-07-01T16:00:00.000000Z",
         status=framework_status
     ).single_result_response()
+    logging_mock = mock.create_autospec(Logger, instance=True)
 
     with pytest.raises(ValueError) as exc:
-        notify_suppliers_with_incomplete_applications('g-cloud-10', 'local', 'notify_api_key', False)
+        notify_suppliers_with_incomplete_applications('g-cloud-10', 'local', 'notify_api_key', False, logging_mock)
 
     assert str(exc.value) == "Suppliers cannot amend applications unless the framework is open."

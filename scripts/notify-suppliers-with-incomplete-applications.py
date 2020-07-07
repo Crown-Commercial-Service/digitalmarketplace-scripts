@@ -31,11 +31,16 @@ Options:
 from docopt import docopt
 import sys
 sys.path.insert(0, '.')
+
+import logging
+from dmscripts.helpers import logging_helpers
 from dmscripts.notify_suppliers_with_incomplete_applications import notify_suppliers_with_incomplete_applications
 
 
 if __name__ == '__main__':
     doc_opt_arguments = docopt(__doc__)
+
+    logger = logging_helpers.configure_logger({"dmapiclient": logging.INFO})
 
     list_of_supplier_ids = []
     if doc_opt_arguments['--supplier-ids']:
@@ -47,6 +52,7 @@ if __name__ == '__main__':
             doc_opt_arguments['<stage>'],
             doc_opt_arguments['<notify_api_key>'],
             doc_opt_arguments['--dry-run'],
-            supplier_ids=list_of_supplier_ids
+            logger,
+            supplier_ids=list_of_supplier_ids,
         )
     )
