@@ -67,7 +67,7 @@ def build_message(sf, framework_slug, data_api_client):
     return message
 
 
-def notify_suppliers_with_incomplete_applications(framework_slug, stage, notify_api_key, dry_run):
+def notify_suppliers_with_incomplete_applications(framework_slug, stage, notify_api_key, dry_run, supplier_ids=None):
     logger = configure_logger({"dmapiclient": logging.INFO})
     data_api_client = DataAPIClient(
         base_url=get_api_endpoint_from_stage(stage), auth_token=get_auth_token('api', stage)
@@ -81,6 +81,13 @@ def notify_suppliers_with_incomplete_applications(framework_slug, stage, notify_
     error_count = 0
 
     for sf in data_api_client.find_framework_suppliers_iter(framework_slug):
+        # Restrict suppliers to those specified in the argument, if given.
+        # While this is inefficient for a small number of supplier IDs, looking up
+        # each supplier individually for a large number of supplier IDs would be worse.
+        if supplier_ids:
+            if sf['supplierId'] not in supplier_ids:
+                continue
+
         message = build_message(sf, framework_slug, data_api_client)
 
         if message:
