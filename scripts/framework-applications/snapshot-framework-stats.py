@@ -15,6 +15,7 @@ from docopt import docopt
 import json
 import logging
 import sys
+import datetime
 
 import dmapiclient
 from dmapiclient.audit import AuditTypes
@@ -65,6 +66,7 @@ def snapshot_framework_stats(client, framework_slug):
         object_type='frameworks',
         object_id=framework_slug
     )
+    stats['date_generated'] = datetime.datetime.now().replace(microsecond=0).isoformat()
     log_human_readable_stats(stats)
 
     logger.info("Framework stats snapshot saved as audit event")
