@@ -23,22 +23,44 @@ Options:
     <notify_api_key>            API key for GOV.UK Notify.
 
     -n, --dry-run               Run script without sending emails.
-
+    --supplier-ids=SUPPLIERS    Comma separated list of suppliers IDs to be emailed. This is in case the
+                                script fails halfway and we need to resume it without sending emails twice
+                                to any supplier
     -h, --help                  Show this screen
 """
 from docopt import docopt
 import sys
 sys.path.insert(0, '.')
+
+import logging
+from dmscripts.helpers import logging_helpers
+from dmapiclient import DataAPIClient
+from dmscripts.helpers.auth_helpers import get_auth_token
+from dmutils.env_helpers import get_api_endpoint_from_stage
 from dmscripts.notify_suppliers_with_incomplete_applications import notify_suppliers_with_incomplete_applications
 
 
 if __name__ == '__main__':
     doc_opt_arguments = docopt(__doc__)
+
+    logger = logging_helpers.configure_logger({"dmapiclient": logging.INFO})
+
+    list_of_supplier_ids = []
+    if doc_opt_arguments['--supplier-ids']:
+        list_of_supplier_ids = list(map(int, doc_opt_arguments['--supplier-ids'].split(',')))
+
+    stage = doc_opt_arguments['<stage>']
+    data_api_client = DataAPIClient(
+        base_url=get_api_endpoint_from_stage(stage), auth_token=get_auth_token('api', stage)
+    )
+
     sys.exit(
         notify_suppliers_with_incomplete_applications(
             doc_opt_arguments['<framework>'],
-            doc_opt_arguments['<stage>'],
+            data_api_client,
             doc_opt_arguments['<notify_api_key>'],
-            doc_opt_arguments['--dry-run']
+            doc_opt_arguments['--dry-run'],
+            logger,
+            supplier_ids=list_of_supplier_ids,
         )
     )

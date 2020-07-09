@@ -1,10 +1,6 @@
-from dmapiclient import DataAPIClient
-from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.email_helpers import scripts_notify_client
-from dmscripts.helpers.logging_helpers import configure_logger, logging
 from dmutils.email.exceptions import EmailError
 from dmutils.email.helpers import hash_string
-from dmutils.env_helpers import get_api_endpoint_from_stage
 from dmutils.formats import utctoshorttimelongdateformat
 
 
@@ -47,12 +43,29 @@ def send_notification(mail_client, message, framework, email, supplier_id, dry_r
     return 0
 
 
-def notify_suppliers_with_incomplete_applications(framework_slug, stage, notify_api_key, dry_run):
-    logger = configure_logger({"dmapiclient": logging.INFO})
-    data_api_client = DataAPIClient(
-        base_url=get_api_endpoint_from_stage(stage), auth_token=get_auth_token('api', stage)
-    )
+def build_message(sf, framework_slug, data_api_client):
+    message = ''
+    if not sf.get('applicationCompanyDetailsConfirmed', None):
+        message += MESSAGES['unconfirmed_company_details']
+    if not sf.get('declaration', {'status': None}).get('status', None) == 'complete':
+        message += MESSAGES['incomplete_declaration']
 
+    submitted_draft_services, unsubmitted_draft_services = 0, 0
+    for service in data_api_client.find_draft_services_iter(sf['supplierId'], framework=framework_slug):
+        if service.get('status') == 'not-submitted':
+            unsubmitted_draft_services += 1
+        if service.get('status') == 'submitted':
+            submitted_draft_services += 1
+    if submitted_draft_services == 0:
+        message += MESSAGES['no_services']
+    elif unsubmitted_draft_services > 0:
+        message += MESSAGES['unsubmitted_services'].format(unsubmitted_draft_services)
+    return message
+
+
+def notify_suppliers_with_incomplete_applications(
+    framework_slug, data_api_client, notify_api_key, dry_run, logger, supplier_ids=None
+):
     framework = data_api_client.get_framework(framework_slug)['frameworks']
     if framework['status'] != 'open':
         raise ValueError("Suppliers cannot amend applications unless the framework is open.")
@@ -61,22 +74,14 @@ def notify_suppliers_with_incomplete_applications(framework_slug, stage, notify_
     error_count = 0
 
     for sf in data_api_client.find_framework_suppliers_iter(framework_slug):
-        message = ''
-        if not sf.get('applicationCompanyDetailsConfirmed', None):
-            message += MESSAGES['unconfirmed_company_details']
-        if not sf.get('declaration', {'status': None}).get('status', None) == 'complete':
-            message += MESSAGES['incomplete_declaration']
+        # Restrict suppliers to those specified in the argument, if given.
+        # While this is inefficient for a small number of supplier IDs, looking up
+        # each supplier individually for a large number of supplier IDs would be worse.
+        if supplier_ids:
+            if sf['supplierId'] not in supplier_ids:
+                continue
 
-        submitted_draft_services, unsubmitted_draft_services = 0, 0
-        for service in data_api_client.find_draft_services_iter(sf['supplierId'], framework=framework_slug):
-            if service.get('status') == 'not-submitted':
-                unsubmitted_draft_services += 1
-            if service.get('status') == 'submitted':
-                submitted_draft_services += 1
-        if submitted_draft_services == 0:
-            message += MESSAGES['no_services']
-        elif unsubmitted_draft_services > 0:
-            message += MESSAGES['unsubmitted_services'].format(unsubmitted_draft_services)
+        message = build_message(sf, framework_slug, data_api_client)
 
         if message:
             primary_email = sf.get('declaration', {'primaryContactEmail': None}).get('primaryContactEmail', None)
