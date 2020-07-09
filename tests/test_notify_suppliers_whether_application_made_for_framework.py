@@ -49,12 +49,13 @@ class TestNotifySuppliersWhetherApplicationMade:
         self.logger = mock.create_autospec(Logger, instance=True)
 
     def test_notify_suppliers_whether_application_made_happy_path(self):
+        expected_error_count = 0
         assert notify_suppliers_whether_application_made(
             self.data_api_client,
             self.notify_client,
             'g-cloud-12',
             self.logger,
-        ) == 0
+        ) == expected_error_count
 
         assert self.notify_client.send_email.call_args_list == [
             mock.call(
@@ -109,13 +110,14 @@ class TestNotifySuppliersWhetherApplicationMade:
         ]
 
     def test_notify_suppliers_whether_application_made_dry_run(self):
+        expected_error_count = 0
         assert notify_suppliers_whether_application_made(
             self.data_api_client,
             self.notify_client,
             'g-cloud-12',
             self.logger,
             dry_run=True
-        ) == 0
+        ) == expected_error_count
 
         assert self.notify_client.send_email.call_args_list == []
         assert self.logger.info.call_args_list == [
@@ -136,13 +138,14 @@ class TestNotifySuppliersWhetherApplicationMade:
         ]
 
     def test_notify_suppliers_whether_application_made_supplier_ids_list(self):
+        expected_error_count = 0
         assert notify_suppliers_whether_application_made(
             self.data_api_client,
             self.notify_client,
             'g-cloud-12',
             self.logger,
             supplier_ids=[712345]
-        ) == 0
+        ) == expected_error_count
 
         assert self.notify_client.send_email.call_args_list == [
             mock.call(
@@ -166,6 +169,7 @@ class TestNotifySuppliersWhetherApplicationMade:
         ]
 
     def test_notify_suppliers_whether_application_made_email_error_logs_supplier_id(self):
+        expected_error_count = 1
         self.notify_client.send_email.side_effect = [
             EmailError("Arghhh!"),  # The first user email fails
             None,
@@ -177,7 +181,7 @@ class TestNotifySuppliersWhetherApplicationMade:
             self.notify_client,
             'g-cloud-12',
             self.logger
-        ) == 1
+        ) == expected_error_count
 
         assert self.logger.info.call_args_list == [
             mock.call("Supplier '712345'"),
