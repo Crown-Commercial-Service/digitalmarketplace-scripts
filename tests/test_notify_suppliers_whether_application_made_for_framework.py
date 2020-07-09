@@ -30,8 +30,8 @@ class TestNotifySuppliersWhetherApplicationMade:
             {"supplierId": 712346},
         ]
         self.data_api_client.export_users.return_value = {
-            # This endpoint returns some unusually formmatted keys :(
-            # See https://github.com/alphagov/digitalmarketplace-api/blob/master/app/main/views/users.py#L417
+            # This endpoint returns some unusually formatted keys :(
+            # See https://github.com/alphagov/digitalmarketplace-api/blob/6ad35e526fcf4d76320159a1a4ac97133a1ce13d/app/main/views/users.py#L417  # noqa
             'users': [
                 {'supplier_id': 712345, 'email address': 'user1@example.com', 'application_status': 'no_application'},
                 {'supplier_id': 712346, 'email address': 'user2@example.com', 'application_status': 'application'},
