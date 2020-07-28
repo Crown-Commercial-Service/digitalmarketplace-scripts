@@ -30,7 +30,7 @@ from dmapiclient import DataAPIClient
 from docopt import docopt
 sys.path.insert(0, '.')
 
-from dmscripts.export_framework_applications_at_close import GenerateMasterCSV
+from dmscripts.export_framework_applications_at_close import GenerateFrameworkApplicationsCSV
 from dmutils.env_helpers import get_api_endpoint_from_stage
 
 if __name__ == "__main__":
@@ -53,7 +53,7 @@ if __name__ == "__main__":
         base_url=get_api_endpoint_from_stage(stage),
         auth_token=arguments['<auth_token>'],
     )
-    csv_builder = GenerateMasterCSV(
+    csv_builder = GenerateFrameworkApplicationsCSV(
         client=client,
         target_framework_slug=framework_slug
     )

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-"""Tests for GenerateMasterCSV class."""
+"""Tests for GenerateFrameworkApplicationsCSV class."""
 from collections import OrderedDict
 import json
 import mock
 import os
 from six.moves import cStringIO
 
-from dmscripts.export_framework_applications_at_close import GenerateMasterCSV
+from dmscripts.export_framework_applications_at_close import GenerateFrameworkApplicationsCSV
 
 
 FIXTURES_DIR = os.path.join(os.path.dirname(__file__), 'fixtures')
@@ -14,7 +14,7 @@ FIXTURES_DIR = os.path.join(os.path.dirname(__file__), 'fixtures')
 
 def test_get_fieldnames(mock_data_client):
     """Test building filenames."""
-    csv_builder = GenerateMasterCSV(client=mock_data_client, target_framework_slug='test_framework_slug')
+    csv_builder = GenerateFrameworkApplicationsCSV(client=mock_data_client, target_framework_slug='test_framework_slug')
     assert mock_data_client.get_framework.called_once_with('test_framework_slug')
 
     csv_builder.service_status_labels = OrderedDict([('key1', 'test_lot_prefix_1'), ('key2', 'test_lot_prefix_2')])
@@ -32,12 +32,12 @@ def test_get_fieldnames(mock_data_client):
 
 
 @mock.patch(
-    'dmscripts.export_framework_applications_at_close.GenerateMasterCSV.get_fieldnames',
+    'dmscripts.export_framework_applications_at_close.GenerateFrameworkApplicationsCSV.get_fieldnames',
     return_value=['test_field_1', 'test_field_2'],
 )
 def test_write_csv(fieldname_mock, mock_data_client):
     """Test writing csv."""
-    csv_builder = GenerateMasterCSV(client=mock_data_client, target_framework_slug='test_framework_slug')
+    csv_builder = GenerateFrameworkApplicationsCSV(client=mock_data_client, target_framework_slug='test_framework_slug')
     assert fieldname_mock.called_once_with('test_framework_slug')
     csv_builder.output = [
         {'test_field_1': 'foo', 'test_field_2': 'bar'},
@@ -55,7 +55,7 @@ def test_populate_output_suppliers(mock_data_client):
     """Test supplier info, no lot info."""
     with open(os.path.join(FIXTURES_DIR, 'test_supplier_frameworks_response.json')) as supplier_frameworks_response:
         mock_data_client.find_framework_suppliers.return_value = json.loads(supplier_frameworks_response.read())
-    csv_builder = GenerateMasterCSV(client=mock_data_client, target_framework_slug='test_framework_slug')
+    csv_builder = GenerateFrameworkApplicationsCSV(client=mock_data_client, target_framework_slug='test_framework_slug')
     f = cStringIO()
     csv_builder.populate_output()
     csv_builder.write_csv(outfile=f)
@@ -78,7 +78,7 @@ def test_one_supplier_one_lot(mock_data_client):
         'lot': 'saas', 'lotSlug': 'saas', 'status': 'submitted', 'extraneous_field': 'foo'
     }])
 
-    csv_builder = GenerateMasterCSV(client=mock_data_client, target_framework_slug='test_framework_slug')
+    csv_builder = GenerateFrameworkApplicationsCSV(client=mock_data_client, target_framework_slug='test_framework_slug')
     f = cStringIO()
     csv_builder.populate_output()
     csv_builder.write_csv(outfile=f)
@@ -167,7 +167,7 @@ def test_many_suppliers_many_lots(mock_data_client):
             assert False, "The csv creator received an invalid supplier id."
     mock_data_client.find_draft_services_iter.side_effect = service_api_side_effect
 
-    csv_builder = GenerateMasterCSV(client=mock_data_client, target_framework_slug='test_framework_slug')
+    csv_builder = GenerateFrameworkApplicationsCSV(client=mock_data_client, target_framework_slug='test_framework_slug')
     f = cStringIO()
     csv_builder.populate_output()
     csv_builder.write_csv(outfile=f)

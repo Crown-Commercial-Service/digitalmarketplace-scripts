@@ -5,7 +5,7 @@ from collections import OrderedDict
 from dmscripts.helpers.csv_helpers import GenerateCSVFromAPI
 
 
-class GenerateMasterCSV(GenerateCSVFromAPI):
+class GenerateFrameworkApplicationsCSV(GenerateCSVFromAPI):
     """"Generate a master csv given a framework."""
 
     static_fieldnames = ('supplier_id', 'supplier_dm_name', 'application_status', 'declaration_status')
@@ -21,7 +21,7 @@ class GenerateMasterCSV(GenerateCSVFromAPI):
         :param client: Instance of dmapiclient.data.DataAPIClient
         :param target_framework_slug: A framework slug ie 'digital-outcomes-and-specialists-2' or 'g-cloud-8'
         """
-        super(GenerateMasterCSV, self).__init__(client)
+        super(GenerateFrameworkApplicationsCSV, self).__init__(client)
         self.target_framework_slug = target_framework_slug
         self.framework = self.client.get_framework(target_framework_slug)['frameworks']
         self.lot_slugs = tuple(i['slug'] for i in self.framework['lots'])
