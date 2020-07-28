@@ -6,7 +6,7 @@ import mock
 import os
 from six.moves import cStringIO
 
-from dmscripts.generate_framework_master_csv import GenerateMasterCSV
+from dmscripts.export_framework_applications_at_close import GenerateMasterCSV
 
 
 FIXTURES_DIR = os.path.join(os.path.dirname(__file__), 'fixtures')
@@ -32,7 +32,7 @@ def test_get_fieldnames(mock_data_client):
 
 
 @mock.patch(
-    'dmscripts.generate_framework_master_csv.GenerateMasterCSV.get_fieldnames',
+    'dmscripts.export_framework_applications_at_close.GenerateMasterCSV.get_fieldnames',
     return_value=['test_field_1', 'test_field_2'],
 )
 def test_write_csv(fieldname_mock, mock_data_client):
