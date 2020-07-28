@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-"""Class used to output a framework master csv."""
+"""Class used to output a csv of how framework applications looked after the deadline."""
 from collections import OrderedDict
 
 from dmscripts.helpers.csv_helpers import GenerateCSVFromAPI
 
 
-class GenerateMasterCSV(GenerateCSVFromAPI):
-    """"Generate a master csv given a framework."""
+class GenerateFrameworkApplicationsCSV(GenerateCSVFromAPI):
+    """"Generate a csv of applications, given a framework."""
 
     static_fieldnames = ('supplier_id', 'supplier_dm_name', 'application_status', 'declaration_status')
     service_status_labels = OrderedDict([
@@ -21,7 +21,7 @@ class GenerateMasterCSV(GenerateCSVFromAPI):
         :param client: Instance of dmapiclient.data.DataAPIClient
         :param target_framework_slug: A framework slug ie 'digital-outcomes-and-specialists-2' or 'g-cloud-8'
         """
-        super(GenerateMasterCSV, self).__init__(client)
+        super(GenerateFrameworkApplicationsCSV, self).__init__(client)
         self.target_framework_slug = target_framework_slug
         self.framework = self.client.get_framework(target_framework_slug)['frameworks']
         self.lot_slugs = tuple(i['slug'] for i in self.framework['lots'])
@@ -63,7 +63,7 @@ class GenerateMasterCSV(GenerateCSVFromAPI):
     def get_supplier_frameworks(self):
         """Return supplier frameworks."""
         return self.client.find_framework_suppliers(
-            self.target_framework_slug, with_declarations=None
+            self.target_framework_slug, with_declarations=True
         )['supplierFrameworks']
 
     def get_supplier_application_status(self):
