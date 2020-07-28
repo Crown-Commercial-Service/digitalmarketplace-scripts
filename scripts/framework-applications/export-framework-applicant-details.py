@@ -19,6 +19,8 @@ sys.path.insert(0, '.')
 
 from docopt import docopt
 from dmscripts.helpers.auth_helpers import get_auth_token
+from dmscripts.helpers.logging_helpers import configure_logger, get_logger
+from dmscripts.helpers.logging_helpers import INFO as loglevel_INFO, DEBUG as loglevel_DEBUG
 from dmscripts.export_framework_applicant_details import export_supplier_details
 from dmapiclient import DataAPIClient
 from dmutils.env_helpers import get_api_endpoint_from_stage
@@ -30,6 +32,9 @@ if __name__ == '__main__':
     STAGE = arguments['<stage>']
     FRAMEWORK = arguments['<framework_slug>']
     OUTPUT_DIR = arguments['<output_dir>']
+
+    configure_logger({"script": loglevel_DEBUG if args["--verbose"] else loglevel_INFO})
+    logger = get_logger()
 
     client = DataAPIClient(get_api_endpoint_from_stage(STAGE), get_auth_token('api', STAGE))
     now = datetime.datetime.now()
@@ -49,4 +54,6 @@ if __name__ == '__main__':
 
     pool = ThreadPool(3)
 
-    export_supplier_details(client, FRAMEWORK, filepath, framework_lot_slugs=framework_lot_slugs, map_impl=pool.imap)
+    export_supplier_details(
+        client, FRAMEWORK, filepath, framework_lot_slugs=framework_lot_slugs, map_impl=pool.imap, logger=logger
+    )
