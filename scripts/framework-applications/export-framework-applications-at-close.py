@@ -15,8 +15,8 @@ Fields included:
 * The number of services submitted and left in draft per lot
 
 Usage:
-    scripts/framework-applications/export-framework-applications-at-close.py <framework_slug> <stage> <auth_token> <output-dir>
-        [-e <exclude_suppliers>]
+    scripts/framework-applications/export-framework-applications-at-close.py <framework_slug> <stage> <auth_token>
+        <output-dir> [-e <exclude_suppliers>]
 
 Example:
     scripts/framework-applications/export-framework-applications-at-close.py g-cloud-11 preview myToken path/to/myfolder
