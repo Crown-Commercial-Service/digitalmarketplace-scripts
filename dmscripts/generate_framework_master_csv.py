@@ -63,7 +63,7 @@ class GenerateMasterCSV(GenerateCSVFromAPI):
     def get_supplier_frameworks(self):
         """Return supplier frameworks."""
         return self.client.find_framework_suppliers(
-            self.target_framework_slug, with_declarations=None
+            self.target_framework_slug, with_declarations=True
         )['supplierFrameworks']
 
     def get_supplier_application_status(self):
