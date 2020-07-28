@@ -5,6 +5,10 @@
 Usage:
     scripts/framework-applications/export-framework-applicant-details.py <stage> <framework_slug> <output_dir>
 
+Options:
+    --verbose                   Show debug log messages
+    -h, --help                  Show this screen
+
 Example:
     scripts/framework-applications/export-framework-applicant-details.py dev g-cloud-12 SCRIPT_OUTPUTS
 
@@ -33,7 +37,7 @@ if __name__ == '__main__':
     FRAMEWORK = arguments['<framework_slug>']
     OUTPUT_DIR = arguments['<output_dir>']
 
-    configure_logger({"script": loglevel_DEBUG if args["--verbose"] else loglevel_INFO})
+    configure_logger({"script": loglevel_DEBUG if arguments["--verbose"] else loglevel_INFO})
     logger = get_logger()
 
     client = DataAPIClient(get_api_endpoint_from_stage(STAGE), get_auth_token('api', STAGE))
