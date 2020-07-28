@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-"""Class used to output a framework master csv."""
+"""Class used to output a csv of how framework applications looked after the deadline."""
 from collections import OrderedDict
 
 from dmscripts.helpers.csv_helpers import GenerateCSVFromAPI
 
 
 class GenerateFrameworkApplicationsCSV(GenerateCSVFromAPI):
-    """"Generate a master csv given a framework."""
+    """"Generate a csv of applications, given a framework."""
 
     static_fieldnames = ('supplier_id', 'supplier_dm_name', 'application_status', 'declaration_status')
     service_status_labels = OrderedDict([

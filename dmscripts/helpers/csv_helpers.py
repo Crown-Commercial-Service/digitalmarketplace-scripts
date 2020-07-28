@@ -12,7 +12,7 @@ else:
 
 
 class GenerateCSVFromAPI(object):
-    """Stub class for master csv generation."""
+    """Stub class for applications csv generation."""
 
     def __init__(self, client):
         self.client = client
