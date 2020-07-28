@@ -1,19 +1,16 @@
 #!/usr/bin/env python
-"""Export supplier "about you" information for suppliers who applied to a framework
-
-Currently will only work for the following frameworks:
-  * g-cloud-8, g-cloud-9, g-cloud-10, g-cloud-11
-  * digital-outcomes-and-specialists-2, digital-outcomes-and-specialists-3
-
-Support for new frameworks needs to be explicitly added to the DECLARATION_FIELDS in
-dmscripts/export_framework_applicant_details.py, though in the (far) future it would be nice if this information could
-be pulled from the frameworks themselves provided the frameworks repo knew which fields classed as "about you".
+"""Export supplier "about you" information for suppliers who applied to a framework.
+   This report includes registered company information and contact details.
 
 Usage:
     scripts/framework-applications/export-framework-applicant-details.py <stage> <framework_slug> <output_dir>
 
+Options:
+    --verbose                   Show debug log messages
+    -h, --help                  Show this screen
+
 Example:
-    scripts/framework-applications/export-framework-applicant-details.py dev g-cloud-8 SCRIPT_OUTPUTS
+    scripts/framework-applications/export-framework-applicant-details.py dev g-cloud-12 SCRIPT_OUTPUTS
 
 """
 import datetime
@@ -26,6 +23,8 @@ sys.path.insert(0, '.')
 
 from docopt import docopt
 from dmscripts.helpers.auth_helpers import get_auth_token
+from dmscripts.helpers.logging_helpers import configure_logger, get_logger
+from dmscripts.helpers.logging_helpers import INFO as loglevel_INFO, DEBUG as loglevel_DEBUG
 from dmscripts.export_framework_applicant_details import export_supplier_details
 from dmapiclient import DataAPIClient
 from dmutils.env_helpers import get_api_endpoint_from_stage
@@ -37,6 +36,9 @@ if __name__ == '__main__':
     STAGE = arguments['<stage>']
     FRAMEWORK = arguments['<framework_slug>']
     OUTPUT_DIR = arguments['<output_dir>']
+
+    configure_logger({"script": loglevel_DEBUG if arguments["--verbose"] else loglevel_INFO})
+    logger = get_logger()
 
     client = DataAPIClient(get_api_endpoint_from_stage(STAGE), get_auth_token('api', STAGE))
     now = datetime.datetime.now()
@@ -56,4 +58,6 @@ if __name__ == '__main__':
 
     pool = ThreadPool(3)
 
-    export_supplier_details(client, FRAMEWORK, filepath, framework_lot_slugs=framework_lot_slugs, map_impl=pool.imap)
+    export_supplier_details(
+        client, FRAMEWORK, filepath, framework_lot_slugs=framework_lot_slugs, map_impl=pool.imap, logger=logger
+    )

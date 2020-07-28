@@ -3,9 +3,7 @@ from itertools import chain
 from dmscripts.helpers.csv_helpers import write_csv
 from dmscripts.helpers.framework_helpers import find_suppliers_with_details_and_draft_service_counts
 from dmscripts.helpers.supplier_data_helpers import country_code_to_name
-from dmscripts.helpers.logging_helpers import get_logger
 
-logger = get_logger()
 
 DECLARATION_FIELDS = (
     "primaryContact",
@@ -40,6 +38,7 @@ def get_csv_rows(
     count_statuses=("submitted", "failed",),
     dry_run=False,
     include_central_supplier_details=False,
+    logger=None
 ):
     """
     :param count_statuses:                      tuple of draft service statuses that should be
@@ -49,6 +48,7 @@ def get_csv_rows(
     :param dry_run:                             if True the records will be returned without
                                                 declaration information.
     :param include_central_supplier_details:    include contact info from supplier account (i.e. not the declaration)
+    :param logger:                              Logger object
 
     :returns:                                   row headers and rows as a sequence of dictionaries
                                                 with the headers as keys.
@@ -81,7 +81,8 @@ def get_csv_rows(
         and any(status in count_statuses for (lot, status) in record['counts'])
     ]
 
-    logger.info(f"found {len(records)} supplier records to process")
+    if logger:
+        logger.info(f"found {len(records)} supplier records to process")
 
     rows_iter = (
         _create_row(
@@ -159,7 +160,9 @@ def _create_row(
     return row
 
 
-def export_supplier_details(data_api_client, framework_slug, filename, framework_lot_slugs, map_impl=map):
+def export_supplier_details(
+    data_api_client, framework_slug, filename, framework_lot_slugs, map_impl=map, logger=None
+):
     records = find_suppliers_with_details_and_draft_service_counts(data_api_client, framework_slug, map_impl=map_impl)
-    headers, rows_iter = get_csv_rows(records, framework_slug, framework_lot_slugs)
+    headers, rows_iter = get_csv_rows(records, framework_slug, framework_lot_slugs, logger=logger)
     write_csv(headers, rows_iter, filename)

@@ -88,5 +88,5 @@ def test_export_supplier_details_calls_helper_functions(find_suppliers, get_csv_
     export_supplier_details(data_api_client, 'g-things-23', "filename.csv", "lot-1,lot-2")
 
     find_suppliers.assert_called_once_with(data_api_client, 'g-things-23', map_impl=mock.ANY)
-    get_csv_rows.assert_called_once_with(find_suppliers.return_value, 'g-things-23', "lot-1,lot-2")
+    get_csv_rows.assert_called_once_with(find_suppliers.return_value, 'g-things-23', "lot-1,lot-2", logger=None)
     write_csv.assert_called_once_with(['header1', 'header2'], 'rows_iter', "filename.csv")
