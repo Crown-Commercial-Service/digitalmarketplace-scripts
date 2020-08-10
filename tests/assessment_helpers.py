@@ -43,34 +43,6 @@ class BaseAssessmentTest(object):
             },
         }
 
-    # putting these in methods so we are sure to always get a clean copy
-    def _draft_service_schema(self):
-        return {
-            "$schema": "http://json-schema.org/draft-04/schema#",
-            "type": "object",
-            "anyOf": [
-                {
-                    "properties": {
-                        "lotSlug": {"enum": ["stuffed-roast-heart"]},
-                        "kosher": {"type": "boolean"},
-                    },
-                    "required": ["kosher"],
-                },
-                {
-                    "properties": {
-                        "lotSlug": {"enum": ["pork-kidney", "ham-and-eggs"]},
-                        "kosher": {"enum": [False]},
-                        "butcher": {"enum": ["Dlugacz"]},
-                    },
-                },
-                {
-                    "properties": {
-                        "lotSlug": {"enum": ["grilled-mutton-kidney"]},
-                    },
-                },
-            ],
-        }
-
     def _get_ordered_question_ids(self):
         return (
             "shouldBeFalseLax",
