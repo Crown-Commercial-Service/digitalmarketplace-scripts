@@ -123,7 +123,7 @@ def contact_details(record):
 
 def admin_link(record):
     base = get_web_url_from_stage('production')
-    admin_path = f"{base}/suppliers/{record['supplier']['id']}/edit/declarations/{record['frameworkSlug']}"
+    admin_path = f"{base}/admin/suppliers/{record['supplier']['id']}/edit/declarations/{record['frameworkSlug']}"
     return [('admin_link', admin_path)]
 
 
