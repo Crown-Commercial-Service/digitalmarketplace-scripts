@@ -25,7 +25,7 @@ def _assess_draft_services(
 ):
     # A supplier must have at least 1 submitted service
     counter = Counter()
-    for draft_service in client.find_draft_services_iter(supplier_id, framework=framework_slug):
+    for draft_service in client.find_draft_services_by_framework_iter(framework_slug, supplier_id=supplier_id):
         counter[draft_service["status"]] += 1
 
     logger.info(

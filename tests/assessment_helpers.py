@@ -293,6 +293,10 @@ class BaseAssessmentTest(object):
             "interestedSuppliers": self.mock_supplier_frameworks.keys(),
         }
 
+    def _mock_find_draft_services_by_framework_iter_impl(self, framework, supplier_id=None):
+        assert framework == self.framework_slug
+        return iter(self.mock_draft_services[supplier_id])
+
     def _mock_find_draft_services_iter_impl(self, supplier_id, framework=None):
         assert framework == self.framework_slug
         return iter(self.mock_draft_services[supplier_id])
@@ -310,7 +314,10 @@ class BaseAssessmentTest(object):
         self.mock_data_client = Mock()
         self.mock_data_client.get_supplier_framework_info.side_effect = self._mock_get_supplier_framework_info_impl
         self.mock_data_client.get_interested_suppliers.side_effect = self._mock_get_interested_suppliers_impl
-        self.mock_data_client.find_draft_services_iter.side_effect = self._mock_find_draft_services_iter_impl
+        self.mock_data_client.find_draft_services_by_framework_iter.side_effect = \
+            self._mock_find_draft_services_by_framework_iter_impl
+        self.mock_data_client.find_draft_services_iter.side_effect = \
+            self._mock_find_draft_services_iter_impl
         self.mock_data_client.get_supplier.side_effect = self._mock_get_supplier_impl
 
 
