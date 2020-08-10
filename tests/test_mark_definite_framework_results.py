@@ -25,14 +25,13 @@ class TestNoPrevResults(BaseAssessmentTest):
 
     @pytest.mark.parametrize(
         # see above explanation of parameterization
-        "reassess_passed_suppliers,reassess_failed_suppliers,reassess_failed_suppliers_draft_services,dry_run",
-        tuple(product(*repeat((False, True,), 4))),
+        "reassess_passed_suppliers,reassess_failed_suppliers,dry_run",
+        tuple(product(*repeat((False, True,), 3))),
     )
     def test_with_discretionary_pass_schema(
             self,
             reassess_passed_suppliers,
             reassess_failed_suppliers,
-            reassess_failed_suppliers_draft_services,
             dry_run,
     ):
         mark_definite_framework_results(
@@ -59,14 +58,13 @@ class TestNoPrevResults(BaseAssessmentTest):
 
     @pytest.mark.parametrize(
         # see above explanation of parameterization
-        "reassess_passed_suppliers,reassess_failed_suppliers,reassess_failed_suppliers_draft_services,dry_run",
-        tuple(product(*repeat((False, True,), 4))),
+        "reassess_passed_suppliers,reassess_failed_suppliers,dry_run",
+        tuple(product(*repeat((False, True,), 3))),
     )
     def test_no_discretionary_pass_schema(
         self,
         reassess_passed_suppliers,
         reassess_failed_suppliers,
-        reassess_failed_suppliers_draft_services,
         dry_run,
     ):
         mark_definite_framework_results(
@@ -91,14 +89,13 @@ class TestNoPrevResults(BaseAssessmentTest):
 
     @pytest.mark.parametrize(
         # see above explanation of parameterization
-        "reassess_passed_suppliers,reassess_failed_suppliers,reassess_failed_suppliers_draft_services,dry_run",
-        tuple(product(*repeat((False, True,), 4))),
+        "reassess_passed_suppliers,reassess_failed_suppliers,dry_run",
+        tuple(product(*repeat((False, True,), 3))),
     )
     def test_neither_optional_schema(
         self,
         reassess_passed_suppliers,
         reassess_failed_suppliers,
-        reassess_failed_suppliers_draft_services,
         dry_run,
     ):
         mark_definite_framework_results(
