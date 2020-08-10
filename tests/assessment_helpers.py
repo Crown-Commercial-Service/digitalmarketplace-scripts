@@ -177,14 +177,6 @@ class BaseAssessmentTest(object):
                         "omnipresent": "ether",
                     },
                 },
-                6543: {
-                    "onFramework": True,
-                    "declaration": {
-                        "status": "complete",
-                        "shouldBeTrueStrict": True,
-                        "omnipresent": "ether",
-                    },
-                },
                 7654: {
                     "onFramework": None,
                     "declaration": {
@@ -274,14 +266,6 @@ class BaseAssessmentTest(object):
                     },
                 ),
                 5432: (),
-                6543: (
-                    {
-                        "id": 999010,
-                        "status": "failed",
-                        "lotSlug": "stuffed-roast-heart",
-                        "kosher": True,
-                    },
-                ),
                 7654: (
                     {
                         "id": 999011,
@@ -290,7 +274,7 @@ class BaseAssessmentTest(object):
                     },
                     {
                         "id": 999012,
-                        "status": "failed",
+                        "status": "not-submitted",
                         "lotSlug": "stuffed-roast-heart",
                         "kosher": None,
                     },
@@ -304,7 +288,7 @@ class BaseAssessmentTest(object):
                     },
                     {
                         "id": 999014,
-                        "status": "failed",
+                        "status": "not-submitted",
                         "lotSlug": "grilled-mutton-kidney",
                         "kosher": None,
                     },
@@ -384,7 +368,6 @@ class BaseAssessmentMismatchedOnFrameworksTestMixin(_BaseAssessmentOverriddenOnF
             4321: False,
             4567: False,
             5432: None,
-            6543: None,
             7654: None,
             8765: None,
         }
@@ -400,7 +383,6 @@ class BaseAssessmentOnFrameworksAsThoughNoBaselineTestMixin(_BaseAssessmentOverr
             4321: True,
             4567: None,
             5432: None,
-            6543: True,
             7654: None,
             8765: True,
         }

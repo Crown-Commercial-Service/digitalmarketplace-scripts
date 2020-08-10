@@ -76,10 +76,8 @@ def mark_definite_framework_results(
     framework_slug,
     declaration_definite_pass_schema,
     declaration_discretionary_pass_schema=None,
-    service_schema=None,
     reassess_passed_suppliers=False,
     reassess_failed_suppliers=False,
-    reassess_failed_draft_services=False,
     dry_run=True,
     supplier_ids=None,
     logger=logging.getLogger("script"),
@@ -122,9 +120,7 @@ def mark_definite_framework_results(
             updated_by,
             framework_slug,
             supplier_id,
-            service_schema=service_schema,
             dry_run=dry_run,
-            reassess_failed_draft_services=reassess_failed_draft_services,
             logger=logger
         )
         if not service_counter["passed"]:
