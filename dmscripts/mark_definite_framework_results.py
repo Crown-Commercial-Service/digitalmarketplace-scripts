@@ -19,53 +19,19 @@ def _passes_validation(candidate, schema, logger, schema_name="schema", tablevel
 
 def _assess_draft_services(
     client,
-    updated_by,
     framework_slug,
     supplier_id,
-    service_schema=None,
-    dry_run=True,
-    reassess_failed_draft_services=False,
     logger=logging.getLogger("script"),
 ):
+    # A supplier must have at least 1 submitted service
     counter = Counter()
-    for draft_service in client.find_draft_services_iter(supplier_id, framework=framework_slug):
-        if draft_service["status"] in ("submitted", "failed",):
-            logger.debug("\tAssessing draft service %s", draft_service["id"])
-            if draft_service["status"] == "failed" and not reassess_failed_draft_services:
-                logger.debug("\t\tSkipping - already marked failed")
-                counter["skipped"] += 1
-            elif (
-                service_schema is None
-                or _passes_validation(
-                    draft_service,
-                    service_schema,
-                    logger,
-                    schema_name="service_schema",
-                    tablevel=2,
-                    loglevel=logging.DEBUG
-                )
-            ):
-                if not dry_run:
-                    # mark this as submitted
-                    if draft_service["status"] != "submitted":
-                        client.update_draft_service_status(draft_service["id"], "submitted", updated_by)
-                    else:
-                        logger.debug("\tUnchanged result - not re-setting")
-                counter["passed"] += 1
-            else:
-                if not dry_run:
-                    # mark this as failed
-                    if draft_service["status"] != "failed":
-                        client.update_draft_service_status(draft_service["id"], "failed", updated_by)
-                    else:
-                        logger.debug("\tUnchanged result - not re-setting")
-                counter["failed"] += 1
+    for draft_service in client.find_draft_services_by_framework_iter(framework_slug, supplier_id=supplier_id):
+        counter[draft_service["status"]] += 1
 
     logger.info(
-        "\tDraft services:  %s passed, %s failed, %s skipped",
-        counter["passed"],
-        counter["failed"],
-        counter["skipped"],
+        "\tDraft services:  %s submitted, %s not-submitted",
+        counter["submitted"],
+        counter["not-submitted"],
     )
     return counter
 
@@ -76,10 +42,8 @@ def mark_definite_framework_results(
     framework_slug,
     declaration_definite_pass_schema,
     declaration_discretionary_pass_schema=None,
-    service_schema=None,
     reassess_passed_suppliers=False,
     reassess_failed_suppliers=False,
-    reassess_failed_draft_services=False,
     dry_run=True,
     supplier_ids=None,
     logger=logging.getLogger("script"),
@@ -119,15 +83,11 @@ def mark_definite_framework_results(
         # A supplier should have at least one valid service to pass their application
         service_counter = _assess_draft_services(
             client,
-            updated_by,
             framework_slug,
             supplier_id,
-            service_schema=service_schema,
-            dry_run=dry_run,
-            reassess_failed_draft_services=reassess_failed_draft_services,
             logger=logger
         )
-        if not service_counter["passed"]:
+        if not service_counter["submitted"]:
             fail_supplier(supplier_id, framework_slug, updated_by, supplier_framework, client, logger, dry_run=dry_run)
             continue
 

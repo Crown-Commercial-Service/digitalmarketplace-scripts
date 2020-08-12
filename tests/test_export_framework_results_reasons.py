@@ -160,12 +160,6 @@ class TestExportOnFrameworkBaseline(_BaseExportTest):
                     "supplier.4321.h-cloud-99@example.com",
                 ],
                 [
-                    "Supplier 6543 generic name",
-                    "6543",
-                    u"Supplier 6543 Empl\u00f6yee 123",
-                    "supplier.6543.h-cloud-99@example.com",
-                ],
-                [
                     "Supplier 8765 generic name",
                     "8765",
                     u"Supplier 8765 Empl\u00f6yee 123",
@@ -224,12 +218,6 @@ class TestExportOnFrameworkBaseline(_BaseExportTest):
                     "4321",
                     u"Supplier 4321 Empl\u00f6yee 123",
                     "supplier.4321.h-cloud-99@example.com",
-                ],
-                [
-                    "Supplier 6543 generic name",
-                    "6543",
-                    u"Supplier 6543 Empl\u00f6yee 123",
-                    "supplier.6543.h-cloud-99@example.com",
                 ],
                 [
                     "Supplier 8765 generic name",
@@ -312,12 +300,6 @@ class TestExportOnFrameworkNoBaseline(BaseAssessmentOnFrameworksAsThoughNoBaseli
                     "supplier.4321.h-cloud-99@example.com",
                 ],
                 [
-                    "Supplier 6543 generic name",
-                    "6543",
-                    u"Supplier 6543 Empl\u00f6yee 123",
-                    "supplier.6543.h-cloud-99@example.com",
-                ],
-                [
                     "Supplier 8765 generic name",
                     "8765",
                     u"Supplier 8765 Empl\u00f6yee 123",
@@ -381,12 +363,6 @@ class TestExportOnFrameworkNoBaseline(BaseAssessmentOnFrameworksAsThoughNoBaseli
                     "4321",
                     u"Supplier 4321 Empl\u00f6yee 123",
                     "supplier.4321.h-cloud-99@example.com",
-                ],
-                [
-                    "Supplier 6543 generic name",
-                    "6543",
-                    u"Supplier 6543 Empl\u00f6yee 123",
-                    "supplier.6543.h-cloud-99@example.com",
                 ],
                 [
                     "Supplier 8765 generic name",

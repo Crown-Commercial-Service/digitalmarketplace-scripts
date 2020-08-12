@@ -43,34 +43,6 @@ class BaseAssessmentTest(object):
             },
         }
 
-    # putting these in methods so we are sure to always get a clean copy
-    def _draft_service_schema(self):
-        return {
-            "$schema": "http://json-schema.org/draft-04/schema#",
-            "type": "object",
-            "anyOf": [
-                {
-                    "properties": {
-                        "lotSlug": {"enum": ["stuffed-roast-heart"]},
-                        "kosher": {"type": "boolean"},
-                    },
-                    "required": ["kosher"],
-                },
-                {
-                    "properties": {
-                        "lotSlug": {"enum": ["pork-kidney", "ham-and-eggs"]},
-                        "kosher": {"enum": [False]},
-                        "butcher": {"enum": ["Dlugacz"]},
-                    },
-                },
-                {
-                    "properties": {
-                        "lotSlug": {"enum": ["grilled-mutton-kidney"]},
-                    },
-                },
-            ],
-        }
-
     def _get_ordered_question_ids(self):
         return (
             "shouldBeFalseLax",
@@ -177,14 +149,6 @@ class BaseAssessmentTest(object):
                         "omnipresent": "ether",
                     },
                 },
-                6543: {
-                    "onFramework": True,
-                    "declaration": {
-                        "status": "complete",
-                        "shouldBeTrueStrict": True,
-                        "omnipresent": "ether",
-                    },
-                },
                 7654: {
                     "onFramework": None,
                     "declaration": {
@@ -274,14 +238,6 @@ class BaseAssessmentTest(object):
                     },
                 ),
                 5432: (),
-                6543: (
-                    {
-                        "id": 999010,
-                        "status": "failed",
-                        "lotSlug": "stuffed-roast-heart",
-                        "kosher": True,
-                    },
-                ),
                 7654: (
                     {
                         "id": 999011,
@@ -290,7 +246,7 @@ class BaseAssessmentTest(object):
                     },
                     {
                         "id": 999012,
-                        "status": "failed",
+                        "status": "not-submitted",
                         "lotSlug": "stuffed-roast-heart",
                         "kosher": None,
                     },
@@ -304,7 +260,7 @@ class BaseAssessmentTest(object):
                     },
                     {
                         "id": 999014,
-                        "status": "failed",
+                        "status": "not-submitted",
                         "lotSlug": "grilled-mutton-kidney",
                         "kosher": None,
                     },
@@ -337,6 +293,10 @@ class BaseAssessmentTest(object):
             "interestedSuppliers": self.mock_supplier_frameworks.keys(),
         }
 
+    def _mock_find_draft_services_by_framework_iter_impl(self, framework, supplier_id=None):
+        assert framework == self.framework_slug
+        return iter(self.mock_draft_services[supplier_id])
+
     def _mock_find_draft_services_iter_impl(self, supplier_id, framework=None):
         assert framework == self.framework_slug
         return iter(self.mock_draft_services[supplier_id])
@@ -354,7 +314,10 @@ class BaseAssessmentTest(object):
         self.mock_data_client = Mock()
         self.mock_data_client.get_supplier_framework_info.side_effect = self._mock_get_supplier_framework_info_impl
         self.mock_data_client.get_interested_suppliers.side_effect = self._mock_get_interested_suppliers_impl
-        self.mock_data_client.find_draft_services_iter.side_effect = self._mock_find_draft_services_iter_impl
+        self.mock_data_client.find_draft_services_by_framework_iter.side_effect = \
+            self._mock_find_draft_services_by_framework_iter_impl
+        self.mock_data_client.find_draft_services_iter.side_effect = \
+            self._mock_find_draft_services_iter_impl
         self.mock_data_client.get_supplier.side_effect = self._mock_get_supplier_impl
 
 
@@ -384,7 +347,6 @@ class BaseAssessmentMismatchedOnFrameworksTestMixin(_BaseAssessmentOverriddenOnF
             4321: False,
             4567: False,
             5432: None,
-            6543: None,
             7654: None,
             8765: None,
         }
@@ -400,7 +362,6 @@ class BaseAssessmentOnFrameworksAsThoughNoBaselineTestMixin(_BaseAssessmentOverr
             4321: True,
             4567: None,
             5432: None,
-            6543: True,
             7654: None,
             8765: True,
         }
