@@ -8,7 +8,7 @@ def get_log_events(
     arn,  # 'arn:aws:iam::161120766136:role/RoleName'
     group,  # 'prod-group-name'
     stream,  # '9e1b2784-39cc-5016-87c0-845e'
-    directory  # '/Users/argyrisgalamatis/Downloads/test' must be absolute
+    directory  # '/Users/username/Downloads/test' must be absolute
 ):
     # create session
     sts_client = boto3.client('sts')
