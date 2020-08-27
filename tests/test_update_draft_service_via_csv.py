@@ -234,11 +234,39 @@ class TestUpdateDraftServicesFromFolder:
         find_draft_id_by_service_name.return_value = 12345
         create_draft_json_from_csv.return_value = {}
 
-        update_draft_services_from_folder("~/local/folder", api_client, 'g-cloud-12', self.content_loader, dry_run)
+        update_draft_services_from_folder(
+            "~/local/folder", api_client, 'g-cloud-12', self.content_loader, dry_run, False
+        )
 
         assert output_results.call_args_list == [
             # unidentifiable, malformed, successful, failed
             mock.call([], [], [('555777', '555777-cloud-software-myservice.csv', 12345)], [])
+        ]
+        assert self.content_loader.load_manifest.call_args_list == [
+            mock.call('g-cloud-12', 'services', 'edit_submission')
+        ]
+
+    @pytest.mark.parametrize('dry_run', (True, False))
+    def test_update_draft_services_from_folder_create_new_service(
+        self, get_all_files_of_type, output_results, find_draft_id_by_service_name, get_question_objects,
+        create_draft_json_from_csv, dry_run
+    ):
+        api_client = mock.Mock(autospec=DataAPIClient)
+        api_client.create_new_draft_service.return_value = {"services": {"id": 999}}
+        api_client.get_draft_service.return_value = {"validationErrors": {}}
+
+        get_all_files_of_type.return_value = [
+            '/path/to/555777-cloud-software-myservice.csv',
+        ]
+        create_draft_json_from_csv.return_value = {}
+
+        update_draft_services_from_folder(
+            "~/local/folder", api_client, 'g-cloud-12', self.content_loader, dry_run, True
+        )
+
+        assert output_results.call_args_list == [
+            # unidentifiable, malformed, successful, failed
+            mock.call([], [], [('555777', '555777-cloud-software-myservice.csv', 999)], [])
         ]
         assert self.content_loader.load_manifest.call_args_list == [
             mock.call('g-cloud-12', 'services', 'edit_submission')
@@ -256,7 +284,9 @@ class TestUpdateDraftServicesFromFolder:
         find_draft_id_by_service_name.return_value = 12345
         create_draft_json_from_csv.return_value = {}
 
-        update_draft_services_from_folder("~/local/folder", api_client, 'g-cloud-12', self.content_loader, False)
+        update_draft_services_from_folder(
+            "~/local/folder", api_client, 'g-cloud-12', self.content_loader, False, False
+        )
 
         assert output_results.call_args_list == [
             # unidentifiable, malformed, successful, failed
@@ -278,7 +308,9 @@ class TestUpdateDraftServicesFromFolder:
         ]
         find_draft_id_by_service_name.return_value = get_draft_response
 
-        update_draft_services_from_folder("~/local/folder", api_client, 'g-cloud-12', content_loader, False)
+        update_draft_services_from_folder(
+            "~/local/folder", api_client, 'g-cloud-12', content_loader, False, False
+        )
 
         assert output_results.call_args_list == [
             # unidentifiable, malformed, successful, failed
@@ -298,7 +330,9 @@ class TestUpdateDraftServicesFromFolder:
         find_draft_id_by_service_name.return_value = 12345
         create_draft_json_from_csv.side_effect = UnicodeDecodeError("utf-8", b'bytesobject', 1, 2, "Yikes")
 
-        update_draft_services_from_folder("~/local/folder", api_client, 'g-cloud-12', content_loader, False)
+        update_draft_services_from_folder(
+            "~/local/folder", api_client, 'g-cloud-12', content_loader, False, False
+        )
 
         assert output_results.call_args_list == [
             # unidentifiable, malformed, successful, failed

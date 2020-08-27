@@ -13,6 +13,7 @@ Usage: update_draft_service_via_csv <framework> <stage> [options]
 
 Options:
     --folder=<folder>                                     Folder to bulk-upload files
+    --create-draft                                        Create new service from CSV
     --dry-run                                             List actions that would have been taken
     -h, --help                                            Show this screen
 
@@ -236,13 +237,13 @@ def output_service_categories_features_and_benefits_summary(draft_json):
     # Useful for determining if these fields are over the max word limit per item
     print("Service categories count:", len(draft_json.get('serviceCategories', [])))
 
-    print("Service features:", draft_json.get('serviceFeatures'))
-    for item in draft_json.get('serviceFeatures', []):
-        print("{} ({} words)".format(item, len(item.split(' '))))
-
-    print("Service benefits:", draft_json.get('serviceBenefits'))
-    for item in draft_json.get('serviceBenefits', []):
-        print("{} ({} words)".format(item, len(item.split(' '))))
+    for question_key in ['serviceFeatures', 'serviceBenefits']:
+        print(f"{question_key}:", draft_json.get(question_key))
+        for item in draft_json.get(question_key, []):
+            words_per_items = len(item.split(' '))
+            if words_per_items > 10:
+                print("Max words per item exceeded")
+                print("{} ({} words)".format(item, words_per_items))
 
 
 def split_lot_and_service(lot_and_service_name):
@@ -291,7 +292,7 @@ def output_results(unidentifiable_files, malformed_csvs, successful_draft_ids, f
                 f.write(str(d) + '\n')
 
 
-def update_draft_services_from_folder(folder_name, api_client, framework_slug, content_loader, dry_run):
+def update_draft_services_from_folder(folder_name, api_client, framework_slug, content_loader, dry_run, create_draft):
     failed_draft_ids = []
     successful_draft_ids = []
     unidentifiable_files = []
@@ -312,10 +313,18 @@ def update_draft_services_from_folder(folder_name, api_client, framework_slug, c
             continue
 
         # Get the id
-        id_ = find_draft_id_by_service_name(api_client, supplier_id, service_name, framework_slug)
-        if id_ is None or id_ == 'multi':
-            unidentifiable_files.append(file_name)
-            continue
+        if create_draft:
+            initial_data = {"serviceName": service_name}
+            draft = api_client.create_new_draft_service(
+                framework_slug, lot_slug, supplier_id, initial_data,
+                f"{framework_slug} create draft service script"
+            )
+            id_ = draft['services']['id']
+        else:
+            id_ = find_draft_id_by_service_name(api_client, supplier_id, service_name, framework_slug)
+            if id_ is None or id_ == 'multi':
+                unidentifiable_files.append(file_name)
+                continue
 
         # Get a dict of service questions for the lot, where the key matches the question text in the CSVs
         content = content.filter(context={"lot": lot_slug})
@@ -381,6 +390,7 @@ if __name__ == "__main__":
     framework_slug = arguments['<framework>']
     stage = arguments['<stage>'] or 'local'
     dry_run = arguments['--dry-run'] or None
+    create_draft = arguments['--create-draft'] or None
 
     data_api_client = DataAPIClient(
         base_url=get_api_endpoint_from_stage(stage),
@@ -402,4 +412,11 @@ if __name__ == "__main__":
         print(f"Cannot update services for framework {framework_slug} in status '{framework_status}'")
         exit(1)
 
-    update_draft_services_from_folder(local_directory, data_api_client, framework_slug, content_loader, dry_run)
+    update_draft_services_from_folder(
+        local_directory,
+        data_api_client,
+        framework_slug,
+        content_loader,
+        dry_run,
+        create_draft
+    )
