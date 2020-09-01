@@ -60,13 +60,13 @@ class TestGetInfoFromFilename:
     def test_get_info_from_filename(self, find_draft_id_by_service_name, matching_drafts, expected_result):
         find_draft_id_by_service_name.return_value = matching_drafts
         api_client = mock.Mock(autospec=DataAPIClient)
-        assert get_info_from_filename('12345-myservice-pricing-document.pdf', api_client, "g-cloud-12") == (
+        assert get_info_from_filename('12345-myservice-pricing-document.pdf', api_client, "g-cloud-12", "pdf") == (
             12345, 'pricingdocument', expected_result
         )
 
     def test_get_info_from_filename_cant_identify_document_type(self):
         api_client = mock.Mock()
-        assert get_info_from_filename('12345-myservice.pdf', api_client, "g-cloud-12") == (12345, None, None)
+        assert get_info_from_filename('12345-myservice.pdf', api_client, "g-cloud-12", "pdf") == (12345, None, None)
 
 
 class TestUpdateDraftServiceWithDocumentPaths:
@@ -119,55 +119,56 @@ class TestUploadDraftPDFsFromFolder:
         self.client = mock.Mock(autospec=DataAPIClient)
         self.client.get_supplier.return_value = {"suppliers": {"name": "ACME LTD"}}
 
+    @pytest.mark.parametrize('file_format', ('pdf', 'ods', 'odt', 'odp'))
     @pytest.mark.parametrize('dry_run', (True, False))
     def test_upload_draft_service_pdfs_from_folder_happy_path(
         self, get_all_files_of_type, output_results, upload_to_submissions_bucket,
-        update_draft_service_with_document_paths, find_draft_id_by_service_name, dry_run
+        update_draft_service_with_document_paths, find_draft_id_by_service_name, dry_run, file_format
     ):
         get_all_files_of_type.return_value = [
-            '/path/to/555777-myservice-pricing-document.pdf',
-            '/path/to/555777-myservice-service-definition-document.pdf',
-            '/path/to/555777-myservice-terms-and-conditions.pdf',
+            f'/path/to/555777-myservice-pricing-document.{file_format}',
+            f'/path/to/555777-myservice-service-definition-document.{file_format}',
+            f'/path/to/555777-myservice-terms-and-conditions.{file_format}',
         ]
         find_draft_id_by_service_name.return_value = 12345
 
         with freeze_time('2020-01-01'):
             upload_draft_service_pdfs_from_folder(
                 self.bucket, "submissions", "https://assets.example.com",
-                "~/local/folder", self.client, 'g-cloud-12', dry_run
+                "~/local/folder", self.client, 'g-cloud-12', file_format, dry_run
             )
 
         assert get_all_files_of_type.call_args_list == [
-            mock.call("~/local/folder", "pdf")
+            mock.call("~/local/folder", file_format)
         ]
         assert upload_to_submissions_bucket.call_args_list == [
             mock.call(
-                '12345-pricingdocument-2020-01-01-0000.pdf',
+                f'12345-pricingdocument-2020-01-01-0000.{file_format}',
                 self.bucket,
                 "submissions",
                 "g-cloud-12",
                 555777,
-                '/path/to/555777-myservice-pricing-document.pdf',
+                f'/path/to/555777-myservice-pricing-document.{file_format}',
                 dry_run,
                 {555777: "ACME LTD"}
             ),
             mock.call(
-                '12345-servicedefinitiondocument-2020-01-01-0000.pdf',
+                f'12345-servicedefinitiondocument-2020-01-01-0000.{file_format}',
                 self.bucket,
                 "submissions",
                 "g-cloud-12",
                 555777,
-                '/path/to/555777-myservice-service-definition-document.pdf',
+                f'/path/to/555777-myservice-service-definition-document.{file_format}',
                 dry_run,
                 {555777: "ACME LTD"}
             ),
             mock.call(
-                '12345-termsandconditions-2020-01-01-0000.pdf',
+                f'12345-termsandconditions-2020-01-01-0000.{file_format}',
                 self.bucket,
                 "submissions",
                 "g-cloud-12",
                 555777,
-                '/path/to/555777-myservice-terms-and-conditions.pdf',
+                f'/path/to/555777-myservice-terms-and-conditions.{file_format}',
                 dry_run,
                 {555777: "ACME LTD"}
             )
@@ -175,17 +176,17 @@ class TestUploadDraftPDFsFromFolder:
         assert update_draft_service_with_document_paths.call_args_list == [
             mock.call(
                 "https://assets.example.com/suppliers/assets/g-cloud-12/submissions/"
-                "555777/12345-pricingdocument-2020-01-01-0000.pdf",
+                f"555777/12345-pricingdocument-2020-01-01-0000.{file_format}",
                 "pricingdocument", 12345, self.client, dry_run
             ),
             mock.call(
                 "https://assets.example.com/suppliers/assets/g-cloud-12/submissions/"
-                "555777/12345-servicedefinitiondocument-2020-01-01-0000.pdf",
+                f"555777/12345-servicedefinitiondocument-2020-01-01-0000.{file_format}",
                 "servicedefinitiondocument", 12345, self.client, dry_run
             ),
             mock.call(
                 "https://assets.example.com/suppliers/assets/g-cloud-12/submissions/"
-                "555777/12345-termsandconditions-2020-01-01-0000.pdf",
+                f"555777/12345-termsandconditions-2020-01-01-0000.{file_format}",
                 "termsandconditions", 12345, self.client, dry_run
             )
         ]
@@ -206,7 +207,7 @@ class TestUploadDraftPDFsFromFolder:
         with freeze_time('2020-01-01'):
             upload_draft_service_pdfs_from_folder(
                 self.bucket, "submissions", "https://assets.example.com",
-                "~/local/folder", self.client, 'g-cloud-12', False
+                "~/local/folder", self.client, 'g-cloud-12', 'pdf', False
             )
 
         assert get_all_files_of_type.call_args_list == [
@@ -231,10 +232,30 @@ class TestUploadDraftPDFsFromFolder:
 
         upload_draft_service_pdfs_from_folder(
             self.bucket, "submissions", "https://assets.example.com",
-            "~/local/folder", self.client, 'g-cloud-12', False
+            "~/local/folder", self.client, 'g-cloud-12', 'pdf', False
         )
 
         assert output_results.call_args_list == [
             # unidentifiable, successful, failed
             mock.call([], [], [12345])
+        ]
+
+    def test_upload_draft_service_pdfs_from_folder_invalid_file_format(
+        self, get_all_files_of_type, output_results, upload_to_submissions_bucket,
+        update_draft_service_with_document_paths, find_draft_id_by_service_name
+    ):
+        get_all_files_of_type.return_value = [
+            '/path/to/555777-myservice-pricing-document.docx',
+        ]
+        find_draft_id_by_service_name.return_value = 12345
+        update_draft_service_with_document_paths.return_value = False
+
+        upload_draft_service_pdfs_from_folder(
+            self.bucket, "submissions", "https://assets.example.com",
+            "~/local/folder", self.client, 'g-cloud-12', 'docx', False
+        )
+
+        assert output_results.call_args_list == [
+            # unidentifiable, successful, failed
+            mock.call(['555777-myservice-pricing-document.docx'], [], [])
         ]

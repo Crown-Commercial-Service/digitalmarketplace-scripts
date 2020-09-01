@@ -21,6 +21,7 @@ Usage: upload_draft_service_pdfs <framework> <stage> [options]
 
 Options:
     --folder=<folder>                                     Folder to bulk-upload files
+    --file-format                                         File format to check for (default: pdf)
     --dry-run                                             List actions that would have been taken
     -h, --help                                            Show this screen
 
@@ -51,21 +52,21 @@ DOC_TYPES = {
 }
 
 
-def _normalise_service_name(name):
+def _normalise_service_name(name, file_format):
     return name.lower().\
         replace('-', '').\
         replace('_', ''). \
         replace(':', ''). \
         replace(' ', '').\
-        replace('.pdf', '')
+        replace(f'.{file_format}', '')
 
 
-def get_info_from_filename(filepath, client, framework_slug):
+def get_info_from_filename(filepath, client, framework_slug, file_format):
     supplier_id, doc_type, draft_id = None, None, None
 
     # Split out Supplier ID first - should be the prefix
     supplier_id, service_name_and_doctype = filepath.split('-', maxsplit=1)
-    service_name = _normalise_service_name(service_name_and_doctype)
+    service_name = _normalise_service_name(service_name_and_doctype, file_format)
 
     for dt in DOC_TYPES.keys():
         if dt in service_name:
@@ -87,9 +88,9 @@ def get_info_from_filename(filepath, client, framework_slug):
     return int(supplier_id), doc_type, draft_id
 
 
-def construct_upload_filename(draft_id, doc_type):
+def construct_upload_filename(draft_id, doc_type, file_format):
     datestamp = default_file_suffix()
-    return f"{draft_id}-{doc_type}-{datestamp}.pdf"
+    return f"{draft_id}-{doc_type}-{datestamp}.{file_format}"
 
 
 def upload_to_submissions_bucket(
@@ -166,14 +167,14 @@ def output_results(unidentifiable_files, successful_draft_ids, failed_draft_ids)
 
 
 def upload_draft_service_pdfs_from_folder(
-    bucket, bucket_category, assets_path, local_directory, api_client, framework_slug, dry_run
+    bucket, bucket_category, assets_path, local_directory, api_client, framework_slug, file_format, dry_run
 ):
     failed_draft_ids = []
     successful_draft_ids = []
     unidentifiable_files = []
 
-    # Parse files in folder (TODO: support ODF files)
-    for path in get_all_files_of_type(local_directory, 'pdf'):
+    # Parse files in folder
+    for path in get_all_files_of_type(local_directory, file_format):
         # Check file is open document format or PDF
         file_name = os.path.basename(path)
         print(f"File name: {file_name}")
@@ -184,7 +185,7 @@ def upload_draft_service_pdfs_from_folder(
             continue
 
         # Get IDs etc
-        supplier_id, doc_type, draft_id = get_info_from_filename(file_name, api_client, framework_slug)
+        supplier_id, doc_type, draft_id = get_info_from_filename(file_name, api_client, framework_slug, file_format)
         if supplier_id is None:
             print("Unable to determine Supplier ID")
             unidentifiable_files.append(file_name)
@@ -202,7 +203,7 @@ def upload_draft_service_pdfs_from_folder(
         # Get supplier name, to add to S3 metadata (ie visible to buyers on download)
         supplier = api_client.get_supplier(supplier_id)
         supplier_name_dict = {supplier_id: supplier['suppliers']['name']}
-        new_filename = construct_upload_filename(draft_id, doc_type)
+        new_filename = construct_upload_filename(draft_id, doc_type, file_format)
 
         # Upload to S3
         upload_to_submissions_bucket(
@@ -235,6 +236,7 @@ if __name__ == "__main__":
         auth_token=get_auth_token('api', stage)
     )
     local_directory = arguments['--folder']
+    file_format = arguments.get('--file-format', 'pdf')
 
     # Check framework status
     framework = data_api_client.get_framework(framework_slug)
@@ -263,5 +265,6 @@ if __name__ == "__main__":
         local_directory,
         data_api_client,
         framework_slug,
+        file_format,
         dry_run
     )
