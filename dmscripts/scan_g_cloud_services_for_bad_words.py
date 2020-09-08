@@ -26,9 +26,11 @@ def get_suppliers(client, framework_slug):
 
 def get_services(client, supplier_id, framework_slug, scan_drafts):
     if scan_drafts:
-        return client.find_draft_services(supplier_id, framework=framework_slug)['services']
+        return client.find_draft_services_by_framework_iter(
+            framework_slug, supplier_id=supplier_id, status="submitted"
+        )
 
-    return client.find_services(supplier_id, framework=framework_slug)["services"]
+    return client.find_services_iter(supplier_id, framework=framework_slug)
 
 
 def _get_bad_words_from_file(bad_words_path):
