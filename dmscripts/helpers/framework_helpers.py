@@ -45,6 +45,17 @@ def find_suppliers_with_details_and_draft_services(
     return records
 
 
+def framework_supports_e_signature(framework_slug):
+    """
+    This is a hacky way to determine if a framework supports e-signature,
+    which will be frameworks from G-Cloud-12 onwards
+    # TODO: Do more robust check
+    :param framework_slug:
+    :return: Boolean
+    """
+    return framework_slug in ['g-cloud-12']
+
+
 def find_suppliers_with_details_and_draft_service_counts(
     client,
     framework_slug,
@@ -55,6 +66,7 @@ def find_suppliers_with_details_and_draft_service_counts(
     length = len(records)
     records = map_impl(partial(add_supplier_info, client), records)
     records = map_impl(partial(add_framework_info, client, framework_slug), records)
+    records = map_impl(partial(add_agreement_info, client), records)
     records = map_impl(partial(add_draft_counts, client, framework_slug), records)
     records = map_watch(
         records,
@@ -86,6 +98,17 @@ def add_framework_info(client, framework_slug, record):
                 declaration=supplier_framework['declaration'] or {},
                 countersignedPath=supplier_framework['countersignedPath'] or "",
                 countersignedAt=supplier_framework['countersignedAt'] or "",
+                agreementId=supplier_framework['agreementId'] or ""
+                )
+
+
+def add_agreement_info(client, record):
+    framework_agreement_id = record['agreementId']
+    framework_agreement = client.get_framework_agreement(framework_agreement_id)
+    return dict(record,
+                signerName=framework_agreement['agreement']['signedAgreementDetails']['signerName'] or "",
+                signerRole=framework_agreement['agreement']['signedAgreementDetails']['signerRole'] or "",
+                signedAgreementReturnedAt=framework_agreement['agreement']['signedAgreementReturnedAt'] or ""
                 )
 
 

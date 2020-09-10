@@ -1,7 +1,6 @@
 import pytest
 from collections import Counter
 from mock import Mock, call
-
 from dmapiclient import HTTPError
 import dmscripts.helpers.framework_helpers as framework_helpers
 
@@ -48,6 +47,7 @@ def test_find_suppliers_with_details_and_draft_services(mock_data_client):
     mock_data_client.get_supplier_framework_info.side_effect = lambda *args: {
         (4, 'framework-slug'): {
             'frameworkInterest': {
+                'agreementId': None,
                 'declaration': {'status': 'complete'},
                 'onFramework': True,
                 'frameworkSlug': 'g-things-1',
@@ -57,6 +57,7 @@ def test_find_suppliers_with_details_and_draft_services(mock_data_client):
         },
         (3, 'framework-slug'): {
             'frameworkInterest': {
+                'agreementId': None,
                 'declaration': {'status': 'started'},
                 'onFramework': False,
                 'frameworkSlug': 'g-things-1',
@@ -66,6 +67,7 @@ def test_find_suppliers_with_details_and_draft_services(mock_data_client):
         },
         (2, 'framework-slug'): {
             'frameworkInterest': {
+                'agreementId': None,
                 'declaration': {'status': 'complete'},
                 'onFramework': True,
                 'frameworkSlug': 'g-things-1',
@@ -112,6 +114,7 @@ def test_find_suppliers_with_details_and_draft_services(mock_data_client):
                 'countersignedAt': '',
                 'onFramework': True,
                 'frameworkSlug': 'g-things-1',
+                'agreementId': ""
             },
             {
                 'supplier': 'supplier 3',
@@ -131,6 +134,7 @@ def test_find_suppliers_with_details_and_draft_services(mock_data_client):
                 'countersignedAt': '',
                 'onFramework': False,
                 'frameworkSlug': 'g-things-1',
+                'agreementId': ""
             },
             {
                 'supplier': 'supplier 2',
@@ -150,11 +154,22 @@ def test_find_suppliers_with_details_and_draft_services(mock_data_client):
                 'countersignedAt': '2017-01-02T03:04:05.000006Z',
                 'onFramework': True,
                 'frameworkSlug': 'g-things-1',
+                'agreementId': ""
             }
         ]
 
 
 def test_find_suppliers_with_details_and_draft_service_counts(mock_data_client):
+    mock_data_client.get_framework_agreement.return_value = {'agreement': {'frameworkSlug': 'g-cloud-12',
+                                                                           'id': 31385,
+                                                                           'signedAgreementDetails': {
+                                                                               'signerName': 'gideon',
+                                                                               'signerRole': 'developer',
+                                                                               'uploaderUserId': 10357},
+                                                                           'signedAgreementReturnedAt':
+                                                                               '2020-09-15T15:52:15.677327Z',
+                                                                           'status': 'signed',
+                                                                           'supplierId': 92237}}
     mock_data_client.get_interested_suppliers.return_value = {
         'interestedSuppliers': [4, 3, 2]
     }
@@ -168,6 +183,7 @@ def test_find_suppliers_with_details_and_draft_service_counts(mock_data_client):
                 'onFramework': True,
                 'countersignedPath': None,
                 'countersignedAt': None,
+                'agreementId': None
             }
         },
         (3, 'framework-slug'): {
@@ -177,6 +193,7 @@ def test_find_suppliers_with_details_and_draft_service_counts(mock_data_client):
                 'onFramework': False,
                 'countersignedPath': None,
                 'countersignedAt': None,
+                'agreementId': None
             }
         },
         (2, 'framework-slug'): {
@@ -186,6 +203,7 @@ def test_find_suppliers_with_details_and_draft_service_counts(mock_data_client):
                 'onFramework': True,
                 'countersignedPath': 'some/path',
                 'countersignedAt': '2017-01-02T03:04:05.000006Z',
+                'agreementId': None
             }
         },
     }[args]
@@ -219,7 +237,11 @@ def test_find_suppliers_with_details_and_draft_service_counts(mock_data_client):
             ),
             'countersignedAt': '',
             'onFramework': True,
+            'signedAgreementReturnedAt': '2020-09-15T15:52:15.677327Z',
+            'signerName': 'gideon',
+            'signerRole': 'developer',
             'frameworkSlug': 'g-things-1',
+            'agreementId': ''
         },
         {
             'supplier': {'id': 3, 'name': 'supplier 3'},
@@ -236,7 +258,11 @@ def test_find_suppliers_with_details_and_draft_service_counts(mock_data_client):
             ),
             'countersignedAt': '',
             'onFramework': False,
+            'signedAgreementReturnedAt': '2020-09-15T15:52:15.677327Z',
+            'signerName': 'gideon',
+            'signerRole': 'developer',
             'frameworkSlug': 'g-things-1',
+            'agreementId': ''
         },
         {
             'supplier': {'id': 2, 'name': 'supplier 2'},
@@ -253,7 +279,11 @@ def test_find_suppliers_with_details_and_draft_service_counts(mock_data_client):
             ),
             'countersignedAt': '2017-01-02T03:04:05.000006Z',
             'onFramework': True,
+            'signedAgreementReturnedAt': '2020-09-15T15:52:15.677327Z',
+            'signerName': 'gideon',
+            'signerRole': 'developer',
             'frameworkSlug': 'g-things-1',
+            'agreementId': ''
         }
     ]
 
@@ -303,6 +333,7 @@ def test_add_framework_info(mock_data_client, on_framework):
             'onFramework': on_framework,
             'countersignedPath': None,
             'countersignedAt': None,
+            'agreementId': None
         }
     }
 
@@ -319,6 +350,7 @@ def test_add_framework_info(mock_data_client, on_framework):
         },
         'countersignedPath': '',
         'countersignedAt': '',
+        'agreementId': ''
     }
 
 
