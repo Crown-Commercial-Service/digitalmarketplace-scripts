@@ -68,6 +68,7 @@ if __name__ == '__main__':
 
     prefix = "[Dry Run] " if DRY_RUN else ""
 
+    # TODO: fetch and format these dates from the API if possible
     # Add in any framework-specific dates etc here
     extra_template_context = {
         "intentionToAwardAt_dateformat": "12 September 2020",
