@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 """
 Email suppliers who have at least one successful lot entry on the given framework.
+This is also known as the 'Intention To Award' email, where we instruct successful suppliers to sign
+their framework agreement.
 
 Uses the Notify API to inform suppliers of success result. This script *should not* resend emails.
 
@@ -66,8 +68,17 @@ if __name__ == '__main__':
 
     prefix = "[Dry Run] " if DRY_RUN else ""
 
+    # TODO: fetch and format these dates from the API if possible
+    # Add in any framework-specific dates etc here
+    extra_template_context = {
+        "intentionToAwardAt_dateformat": "12 September 2020",
+        "frameworkLiveAt_dateformat": "28 September 2020",
+    }
+
     for user_email, personalisation in context_data.items():
         logger.info(f"{prefix}Sending email to supplier user '{hash_string(user_email)}'")
+
+        personalisation.update(extra_template_context)
 
         if DRY_RUN:
             continue
