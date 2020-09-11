@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 """
 Email suppliers who have at least one successful lot entry on the given framework.
+This is also known as the 'Intention To Award' email, where we instruct successful suppliers to sign
+their framework agreement.
 
 Uses the Notify API to inform suppliers of success result. This script *should not* resend emails.
 
