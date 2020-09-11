@@ -6,6 +6,8 @@ their framework agreement.
 
 Uses the Notify API to inform suppliers of success result. This script *should not* resend emails.
 
+If possible, provide the supplier IDs. This is much faster than scanning all suppliers for eligibility.
+
 Usage:
     scripts/framework-applications/notify-successful-suppliers-for-framework.py [options]
          [--supplier-id=<id> ... | --supplier-ids-from=<file>]
@@ -14,11 +16,13 @@ Usage:
 Example:
     scripts/framework-applications/notify-successful-suppliers-for-framework.py preview g-cloud-11 api-key template-id
 
-Options:
+Parameters:
     <stage>                     Environment to run script against.
     <framework>                 Slug of framework to run script against.
     <notify_api_key>            API key for GOV.UK Notify.
+    <notify_template_id>        The ID of the Notify template
 
+Options:
     --supplier-id=<id>          ID(s) of supplier(s) to email.
     --supplier-ids-from=<file>  Path to file containing supplier ID(s), one per line.
 
