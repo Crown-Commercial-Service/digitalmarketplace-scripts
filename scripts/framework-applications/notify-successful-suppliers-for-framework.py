@@ -68,8 +68,16 @@ if __name__ == '__main__':
 
     prefix = "[Dry Run] " if DRY_RUN else ""
 
+    # Add in any framework-specific dates etc here
+    extra_template_context = {
+        "intentionToAwardAt_dateformat": "12 September 2020",
+        "frameworkLiveAt_dateformat": "28 September 2020",
+    }
+
     for user_email, personalisation in context_data.items():
         logger.info(f"{prefix}Sending email to supplier user '{hash_string(user_email)}'")
+
+        personalisation.update(extra_template_context)
 
         if DRY_RUN:
             continue
