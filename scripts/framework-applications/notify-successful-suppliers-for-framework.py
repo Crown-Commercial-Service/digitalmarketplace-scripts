@@ -44,7 +44,7 @@ from dmscripts.helpers.supplier_data_helpers import (
 )
 from dmutils.env_helpers import get_api_endpoint_from_stage
 
-logger = logging_helpers.configure_logger({"dmapiclient": logging.INFO})
+logger = logging_helpers.configure_logger()
 
 
 if __name__ == '__main__':

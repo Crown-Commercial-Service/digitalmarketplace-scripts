@@ -24,7 +24,8 @@ def configure_logger(log_levels: Optional[Mapping] = None) -> Logger:
     :param log_levels: a dictionary of logger name and corresponding log
                        levels. Can be used to silence or add additional log
                        output from other packages. By default configures
-                       'script' and 'dmutils' loggers with INFO level.
+                       'script', 'dmapiclient' and 'dmutils' loggers with
+                       INFO level.
 
     :return: 'script' logger object
 
