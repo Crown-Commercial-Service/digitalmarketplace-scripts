@@ -41,7 +41,6 @@ from dmutils.email.helpers import hash_string
 from dmscripts.helpers.email_helpers import scripts_notify_client
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers import logging_helpers
-from dmscripts.helpers.logging_helpers import logging
 from dmscripts.helpers.supplier_data_helpers import (
     SuccessfulSupplierContextForNotify,
     get_supplier_ids_from_args,
@@ -79,8 +78,9 @@ if __name__ == '__main__':
         "frameworkLiveAt_dateformat": "28 September 2020",
     }
 
-    for user_email, personalisation in context_data.items():
-        logger.info(f"{prefix}Sending email to supplier user '{hash_string(user_email)}'")
+    user_count = len(context_data)
+    for user_number, (user_email, personalisation) in enumerate(context_data.items(), start=1):
+        logger.info(f"{prefix}Sending email to supplier user {user_number} of {user_count} '{hash_string(user_email)}'")
 
         personalisation.update(extra_template_context)
 
