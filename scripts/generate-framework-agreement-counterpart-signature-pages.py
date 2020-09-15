@@ -48,6 +48,7 @@ Options:
     --supplier-ids-from=<file>  Path to file containing supplier ID(s), one per line.
 
     -h, --help                  Show this screen
+    -v, --verbose               Log verbosely
 """
 
 import os
@@ -61,6 +62,7 @@ from docopt import docopt
 from dmscripts.export_framework_applicant_details import get_csv_rows
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.framework_helpers import find_suppliers_with_details_and_draft_service_counts
+from dmscripts.helpers.logging_helpers import configure_logger
 from dmscripts.helpers.supplier_data_helpers import get_supplier_ids_from_args
 from dmscripts.generate_framework_agreement_signature_pages import (
     render_html_for_suppliers_awaiting_countersignature, render_pdf_for_each_html_page
@@ -68,9 +70,21 @@ from dmscripts.generate_framework_agreement_signature_pages import (
 from dmapiclient import DataAPIClient
 from dmutils.env_helpers import get_api_endpoint_from_stage
 
-
 if __name__ == '__main__':
     args = docopt(__doc__)
+
+    if args["--verbose"]:
+        configure_logger({
+            "dmapiclient": "INFO",
+            "dmscripts.generate_framework_agreement_signature_pages": "DEBUG",
+            "framework_helpers": "DEBUG",
+        })
+    else:
+        configure_logger({
+            "dmapiclient": "WARN",
+            "dmscripts.generate_framework_agreement_signature_pages": "INFO",
+            "framework_helpers": "INFO",
+        })
 
     framework_slug = args['<framework_slug>']
     client = DataAPIClient(get_api_endpoint_from_stage(args['<stage>']), get_auth_token('api', args['<stage>']))
@@ -92,6 +106,7 @@ if __name__ == '__main__':
     html_pages.remove('framework-agreement-signature-page.css')
     html_pages.remove('framework-agreement-countersignature.png')
     ok = render_pdf_for_each_html_page(html_pages, html_dir, args['<output_folder>'])
-    shutil.rmtree(html_dir)
+    if ok:
+        shutil.rmtree(html_dir)
     if not ok:
         sys.exit(1)
