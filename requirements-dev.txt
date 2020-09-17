@@ -4,7 +4,6 @@
 #
 #    pip-compile requirements-dev.in
 #
-appnope==0.1.0            # via ipython
 attrs==19.3.0             # via -c requirements.txt, pytest
 backcall==0.1.0           # via ipython
 certifi==2019.11.28       # via -c requirements.txt, requests
