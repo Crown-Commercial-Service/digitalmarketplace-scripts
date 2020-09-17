@@ -6,6 +6,8 @@ their framework agreement.
 
 Uses the Notify API to inform suppliers of success result. This script *should not* resend emails.
 
+If possible, provide the supplier IDs. This is much faster than scanning all suppliers for eligibility.
+
 Usage:
     scripts/framework-applications/notify-successful-suppliers-for-framework.py [options]
          [--supplier-id=<id> ... | --supplier-ids-from=<file>]
@@ -14,11 +16,13 @@ Usage:
 Example:
     scripts/framework-applications/notify-successful-suppliers-for-framework.py preview g-cloud-11 api-key template-id
 
-Options:
+Parameters:
     <stage>                     Environment to run script against.
     <framework>                 Slug of framework to run script against.
     <notify_api_key>            API key for GOV.UK Notify.
+    <notify_template_id>        The ID of the Notify template
 
+Options:
     --supplier-id=<id>          ID(s) of supplier(s) to email.
     --supplier-ids-from=<file>  Path to file containing supplier ID(s), one per line.
 
@@ -37,14 +41,13 @@ from dmutils.email.helpers import hash_string
 from dmscripts.helpers.email_helpers import scripts_notify_client
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers import logging_helpers
-from dmscripts.helpers.logging_helpers import logging
 from dmscripts.helpers.supplier_data_helpers import (
     SuccessfulSupplierContextForNotify,
     get_supplier_ids_from_args,
 )
 from dmutils.env_helpers import get_api_endpoint_from_stage
 
-logger = logging_helpers.configure_logger({"dmapiclient": logging.INFO})
+logger = logging_helpers.configure_logger()
 
 
 if __name__ == '__main__':
@@ -75,8 +78,9 @@ if __name__ == '__main__':
         "frameworkLiveAt_dateformat": "28 September 2020",
     }
 
-    for user_email, personalisation in context_data.items():
-        logger.info(f"{prefix}Sending email to supplier user '{hash_string(user_email)}'")
+    user_count = len(context_data)
+    for user_number, (user_email, personalisation) in enumerate(context_data.items(), start=1):
+        logger.info(f"{prefix}Sending email to supplier user {user_number} of {user_count} '{hash_string(user_email)}'")
 
         personalisation.update(extra_template_context)
 

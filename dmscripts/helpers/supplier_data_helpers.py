@@ -20,7 +20,7 @@ class SupplierFrameworkData(object):
 
     data = None
 
-    def __init__(self, client, target_framework_slug, *, supplier_ids=None):
+    def __init__(self, client, target_framework_slug, *, supplier_ids=None, logger=None):
         """
         :param client: Client object for the Digital Marketplace API
         :param target_framework_slug str: Framework slug
@@ -29,6 +29,7 @@ class SupplierFrameworkData(object):
         self.client = client
         self.target_framework_slug = target_framework_slug
         self.supplier_ids = supplier_ids
+        self.logger = logger
 
     def get_supplier_frameworks(self):
         """Return supplier frameworks."""
@@ -56,8 +57,11 @@ class SupplierFrameworkData(object):
     def populate_data(self):
         """Populate a dict with supplier data from the api."""
         self.data = self.get_supplier_frameworks()
+        supplier_count = len(self.data)
         users = self.get_supplier_users()
-        for supplier_framework in self.data:
+        for supplier_number, supplier_framework in enumerate(self.data, start=1):
+            if self.logger:
+                self.logger.info(f"Populating data for supplier {supplier_number} of {supplier_count}")
             supplier_id = supplier_framework['supplierId']
             supplier_framework['users'] = users.get(supplier_id, [])
             supplier_framework['draft_services'] = list(self.get_supplier_draft_service_data(supplier_id))
@@ -77,21 +81,24 @@ class SuccessfulSupplierContextForNotify(SupplierFrameworkData):
         """
         self.date_today = date.today().strftime(DISPLAY_DATE_FORMAT)
         super(SuccessfulSupplierContextForNotify, self).__init__(
-            client, target_framework_slug, supplier_ids=supplier_ids)
+            client, target_framework_slug, supplier_ids=supplier_ids, logger=logger)
 
         self.framework = client.get_framework(self.target_framework_slug)['frameworks']
         self.framework_lots = [i['name'] for i in self.framework['lots']]
-        self.logger = logger
 
     def get_users_personalisations(self):
         """Return {email_address: {personalisations}} for users eligible for the
         'Your application result - if successful' email
         """
+        suppliers_on_framework = list(filter(lambda i: i['onFramework'], self.data))
+        supplier_count = len(suppliers_on_framework)
+
         output = {}
-        for supplier_framework in filter(lambda i: i['onFramework'], self.data):
+        for supplier_number, supplier_framework in enumerate(suppliers_on_framework, start=1):
             if self.logger:
                 self.logger.info(
-                    'Building user personalisations for supplier {}'.format(supplier_framework['supplierId'])
+                    f"Building user personalisations for supplier {supplier_number} of {supplier_count}: "
+                    f"{supplier_framework['supplierId']}"
                 )
             for user in supplier_framework['users']:
                 output.update(self.get_user_personalisation(user, supplier_framework))
