@@ -10,6 +10,7 @@ Optional:
   --api-token         Override for the API key (don't decrypt from dm-credentials)
   --search-api-url    Override the implicit SearchAPI URL
   --search-api-token  Override for the SearchAPI key (don't decrypt from dm-credentials)
+  --read-only         Only allow access to API calls that read data
 
 Example:
   ./scripts/api-clients-shell.py
@@ -29,6 +30,26 @@ from dmscripts.helpers.auth_helpers import get_auth_token
 from dmutils.env_helpers import get_api_endpoint_from_stage
 
 
+def _is_read_only(item):
+    return item.startswith("get") or item.startswith("find")
+
+
+class ReadOnlyDataAPIClient:
+    def __init__(self, data_client):
+        self._data = data_client
+
+    def __getattr__(self, item: str):
+        attr = getattr(self._data, item)
+
+        if _is_read_only(item):
+            return attr
+        else:
+            raise AttributeError(f"'{item}' is not a read-only attribute of '{self.__class__.__name__}'")
+
+    def __dir__(self):
+        return filter(_is_read_only, dir(self._data))
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('stage', default='development', help='The stage your clients should target',
@@ -40,6 +61,8 @@ if __name__ == '__main__':
     parser.add_argument('--search-api-url', help='Override the implicit SearchAPI URL', type=str)
     parser.add_argument('--search-api-token',
                         help='Override for the SearchAPI key (don\'t decrypt from dm-credentials)', type=str)
+    parser.add_argument('--read-only',
+                        help='Only allow access to API calls that read data', action='store_true')
 
     args = parser.parse_args()
 
@@ -58,6 +81,9 @@ if __name__ == '__main__':
         args.search_api_url or get_api_endpoint_from_stage(stage, app='search-api'),
         search_api_token
     )
+
+    if args.read_only:
+        data = ReadOnlyDataAPIClient(data)
 
     print('Dropping into shell...')
     IPython.start_ipython(argv=[], user_ns={"data": data, "search": search})
