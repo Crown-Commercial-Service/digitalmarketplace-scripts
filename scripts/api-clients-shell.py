@@ -10,7 +10,7 @@ Optional:
   --api-token         Override for the API key (don't decrypt from dm-credentials)
   --search-api-url    Override the implicit SearchAPI URL
   --search-api-token  Override for the SearchAPI key (don't decrypt from dm-credentials)
-  --read-only         Only allow access to API calls that read data
+  -r --read-only      Only allow access to API calls that read data
 
 Example:
   ./scripts/api-clients-shell.py
@@ -61,7 +61,7 @@ if __name__ == '__main__':
     parser.add_argument('--search-api-url', help='Override the implicit SearchAPI URL', type=str)
     parser.add_argument('--search-api-token',
                         help='Override for the SearchAPI key (don\'t decrypt from dm-credentials)', type=str)
-    parser.add_argument('--read-only',
+    parser.add_argument('--read-only', '-r',
                         help='Only allow access to API calls that read data', action='store_true')
 
     args = parser.parse_args()
