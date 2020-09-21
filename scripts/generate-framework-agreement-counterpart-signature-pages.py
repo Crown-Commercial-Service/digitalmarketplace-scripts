@@ -70,6 +70,7 @@ from dmscripts.generate_framework_agreement_signature_pages import (
 from dmapiclient import DataAPIClient
 from dmutils.env_helpers import get_api_endpoint_from_stage
 
+# CCS Sourcing Admin user using developer team email
 AUTOMATED_COUNTERSIGNING_USER_ID = 64041
 
 if __name__ == '__main__':
