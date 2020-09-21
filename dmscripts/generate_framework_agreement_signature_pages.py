@@ -146,10 +146,13 @@ def render_pdf_for_each_html_page(html_pages, html_dir, pdf_dir):
         for index, html_path in enumerate(html_pages):
             pdf_path = html_dir / (html_path.stem + ".pdf")
             # Insert page number for dynamically generated pages
-            footer_page_number = str(index + 1) if index <= 3 else ""
+            page_numbers = {0: "1",
+                            2: "3",
+                            3: "4"}
+
             exit_code = subprocess.call(['wkhtmltopdf',
                                          '--footer-right',
-                                         footer_page_number,
+                                         page_numbers.get(index, ""),
                                          'file://{}'.format(html_path),
                                          pdf_path])
             if exit_code > 0:
