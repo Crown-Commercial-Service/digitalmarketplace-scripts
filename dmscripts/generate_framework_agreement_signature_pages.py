@@ -128,7 +128,7 @@ def render_html_for_suppliers_awaiting_countersignature(rows, framework, templat
             output_pages.append(Path(page_path).resolve())
 
         for static_file in static_files:
-            shutil.copyfile(static_file, Path(html_dir, static_file.name))
+            Path(html_dir, static_file.name).symlink_to(static_file.resolve())
 
         yield html_dir, output_pages
 
