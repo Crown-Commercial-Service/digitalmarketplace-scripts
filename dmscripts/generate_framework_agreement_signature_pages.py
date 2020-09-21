@@ -147,8 +147,8 @@ def render_pdf_for_each_html_page(html_pages, html_dir, pdf_dir):
             pdf_path = html_dir / (html_path.stem + ".pdf")
             # Insert page number for dynamically generated pages
             page_numbers = {0: "1",
-                            2: "3",
-                            3: "4"}
+                            1: "3",
+                            2: "4"}
 
             exit_code = subprocess.call(['wkhtmltopdf',
                                          '--footer-right',
