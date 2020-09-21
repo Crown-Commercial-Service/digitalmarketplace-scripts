@@ -85,14 +85,14 @@ def render_html_for_suppliers_awaiting_countersignature(rows, framework, templat
     html_pages = [Path(template_dir, 'framework-agreement-signature-page.html').resolve()]
     static_files = [Path(template_dir, 'framework-agreement-signature-page.css').resolve()]
 
-    if not framework_supports_e_signature(framework['slug']):
-        static_files.append(Path(template_dir, 'framework-agreement-countersignature.png'))
-
     if framework_supports_e_signature(framework['slug']):
         html_pages.append(Path(template_dir, 'framework-agreement-cover-page.html'))
         static_files.append(Path(template_dir, 'ccs_logo.png'))
         static_files.append(Path(template_dir, 'framework-agreement-toc.pdf'))
         static_files.append(Path(template_dir, 'framework-agreement-boilerplate.pdf'))
+    else:
+        # Only non e-signature document includes countersignature graphic
+        static_files.append(Path(template_dir, 'framework-agreement-countersignature.png'))
 
     for data in rows:
         if data['pass_fail'] == 'fail' or data['countersigned_path'] or not data['countersigned_at']:
