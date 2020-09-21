@@ -133,7 +133,7 @@ def render_html_for_suppliers_awaiting_countersignature(rows, framework, templat
         yield html_dir, output_pages
 
 
-def render_pdf_for_each_html_page(html_pages, html_dir, pdf_dir, framework_slug):
+def render_pdf_for_each_html_page(html_pages, html_dir, pdf_dir):
     html_dir = Path(html_dir).resolve()
     pdf_dir = Path(pdf_dir).resolve()
 
@@ -143,9 +143,15 @@ def render_pdf_for_each_html_page(html_pages, html_dir, pdf_dir, framework_slug)
         os.mkdir(pdf_dir)
 
     if len(html_pages) > 1:
-        for html_path in html_pages:
+        for index, html_path in enumerate(html_pages):
             pdf_path = html_dir / (html_path.stem + ".pdf")
-            exit_code = subprocess.call(['wkhtmltopdf', 'file://{}'.format(html_path), pdf_path])
+            # Insert page number for dynamically generated pages
+            footer_page_number = str(index + 1) if index <= 3 else ""
+            exit_code = subprocess.call(['wkhtmltopdf',
+                                         '--footer-right',
+                                         footer_page_number,
+                                         'file://{}'.format(html_path),
+                                         pdf_path])
             if exit_code > 0:
                 logger.error("ERROR {} on {}".format(exit_code, html_path))
                 ok = False
