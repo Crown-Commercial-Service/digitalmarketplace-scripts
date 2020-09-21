@@ -125,7 +125,11 @@ def get_price_data(answers):
 
 
 def lookup_question_id_and_text(row, questions):
-    question_text = row['Question']
+    try:
+        question_text = row['Question']
+    except KeyError:
+        print(f'Could not find row titles.')
+        return None, None
 
     # Handle curly apostrophes removed from CSV
     if "'" in question_text:
@@ -251,7 +255,7 @@ def split_lot_and_service(lot_and_service_name):
     for lot in LOT_ANSWER_COUNTS.keys():
         if lot in lot_and_service_name:
             lot_slug = lot
-            service_name = lot_and_service_name.split(lot_slug)[1]
+            service_name = lot_and_service_name.split(lot_slug)[1][1:]
             break
 
     if not lot_slug:
@@ -303,23 +307,33 @@ def update_draft_services_from_folder(folder_name, api_client, framework_slug, c
 
     for filepath in get_all_files_of_type(folder_name, 'csv'):
         file_name = os.path.basename(filepath)
+        print(file_name)
         # Get supplier ID from filename
-        supplier_id, lot_and_service_name = file_name.split('-', maxsplit=1)
+        # supplier_id, lot_and_service_name = file_name.split('-', maxsplit=1)
+        supplier_id = os.path.basename(filepath.split('/')[-2][:-9])
+        lot_and_service_name = file_name
         print(f"Supplier ID {supplier_id}")
 
+        print(lot_and_service_name)
         lot_slug, service_name = split_lot_and_service(lot_and_service_name)
         if not (lot_slug and service_name):
             unidentifiable_files.append(file_name)
             continue
 
+        print(lot_slug)
+        print(service_name)
         # Get the id
         if create_draft:
             initial_data = {"serviceName": service_name}
-            draft = api_client.create_new_draft_service(
-                framework_slug, lot_slug, supplier_id, initial_data,
-                f"{framework_slug} create draft service script"
-            )
-            id_ = draft['services']['id']
+            try:
+                draft = api_client.create_new_draft_service(
+                    framework_slug, lot_slug, supplier_id, initial_data,
+                    f"{framework_slug} create draft service script"
+                )
+                id_ = draft['services']['id']
+            except HTTPError as e:
+                print(f'WARNING: {e}')
+                malformed_csvs.append((supplier_id, e))
         else:
             id_ = find_draft_id_by_service_name(api_client, supplier_id, service_name, framework_slug)
             if id_ is None or id_ == 'multi':
@@ -338,6 +352,10 @@ def update_draft_services_from_folder(folder_name, api_client, framework_slug, c
             try:
                 draft_json = create_draft_json_from_csv(filepath, lot_slug, question_objects_, encoding="cp1252")
             except UnicodeDecodeError as e:
+                print("WARNING:", e)
+                malformed_csvs.append((supplier_id, file_name))
+                continue
+        except KeyError as e:
                 print("WARNING:", e)
                 malformed_csvs.append((supplier_id, file_name))
                 continue
@@ -408,7 +426,7 @@ if __name__ == "__main__":
     # Check framework status
     framework = data_api_client.get_framework(framework_slug)
     framework_status = framework['frameworks']['status']
-    if framework_status not in ['open']:
+    if framework_status not in ['open', 'standstill']:
         print(f"Cannot update services for framework {framework_slug} in status '{framework_status}'")
         exit(1)
 
