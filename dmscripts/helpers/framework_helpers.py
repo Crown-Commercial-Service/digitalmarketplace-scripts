@@ -68,11 +68,30 @@ def find_suppliers_with_details_and_draft_service_counts(
     length = len(records)
     records = map_impl(partial(add_supplier_info, client), records)
     records = map_impl(partial(add_framework_info, client, framework_slug), records)
-    records = map_impl(partial(add_agreement_info, client), records)
     records = map_impl(partial(add_draft_counts, client, framework_slug), records)
     records = map_watch(
         records,
         f"fetched details and draft counts for supplier {{count}}/{length}"
+    )
+    return records
+
+
+def find_suppliers_with_signed_framework_agreements(
+    client,
+    framework_slug,
+    supplier_ids=None,
+    map_impl=map,
+):
+    records = find_suppliers(client, framework_slug, supplier_ids)
+    length = len(records)
+    records = map_impl(partial(add_supplier_info, client), records)
+    records = map_impl(partial(add_framework_info, client, framework_slug), records)
+    records = filter(lambda record: bool(record['agreementId']), records)
+    records = map_impl(partial(add_draft_counts, client, framework_slug), records)
+    records = map_impl(partial(add_agreement_info, client), records)
+    records = map_watch(
+        records,
+        f"fetched signed framework agreement for supplier {{count}}/{length}"
     )
     return records
 
@@ -106,11 +125,12 @@ def add_framework_info(client, framework_slug, record):
 
 def add_agreement_info(client, record):
     framework_agreement_id = record['agreementId']
-    framework_agreement = client.get_framework_agreement(framework_agreement_id)
+    framework_agreement = client.get_framework_agreement(framework_agreement_id)["agreement"]
     return dict(record,
-                signerName=framework_agreement['agreement']['signedAgreementDetails']['signerName'] or "",
-                signerRole=framework_agreement['agreement']['signedAgreementDetails']['signerRole'] or "",
-                signedAgreementReturnedAt=framework_agreement['agreement']['signedAgreementReturnedAt'] or ""
+                agreementStatus=framework_agreement["status"] or "",
+                signerName=framework_agreement['signedAgreementDetails']['signerName'] or "",
+                signerRole=framework_agreement['signedAgreementDetails']['signerRole'] or "",
+                signedAgreementReturnedAt=framework_agreement['signedAgreementReturnedAt'] or ""
                 )
 
 

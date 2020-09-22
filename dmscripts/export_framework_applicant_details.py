@@ -130,9 +130,9 @@ def _create_row(
         "pass_fail": _pass_fail_from_record(record),
         "countersigned_at": record["countersignedAt"],
         "countersigned_path": record["countersignedPath"],
-        "signer_name": record["signerName"],
-        "signer_role": record["signerRole"],
-        "signed_agreement_returned_at": record['signedAgreementReturnedAt']
+        "signer_name": record.get("signerName", ""),
+        "signer_role": record.get("signerRole", ""),
+        "signed_agreement_returned_at": record.get("signedAgreementReturnedAt", ""),
     }
     row.update(
         (lot, sum(record["counts"][(lot, status)] for status in count_statuses))

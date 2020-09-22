@@ -237,9 +237,6 @@ def test_find_suppliers_with_details_and_draft_service_counts(mock_data_client):
             ),
             'countersignedAt': '',
             'onFramework': True,
-            'signedAgreementReturnedAt': '2020-09-15T15:52:15.677327Z',
-            'signerName': 'gideon',
-            'signerRole': 'developer',
             'frameworkSlug': 'g-things-1',
             'agreementId': 31385
         },
@@ -258,9 +255,6 @@ def test_find_suppliers_with_details_and_draft_service_counts(mock_data_client):
             ),
             'countersignedAt': '',
             'onFramework': False,
-            'signedAgreementReturnedAt': '2020-09-15T15:52:15.677327Z',
-            'signerName': 'gideon',
-            'signerRole': 'developer',
             'frameworkSlug': 'g-things-1',
             'agreementId': 31385
         },
@@ -279,9 +273,6 @@ def test_find_suppliers_with_details_and_draft_service_counts(mock_data_client):
             ),
             'countersignedAt': '2017-01-02T03:04:05.000006Z',
             'onFramework': True,
-            'signedAgreementReturnedAt': '2020-09-15T15:52:15.677327Z',
-            'signerName': 'gideon',
-            'signerRole': 'developer',
             'frameworkSlug': 'g-things-1',
             'agreementId': 31385
         }
