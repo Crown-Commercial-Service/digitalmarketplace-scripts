@@ -85,7 +85,7 @@ def render_html_for_suppliers_awaiting_countersignature(rows, framework, templat
     html_pages = []
     static_files = []
 
-    if framework_supports_e_signature(framework['slug']):
+    if framework_supports_e_signature(framework):
         html_pages.append(Path(template_dir, 'framework-agreement-cover-page.html'))
         html_pages.append(Path(template_dir, 'framework-agreement-appointment-page-1.html'))
         html_pages.append(Path(template_dir, 'framework-agreement-appointment-page-2.html'))
@@ -151,6 +151,7 @@ def render_pdf_for_each_html_page(html_pages, html_dir, pdf_dir):
                             2: "4"}
 
             exit_code = subprocess.call(['wkhtmltopdf',
+                                         '--enable-local-file-access',
                                          '--footer-right',
                                          page_numbers.get(index, ""),
                                          '--margin-bottom',
