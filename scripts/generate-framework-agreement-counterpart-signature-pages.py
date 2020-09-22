@@ -60,8 +60,10 @@ sys.path.insert(0, '.')
 from docopt import docopt
 from dmscripts.export_framework_applicant_details import get_csv_rows
 from dmscripts.helpers.auth_helpers import get_auth_token
-from dmscripts.helpers.framework_helpers import find_suppliers_with_details_and_draft_service_counts, \
+from dmscripts.helpers.framework_helpers import (
+    find_suppliers_with_signed_framework_agreements,
     framework_supports_e_signature
+)
 from dmscripts.helpers.logging_helpers import configure_logger
 from dmscripts.helpers.supplier_data_helpers import get_supplier_ids_from_args
 from dmscripts.generate_framework_agreement_signature_pages import (
@@ -97,15 +99,18 @@ if __name__ == '__main__':
     supplier_ids = get_supplier_ids_from_args(args)
     html_dir = tempfile.mkdtemp()
 
-    records = find_suppliers_with_details_and_draft_service_counts(client, framework_slug, supplier_ids)
+    records = find_suppliers_with_signed_framework_agreements(client, framework_slug, supplier_ids)
     records = list(records)
-    for record in records:
-        if (framework_supports_e_signature(framework) and
-                client.get_framework_agreement(record['agreementId'])['agreement']['status'] == 'signed'):
-            # E-signatures are automatically approved.
-            client.approve_agreement_for_countersignature(record['agreementId'],
-                                                          "automated countersignature script",
-                                                          AUTOMATED_COUNTERSIGNING_USER_ID)
+    if framework_supports_e_signature(framework):
+        for record in records:
+            if not record["countersignedAt"]:
+                # E-signatures are automatically approved.
+                countersigned_agreement = client.approve_agreement_for_countersignature(
+                    record['agreementId'],
+                    "automated countersignature script",
+                    AUTOMATED_COUNTERSIGNING_USER_ID
+                )["agreement"]
+                record["countersignedAt"] = countersigned_agreement["countersignedAgreementReturnedAt"]
 
     headers, rows = get_csv_rows(
         records, framework_slug, framework_lot_slugs, count_statuses=("submitted",),
