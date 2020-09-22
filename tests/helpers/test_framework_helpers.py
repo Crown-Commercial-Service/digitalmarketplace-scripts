@@ -47,7 +47,7 @@ def test_find_suppliers_with_details_and_draft_services(mock_data_client):
     mock_data_client.get_supplier_framework_info.side_effect = lambda *args: {
         (4, 'framework-slug'): {
             'frameworkInterest': {
-                'agreementId': None,
+                'agreementId': 31385,
                 'declaration': {'status': 'complete'},
                 'onFramework': True,
                 'frameworkSlug': 'g-things-1',
@@ -57,7 +57,7 @@ def test_find_suppliers_with_details_and_draft_services(mock_data_client):
         },
         (3, 'framework-slug'): {
             'frameworkInterest': {
-                'agreementId': None,
+                'agreementId': 31385,
                 'declaration': {'status': 'started'},
                 'onFramework': False,
                 'frameworkSlug': 'g-things-1',
@@ -67,7 +67,7 @@ def test_find_suppliers_with_details_and_draft_services(mock_data_client):
         },
         (2, 'framework-slug'): {
             'frameworkInterest': {
-                'agreementId': None,
+                'agreementId': 31385,
                 'declaration': {'status': 'complete'},
                 'onFramework': True,
                 'frameworkSlug': 'g-things-1',
@@ -114,7 +114,7 @@ def test_find_suppliers_with_details_and_draft_services(mock_data_client):
                 'countersignedAt': '',
                 'onFramework': True,
                 'frameworkSlug': 'g-things-1',
-                'agreementId': ""
+                'agreementId': 31385
             },
             {
                 'supplier': 'supplier 3',
@@ -134,7 +134,7 @@ def test_find_suppliers_with_details_and_draft_services(mock_data_client):
                 'countersignedAt': '',
                 'onFramework': False,
                 'frameworkSlug': 'g-things-1',
-                'agreementId': ""
+                'agreementId': 31385
             },
             {
                 'supplier': 'supplier 2',
@@ -154,7 +154,7 @@ def test_find_suppliers_with_details_and_draft_services(mock_data_client):
                 'countersignedAt': '2017-01-02T03:04:05.000006Z',
                 'onFramework': True,
                 'frameworkSlug': 'g-things-1',
-                'agreementId': ""
+                'agreementId': 31385
             }
         ]
 
