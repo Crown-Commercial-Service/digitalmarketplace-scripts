@@ -100,9 +100,8 @@ if __name__ == '__main__':
     records = find_suppliers_with_details_and_draft_service_counts(client, framework_slug, supplier_ids)
     records = list(records)
     for record in records:
-        if framework_supports_e_signature(framework) and \
-                (client.get_framework_agreement(record['agreementId'])
-                 ['agreement']['status'] == 'signed'):
+        if (framework_supports_e_signature(framework) and
+                client.get_framework_agreement(record['agreementId'])['agreement']['status'] == 'signed'):
             # E-signatures are automatically approved.
             client.approve_agreement_for_countersignature(record['agreementId'],
                                                           "automated countersignature script",
