@@ -52,6 +52,7 @@ prometheus-client==0.2.0  # via gds-metrics
 pyasn1==0.4.8             # via rsa
 pycparser==2.19           # via cffi
 pyjwt==1.7.1              # via notifications-python-client
+pypdf2==1.26.0            # via -r requirements.in
 pyrsistent==0.15.7        # via jsonschema
 python-dateutil==2.8.1    # via -r requirements.in, botocore
 git+https://github.com/madzak/python-json-logger.git@v0.1.8#egg=python-json-logger==0.1.8  # via -r requirements.in, digitalmarketplace-utils

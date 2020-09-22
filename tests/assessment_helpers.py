@@ -1,4 +1,4 @@
-from mock import Mock
+from mock import Mock, MagicMock
 
 
 class BaseAssessmentTest(object):
@@ -73,6 +73,7 @@ class BaseAssessmentTest(object):
                 v,
                 supplierId=k,
                 frameworkSlug=self.framework_slug,
+                agreementId="",
                 countersignedPath="",
                 countersignedAt="",
                 declaration=dict(
@@ -312,6 +313,7 @@ class BaseAssessmentTest(object):
         self.mock_suppliers = self._get_suppliers()
 
         self.mock_data_client = Mock()
+        self.mock_data_client.get_framework_agreement.return_value = MagicMock()
         self.mock_data_client.get_supplier_framework_info.side_effect = self._mock_get_supplier_framework_info_impl
         self.mock_data_client.get_interested_suppliers.side_effect = self._mock_get_interested_suppliers_impl
         self.mock_data_client.find_draft_services_by_framework_iter.side_effect = \

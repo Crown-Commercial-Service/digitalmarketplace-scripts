@@ -50,7 +50,6 @@ Options:
     -h, --help                  Show this screen
     -v, --verbose               Log verbosely
 """
-
 import os
 import shutil
 import sys
@@ -61,7 +60,8 @@ sys.path.insert(0, '.')
 from docopt import docopt
 from dmscripts.export_framework_applicant_details import get_csv_rows
 from dmscripts.helpers.auth_helpers import get_auth_token
-from dmscripts.helpers.framework_helpers import find_suppliers_with_details_and_draft_service_counts
+from dmscripts.helpers.framework_helpers import find_suppliers_with_details_and_draft_service_counts, \
+    framework_supports_e_signature
 from dmscripts.helpers.logging_helpers import configure_logger
 from dmscripts.helpers.supplier_data_helpers import get_supplier_ids_from_args
 from dmscripts.generate_framework_agreement_signature_pages import (
@@ -69,6 +69,9 @@ from dmscripts.generate_framework_agreement_signature_pages import (
 )
 from dmapiclient import DataAPIClient
 from dmutils.env_helpers import get_api_endpoint_from_stage
+
+# CCS Sourcing Admin user using developer team email
+AUTOMATED_COUNTERSIGNING_USER_ID = 64041
 
 if __name__ == '__main__':
     args = docopt(__doc__)
@@ -95,17 +98,28 @@ if __name__ == '__main__':
     html_dir = tempfile.mkdtemp()
 
     records = find_suppliers_with_details_and_draft_service_counts(client, framework_slug, supplier_ids)
+    records = list(records)
+    for record in records:
+        if (framework_supports_e_signature(framework) and
+                client.get_framework_agreement(record['agreementId'])['agreement']['status'] == 'signed'):
+            # E-signatures are automatically approved.
+            client.approve_agreement_for_countersignature(record['agreementId'],
+                                                          "automated countersignature script",
+                                                          AUTOMATED_COUNTERSIGNING_USER_ID)
+
     headers, rows = get_csv_rows(
         records, framework_slug, framework_lot_slugs, count_statuses=("submitted",),
         include_central_supplier_details=True
     )
-    render_html_for_suppliers_awaiting_countersignature(
+
+    html_to_render = render_html_for_suppliers_awaiting_countersignature(
         rows, framework, os.path.join(args['<path_to_agreements_repo>'], 'documents', framework['slug']), html_dir
     )
-    html_pages = os.listdir(html_dir)
-    html_pages.remove('framework-agreement-signature-page.css')
-    html_pages.remove('framework-agreement-countersignature.png')
-    ok = render_pdf_for_each_html_page(html_pages, html_dir, args['<output_folder>'])
+
+    ok = True
+    for html_dir, html_pages in html_to_render:
+        ok &= render_pdf_for_each_html_page(html_pages, html_dir, args['<output_folder>'])
+
     if ok:
         shutil.rmtree(html_dir)
     if not ok:

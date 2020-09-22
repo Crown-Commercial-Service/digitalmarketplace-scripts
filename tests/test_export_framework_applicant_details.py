@@ -6,6 +6,9 @@ from dmscripts.export_framework_applicant_details import export_supplier_details
 
 def test_get_csv_rows_returns_headers_and_rows():
     example_record = {
+        "signerName": "",
+        "signerRole": "",
+        "signedAgreementReturnedAt": "",
         "declaration": {"status": "complete"},
         "supplier": {
             "id": 12345,
@@ -59,6 +62,9 @@ def test_get_csv_rows_returns_headers_and_rows():
         'pass_fail': 'pass',
         'primaryContact': '',
         'primaryContactEmail': '',
+        'signed_agreement_returned_at': '',
+        'signer_name': '',
+        'signer_role': '',
         'subcontracting': '',
         'supplierCompanyRegistrationNumber': '',
         'supplierDunsNumber': '',
