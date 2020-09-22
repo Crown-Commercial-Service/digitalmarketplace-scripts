@@ -183,7 +183,7 @@ def test_find_suppliers_with_details_and_draft_service_counts(mock_data_client):
                 'onFramework': True,
                 'countersignedPath': None,
                 'countersignedAt': None,
-                'agreementId': None
+                'agreementId': 31385
             }
         },
         (3, 'framework-slug'): {
@@ -193,7 +193,7 @@ def test_find_suppliers_with_details_and_draft_service_counts(mock_data_client):
                 'onFramework': False,
                 'countersignedPath': None,
                 'countersignedAt': None,
-                'agreementId': None
+                'agreementId': 31385
             }
         },
         (2, 'framework-slug'): {
@@ -203,7 +203,7 @@ def test_find_suppliers_with_details_and_draft_service_counts(mock_data_client):
                 'onFramework': True,
                 'countersignedPath': 'some/path',
                 'countersignedAt': '2017-01-02T03:04:05.000006Z',
-                'agreementId': None
+                'agreementId': 31385
             }
         },
     }[args]
@@ -241,7 +241,7 @@ def test_find_suppliers_with_details_and_draft_service_counts(mock_data_client):
             'signerName': 'gideon',
             'signerRole': 'developer',
             'frameworkSlug': 'g-things-1',
-            'agreementId': ''
+            'agreementId': 31385
         },
         {
             'supplier': {'id': 3, 'name': 'supplier 3'},
@@ -262,7 +262,7 @@ def test_find_suppliers_with_details_and_draft_service_counts(mock_data_client):
             'signerName': 'gideon',
             'signerRole': 'developer',
             'frameworkSlug': 'g-things-1',
-            'agreementId': ''
+            'agreementId': 31385
         },
         {
             'supplier': {'id': 2, 'name': 'supplier 2'},
@@ -283,7 +283,7 @@ def test_find_suppliers_with_details_and_draft_service_counts(mock_data_client):
             'signerName': 'gideon',
             'signerRole': 'developer',
             'frameworkSlug': 'g-things-1',
-            'agreementId': ''
+            'agreementId': 31385
         }
     ]
 
@@ -333,7 +333,7 @@ def test_add_framework_info(mock_data_client, on_framework):
             'onFramework': on_framework,
             'countersignedPath': None,
             'countersignedAt': None,
-            'agreementId': None
+            'agreementId': 31385
         }
     }
 
@@ -350,7 +350,7 @@ def test_add_framework_info(mock_data_client, on_framework):
         },
         'countersignedPath': '',
         'countersignedAt': '',
-        'agreementId': ''
+        'agreementId': 31385
     }
 
 
