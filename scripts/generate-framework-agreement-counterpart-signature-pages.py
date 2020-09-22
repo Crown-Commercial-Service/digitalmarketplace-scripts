@@ -47,9 +47,13 @@ Options:
     --supplier-id=<id>          ID(s) of supplier(s) to email.
     --supplier-ids-from=<file>  Path to file containing supplier ID(s), one per line.
 
+    --dry-run                   Dry run (don't countersign agreements)
+
     -h, --help                  Show this screen
     -v, --verbose               Log verbosely
 """
+import datetime
+import logging
 import os
 import shutil
 import sys
@@ -104,13 +108,21 @@ if __name__ == '__main__':
     if framework_supports_e_signature(framework):
         for record in records:
             if not record["countersignedAt"]:
-                # E-signatures are automatically approved.
-                countersigned_agreement = client.approve_agreement_for_countersignature(
-                    record['agreementId'],
-                    "automated countersignature script",
-                    AUTOMATED_COUNTERSIGNING_USER_ID
-                )["agreement"]
-                record["countersignedAt"] = countersigned_agreement["countersignedAgreementReturnedAt"]
+                agreement_id = record["agreementId"]
+                supplier_id = record["supplierId"]
+
+                if args["--dry-run"] is True:
+                    logging.info(f"DRY-RUN would countersign agreement {agreement_id} for supplier {supplier_id}")
+                    record["countersignedAt"] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+                else:
+                    logging.debug(f"countersigning agreement {agreement_id} for supplier {supplier_id}")
+                    # E-signatures are automatically approved.
+                    countersigned_agreement = client.approve_agreement_for_countersignature(
+                        agreement_id,
+                        "automated countersignature script",
+                        AUTOMATED_COUNTERSIGNING_USER_ID
+                    )["agreement"]
+                    record["countersignedAt"] = countersigned_agreement["countersignedAgreementReturnedAt"]
 
     headers, rows = get_csv_rows(
         records, framework_slug, framework_lot_slugs, count_statuses=("submitted",),
