@@ -32,6 +32,8 @@ from dmcontent.content_loader import ContentLoader
 from dmutils.env_helpers import get_api_endpoint_from_stage
 from docopt import docopt
 
+from dmscripts.helpers.logging_helpers import configure_logger
+
 
 LOT_ANSWER_COUNTS = {
     'cloud-support': 10,
@@ -64,6 +66,12 @@ PRICE_INTERVAL_UNITS = [
     "per 6 months",
     "per year"
 ]
+
+
+configure_logger({
+    "dmapiclient": "INFO",
+    "framework_helpers": "DEBUG",
+})
 
 
 def _normalise_service_name(name):
@@ -125,11 +133,11 @@ def get_price_data(answers):
 
 
 def lookup_question_id_and_text(row, questions):
-    try:
-        question_text = row['Question']
-    except KeyError:
-        print(f'Could not find row titles.')
-        return None, None
+    question_text = row['Question']
+    # try:
+    # except KeyError:
+    #     print(f'Could not find row titles.')
+    #     return None, None
 
     # Handle curly apostrophes removed from CSV
     if "'" in question_text:
@@ -215,10 +223,12 @@ def create_draft_json_from_csv(filepath, lot_slug, question_objects, encoding=No
 
         for row in reader:
             question_id, question_text = lookup_question_id_and_text(row, question_objects)
+            print('QUESTION ID, TEXT:', question_id, question_text)
             if not question_id:
                 continue
 
             answer = parse_answer_from_csv_row(row, question_objects, question_text, lot_slug)
+            print('ANSWER ID, TEXT:', answer)
             if answer is not None:
                 if question_id == 'price':
                     # Add all price fields
@@ -394,6 +404,10 @@ def update_draft_services_from_folder(folder_name, api_client, framework_slug, c
                 failed_draft_ids.append((supplier_id, file_name, id_, errors))
                 # Debugging serviceCategories, serviceBenefits, serviceFeatures
                 output_service_categories_features_and_benefits_summary(draft_json)
+                print('-----------------------------------------------------------')
+                for k, v in draft['validationErrors'].items():
+                    print(k, '->', v)
+                print('-----------------------------------------------------------')
             else:
                 print(f"Draft ID {id_} ready to be marked as complete.")
                 successful_draft_ids.append((supplier_id, file_name, id_))
