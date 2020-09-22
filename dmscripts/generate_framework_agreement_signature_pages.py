@@ -151,7 +151,6 @@ def render_pdf_for_each_html_page(html_pages, html_dir, pdf_dir):
                             2: "4"}
 
             exit_code = subprocess.call(['wkhtmltopdf',
-                                         '--enable-local-file-access',
                                          '--footer-right',
                                          page_numbers.get(index, ""),
                                          '--margin-bottom',
