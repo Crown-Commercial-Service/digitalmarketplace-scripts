@@ -60,6 +60,7 @@ import tempfile
 
 sys.path.insert(0, '.')
 
+import dmapiclient
 from docopt import docopt
 from dmscripts.export_framework_applicant_details import get_csv_rows
 from dmscripts.helpers.auth_helpers import get_auth_token
@@ -121,12 +122,15 @@ if __name__ == '__main__':
                     record["countersignedAt"] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
                 else:
                     logger.info(f"countersigning agreement {agreement_id} for supplier {supplier_id}")
-                    countersigned_agreement = client.approve_agreement_for_countersignature(
-                        agreement_id,
-                        "automated countersignature script",
-                        AUTOMATED_COUNTERSIGNING_USER_ID
-                    )["agreement"]
-                    record["countersignedAt"] = countersigned_agreement["countersignedAgreementReturnedAt"]
+                    try:
+                        countersigned_agreement = client.approve_agreement_for_countersignature(
+                            agreement_id,
+                            "automated countersignature script",
+                            AUTOMATED_COUNTERSIGNING_USER_ID
+                        )["agreement"]
+                        record["countersignedAt"] = countersigned_agreement["countersignedAgreementReturnedAt"]
+                    except dmapiclient.errors.HTTPError as e:
+                        logger.warn(f"failed to countersign agreement {agreement_id} for supplier {supplier_id}: {e}")
 
             return record
 
