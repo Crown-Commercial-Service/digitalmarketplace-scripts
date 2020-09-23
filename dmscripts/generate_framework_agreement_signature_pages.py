@@ -80,7 +80,7 @@ def render_html_for_successful_suppliers(rows, framework, template_dir, output_d
     shutil.copyfile(template_css_path, os.path.join(output_dir, 'framework-agreement-signature-page.css'))
 
 
-def render_html_for_suppliers_awaiting_countersignature(rows, framework, template_dir, output_dir):
+def render_html_for_suppliers_awaiting_countersignature(rows, framework, template_dir, output_dir, *, dry_run=False):
     output_dir = Path(output_dir).resolve()
     html_pages = []
     static_files = []
@@ -119,6 +119,13 @@ def render_html_for_suppliers_awaiting_countersignature(rows, framework, templat
                 data['signed_agreement_returned_at'], '%Y-%m-%dT%H:%M:%S.%fZ'
             ).strftime('%d %B %Y')
         data['includeCountersignature'] = True
+
+        # TODO: the template should get these details from the agreement object rather than the framework object
+        # but currently the agreement object isn't in the data dict so for now we need to do this
+        # TODO: instead of this, add a watermark to the PDF
+        if dry_run:
+            framework["frameworkAgreementDetails"]["countersignerName"] = "------DRAFT------"
+            framework["frameworkAgreementDetails"]["countersignerRole"] = "------DRAFT------"
 
         logger.info(f"generating coutersigned agreement PDF for {data['supplier_id']}")
 
