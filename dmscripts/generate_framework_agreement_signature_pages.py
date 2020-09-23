@@ -120,6 +120,8 @@ def render_html_for_suppliers_awaiting_countersignature(rows, framework, templat
             ).strftime('%d %B %Y')
         data['includeCountersignature'] = True
 
+        logger.info(f"generating coutersigned agreement PDF for {data['supplier_id']}")
+
         html_dir = output_dir / str(data['supplier_id'])
         output_pages = []
         for html_page in html_pages:
@@ -150,19 +152,29 @@ def render_pdf_for_each_html_page(html_pages, html_dir, pdf_dir):
                             1: "3",
                             2: "4"}
 
-            exit_code = subprocess.call(['wkhtmltopdf',
-                                         '--enable-local-file-access',
-                                         '--footer-right',
-                                         page_numbers.get(index, ""),
-                                         '--margin-bottom',
-                                         '20mm',
-                                         '--margin-right',
-                                         '20mm',
-                                         'file://{}'.format(html_path),
-                                         pdf_path])
-            if exit_code > 0:
-                logger.error("ERROR {} on {}".format(exit_code, html_path))
+            proc = subprocess.run(
+                [
+                    'wkhtmltopdf',
+                    '--log-level', 'warn',
+                    '--enable-local-file-access',
+                    '--footer-right',
+                    page_numbers.get(index, ""),
+                    '--margin-bottom',
+                    '20mm',
+                    '--margin-right',
+                    '20mm',
+                    'file://{}'.format(html_path),
+                    pdf_path,
+                ],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                universal_newlines=True,
+            )
+            if proc.returncode > 0:
+                logger.error(f"ERROR {proc.returncode} on {html_path}: {proc.stdout}")
                 ok = False
+            elif proc.stdout:
+                logger.warn(proc.stdout)
         merge_e_signature_docs(html_dir, pdf_dir)
     else:
         html_path = html_pages[0]
