@@ -140,7 +140,11 @@ if __name__ == '__main__':
     )
 
     html_to_render = render_html_for_suppliers_awaiting_countersignature(
-        rows, framework, os.path.join(args['<path_to_agreements_repo>'], 'documents', framework['slug']), html_dir
+        rows,
+        framework,
+        os.path.join(args['<path_to_agreements_repo>'], 'documents', framework['slug']),
+        html_dir,
+        dry_run=args["--dry-run"],
     )
 
     ok = True
