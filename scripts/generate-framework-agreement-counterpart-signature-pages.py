@@ -111,7 +111,7 @@ if __name__ == '__main__':
             f"Framework {framework_slug} supports e-signatures, unapproved agreements will be automatically approved"
         )
 
-        for record in records:
+        def approve_supplier_framework_agreement(record):
             if not record["countersignedAt"]:
                 agreement_id = record["agreementId"]
                 supplier_id = record["supplier_id"]
@@ -127,6 +127,10 @@ if __name__ == '__main__':
                         AUTOMATED_COUNTERSIGNING_USER_ID
                     )["agreement"]
                     record["countersignedAt"] = countersigned_agreement["countersignedAgreementReturnedAt"]
+
+            return record
+
+        records = map(approve_supplier_framework_agreement, records)
 
     logger.info(f"Fetching data for {len(supplier_ids) if supplier_ids else 'all'} suppliers on {framework_slug}")
 
