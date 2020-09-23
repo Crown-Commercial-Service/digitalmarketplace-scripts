@@ -53,7 +53,6 @@ Options:
     -v, --verbose               Log verbosely
 """
 import datetime
-import logging
 import os
 import shutil
 import sys
@@ -83,16 +82,18 @@ if __name__ == '__main__':
     args = docopt(__doc__)
 
     if args["--verbose"]:
-        configure_logger({
+        logger = configure_logger({
             "dmapiclient": "INFO",
             "dmscripts.generate_framework_agreement_signature_pages": "DEBUG",
             "framework_helpers": "DEBUG",
+            "script": "DEBUG",
         })
     else:
-        configure_logger({
+        logger = configure_logger({
             "dmapiclient": "WARN",
             "dmscripts.generate_framework_agreement_signature_pages": "INFO",
             "framework_helpers": "INFO",
+            "script": "INFO",
         })
 
     framework_slug = args['<framework_slug>']
@@ -104,25 +105,30 @@ if __name__ == '__main__':
     html_dir = tempfile.mkdtemp()
 
     records = find_suppliers_with_signed_framework_agreements(client, framework_slug, supplier_ids)
-    records = list(records)
+
     if framework_supports_e_signature(framework):
+        logger.info(
+            f"Framework {framework_slug} supports e-signatures, unapproved agreements will be automatically approved"
+        )
+
         for record in records:
             if not record["countersignedAt"]:
                 agreement_id = record["agreementId"]
                 supplier_id = record["supplier_id"]
 
                 if args["--dry-run"] is True:
-                    logging.info(f"DRY-RUN would countersign agreement {agreement_id} for supplier {supplier_id}")
+                    logger.info(f"DRY-RUN would countersign agreement {agreement_id} for supplier {supplier_id}")
                     record["countersignedAt"] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
                 else:
-                    logging.debug(f"countersigning agreement {agreement_id} for supplier {supplier_id}")
-                    # E-signatures are automatically approved.
+                    logger.info(f"countersigning agreement {agreement_id} for supplier {supplier_id}")
                     countersigned_agreement = client.approve_agreement_for_countersignature(
                         agreement_id,
                         "automated countersignature script",
                         AUTOMATED_COUNTERSIGNING_USER_ID
                     )["agreement"]
                     record["countersignedAt"] = countersigned_agreement["countersignedAgreementReturnedAt"]
+
+    logger.info(f"Fetching data for {len(supplier_ids) if supplier_ids else 'all'} suppliers on {framework_slug}")
 
     headers, rows = get_csv_rows(
         records, framework_slug, framework_lot_slugs, count_statuses=("submitted",),
