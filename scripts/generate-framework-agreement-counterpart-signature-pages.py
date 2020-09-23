@@ -97,6 +97,8 @@ if __name__ == '__main__':
             "script": "INFO",
         })
 
+    dry_run = args["--dry-run"]
+
     framework_slug = args['<framework_slug>']
     client = DataAPIClient(get_api_endpoint_from_stage(args['<stage>']), get_auth_token('api', args['<stage>']))
     framework = client.get_framework(framework_slug)['frameworks']
@@ -113,11 +115,33 @@ if __name__ == '__main__':
         )
 
         def approve_supplier_framework_agreement(record):
-            if not record["countersignedAt"]:
+            if not record["countersignedAt"] and record["countersignedPath"]:
+                # Some suppliers will have created a new framework agreement in
+                # the time between this script and the upload script being run.
+                # In this case we can't countersign as the API won't let us, but
+                # the existing PDF won't be valid. So we delete the reference to
+                # the outdated agreement PDF to return it to the signed state.
+                # TODO: fix the race condition https://trello.com/c/lPJCI12q
+                agreement_id = record["agreementId"]
+
+                if dry_run is True:
+                    logger.info("DRY-RUN would remove outdated countersigned agreement {agreement_id}")
+                else:
+                    logger.info("removing outdated countersigned agreement {agreement_id}")
+                    try:
+                        framework_agreement = client.update_framework_agreement(
+                            agreement_id, {"countersignedAgreementPath": None}, "automated countersignature script"
+                        )["agreement"]
+                        record["agreementStatus"] = framework_agreement["status"]
+                        record["countersignedPath"] = ""
+                    except dmapiclient.errors.HTTPError as e:
+                        logger.warn(f"failed to update countersigned agreement {agreement_id}: {e}")
+
+            if record["agreementStatus"] == "signed":
                 agreement_id = record["agreementId"]
                 supplier_id = record["supplier_id"]
 
-                if args["--dry-run"] is True:
+                if dry_run is True:
                     logger.info(f"DRY-RUN would countersign agreement {agreement_id} for supplier {supplier_id}")
                     record["countersignedAt"] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
                 else:
@@ -130,7 +154,7 @@ if __name__ == '__main__':
                         )["agreement"]
                         record["countersignedAt"] = countersigned_agreement["countersignedAgreementReturnedAt"]
                     except dmapiclient.errors.HTTPError as e:
-                        logger.warn(f"failed to countersign agreement {agreement_id} for supplier {supplier_id}: {e}")
+                        logger.warn(f"failed to countersign agreement {agreement_id}: {e}")
 
             return record
 
@@ -148,7 +172,7 @@ if __name__ == '__main__':
         framework,
         os.path.join(args['<path_to_agreements_repo>'], 'documents', framework['slug']),
         html_dir,
-        dry_run=args["--dry-run"],
+        dry_run=dry_run,
     )
 
     ok = True
