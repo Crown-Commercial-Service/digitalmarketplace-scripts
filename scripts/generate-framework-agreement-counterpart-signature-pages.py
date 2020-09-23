@@ -109,7 +109,7 @@ if __name__ == '__main__':
         for record in records:
             if not record["countersignedAt"]:
                 agreement_id = record["agreementId"]
-                supplier_id = record["supplierId"]
+                supplier_id = record["supplier_id"]
 
                 if args["--dry-run"] is True:
                     logging.info(f"DRY-RUN would countersign agreement {agreement_id} for supplier {supplier_id}")
