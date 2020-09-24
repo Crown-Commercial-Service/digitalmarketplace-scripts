@@ -13,29 +13,52 @@ else:
     import builtins
 
 
-@pytest.mark.parametrize("notify_fail_early", (False, True,))  # should make no difference
-@mock.patch('dmscripts.upload_counterpart_agreements.getpass.getuser')
-def test_upload_counterpart_file_uploads_and_calls_api_if_not_dry_run(getuser, notify_fail_early):
-    getuser.return_value = 'test user'
+@pytest.fixture
+def bucket():
     bucket = mock.Mock()
+    return bucket
+
+
+@pytest.fixture
+def data_api_client():
     data_api_client = mock.Mock()
+    data_api_client.get_framework_agreement.return_value = {
+        "agreement": {
+            "frameworkSlug": "g-cloud-8"
+        }
+    }
     data_api_client.get_supplier_framework_info.return_value = {
         "frameworkInterest": {
             "agreementId": 23,
             "declaration": {
                 "supplierRegisteredName": "The supplier who signed",
+                "primaryContactEmail": "supplier.primary@example.com",
             },
-        }
+        },
     }
+    return data_api_client
+
+
+@pytest.fixture
+def framework():
+    return {
+        "name": "Gee Cloud Eight",
+        "slug": "g-cloud-8",
+    }
+
+
+@pytest.mark.parametrize("notify_fail_early", (False, True,))  # should make no difference
+@mock.patch('dmscripts.upload_counterpart_agreements.getpass.getuser')
+def test_upload_counterpart_file_uploads_and_calls_api_if_not_dry_run(
+    getuser, notify_fail_early, bucket, data_api_client, framework
+):
+    getuser.return_value = 'test user'
 
     with freeze_time('2016-11-12 13:14:15'):
         with mock.patch.object(builtins, 'open', mock.mock_open(read_data='foo')):
             upload_counterpart_file(
                 bucket,
-                {
-                    "name": "Gee Cloud Eight",
-                    "slug": "g-cloud-8",
-                },
+                framework,
                 'pdfs/123456-23-file.pdf',
                 False,
                 data_api_client,
@@ -60,18 +83,9 @@ def test_upload_counterpart_file_uploads_and_calls_api_if_not_dry_run(getuser, n
 
 
 @pytest.mark.parametrize("notify_fail_early", (False, True,))  # should make no difference
-def test_upload_counterpart_file_does_not_perform_actions_if_dry_run(notify_fail_early):
-    bucket = mock.Mock()
-    data_api_client = mock.Mock()
-    data_api_client.get_supplier_framework_info.return_value = {
-        "frameworkInterest": {
-            "agreementId": 23,
-            "declaration": {
-                "supplierRegisteredName": "The supplier who signed",
-                "primaryContactEmail": "supplier.primary@example.com",
-            },
-        },
-    }
+def test_upload_counterpart_file_does_not_perform_actions_if_dry_run(
+    bucket, data_api_client, framework, notify_fail_early
+):
     data_api_client.find_users_iter.side_effect = lambda *args, **kwargs: iter((
         {
             "id": 111322,
@@ -92,10 +106,7 @@ def test_upload_counterpart_file_does_not_perform_actions_if_dry_run(notify_fail
     with mock.patch.object(builtins, 'open', mock.mock_open(read_data='foo')):
         upload_counterpart_file(
             bucket,
-            {
-                "name": "Dos Two",
-                "slug": "digital-outcomes-and-specialists-2",
-            },
+            framework,
             'pdfs/123456-23-file.pdf',
             True,
             data_api_client,
@@ -189,18 +200,10 @@ def test_upload_counterpart_file_sends_correct_emails(
     notify_fail_early,
     find_users_iterable,
     expected_send_email_emails,
+    bucket,
+    data_api_client,
+    framework,
 ):
-    bucket = mock.Mock()
-    data_api_client = mock.Mock()
-    data_api_client.get_supplier_framework_info.return_value = {
-        "frameworkInterest": {
-            "agreementId": 23,
-            "declaration": {
-                "supplierRegisteredName": "The supplier who signed",
-                "primaryContactEmail": "supplier.primary@example.com",
-            },
-        },
-    }
     data_api_client.find_users_iter.side_effect = lambda *args, **kwargs: iter(find_users_iterable)
     dm_notify_client = mock.Mock()
     if notify_raise_email_error:
@@ -210,10 +213,7 @@ def test_upload_counterpart_file_sends_correct_emails(
         with (pytest.raises(EmailError) if notify_raise_email_error else _empty_context_manager()):
             upload_counterpart_file(
                 bucket,
-                {
-                    "name": "Dos Two",
-                    "slug": "digital-outcomes-and-specialists-2",
-                },
+                framework,
                 'pdfs/123456-23-file.pdf',
                 False,
                 data_api_client,
@@ -227,8 +227,8 @@ def test_upload_counterpart_file_sends_correct_emails(
         data_api_client.find_users_iter.assert_called_with(supplier_id=123456)
 
         expected_personalisation = {
-            "framework_slug": "digital-outcomes-and-specialists-2",
-            "framework_name": "Dos Two",
+            "framework_slug": "g-cloud-8",
+            "framework_name": "Gee Cloud Eight",
             "supplier_name": "The supplier who signed",
         }
 
