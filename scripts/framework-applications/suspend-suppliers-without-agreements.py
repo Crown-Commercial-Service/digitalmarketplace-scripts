@@ -80,7 +80,7 @@ if __name__ == "__main__":
     )
 
     framework = client.get_framework(framework_slug)["frameworks"]
-    # Check that the framework is live
+    # Check that the framework is in live or standstill
     if framework['status'] not in ['live', 'standstill']:
         logger.error(f"Cannot suspend services for '{framework_slug}' with status {framework['status']}")
         exit(1)
