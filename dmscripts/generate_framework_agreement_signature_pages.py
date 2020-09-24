@@ -129,11 +129,12 @@ def render_html_for_suppliers_awaiting_countersignature(rows, framework, templat
 
         logger.info(f"generating coutersigned agreement PDF for {data['supplier_id']}")
 
-        html_dir = output_dir / str(data['supplier_id'])
+        name_prefix = f"{data['supplier_id']}-{data['agreementId']}"
+        html_dir = output_dir / str(name_prefix)
         output_pages = []
         for html_page in html_pages:
             html = render_html(str(html_page), data)
-            page_path = save_page(html, data['supplier_id'], html_dir, html_page.stem)
+            page_path = save_page(html, name_prefix, html_dir, html_page.stem)
             output_pages.append(Path(page_path).resolve())
 
         for static_file in static_files:
@@ -195,12 +196,12 @@ def render_pdf_for_each_html_page(html_pages, html_dir, pdf_dir):
 
 
 def merge_e_signature_docs(input_dir, output_dir):
-    supplier_id = input_dir.name
+    name_prefix = input_dir.name
     pdf_list = [
-        input_dir / f"{supplier_id}-framework-agreement-cover-page.pdf",
+        input_dir / f"{name_prefix}-framework-agreement-cover-page.pdf",
         input_dir / "framework-agreement-toc.pdf",
-        input_dir / f"{supplier_id}-framework-agreement-appointment-page-1.pdf",
-        input_dir / f"{supplier_id}-framework-agreement-appointment-page-2.pdf",
+        input_dir / f"{name_prefix}-framework-agreement-appointment-page-1.pdf",
+        input_dir / f"{name_prefix}-framework-agreement-appointment-page-2.pdf",
         input_dir / "framework-agreement-boilerplate.pdf",
     ]
 
@@ -209,4 +210,4 @@ def merge_e_signature_docs(input_dir, output_dir):
     pdf_file_merger = PdfFileMerger()
     for index, filename in enumerate(pdf_list):
         pdf_file_merger.merge(position=index, fileobj=str(filename.resolve()), import_bookmarks=False)
-    pdf_file_merger.write(f"{output_dir}/{supplier_id}-framework-agreement-signature-page.pdf")
+    pdf_file_merger.write(f"{output_dir}/{name_prefix}-framework-agreement-signature-page.pdf")

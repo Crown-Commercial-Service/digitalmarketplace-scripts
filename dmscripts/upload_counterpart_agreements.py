@@ -1,5 +1,6 @@
 import getpass
 from itertools import chain
+from pathlib import Path
 
 from dmutils.s3 import S3ResponseError
 from dmapiclient import APIError
@@ -8,7 +9,6 @@ from dmutils.documents import generate_timestamped_document_upload_path, generat
 from dmutils.email.helpers import hash_string
 from dmutils.email.exceptions import EmailError
 
-from dmscripts.bulk_upload_documents import get_supplier_id_from_framework_file_path
 from dmscripts.helpers import logging_helpers
 
 
@@ -28,7 +28,10 @@ def upload_counterpart_file(
 
     logger = logger or logging_helpers.getLogger()
 
-    supplier_id = get_supplier_id_from_framework_file_path(file_path)
+    # file should be named {supplier_id}-{agreement_id}-{file_name}.pdf
+    file_path = Path(file_path)
+    supplier_id, agreement_id, _ = file_path.stem.split("-")
+
     supplier_framework = data_api_client.get_supplier_framework_info(supplier_id, framework["slug"])
     supplier_framework = supplier_framework['frameworkInterest']
     supplier_name = (
