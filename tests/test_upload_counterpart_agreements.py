@@ -73,7 +73,7 @@ def test_upload_counterpart_file_uploads_and_calls_api_if_not_dry_run(
             )
 
             data_api_client.update_framework_agreement.assert_called_once_with(
-                23,
+                '23',
                 {
                     'countersignedAgreementPath':
                     'g-cloud-8/agreements/123456/123456-agreement-countersignature-2016-11-12-131415.pdf'

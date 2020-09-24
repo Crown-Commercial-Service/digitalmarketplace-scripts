@@ -33,6 +33,15 @@ def upload_counterpart_file(
     supplier_id, agreement_id, _ = file_path.stem.split("-")
 
     supplier_framework = data_api_client.get_supplier_framework_info(supplier_id, framework["slug"])
+    framework_agreement = data_api_client.get_framework_agreement(agreement_id)["agreement"]
+
+    # TODO: we should get the below details from the framework agreement object
+    # rather than the script command line, for now let's just check that they
+    # match and if not mark it as failed and move on. (This will probably never
+    # happen).
+    if framework_agreement["frameworkSlug"] != framework["slug"]:
+        raise RuntimeError(f"file {file_path.name} is for the wrong framework!")
+
     supplier_framework = supplier_framework['frameworkInterest']
     supplier_name = (
         supplier_framework['declaration']['supplierRegisteredName']
@@ -65,7 +74,7 @@ def upload_counterpart_file(
 
             # Save filepath to framework agreement
             data_api_client.update_framework_agreement(
-                supplier_framework['agreementId'],
+                agreement_id,
                 {"countersignedAgreementPath": upload_path},
                 'upload-counterpart-agreements script run by {}'.format(getpass.getuser())
             )
