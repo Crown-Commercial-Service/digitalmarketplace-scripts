@@ -20,14 +20,54 @@ Example:
 """
 
 import argparse
-import IPython
 import sys
+
+import IPython
+from IPython.terminal.prompts import Prompts, Token
+from traitlets.config import Config
 
 from dmapiclient import DataAPIClient, SearchAPIClient
 
 sys.path.insert(0, '.')
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmutils.env_helpers import get_api_endpoint_from_stage
+
+
+def DMEnvironmentPrompt(stage: str, read_only: bool = False):
+    """IPython prompt which shows the stage the API client is connected to"""
+
+    formatting = {
+        "development": {
+            "prompt": (Token.Generic, "local"),
+        },
+        "preview": {
+            "prompt": (Token.Generic, "preview"),
+        },
+        "staging": {
+            "prompt": (Token.Generic, "staging"),
+        },
+        "production": {
+            "prompt": (Token.Generic.Error, "production"),
+        },
+        "read_only": {
+            "prompt": (Token.Generic.Strong, "ro"),
+        },
+        "read_write": {
+            "prompt": (Token.Generic.Emph, "rw"),
+        },
+    }
+
+    _prompt = [
+        formatting[stage]["prompt"],
+        (Token, " "),
+        formatting["read_only" if read_only else "read_write"]["prompt"]
+    ]
+
+    class DMPrompts(Prompts):
+        def in_prompt_tokens(self):
+            return _prompt + [(Token, "\n")] + super().in_prompt_tokens()
+
+    return DMPrompts
 
 
 def _is_read_only(item):
@@ -85,5 +125,8 @@ if __name__ == '__main__':
     if args.read_only:
         data = ReadOnlyDataAPIClient(data)
 
+    ipython_config = Config()
+    ipython_config.TerminalInteractiveShell.prompts_class = DMEnvironmentPrompt(stage, args.read_only)
+
     print('Dropping into shell...')
-    IPython.start_ipython(argv=[], user_ns={"data": data, "search": search})
+    IPython.start_ipython(argv=[], config=ipython_config, user_ns={"data": data, "search": search})
