@@ -8,7 +8,8 @@ so that buyers won't see them in search results (G-Cloud) or the supplier cannot
 Suppliers who have returned an incorrect agreement file ('on-hold') should not be suspended.
 
 This script carries out the same action that a CCS Category user could perform in the admin, but in bulk.
-CCS will provide a list of supplier IDs that should be suspended.
+In the past CCS has provided a list of supplier IDs that should be suspended, however this script can also
+suspend all suppliers who have not returned a framework agreement.
 
 Usage:
     scripts/framework-applications/suspend-suppliers-without-agreements.py
@@ -31,7 +32,7 @@ Options:
     -v, --verbose               Show debug log messages.
 
     If neither `--supplier-ids-from` or `--supplier-id` are provided then
-    framework agreements will be generated for all valid suppliers.
+    all suppliers without framework agreements will be suspended.
 """
 import csv
 import sys
@@ -46,6 +47,7 @@ from dmscripts.helpers.logging_helpers import (
     configure_logger,
     logging,
 )
+from dmscripts.helpers.framework_helpers import find_suppliers_without_agreements
 from dmscripts.helpers.supplier_data_helpers import get_supplier_ids_from_args
 
 from dmapiclient import DataAPIClient
@@ -72,8 +74,6 @@ if __name__ == "__main__":
         "script": logging.DEBUG if verbose else logging.INFO,
     })
 
-    supplier_ids = get_supplier_ids_from_args(args)
-
     client = DataAPIClient(
         get_api_endpoint_from_stage(args["<stage>"]),
         get_auth_token("api", args["<stage>"]),
@@ -85,13 +85,17 @@ if __name__ == "__main__":
         logger.error(f"Cannot suspend services for '{framework_slug}' with status {framework['status']}")
         exit(1)
 
-    csv_headers = ['Supplier email', 'Supplier ID', "No. of services suspended"]
+    supplier_ids = get_supplier_ids_from_args(args)
+    suppliers = find_suppliers_without_agreements(client, framework_slug, supplier_ids)
 
     with open(output_dir / FILENAME, 'w') as csvfile:
+        csv_headers = ['Supplier email', 'Supplier ID', "No. of services suspended"]
+
         writer = csv.writer(csvfile, quoting=csv.QUOTE_MINIMAL)
         writer.writerow(csv_headers)
 
-        for supplier_id in supplier_ids:
+        for supplier in suppliers:
+            supplier_id = supplier["supplierId"]
             framework_info = client.get_supplier_framework_info(supplier_id, framework_slug)
 
             # Do the suspending
