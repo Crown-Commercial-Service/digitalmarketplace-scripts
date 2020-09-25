@@ -96,6 +96,16 @@ def find_suppliers_with_signed_framework_agreements(
     return records
 
 
+def find_suppliers_without_agreements(client, framework_slug, supplier_ids=None):
+    """Find suppliers on a framework who haven't returned a framework agreement yet"""
+    records = client.find_framework_suppliers_iter(framework_slug, agreement_returned=False)
+    if supplier_ids:
+        records = filter(lambda r: r["supplierId"] in supplier_ids, records)
+    # we're not interested in suppliers who aren't on the framework
+    records = filter(lambda r: r["onFramework"], records)
+    return records
+
+
 def find_suppliers(client, framework_slug, supplier_ids=None):
     suppliers = client.get_interested_suppliers(framework_slug)['interestedSuppliers']
     suppliers = [
@@ -109,6 +119,10 @@ def find_suppliers(client, framework_slug, supplier_ids=None):
 def add_supplier_info(client, record):
     supplier = client.get_supplier(record['supplier_id'])
     return dict(record, supplier=supplier['suppliers'])
+
+
+# TODO: the following functions need to be completely rewritten so that they
+# add full objects rather than non-standard keys
 
 
 def add_framework_info(client, framework_slug, record):
