@@ -97,7 +97,8 @@ indexers = {
 GCLOUD_MAPPINGS = {
     'g-cloud-9': 'services',
     'g-cloud-10': 'services-g-cloud-10',
-    'g-cloud-11': 'services-g-cloud-11'
+    'g-cloud-11': 'services-g-cloud-11',
+    'g-cloud-12': 'services-g-cloud-12',
 }
 # All DOS framework iterations use the same mapping, which was last changed for DOS2
 DOS_MAPPING = 'briefs-digital-outcomes-and-specialists-2'
