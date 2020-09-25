@@ -34,7 +34,7 @@ if __name__ == '__main__':
     data = DataAPIClient(get_api_endpoint_from_stage(args.stage), get_auth_token('api', args.stage))
 
     audit_events = data.find_audit_events_iter(audit_type=AuditTypes.update_service,
-                                               user='Moving documents to live bucket',
+                                               user='publish_draft_services.py',
                                                audit_date=args.date,
                                                acknowledged='false')
 
