@@ -86,7 +86,8 @@ def upload_counterpart_file(
                     }, allow_resend=True)
                     logger.debug(f"NOTIFY: sent email to supplier '{supplier_id}' user {hash_string(notify_email)}")
                 else:
-                    logger.info("[Dry-run] Send notify email to %s", notify_email)
+                    logger.info(
+                        f"[Dry-run] Send notify email to supplier '{supplier_id}' user {hash_string(notify_email)}")
             except EmailError:
                 logger.error(
                     f"NOTIFY: Error sending email to supplier '{supplier_id}' user {hash_string(notify_email)}")
