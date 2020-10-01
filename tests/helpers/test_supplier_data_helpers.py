@@ -7,11 +7,11 @@ from dmscripts.helpers.supplier_data_helpers import (
     country_code_to_name,
     get_supplier_ids_from_args,
     AppliedToFrameworkSupplierContextForNotify,
-    SupplierFrameworkData,
+    SupplierFrameworkData, unsuspend_suspended_supplier_services,
 )
 from dmscripts.data_retention_remove_supplier_declarations import SupplierFrameworkDeclarations
 from tests.assessment_helpers import BaseAssessmentTest
-import mock
+from mock import mock, call
 import json
 from freezegun import freeze_time
 
@@ -311,3 +311,76 @@ class TestSupplierIDsHelpers:
 
         args = parse_docopt("--supplier-id=1,2,3 --supplier-id=4")
         get_supplier_ids_from_args(args) == [1, 2, 3, 4]
+
+
+@pytest.fixture
+def record():
+    return {'supplier_id': 92237,
+            'onFramework': True,
+            'frameworkSlug': 'g-cloud-12',
+            }
+
+
+@pytest.fixture
+def logger():
+    return mock.Mock()
+
+
+@pytest.fixture
+def data_api_client():
+    return mock.Mock()
+
+
+class TestUnsuspendSuspendedSupplierServices:
+
+    def test_unsuspends_supplier_services(self, record, logger, data_api_client):
+        data_api_client.find_services.return_value = {'meta': {'total': 2}, 'services': [
+            {'id': '1'}, {'id': '2'}
+        ]}
+        data_api_client.find_audit_events_iter.return_value = list([
+            {
+                'data': {'serviceId': '1',
+                         }
+            }, {
+                'data': {'serviceId': '2',
+                         }
+            },
+        ]
+        )
+        unsuspend_suspended_supplier_services(record, "suspending user", data_api_client, logger, False)
+
+        calls = [call.update_service_status('2', 'published', 'Unsuspend services helper'),
+                 call.update_service_status('1', 'published', 'Unsuspend services helper')]
+        data_api_client.assert_has_calls(calls, any_order=True)
+
+    def test_dry_run_does_not_supplier_services(self, record, logger, data_api_client):
+        data_api_client.find_services.return_value = {'meta': {'total': 2}, 'services': [
+            {'id': '1'}, {'id': '2'}
+        ]}
+        data_api_client.find_audit_events_iter.return_value = list([
+            {
+                'data': {'serviceId': '1',
+                         }
+            }, {
+                'data': {'serviceId': '2',
+                         }
+            },
+        ]
+        )
+        unsuspend_suspended_supplier_services(record, "suspending user", data_api_client, logger, dry_run=False)
+        data_api_client.update_service_status.assert_not_called
+
+    def test_service_not_found_in_audit_events_not_suspended(self, record, logger, data_api_client):
+        data_api_client.find_services.return_value = {'meta': {'total': 2}, 'services': [
+            {'id': '1'}, {'id': '2'}
+        ]}
+        data_api_client.find_audit_events_iter.return_value = list([
+            {
+                'data': {'serviceId': '1'
+                         }
+            }
+        ]
+        )
+        unsuspend_suspended_supplier_services(record, "suspending user", data_api_client, logger, dry_run=False)
+        assert data_api_client.update_service_status.call_count == 1
+        data_api_client.update_service_status.assert_called_with('1', 'published', 'Unsuspend services helper')

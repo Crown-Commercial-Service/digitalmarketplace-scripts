@@ -139,7 +139,6 @@ if __name__ == '__main__':
                 unsuspend_suspended_supplier_services(record, AUTOMATED_SUSPENDING_USER, client, logger, dry_run)
             return record
 
-
         records = map(approve_supplier_framework_agreement, records)
 
     logger.info(f"Fetching data for {len(supplier_ids) if supplier_ids else 'all'} suppliers on {framework_slug}")
