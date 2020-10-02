@@ -101,7 +101,7 @@ def unsuspend_supplier_services(client, logger, framework_slug, supplier_id, fra
 
     if not suspended_services_on_framework:
         logger.error(f'Supplier {supplier_id} has no {old_service_status} services on the framework.')
-        return suspended_service_count
+        return unsuspended_service_count
 
     services_suspended_by_script = set(
         event["data"]["serviceId"]
