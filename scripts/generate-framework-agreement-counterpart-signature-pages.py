@@ -134,9 +134,13 @@ if __name__ == '__main__':
                             AUTOMATED_COUNTERSIGNING_USER_ID
                         )["agreement"]
                         record["countersignedAt"] = countersigned_agreement["countersignedAgreementReturnedAt"]
+                        unsuspend_suspended_supplier_services(record,
+                                                              AUTOMATED_SUSPENDING_USER,
+                                                              client,
+                                                              logger,
+                                                              dry_run)
                     except dmapiclient.errors.HTTPError as e:
                         logger.warn(f"failed to countersign agreement {agreement_id} for supplier {supplier_id}: {e}")
-                unsuspend_suspended_supplier_services(record, AUTOMATED_SUSPENDING_USER, client, logger, dry_run)
             return record
 
         records = map(approve_supplier_framework_agreement, records)
