@@ -69,7 +69,7 @@ from dmscripts.helpers.framework_helpers import (
     framework_supports_e_signature
 )
 from dmscripts.helpers.logging_helpers import configure_logger
-from dmscripts.helpers.supplier_data_helpers import get_supplier_ids_from_args
+from dmscripts.helpers.supplier_data_helpers import get_supplier_ids_from_args, unsuspend_suspended_supplier_services
 from dmscripts.generate_framework_agreement_signature_pages import (
     render_html_for_suppliers_awaiting_countersignature, render_pdf_for_each_html_page
 )
@@ -78,6 +78,9 @@ from dmutils.env_helpers import get_api_endpoint_from_stage
 
 # CCS Sourcing Admin user using developer team email
 AUTOMATED_COUNTERSIGNING_USER_ID = 64041
+
+# User name which performs automated suspending for suppliers who did not sign agreement during standstill
+AUTOMATED_SUSPENDING_USER = "Suspend services script"
 
 if __name__ == '__main__':
     args = docopt(__doc__)
@@ -110,14 +113,16 @@ if __name__ == '__main__':
     if framework_supports_e_signature(framework):
         logger.info(
             f"Framework {framework_slug} supports e-signatures, unapproved agreements will be automatically approved"
+            f" and suspended services unsuspended"
         )
 
         def approve_supplier_framework_agreement(record):
             if not record["countersignedAt"]:
                 agreement_id = record["agreementId"]
                 supplier_id = record["supplier_id"]
+                dry_run = args["--dry-run"]
 
-                if args["--dry-run"] is True:
+                if dry_run:
                     logger.info(f"DRY-RUN would countersign agreement {agreement_id} for supplier {supplier_id}")
                     record["countersignedAt"] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
                 else:
@@ -129,9 +134,13 @@ if __name__ == '__main__':
                             AUTOMATED_COUNTERSIGNING_USER_ID
                         )["agreement"]
                         record["countersignedAt"] = countersigned_agreement["countersignedAgreementReturnedAt"]
+                        unsuspend_suspended_supplier_services(record,
+                                                              AUTOMATED_SUSPENDING_USER,
+                                                              client,
+                                                              logger,
+                                                              dry_run)
                     except dmapiclient.errors.HTTPError as e:
                         logger.warn(f"failed to countersign agreement {agreement_id} for supplier {supplier_id}: {e}")
-
             return record
 
         records = map(approve_supplier_framework_agreement, records)
