@@ -121,7 +121,7 @@ def unsuspend_supplier_services(client, logger, framework_slug, supplier_id, fra
     )
     for service_id in service_ids:
         if dry_run:
-            logger.info(f"[DRY RUN] Would suspend service {service_id} for supplier {supplier_id}")
+            logger.info(f"[DRY RUN] Would set status to '{new_service_status}' for service {service_id} for supplier {supplier_id}")
         else:
             client.update_service_status(service_id, new_service_status, "Suspend services script")
         unsuspended_service_count += 1
