@@ -104,7 +104,7 @@ if __name__ == "__main__":
             "audit_date={audit_date!r}, audit_type={audit_type}, user={user!r})".format(**find_audit_events)
         )
 
-        previously_suspended_suppliers = set(event["data"]["supplierId"] for event in client.find_audit_events_iter(**find_audit_events))
+        supplier_ids = set(event["data"]["supplierId"] for event in client.find_audit_events_iter(**find_audit_events))
 
     logger.info(f"going to try and un-suspend {len(supplier_ids)} suppliers")
 
