@@ -328,7 +328,8 @@ def logger():
 
 @pytest.fixture
 def data_api_client():
-    return mock.Mock()
+    from dmapiclient import DataAPIClient
+    return mock.create_autospec(DataAPIClient)
 
 
 class TestUnsuspendSuspendedSupplierServices:
