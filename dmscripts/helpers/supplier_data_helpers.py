@@ -374,9 +374,10 @@ def unsuspend_suspended_supplier_services(record, suspending_user, client, logge
     )
     service_ids = suspended_services_on_framework & services_suspended_by_script
     # Unsuspend all services for supplier (the API will re-index the services for search results)
-    logger.info(
-        f"Setting {len(service_ids)} services to '{new_service_status}' for supplier {supplier_id}."
-    )
+    if service_ids:
+        logger.info(
+            f"Setting {len(service_ids)} services to '{new_service_status}' for supplier {supplier_id}."
+        )
     for service_id in service_ids:
         if dry_run:
             logger.info(f"[DRY RUN] Would unsuspend service {service_id} for supplier {supplier_id}")
