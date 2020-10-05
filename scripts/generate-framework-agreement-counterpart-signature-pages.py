@@ -125,6 +125,11 @@ if __name__ == '__main__':
                 if dry_run:
                     logger.info(f"DRY-RUN would countersign agreement {agreement_id} for supplier {supplier_id}")
                     record["countersignedAt"] = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+                    unsuspend_suspended_supplier_services(record,
+                                                          AUTOMATED_SUSPENDING_USER,
+                                                          client,
+                                                          logger,
+                                                          dry_run)
                 else:
                     logger.info(f"countersigning agreement {agreement_id} for supplier {supplier_id}")
                     try:
