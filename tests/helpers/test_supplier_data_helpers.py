@@ -354,7 +354,7 @@ class TestUnsuspendSuspendedSupplierServices:
                  call.update_service_status('1', 'published', 'Unsuspend services helper')]
         data_api_client.assert_has_calls(calls, any_order=True)
 
-    def test_dry_run_does_not_supplier_services(self, record, logger, data_api_client):
+    def test_dry_run_does_not_update_supplier_services(self, record, logger, data_api_client):
         data_api_client.find_services.return_value = {'meta': {'total': 2}, 'services': [
             {'id': '1'}, {'id': '2'}
         ]}
