@@ -13,7 +13,6 @@ Example:
 
 from docopt import docopt
 import json
-import logging
 import sys
 import datetime
 
@@ -22,11 +21,11 @@ from dmapiclient.audit import AuditTypes
 
 sys.path.insert(0, '.')
 from dmscripts.helpers.auth_helpers import get_auth_token
+from dmscripts.helpers.logging_helpers import configure_logger
 from dmutils.env_helpers import get_api_endpoint_from_stage
 
 
-logger = logging.getLogger('script')
-logging.basicConfig(level=logging.INFO)
+logger = configure_logger()
 
 
 def log_human_readable_stats(stats):
