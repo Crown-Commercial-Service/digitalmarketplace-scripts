@@ -99,12 +99,12 @@ if __name__ == '__main__':
         get_api_endpoint_from_stage(args.stage),
         get_auth_token('api', args.stage)
     )
-    
+
     updated_drafts = [
         remove_dos4_answers(data, draft, args.developer_email) for draft
         in get_affected_drafts_services(data)
     ]
-    
+
     for draft in updated_drafts:
         print(f"Supplier id: {draft['supplierId']}")
         print(f"Draft id: {draft['id']}")
