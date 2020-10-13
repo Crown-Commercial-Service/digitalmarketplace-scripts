@@ -44,7 +44,7 @@ requests-mock==1.7.0      # via -r requirements-dev.in
 requests==2.23.0          # via -c requirements.txt, requests-mock
 six==1.14.0               # via -c requirements.txt, freezegun, mock, packaging, pip-tools, python-dateutil, requests-mock, traitlets
 traitlets==4.3.3          # via ipython
-urllib3==1.25.8           # via -c requirements.txt, requests
+urllib3==1.25.10          # via -c requirements.txt, requests
 wcwidth==0.1.8            # via prompt-toolkit, pytest
 zipp==3.0.0               # via -c requirements.txt, importlib-metadata
 

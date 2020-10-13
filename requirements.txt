@@ -63,7 +63,7 @@ rsa==4.5                  # via awscli
 s3transfer==0.3.3         # via awscli, boto3
 six==1.14.0               # via cryptography, jsonschema, pyrsistent, python-dateutil
 unicodecsv==0.14.1        # via -r requirements.in, digitalmarketplace-utils
-urllib3==1.25.8           # via botocore, requests
+urllib3==1.25.10          # via botocore, requests
 werkzeug==1.0.0           # via digitalmarketplace-utils, flask
 workdays==1.4             # via digitalmarketplace-utils
 wtforms==2.2.1            # via flask-wtf
