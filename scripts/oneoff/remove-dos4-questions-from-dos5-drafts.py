@@ -12,7 +12,9 @@ from typing import List
 
 
 def get_affected_drafts_services(api_client: DataAPIClient) -> List[dict]:
-    all_drafts = api_client.find_draft_services_by_framework('digital-outcomes-and-specialists-5')["services"]
+    all_drafts = api_client.find_draft_services_by_framework(
+        'digital-outcomes-and-specialists-5', status='not-submitted'
+    )["services"]
 
     return [draft for draft in all_drafts if draft_service_contains_dos4_answer(draft)]
 
@@ -48,10 +50,13 @@ def draft_service_contains_dos4_answer(draft: dict) -> bool:
         "designerAccessibleApplications"
     }
 
-    return len(invalid_answers.union(set(draft.keys()))) > 0 and draft['status'] == 'not-submitted'
+    return invalid_answers.intersection(draft)
 
 
 def remove_dos4_answers(api_client: DataAPIClient, draft: dict, developer_email: str) -> dict:
+    print(f"Supplier id: {draft['supplierId']}")
+    print(f"Draft id: {draft['id']}")
+
     return api_client.update_draft_service(
         draft['id'],
         {
@@ -91,7 +96,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
 
     parser.add_argument("stage", type=str)
-    parser.add_argument("developer_email", type=str)
+    parser.add_argument("--updated-by", type=str, dest="developer_email")
 
     args = parser.parse_args()
 
@@ -104,7 +109,3 @@ if __name__ == '__main__':
         remove_dos4_answers(data, draft, args.developer_email) for draft
         in get_affected_drafts_services(data)
     ]
-
-    for draft in updated_drafts:
-        print(f"Supplier id: {draft['supplierId']}")
-        print(f"Draft id: {draft['id']}")
