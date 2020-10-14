@@ -16,8 +16,7 @@ def get_user() -> str:
     if os.getenv("JENKINS_HOME") and os.getenv("BUILD_TAG"):
         updated_by = os.environ["BUILD_TAG"]
         if os.getenv("BUILD_USER"):
-            updated_by += " started by "
-            updated_by += os.environ["BUILD_USER"]
+            updated_by += f' started by {os.environ["BUILD_USER"]}'
         return updated_by
 
     # if possible get the email address from git config
