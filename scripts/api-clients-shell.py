@@ -30,6 +30,7 @@ from dmapiclient import DataAPIClient, SearchAPIClient
 
 sys.path.insert(0, '.')
 from dmscripts.helpers.auth_helpers import get_auth_token
+from dmscripts.helpers.updated_by_helpers import get_user
 from dmutils.env_helpers import get_api_endpoint_from_stage
 
 
@@ -108,18 +109,23 @@ if __name__ == '__main__':
 
     stage = args.stage.lower()
 
+    user = get_user()
+    print(f"Setting user to '{user}'...")
+
     print('Retrieving credentials...')
     api_token = args.api_token or get_auth_token('api', stage)
     search_api_token = args.search_api_token or get_auth_token('search_api', stage)
 
     print('Creating clients...')
     data = DataAPIClient(
-        args.api_url or get_api_endpoint_from_stage(stage),
-        api_token
+        base_url=args.api_url or get_api_endpoint_from_stage(stage),
+        auth_token=api_token,
+        user=user,
     )
     search = SearchAPIClient(
-        args.search_api_url or get_api_endpoint_from_stage(stage, app='search-api'),
-        search_api_token
+        base_url=args.search_api_url or get_api_endpoint_from_stage(stage, app='search-api'),
+        auth_token=search_api_token,
+        user=user,
     )
 
     if args.read_only:
