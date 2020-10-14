@@ -50,7 +50,7 @@ def draft_service_contains_dos4_answer(draft: dict) -> bool:
         "designerAccessibleApplications"
     }
 
-    return invalid_answers.intersection(draft)
+    return bool(invalid_answers.intersection(draft))
 
 
 def remove_dos4_answers(api_client: DataAPIClient, draft: dict, developer_email: str) -> dict:
