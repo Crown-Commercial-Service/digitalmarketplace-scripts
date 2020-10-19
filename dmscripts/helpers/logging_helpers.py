@@ -8,6 +8,7 @@ from logging import DEBUG, INFO, WARNING, ERROR, CRITICAL, getLogger, Logger  # 
 from dmutils.logging import CustomLogFormatter
 
 LOG_FORMAT = '%(asctime)s %(name)s %(levelname)s %(message)s'
+TIMESTAMP_FORMAT = '%Y-%m-%d %H:%M:%S,uuu %Z'
 
 
 def get_logger() -> Logger:
@@ -33,7 +34,7 @@ def configure_logger(log_levels: Optional[Mapping] = None) -> Logger:
     log_levels = merge_log_levels(log_levels or {})
 
     handler = logging.StreamHandler(sys.stderr)
-    handler.setFormatter(CustomLogFormatter(LOG_FORMAT))
+    handler.setFormatter(CustomLogFormatter(LOG_FORMAT, datefmt=TIMESTAMP_FORMAT))
 
     for logger_name, level in log_levels.items():
         logging.getLogger(logger_name).addHandler(handler)
