@@ -12,9 +12,9 @@ from typing import List
 
 
 def get_affected_drafts_services(api_client: DataAPIClient) -> List[dict]:
-    all_drafts = api_client.find_draft_services_by_framework(
+    all_drafts = api_client.find_draft_services_by_framework_iter(
         'digital-outcomes-and-specialists-5', status='not-submitted'
-    )["services"]
+    )
 
     return [draft for draft in all_drafts if draft_service_contains_dos4_answer(draft)]
 
