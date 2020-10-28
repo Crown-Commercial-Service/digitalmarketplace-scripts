@@ -8,6 +8,11 @@ Requires a running version of veraPDF-REST (https://github.com/veraPDF/veraPDF-r
 Set AWS_PROFILE to the relevant profile for the stage when running eg.
 $ AWS_PROFILE=development-developer ./scripts/scan-pdf-content.py preview g-cloud-12 http://localhost:8080
 
+By default this script will fetch a list of PDFs to scan from the relevant S3 bucket, but it can also
+resume from a failed run. The PDF S3 keys are stored in a temporary file and if the index argument is
+passed keys will be loaded from the file and the scan resumed from position `index`. The easiest way to
+determine the correct index is to count the number of result rows in the report CSV.
+
 Usage: scan-pdf-content.py <stage> <framework> <verapdf-url> [--index=<index>]
 
 Options:
@@ -21,19 +26,19 @@ Options:
 
 Examples:
     ./scripts/scan-pdf-content.py staging g-cloud-12 http://localhost:8080
+    ./scripts/scan-pdf-content.pt preview g-cloud-12 http://localhost:8080 --index 50
 """
-import boto3
-import requests
 import csv
-import logging
 import json
+import logging
 import os
 import threading
 import queue
-from docopt import docopt
 from datetime import datetime
-
 from typing import Tuple, NamedTuple, Optional
+import boto3
+import requests
+from docopt import docopt
 
 
 class ScanResult(NamedTuple):
@@ -152,6 +157,20 @@ def scan_object(verapdf_url: str, file_to_scan: bytes) -> Tuple[int, str]:
         return response.status_code, "No unusual content types"
 
 
+def set_up_report_file(filename: str) -> None:
+    """
+    Create an empty CSV with headers to store results
+
+    :param filename: The name of the output file to create
+    :returns: None
+    """
+    with open(filename, "w") as f:
+        report_writer = csv.writer(f, delimiter=",")
+        report_writer.writerow(
+            ["scanned_at", "bucket", "framework", "key", "status_code", "message"]
+        )
+
+
 def write_result(filename: str, scan: ScanResult) -> None:
     """
     Write the result of a scan to the report CSV
@@ -258,20 +277,6 @@ def scan_all_pdfs(
     logging.info("Finished scanning")
     logging.info("Removing temporary files")
     os.remove("/tmp/pdf-scan-queue.json")
-
-
-def set_up_report_file(filename: str) -> None:
-    """
-    Create an empty CSV with headers to store results
-
-    :param filename: The name of the output file to create
-    :returns: None
-    """
-    with open(filename, "w") as f:
-        report_writer = csv.writer(f, delimiter=",")
-        report_writer.writerow(
-            ["scanned_at", "bucket", "framework", "key", "status_code", "message"]
-        )
 
 
 if __name__ == "__main__":
