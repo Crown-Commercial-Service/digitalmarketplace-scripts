@@ -5,6 +5,9 @@ non-text or image content (ie. JS or videos).
 
 Requires a running version of veraPDF-REST (https://github.com/veraPDF/veraPDF-rest)
 
+Set AWS_PROFILE to the relevant profile for the stage when running eg.
+$ AWS_PROFILE=development-developer ./scripts/scan-pdf-content.py preview g-cloud-12 http://localhost:8080
+
 Usage: scan-pdf-content.py <stage> <framework> <verapdf-url> [--index=<index>]
 
 Options:
@@ -22,7 +25,6 @@ Examples:
 import boto3
 import requests
 import csv
-import uuid
 import logging
 import json
 import os
@@ -43,44 +45,15 @@ class ScanResult(NamedTuple):
     key: str
 
 
-def get_aws_session(stage: str) -> boto3.session.Session:
-    """
-    Start an authenticated session for the supplied stage.
-
-    :param stage: The stage we need credentials for. Must be one of 'production',
-        'staging' or 'preview'.
-    :return: An authenticated boto3.session.Session object
-    """
-    # production and staging data is in the production AWS account
-    if stage == "preview":
-        arn = "arn:aws:iam::381494870249:role/infrastructure"
-    else:
-        arn = "arn:aws:iam::050019655025:role/infrastructure"
-
-    sts_client = boto3.client("sts")
-    session_name = f"PDFContentScan-{str(uuid.uuid4())}"
-    sts_response = sts_client.assume_role(RoleArn=arn, RoleSessionName=session_name)
-
-    return boto3.session.Session(
-        aws_access_key_id=sts_response["Credentials"]["AccessKeyId"],
-        aws_secret_access_key=sts_response["Credentials"]["SecretAccessKey"],
-        aws_session_token=sts_response["Credentials"]["SessionToken"],
-        region_name="eu-west-1",
-    )
-
-
-def list_pdfs_in_bucket(
-    bucket_name: str, framework: str, session: boto3.session.Session
-) -> list:
+def list_pdfs_in_bucket(bucket_name: str, framework: str,) -> list:
     """
     Return a list of `ObjectSummary`s for PDFs in the supplied S3 bucket.
 
     :param bucket_name: The name of the bucket to check
     :param framework: The name of the framework to scan for
-    :param session: An authenticated AWS session with permissions to access `bucket_name`
     :return: A list of S3 objects
     """
-    s3 = session.resource("s3")
+    s3 = boto3.resource("s3")
     bucket = s3.Bucket(bucket_name)
     all_objects = bucket.objects.filter(Prefix=f"{framework}/documents")
 
@@ -102,14 +75,13 @@ def save_all_pdf_names_to_scan(pdfs: list) -> None:
             f.write("\n")
 
 
-def load_pdfs_to_scan_from_file(session: boto3.session.Session) -> list:
+def load_pdfs_to_scan_from_file() -> list:
     """
     Load a list of PDFs to scan from a temporary file and convert to `ObjectSummary`s.
 
-    :param session: An authenticated AWS session
     :return: A list of `ObjectSummary`s
     """
-    s3 = session.resource("s3")
+    s3 = boto3.resource("s3")
     with open("/tmp/pdf-scan-queue.json", "r") as f:
         logging.info("Loading files to scan from /tmp/pdf-scan-queue.json")
         lines = [json.loads(line) for line in f.readlines()]
@@ -117,18 +89,14 @@ def load_pdfs_to_scan_from_file(session: boto3.session.Session) -> list:
     return [s3.ObjectSummary(line["bucket_name"], line["key"]) for line in lines]
 
 
-def fetch_s3_object_to_memory(
-    object_summary,
-    session: boto3.session.Session,
-) -> bytes:
+def fetch_s3_object_to_memory(object_summary,) -> bytes:
     """
     Download the contents of an object in S3 into an in-memory variable.
 
-    :param session: An authenticated AWS session
     :param object_summary: An `ObjectSummary` for an object stored in S3
     :return: The contents of the supplied object
     """
-    s3 = session.resource("s3")
+    s3 = boto3.resource("s3")
     return (
         s3.Object(object_summary.bucket_name, object_summary.key).get()["Body"].read()
     )
@@ -206,13 +174,12 @@ def write_result(filename: str, scan: ScanResult) -> None:
         )
 
 
-def scan_pdf(scan_queue: queue.Queue, verapdf_url: str, session: boto3.session.Session, report_name: str):
+def scan_pdf(scan_queue: queue.Queue, verapdf_url: str, report_name: str):
     """
     Worker function. Get a PDF from the queue, download, scan and write the results to `report_name`.
 
     :param scan_queue: The queue to get tasks from
     :param verapdf_url: The base URL to a verapdf-rest service
-    :param session: An authenticated AWS session
     :param report_name: The file to write scan results to
     :return: None
     """
@@ -222,7 +189,7 @@ def scan_pdf(scan_queue: queue.Queue, verapdf_url: str, session: boto3.session.S
         if i % 10 == 0:
             logging.info(f"Scanning file {i}")
 
-        pdf_content = fetch_s3_object_to_memory(pdf_summary, session)
+        pdf_content = fetch_s3_object_to_memory(pdf_summary)
         code, message = scan_object(verapdf_url, pdf_content)
         scan_result = ScanResult(
             scanned_at=str(datetime.now()),
@@ -241,7 +208,6 @@ def scan_all_pdfs(
     bucket_name: str,
     verapdf_url: str,
     framework: str,
-    session: boto3.session.Session,
     report_name: str,
     index: Optional[int] = None
 ) -> None:
@@ -252,7 +218,6 @@ def scan_all_pdfs(
     :param bucket_name: The S3 bucket to scan
     :param verapdf_url: The base url to a verapdf-rest service
     :param framework: The framework slug to scan, eg. g-cloud-12
-    :param session: An authenticated AWS session with permissions to access `bucket_name`
     :param report_name: The file to write scan results to
     :param index: An optional index to resume from. If supplied, a list of PDFs to scan is read from
                     '/tmp/pdf-scan-queue.json' and the scan is started from position `index`.
@@ -261,14 +226,14 @@ def scan_all_pdfs(
     if index is not None:
         # Resuming from a previous run. Load files to scan from disk and set up index
         logging.info("Resuming from previous run")
-        pdfs_to_scan = load_pdfs_to_scan_from_file(session)
+        pdfs_to_scan = load_pdfs_to_scan_from_file()
 
         logging.info(f"Resuming scan from position: {index}")
         pdfs_to_scan = pdfs_to_scan[index:]
 
     else:
         # Starting new scan. Get files to scan from S3
-        pdfs_to_scan = list_pdfs_in_bucket(bucket_name, framework, session)
+        pdfs_to_scan = list_pdfs_in_bucket(bucket_name, framework)
 
     total_to_scan = len(pdfs_to_scan)
 
@@ -284,7 +249,7 @@ def scan_all_pdfs(
     for _ in range(3):
         threading.Thread(
             target=scan_pdf,
-            args=(scan_queue, verapdf_url, session, report_name)
+            args=(scan_queue, verapdf_url, report_name)
         ).start()
 
     # Wait for threads to finish
@@ -325,12 +290,11 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
     s3_bucket = f"digitalmarketplace-documents-{stage}-{stage}"
-    session = get_aws_session(stage)
 
     report_name = f"pdf_scan_results_{stage}-{framework}.csv"
     if index is None:
         # Only set up a new report file if this is a new run
         set_up_report_file(report_name)
 
-    scan_all_pdfs(s3_bucket, verapdf_url, framework, session, report_name, index)
+    scan_all_pdfs(s3_bucket, verapdf_url, framework, report_name, index)
     logging.info(f"Wrote report to ./{report_name}")
