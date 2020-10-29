@@ -10,6 +10,9 @@ sys.path.insert(0, '.')
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmutils.env_helpers import get_api_endpoint_from_stage
 
+NUMBER_OF_SUPPLIERS = 300
+FINAL_DUNS_NUMBER = 123456789
+
 PASSWORD = 'Password1234'
 
 stage = 'development'
@@ -20,7 +23,6 @@ def ensure_supplier_exists(data_api_client, duns_number):
     try:
         [supplier] = data_api_client.find_suppliers(duns_number=duns_number)['suppliers']
     except ValueError:
-        print(f"Creating user with DUNS {duns_number}")
         data_api_client.create_supplier(
             {'companiesHouseNumber': '12345678',
              'contactInformation': [{'address1': 'Supplier Contact Address 1',
@@ -72,7 +74,7 @@ def ensure_user_exists_for_supplier(data_api_client, supplier_id, duns_number):
     return data_api_client.get_user(email_address=email_address)['users']
 
 
-for duns_number in range(123456787, 123456790):
+for duns_number in range(FINAL_DUNS_NUMBER - NUMBER_OF_SUPPLIERS + 1, FINAL_DUNS_NUMBER + 1):
     supplier = ensure_supplier_exists(data_api_client, duns_number)
     user = ensure_user_exists_for_supplier(data_api_client, supplier['id'], duns_number)
     print(f"{user['emailAddress']},{PASSWORD}")
