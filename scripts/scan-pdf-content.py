@@ -4,6 +4,9 @@ Scan user uploaded PDFs in S3 and flag ones which contain any
 non-text or image content (ie. JS or videos).
 
 Requires a running version of veraPDF-REST (https://github.com/veraPDF/veraPDF-rest)
+The simplest way is to use the Docker image provided by veraPDF. Run
+docker run -p 8080:8080 verapdf/rest:latest
+in a separate terminal window to pull the image and start it listening on http://localhost:8080
 
 Set AWS_PROFILE to the relevant profile for the stage when running eg.
 $ AWS_PROFILE=development-developer ./scripts/scan-pdf-content.py preview g-cloud-12 http://localhost:8080
@@ -275,7 +278,7 @@ def scan_all_pdfs(
     scan_queue.join()
 
     logging.info("Finished scanning")
-    logging.info("Removing temporary files")
+    logging.info("Removing temporary file /tmp/pdf-scan-queue.json")
     os.remove("/tmp/pdf-scan-queue.json")
 
 
