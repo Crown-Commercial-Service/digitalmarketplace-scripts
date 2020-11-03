@@ -4,6 +4,9 @@ Scan user uploaded PDFs in S3 and flag ones which contain any
 non-text or image content (ie. JS or videos).
 
 Requires a running version of veraPDF-REST (https://github.com/veraPDF/veraPDF-rest)
+The simplest way is to use the Docker image provided by veraPDF. Run
+docker run -p 8080:8080 verapdf/rest:latest
+in a separate terminal window to pull the image and start it listening on http://localhost:8080
 
 Set AWS_PROFILE to the relevant profile for the stage when running eg.
 $ AWS_PROFILE=development-developer ./scripts/scan-pdf-content.py preview g-cloud-12 http://localhost:8080
@@ -13,14 +16,15 @@ resume from a failed run. The PDF S3 keys are stored in a temporary file and if 
 passed keys will be loaded from the file and the scan resumed from position `index`. The easiest way to
 determine the correct index is to count the number of result rows in the report CSV.
 
-Usage: scan-pdf-content.py <stage> <framework> <verapdf-url> [--index=<index>]
+Usage: scan-pdf-content.py <stage> <framework> <verapdf-url> [--resume]
 
 Options:
     <stage>                         Stage to target
     <framework>                     Slug for the framework to scan
     <verapdf-url>                   The url for the verapdf-rest service to use
-    --index=<index>                 Optional. If supplied, the scan resumes from a previous run, using
-                                        the list of PDFs stored in '/tmp/pdf-scan-queue.json' starting at `index`
+    --resume                        Optional. If supplied, the scan resumes from a previous run, using
+                                        the list of PDFs stored in '/tmp/pdf-scan-queue.json' and the number
+                                        of records in the report CSV
 
     -h, --help                      Show this information
 
@@ -39,6 +43,8 @@ from typing import Tuple, NamedTuple, Optional
 import boto3
 import requests
 from docopt import docopt
+
+NUM_THREADS = 3
 
 
 class ScanResult(NamedTuple):
@@ -193,6 +199,17 @@ def write_result(filename: str, scan: ScanResult) -> None:
         )
 
 
+def lines_in_file(filename: str) -> int:
+    """
+    Count the number of lines in a file
+
+    :param filename: A string containing the relative or absolute path to a file
+    :returns: The number of lines in the file
+    """
+    with open(filename, "r") as f:
+        return len(f.readlines())
+
+
 def scan_pdf(scan_queue: queue.Queue, verapdf_url: str, report_name: str):
     """
     Worker function. Get a PDF from the queue, download, scan and write the results to `report_name`.
@@ -244,20 +261,17 @@ def scan_all_pdfs(
     """
     if index is not None:
         # Resuming from a previous run. Load files to scan from disk and set up index
-        logging.info("Resuming from previous run")
         pdfs_to_scan = load_pdfs_to_scan_from_file()
 
         logging.info(f"Resuming scan from position: {index}")
         pdfs_to_scan = pdfs_to_scan[index:]
+        logging.info(f"{len(pdfs_to_scan)} more files to scan")
 
     else:
-        # Starting new scan. Get files to scan from S3
+        # Starting new scan. Get files to scan from S3 & save
         pdfs_to_scan = list_pdfs_in_bucket(bucket_name, framework)
-
-    total_to_scan = len(pdfs_to_scan)
-
-    save_all_pdf_names_to_scan(pdfs_to_scan)
-    logging.info(f"Scanning {total_to_scan} files")
+        save_all_pdf_names_to_scan(pdfs_to_scan)
+        logging.info(f"Scanning {len(pdfs_to_scan)} files")
 
     # Put all tasks into a queue
     scan_queue = queue.Queue()
@@ -265,7 +279,7 @@ def scan_all_pdfs(
         scan_queue.put((i, pdf))
 
     # Start threads
-    for _ in range(3):
+    for _ in range(NUM_THREADS):
         threading.Thread(
             target=scan_pdf,
             args=(scan_queue, verapdf_url, report_name)
@@ -275,7 +289,7 @@ def scan_all_pdfs(
     scan_queue.join()
 
     logging.info("Finished scanning")
-    logging.info("Removing temporary files")
+    logging.info("Removing temporary file /tmp/pdf-scan-queue.json")
     os.remove("/tmp/pdf-scan-queue.json")
 
 
@@ -287,16 +301,29 @@ if __name__ == "__main__":
     verapdf_url = args["<verapdf-url>"]
     index = None
 
-    if args.get("--index"):
-        if not os.path.exists("/tmp/pdf-scan-queue.json"):
-            raise FileNotFoundError("--index was supplied but no file found at /tmp/pdf-scan-queue.json")
-        index = int(args["--index"])
-
     logging.basicConfig(level=logging.INFO)
 
     s3_bucket = f"digitalmarketplace-documents-{stage}-{stage}"
 
     report_name = f"pdf_scan_results_{stage}-{framework}.csv"
+    logging.info(f"Writing report to ./{report_name}")
+
+    if args.get("--resume"):
+        if not os.path.exists("/tmp/pdf-scan-queue.json"):
+            raise FileNotFoundError("--resume was passed but no file found at /tmp/pdf-scan-queue.json")
+
+        if not os.path.exists(report_name):
+            raise FileNotFoundError(f"--resume was passed but no report was found as {report_name}")
+
+        # The scan which failed may not be the highest index in the queue because scans run concurrently.
+        # Stepping the index back by the number of threads ensures that all files are scanned at the
+        # cost of sometimes scanning some of them twice.
+        # Also subtract 1 from the index to remove the CSV header.
+        index = max(lines_in_file(report_name) - NUM_THREADS - 1, 0)
+        total_queue_length = lines_in_file('/tmp/pdf-scan-queue.json')
+        logging.info(f"Found scan queue at /tmp/pdf-scan-queue.json with {total_queue_length} lines")
+        logging.info(f"Resuming scan at position {index}")
+
     if index is None:
         # Only set up a new report file if this is a new run
         set_up_report_file(report_name)
