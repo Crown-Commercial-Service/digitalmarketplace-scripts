@@ -128,8 +128,9 @@ if __name__ == "__main__":
             "date of approval",
             "date of edit",
             "approved by",
-            "service ID",
             "supplier name",
+            "supplier ID",
+            "service ID",
         ]
     )
 
@@ -140,6 +141,7 @@ if __name__ == "__main__":
                 e["createdAt"],
                 e["acknowledgedBy"],
                 e["data"].get("supplierName"),
+                e["data"].get("supplierId"),
                 e["data"].get("serviceId"),
             ]
         )
