@@ -125,21 +125,23 @@ if __name__ == "__main__":
 
     writer.writerow(
         [
-            "date of approval",
             "date of edit",
+            "date of approval",
             "approved by",
-            "service ID",
             "supplier name",
+            "supplier ID",
+            "service ID",
         ]
     )
 
     for e in audit_events:
         writer.writerow(
             [
-                e["acknowledgedAt"].strftime(ISO_FORMAT),
                 e["createdAt"],
+                e["acknowledgedAt"].strftime(ISO_FORMAT),
                 e["acknowledgedBy"],
                 e["data"].get("supplierName"),
+                e["data"].get("supplierId"),
                 e["data"].get("serviceId"),
             ]
         )
