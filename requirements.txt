@@ -11,6 +11,7 @@ backoff==1.10.0           # via -r requirements.in
 blinker==1.4              # via gds-metrics
 boto3==1.14.34            # via digitalmarketplace-utils
 botocore==1.17.60         # via awscli, boto3, s3transfer
+cachelib==0.1.1           # via flask-session
 certifi==2019.11.28       # via requests
 cffi==1.14.0              # via cryptography
 chardet==3.0.4            # via requests
@@ -21,13 +22,14 @@ cryptography==3.2.1       # via digitalmarketplace-utils
 defusedxml==0.6.0         # via odfpy
 git+https://github.com/alphagov/digitalmarketplace-apiclient.git@21.10.0#egg=digitalmarketplace-apiclient==21.10.0  # via -r requirements.in
 git+https://github.com/alphagov/digitalmarketplace-content-loader.git@7.21.0#egg=digitalmarketplace-content-loader==7.21.0  # via -r requirements.in
-git+https://github.com/alphagov/digitalmarketplace-utils.git@54.1.1#egg=digitalmarketplace-utils==54.1.1  # via -r requirements.in, digitalmarketplace-content-loader
+git+https://github.com/alphagov/digitalmarketplace-utils.git@55.2.1#egg=digitalmarketplace-utils==55.2.1  # via -r requirements.in, digitalmarketplace-content-loader
 docopt==0.6.2             # via -r requirements.in, notifications-python-client
 docutils==0.15.2          # via awscli, botocore
 flask-gzip==0.2           # via digitalmarketplace-utils
 flask-login==0.5.0        # via digitalmarketplace-utils
+flask-session==0.3.2      # via digitalmarketplace-utils
 flask-wtf==0.14.3         # via digitalmarketplace-utils
-flask==1.0.4              # via -r requirements.in, digitalmarketplace-content-loader, digitalmarketplace-utils, flask-gzip, flask-login, flask-wtf, gds-metrics
+flask==1.0.4              # via -r requirements.in, digitalmarketplace-content-loader, digitalmarketplace-utils, flask-gzip, flask-login, flask-session, flask-wtf, gds-metrics
 fleep==1.0.1              # via digitalmarketplace-utils
 future==0.18.2            # via notifications-python-client
 gds-metrics==0.2.0        # via digitalmarketplace-utils
@@ -56,6 +58,7 @@ python-dateutil==2.8.1    # via -r requirements.in, botocore
 git+https://github.com/madzak/python-json-logger.git@v0.1.8#egg=python-json-logger==0.1.8  # via -r requirements.in, digitalmarketplace-utils
 pytz==2019.3              # via digitalmarketplace-utils
 pyyaml==5.3.1             # via awscli, digitalmarketplace-content-loader, yq
+redis==3.5.3              # via digitalmarketplace-utils
 requests==2.23.0          # via digitalmarketplace-apiclient, digitalmarketplace-utils, mailchimp3, notifications-python-client
 rsa==4.5                  # via awscli
 s3transfer==0.3.3         # via awscli, boto3
