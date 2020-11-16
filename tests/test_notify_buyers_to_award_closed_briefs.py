@@ -3,7 +3,7 @@ from freezegun import freeze_time
 import datetime
 import pytest
 
-from dmutils.email import EmailError
+from dmutils.email.exceptions import EmailError, EmailTemplateError
 from dmscripts import notify_buyers_to_award_closed_briefs
 
 
@@ -116,6 +116,15 @@ class TestSendEmailToBriefUserViaNotify:
             )
 
         assert failed_user == 999
+
+    def test_send_email_to_brief_user_via_notify_does_not_catch_email_template_errors(self):
+        notify_client = mock.Mock()
+        notify_client.send_email.side_effect = EmailTemplateError
+
+        with pytest.raises(EmailTemplateError):
+            notify_buyers_to_award_closed_briefs.send_email_to_brief_user_via_notify(
+                notify_client, 'NOTIFY_TEMPLATE_ID', self.brief['users'][2], self.brief, None, None
+            )
 
     @mock.patch('dmscripts.notify_buyers_to_award_closed_briefs.logger', autospec=True)
     def test_send_email_to_brief_user_via_notify_logs_instead_of_sending_for_dry_runs(self, logger):

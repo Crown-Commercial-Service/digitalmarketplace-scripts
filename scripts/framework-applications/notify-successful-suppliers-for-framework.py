@@ -36,7 +36,7 @@ sys.path.insert(0, '.')
 from docopt import docopt
 
 from dmapiclient import DataAPIClient
-from dmutils.email.exceptions import EmailError
+from dmutils.email.exceptions import EmailError, EmailTemplateError
 from dmutils.email.helpers import hash_string
 from dmscripts.helpers.email_helpers import scripts_notify_client
 from dmscripts.helpers.auth_helpers import get_auth_token
@@ -91,3 +91,6 @@ if __name__ == '__main__':
             mail_client.send_email(user_email, GOVUK_NOTIFY_TEMPLATE_ID, personalisation, allow_resend=False)
         except EmailError as e:
             logger.error(f"Error sending email to supplier user '{hash_string(user_email)}': {e}")
+
+            if isinstance(e, EmailTemplateError):
+                raise  # do not try to continue

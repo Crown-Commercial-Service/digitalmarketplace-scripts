@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 
 from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.logging_helpers import logging
-from dmutils.email.exceptions import EmailError
+from dmutils.email.exceptions import EmailError, EmailTemplateError
 from dmutils.email.dm_notify import DMNotifyClient
 from dmutils.formats import DATETIME_FORMAT
 from dmutils.env_helpers import get_web_url_from_stage
@@ -171,6 +171,8 @@ def main(data_api_url, data_api_token, email_api_key, stage, dry_run, supplier_i
             )
             try:
                 send_supplier_emails(email_api_key, email_addresses, supplier_context, logger)
+            except EmailTemplateError:
+                raise  # do not try to continue
             except EmailError:
                 failed_supplier_ids.append(supplier_id)
 

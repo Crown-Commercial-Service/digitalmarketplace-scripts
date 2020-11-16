@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, date
 
-from dmutils.email.exceptions import EmailError
+from dmutils.email.exceptions import EmailError, EmailTemplateError
 from dmutils.email.helpers import get_email_addresses, hash_string, validate_email_address
 from dmutils.formats import DATE_FORMAT
 from dmutils.env_helpers import get_web_url_from_stage
@@ -98,7 +98,7 @@ def _build_and_send_emails(brief_responses, mail_client, stage, dry_run, templat
                         'email_address': hash_string(email_address),
                     }
                 )
-            except EmailError:
+            except EmailError as e:
                 # Log individual failures in more detail
                 logger.error(
                     "Email sending failed for BriefResponse {brief_response_id} (Brief ID {brief_id})",
@@ -107,6 +107,10 @@ def _build_and_send_emails(brief_responses, mail_client, stage, dry_run, templat
                         "brief_response_id": brief_response['id']
                     }
                 )
+
+                if isinstance(e, EmailTemplateError):
+                    raise  # do not try to continue
+
                 failed_brief_responses.append(brief_response['id'])
 
     return failed_brief_responses

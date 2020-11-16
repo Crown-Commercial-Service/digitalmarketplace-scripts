@@ -1,4 +1,5 @@
 import mock
+import pytest
 from freezegun import freeze_time
 
 import datetime
@@ -8,7 +9,7 @@ from dmscripts.notify_buyers_when_requirements_close import (
     notify_users,
     main
 )
-from dmutils.email.exceptions import EmailError
+from dmutils.email.exceptions import EmailError, EmailTemplateError
 
 
 NOTIFY_API_KEY = "1" * 73
@@ -97,6 +98,23 @@ def test_notify_users_returns_false_on_error(send_email):
             {'emailAddress': 'c@example.com', 'active': True},
         ],
     })
+
+
+@mock.patch('dmscripts.notify_buyers_when_requirements_close.DMNotifyClient.send_email', autospec=True)
+def test_notify_users_raises_email_template_error(send_email):
+    send_email.side_effect = EmailTemplateError('Error')
+    with pytest.raises(EmailTemplateError):
+        notify_users(NOTIFY_API_KEY, 'preview', {
+            'id': 100,
+            'title': 'My brief title',
+            'lotSlug': 'lot-slug',
+            'frameworkSlug': 'framework-slug',
+            'users': [
+                {'emailAddress': 'a@example.com', 'active': True},
+                {'emailAddress': 'b@example.com', 'active': False},
+                {'emailAddress': 'c@example.com', 'active': True},
+            ],
+        })
 
 
 @mock.patch('dmscripts.notify_buyers_when_requirements_close.notify_users')

@@ -2,7 +2,7 @@
 from datetime import datetime, date, timedelta
 
 import dmapiclient
-from dmutils.email.exceptions import EmailError
+from dmutils.email.exceptions import EmailError, EmailTemplateError
 from dmutils.formats import DATE_FORMAT
 
 from dmscripts.helpers import logging_helpers, brief_data_helpers
@@ -72,6 +72,8 @@ def send_email_to_brief_user_via_notify(notify_client, notify_template_id, user,
                 notify_client.send_email(
                     user['emailAddress'], notify_template_id, email_context_data, allow_resend=False
                 )
+        except EmailTemplateError:
+            raise  # do not try to continue
         except EmailError:
             return user['id']
 

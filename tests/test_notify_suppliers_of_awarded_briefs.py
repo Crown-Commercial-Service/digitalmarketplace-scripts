@@ -1,9 +1,10 @@
 import mock
+import pytest
 
 from freezegun import freeze_time
 
 from dmscripts import notify_suppliers_of_awarded_briefs as tested_script
-from dmutils.email.exceptions import EmailError
+from dmutils.email.exceptions import EmailError, EmailTemplateError
 from dmutils.email.helpers import hash_string
 
 
@@ -253,3 +254,30 @@ def test_main_catches_email_errors_and_returns_ids(data_api_client, notify_clien
             }
         )
     ]
+
+
+@mock.patch('dmutils.email.DMNotifyClient', autospec=True)
+@mock.patch('dmapiclient.DataAPIClient', autospec=True)
+def test_main_does_not_catch_email_template_errors(data_api_client, notify_client):
+    logger = mock.Mock()
+    notify_client.send_email.side_effect = EmailTemplateError
+    data_api_client.find_brief_responses_iter.side_effect = [
+        [_get_dummy_brief_response(4321, AWARDED_BRIEFS[0], awarded=True)],
+        [_get_dummy_brief_response(1234, AWARDED_BRIEFS[0], awarded=False)],
+    ]
+
+    with pytest.raises(EmailTemplateError):
+        tested_script.main(
+            data_api_client, notify_client, 'notify_template_id', 'preview', logger
+        )
+
+    assert logger.error.call_args_list == [
+        mock.call(
+            'Email sending failed for BriefResponse {brief_response_id} (Brief ID {brief_id})',
+            extra={
+                "brief_id": 123,
+                "brief_response_id": 4321
+            }
+        ),
+    ]
+    assert logger.info.call_args_list == []
