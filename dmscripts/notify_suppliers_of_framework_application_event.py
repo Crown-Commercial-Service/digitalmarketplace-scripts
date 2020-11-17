@@ -8,7 +8,7 @@ from warnings import warn
 from dmapiclient import DataAPIClient
 
 from dmutils.email import DMNotifyClient
-from dmutils.email.exceptions import EmailError
+from dmutils.email.exceptions import EmailError, EmailTemplateError
 from dmutils.email.helpers import hash_string
 from dmutils.env_helpers import get_web_url_from_stage
 from dmutils import formats
@@ -123,5 +123,8 @@ def notify_suppliers_of_framework_application_event(
                                 "e": str(e),
                             },
                         )
+
+                        if isinstance(e, EmailTemplateError):
+                            raise  # do not try to continue
 
     return failure_count

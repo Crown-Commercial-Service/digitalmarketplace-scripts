@@ -1,4 +1,4 @@
-from dmutils.email.exceptions import EmailError
+from dmutils.email.exceptions import EmailError, EmailTemplateError
 from dmutils.email.helpers import hash_string
 from dmscripts.helpers.supplier_data_helpers import AppliedToFrameworkSupplierContextForNotify
 
@@ -35,6 +35,10 @@ def notify_suppliers_whether_application_made(
                 mail_client.send_email(user_email, template, personalisation, allow_resend=False)
             except EmailError as e:
                 logger.error(f"Error sending email to supplier '{supplier_id}' user '{hash_string(user_email)}': {e}")
+
+                if isinstance(e, EmailTemplateError):
+                    raise  # do not try to continue
+
                 error_count += 1
 
     return error_count

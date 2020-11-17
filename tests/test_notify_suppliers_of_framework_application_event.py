@@ -8,7 +8,8 @@ from freezegun import freeze_time
 from dmapiclient import DataAPIClient
 from dmtestutils.api_model_stubs import FrameworkStub, SupplierFrameworkStub
 from dmtestutils.comparisons import AnyStringMatching
-from dmutils.email import DMNotifyClient, EmailError
+from dmutils.email import DMNotifyClient
+from dmutils.email.exceptions import EmailError, EmailTemplateError
 
 from dmscripts.notify_suppliers_of_framework_application_event import \
     notify_suppliers_of_framework_application_event
@@ -359,4 +360,33 @@ class TestNotifySuppliersOfFrameworkApplicationEvent:
             "two@peasoup.net",
             "two@shirts.co.ua",
             "three@shirts.co.ua",
+        )
+
+    def test_template_failure_does_not_continue(self):
+
+        self.mock_notify_client.send_email.side_effect = EmailTemplateError("foo")
+
+        with pytest.raises(EmailTemplateError):
+            notify_suppliers_of_framework_application_event(
+                data_api_client=self.mock_data_api_client,
+                notify_client=self.mock_notify_client,
+                notify_template_id="8877eeff",
+                framework_slug="g-cloud-99",
+                dry_run=False,
+                stage="production",
+                logger=self.mock_logger,
+                run_id=uuid.UUID("12345678-1234-5678-1234-567812345678"),
+            )
+
+        assert mock.call.error(
+            "Failed sending to {email_hash}: {e}",
+            extra={
+                "email_hash": mock.ANY,
+                "e": AnyStringMatching("foo"),
+            },
+        ) in self.mock_logger.mock_calls
+
+        # check that we do not end up trying to send all emails instead of giving up after error
+        assert tuple(call[0][0] for call in self.mock_notify_client.send_email.call_args_list) == (
+            "one@peasoup.net",
         )

@@ -6,7 +6,7 @@ from dmapiclient import APIError
 from dmutils.documents import generate_timestamped_document_upload_path, generate_download_filename, \
     COUNTERPART_FILENAME
 from dmutils.email.helpers import hash_string
-from dmutils.email.exceptions import EmailError
+from dmutils.email.exceptions import EmailError, EmailTemplateError
 
 from dmscripts.bulk_upload_documents import get_supplier_id_from_framework_file_path
 from dmscripts.helpers import logging_helpers
@@ -88,13 +88,19 @@ def upload_counterpart_file(
                 else:
                     logger.info(
                         f"[Dry-run] Send notify email to supplier '{supplier_id}' user {hash_string(notify_email)}")
-            except EmailError:
+            except EmailError as e:
                 logger.error(
                     f"NOTIFY: Error sending email to supplier '{supplier_id}' user {hash_string(notify_email)}")
+
+                if isinstance(e, EmailTemplateError):
+                    raise  # do not try to continue
+
                 if notify_fail_early:
                     raise
+
                 else:
                     failed_send_email_calls += 1
+
     # just catching these exceptions for logging then reraising
     except (OSError, IOError) as e:
         logger.error("Error reading file '{}': {}".format(file_path, e.message))

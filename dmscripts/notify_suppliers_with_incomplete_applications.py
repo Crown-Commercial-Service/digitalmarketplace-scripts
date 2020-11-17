@@ -1,5 +1,5 @@
 from dmscripts.helpers.email_helpers import scripts_notify_client
-from dmutils.email.exceptions import EmailError
+from dmutils.email.exceptions import EmailError, EmailTemplateError
 from dmutils.email.helpers import hash_string
 from dmutils.formats import utctoshorttimelongdateformat
 
@@ -39,6 +39,10 @@ def send_notification(mail_client, message, framework, email, supplier_id, dry_r
                 f"Error sending email to supplier '{supplier_id}' "
                 f"user '{hash_string(email)}': {e}"
             )
+
+            if isinstance(e, EmailTemplateError):
+                raise  # do not try to continue
+
             return 1
     return 0
 

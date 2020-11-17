@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 import dmapiclient
 from dmutils.email.dm_notify import DMNotifyClient
-from dmutils.email.exceptions import EmailError
+from dmutils.email.exceptions import EmailError, EmailTemplateError
 from dmutils.env_helpers import get_web_url_from_stage
 from dmutils.formats import DATE_FORMAT
 
@@ -48,6 +48,9 @@ def notify_users(email_api_key, stage, brief):
                 "Email failed to send for brief_id: {brief_id}",
                 extra={'error': e, 'brief_id': brief['id']}
             )
+
+            if isinstance(e, EmailTemplateError):
+                raise  # do not try to continue
 
             return False
 

@@ -1,10 +1,10 @@
+from datetime import datetime
+
 import mock
 import pytest
 from freezegun import freeze_time
-from dmutils.email.exceptions import EmailError
 
-from datetime import datetime
-
+from dmutils.email.exceptions import EmailError, EmailTemplateError
 from dmscripts.notify_suppliers_of_new_questions_answers import (
     main,
     get_live_briefs_with_new_questions_and_answers_between_two_dates,
@@ -470,6 +470,41 @@ def test_main_catches_and_logs_email_errors_returns_false(
         'Email sending failed for the following supplier IDs: {supplier_ids}',
         extra={"supplier_ids": "3,5"}
     )
+
+
+@mock.patch(MODULE_UNDER_TEST + '.logger', autospec=True)
+@mock.patch(MODULE_UNDER_TEST + '.send_supplier_emails', autospec=True)
+@mock.patch(MODULE_UNDER_TEST + '.get_supplier_email_addresses_by_supplier_id', autospec=True)
+@mock.patch(MODULE_UNDER_TEST + '.get_ids_of_interested_suppliers_for_briefs', autospec=True)
+@mock.patch(MODULE_UNDER_TEST + '.get_live_briefs_with_new_questions_and_answers_between_two_dates', autospec=True)
+@mock.patch(MODULE_UNDER_TEST + '.dmapiclient.DataAPIClient')
+def test_main_raises_email_template_error(
+    data_api_client,
+    get_live_briefs_with_new_questions_and_answers_between_two_dates,
+    get_ids_of_interested_suppliers_for_briefs,
+    get_supplier_email_addresses_by_supplier_id,
+    send_supplier_emails,
+    logger
+):
+    get_live_briefs_with_new_questions_and_answers_between_two_dates.return_value = [
+        FILTERED_BRIEFS[0]
+    ]
+    get_ids_of_interested_suppliers_for_briefs.return_value = {
+        3: [FILTERED_BRIEFS[0]["id"]],
+        4: [FILTERED_BRIEFS[0]["id"]],
+        5: [FILTERED_BRIEFS[0]["id"]],
+    }
+    get_supplier_email_addresses_by_supplier_id.side_effect = [
+        ['a@example.com'], ['b@example.com'], ['c@example.com']
+    ]
+    send_supplier_emails.side_effect = EmailTemplateError
+
+    with pytest.raises(EmailTemplateError):
+        main('api_url', 'api_token', 'M', 'preview', dry_run=False)
+
+    assert send_supplier_emails.call_args_list == [
+        mock.call('M', ['a@example.com'], mock.ANY, mock.ANY),
+    ]
 
 
 @mock.patch(MODULE_UNDER_TEST + '.logger', autospec=True)
