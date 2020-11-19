@@ -1,0 +1,331 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "allOf": [
+    {
+      "$ref": "#/definitions/baseline"
+    },
+    {
+      "properties": {
+        "bankrupt": {
+          "enum": [
+            false
+          ]
+        },
+        "confidentialInformation": {
+          "enum": [
+            false
+          ]
+        },
+        "conflictOfInterest": {
+          "enum": [
+            false
+          ]
+        },
+        "distortedCompetition": {
+          "enum": [
+            false
+          ]
+        },
+        "distortingCompetition": {
+          "enum": [
+            false
+          ]
+        },
+        "environmentalSocialLabourLaw": {
+          "enum": [
+            false
+          ]
+        },
+        "graveProfessionalMisconduct": {
+          "enum": [
+            false
+          ]
+        },
+        "incorrectTaxReturns": {
+          "enum": [
+            false
+          ]
+        },
+        "influencedContractingAuthority": {
+          "enum": [
+            false
+          ]
+        },
+        "misleadingInformation": {
+          "enum": [
+            false
+          ]
+        },
+        "modernSlaveryReportingRequirements": {
+          "enum": [
+            true
+          ]
+        },
+        "seriousMisrepresentation": {
+          "enum": [
+            false
+          ]
+        },
+        "significantOrPersistentDeficiencies": {
+          "enum": [
+            false
+          ]
+        },
+        "taxEvasion": {
+          "enum": [
+            false
+          ]
+        },
+        "unspentTaxConvictions": {
+          "enum": [
+            false
+          ]
+        },
+        "witheldSupportingDocuments": {
+          "enum": [
+            false
+          ]
+        }
+      }
+    }
+  ],
+  "definitions": {
+    "baseline": {
+      "$schema": "http://json-schema.org/draft-04/schema#",
+      "allOf": [
+        {
+          "properties": {
+            "10WorkingDays": {
+              "enum": [
+                true
+              ]
+            },
+            "MI": {
+              "enum": [
+                true
+              ]
+            },
+            "accurateInformation": {
+              "enum": [
+                true
+              ]
+            },
+            "accuratelyDescribed": {
+              "enum": [
+                true
+              ]
+            },
+            "canProvideFromDayOne": {
+              "enum": [
+                true
+              ]
+            },
+            "civilServiceValues": {
+              "enum": [
+                true
+              ]
+            },
+            "conspiracy": {
+              "enum": [
+                false
+              ]
+            },
+            "continuousProfessionalDevelopment": {
+              "enum": [
+                true
+              ]
+            },
+            "corruptionBribery": {
+              "enum": [
+                false
+              ]
+            },
+            "customerSatisfactionProcess": {
+              "enum": [
+                true
+              ]
+            },
+            "employersLiabilityInsurance": {
+              "enum": [
+                "insurance",
+                "not-applicable"
+              ]
+            },
+            "employmentStatus": {
+              "enum": [
+                true
+              ]
+            },
+            "environmentallyFriendly": {
+              "enum": [
+                true
+              ]
+            },
+            "equalityAndDiversity": {
+              "enum": [
+                true
+              ]
+            },
+            "evidence": {
+              "enum": [
+                true
+              ]
+            },
+            "fraudAndTheft": {
+              "enum": [
+                false
+              ]
+            },
+            "fullAccountability": {
+              "enum": [
+                true
+              ]
+            },
+            "helpBuyersComplyTechnologyCodesOfPractice": {
+              "enum": [
+                true
+              ]
+            },
+            "informationChanges": {
+              "enum": [
+                true
+              ]
+            },
+            "offerServicesYourselves": {
+              "enum": [
+                true
+              ]
+            },
+            "organisedCrime": {
+              "enum": [
+                false
+              ]
+            },
+            "proofOfClaims": {
+              "enum": [
+                true
+              ]
+            },
+            "publishContracts": {
+              "enum": [
+                true
+              ]
+            },
+            "readUnderstoodGuidance": {
+              "enum": [
+                true
+              ]
+            },
+            "safeguardPersonalData": {
+              "enum": [
+                true
+              ]
+            },
+            "safeguardingOfficialInformation": {
+              "enum": [
+                true
+              ]
+            },
+            "serviceStandard": {
+              "enum": [
+                true
+              ]
+            },
+            "skillsAndCapabilityAssessment": {
+              "enum": [
+                true
+              ]
+            },
+            "skillsAndResources": {
+              "enum": [
+                true
+              ]
+            },
+            "termsAndConditions": {
+              "enum": [
+                true
+              ]
+            },
+            "termsOfParticipation": {
+              "enum": [
+                true
+              ]
+            },
+            "terrorism": {
+              "enum": [
+                false
+              ]
+            },
+            "transparentContracting": {
+              "enum": [
+                true
+              ]
+            },
+            "unfairCompetition": {
+              "enum": [
+                false
+              ]
+            }
+          }
+        }
+      ],
+      "required": [
+        "10WorkingDays",
+        "MI",
+        "accurateInformation",
+        "accuratelyDescribed",
+        "canProvideFromDayOne",
+        "civilServiceValues",
+        "conspiracy",
+        "continuousProfessionalDevelopment",
+        "corruptionBribery",
+        "customerSatisfactionProcess",
+        "employersLiabilityInsurance",
+        "employmentStatus",
+        "environmentallyFriendly",
+        "equalityAndDiversity",
+        "evidence",
+        "fraudAndTheft",
+        "fullAccountability",
+        "helpBuyersComplyTechnologyCodesOfPractice",
+        "informationChanges",
+        "offerServicesYourselves",
+        "organisedCrime",
+        "proofOfClaims",
+        "publishContracts",
+        "readUnderstoodGuidance",
+        "safeguardPersonalData",
+        "safeguardingOfficialInformation",
+        "serviceStandard",
+        "skillsAndCapabilityAssessment",
+        "skillsAndResources",
+        "termsAndConditions",
+        "termsOfParticipation",
+        "terrorism",
+        "transparentContracting",
+        "unfairCompetition"
+      ],
+      "title": "digital-outcomes-and-specialists-5 Declaration Assessment Schema (Baseline Schema)",
+      "type": "object"
+    }
+  },
+  "required": [
+    "bankrupt",
+    "confidentialInformation",
+    "conflictOfInterest",
+    "distortedCompetition",
+    "distortingCompetition",
+    "environmentalSocialLabourLaw",
+    "graveProfessionalMisconduct",
+    "incorrectTaxReturns",
+    "influencedContractingAuthority",
+    "misleadingInformation",
+    "seriousMisrepresentation",
+    "significantOrPersistentDeficiencies",
+    "taxEvasion",
+    "unspentTaxConvictions",
+    "witheldSupportingDocuments"
+  ],
+  "title": "digital-outcomes-and-specialists-5 Declaration Assessment Schema (Definite Pass Schema)",
+  "type": "object"
+}
