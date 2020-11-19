@@ -26,7 +26,7 @@ from dmscripts.helpers.updated_by_helpers import get_user
 
 
 def get_slavery_statement_declaration_key(declaration):
-    if declaration['declaration']['modernSlaveryStatement']:
+    if declaration['declaration'].get('modernSlaveryStatement'):
         return 'modernSlaveryStatement'
 
     return 'modernSlaveryStatementOptional'
