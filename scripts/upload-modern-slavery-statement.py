@@ -22,10 +22,11 @@ import sys
 
 sys.path.insert(0, '.')
 from dmscripts.helpers.auth_helpers import get_auth_token
+from dmscripts.helpers.updated_by_helpers import get_user
 
 
 def get_slavery_statement_declaration_key(declaration):
-    if declaration['declaration']['modernSlaveryStatement']:
+    if declaration['declaration'].get('modernSlaveryStatement'):
         return 'modernSlaveryStatement'
 
     return 'modernSlaveryStatementOptional'
@@ -44,11 +45,11 @@ if __name__ == '__main__':
     s3_key_name = f"{framework}/documents/{supplier_id}/{s3_file_name}"
     asset_url = f"https://assets.digitalmarketplace.service.gov.uk/{s3_key_name}"
 
-    data_api_client = DataAPIClient(get_api_endpoint_from_stage(stage), get_auth_token('api', stage))
+    user = get_user()
+    print(f"Setting user to '{user}'...")
+
+    data_api_client = DataAPIClient(get_api_endpoint_from_stage(stage), get_auth_token('api', stage), user=user)
     supplier_declaration = data_api_client.get_supplier_declaration(supplier_id, framework)
-    supplier_service_link = next(
-        data_api_client.find_services_iter(supplier_id=supplier_id, framework=framework)
-    )['links']['self']
 
     bucket = S3(bucket_name)
     with open(file_path, 'br') as source_file:
@@ -63,4 +64,4 @@ if __name__ == '__main__':
         }
     )
 
-    print(f"Updated modern slavery statement. Check {supplier_service_link}")
+    print("Updated modern slavery statement. If G-Cloud, check the link in one of the supplier's services.")
