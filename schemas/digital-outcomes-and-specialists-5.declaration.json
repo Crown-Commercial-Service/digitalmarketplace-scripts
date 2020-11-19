@@ -263,7 +263,7 @@
             },
             "unfairCompetition": {
               "enum": [
-                false
+                true
               ]
             }
           }
