@@ -21,7 +21,6 @@ Example:
 """
 
 
-import csv
 import itertools
 import sys
 from datetime import datetime, timedelta
@@ -37,20 +36,8 @@ from dmutils.env_helpers import get_api_endpoint_from_stage
 sys.path.insert(0, ".")
 
 from dmscripts.helpers.auth_helpers import get_auth_token
-
-
-ISO_FORMAT = "%Y-%m-%dT%H:%M:%S.%fZ"
-DEFAULT_DATETIME = "1970-01-01T00:00:00.000000Z"
-
-
-def parse_datetime(s: str) -> datetime:
-    try:
-        return datetime.strptime(s, ISO_FORMAT)
-    except ValueError as e:
-        if len(s) < len(DEFAULT_DATETIME):
-            return datetime.strptime(s + DEFAULT_DATETIME[len(s):], ISO_FORMAT)
-        else:
-            raise e
+from dmscripts.helpers.datetime_helpers import ISO_FORMAT, parse_datetime
+from dmscripts.export_service_edits import write_service_edits_csv
 
 
 def find_approved_service_edits(
@@ -120,28 +107,4 @@ if __name__ == "__main__":
         lambda e: validate_email_address(e["acknowledgedBy"]), audit_events
     )
 
-    # write details as csv
-    writer = csv.writer(sys.stdout)
-
-    writer.writerow(
-        [
-            "date of edit",
-            "date of approval",
-            "approved by",
-            "supplier name",
-            "supplier ID",
-            "service ID",
-        ]
-    )
-
-    for e in audit_events:
-        writer.writerow(
-            [
-                e["createdAt"],
-                e["acknowledgedAt"].strftime(ISO_FORMAT),
-                e["acknowledgedBy"],
-                e["data"].get("supplierName"),
-                e["data"].get("supplierId"),
-                e["data"].get("serviceId"),
-            ]
-        )
+    write_service_edits_csv(sys.stdout, audit_events, data_api_client)
