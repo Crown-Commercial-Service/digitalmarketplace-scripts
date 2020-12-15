@@ -8,7 +8,7 @@ from logging import DEBUG, INFO, WARNING, ERROR, CRITICAL, getLogger, Logger  # 
 from dmutils.logging import CustomLogFormatter
 
 LOG_FORMAT = '%(asctime)s %(name)s %(levelname)s %(message)s'
-TIMESTAMP_FORMAT = '%Y-%m-%d %H:%M:%S,uuu %Z'
+TIMESTAMP_FORMAT = '%Y-%m-%d %H:%M:%S %Z'
 
 
 def get_logger() -> Logger:
