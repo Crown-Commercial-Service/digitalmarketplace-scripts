@@ -167,7 +167,7 @@ if __name__ == '__main__':
 
     ok = True
     for html_dir, html_pages in html_to_render:
-        ok &= render_pdf_for_each_html_page(html_pages, html_dir, args['<output_folder>'])
+        ok &= render_pdf_for_each_html_page(html_pages, html_dir, args['<output_folder>'], framework['slug'])
 
     if ok:
         shutil.rmtree(html_dir)
