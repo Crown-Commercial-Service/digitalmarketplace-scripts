@@ -5,6 +5,8 @@ import subprocess
 from pathlib import Path
 
 from datetime import datetime
+from typing import NamedTuple
+
 from PyPDF2 import PdfFileMerger
 
 from dmscripts.helpers.html_helpers import render_html
@@ -210,28 +212,34 @@ def render_pdf_for_each_html_page(html_pages, html_dir, pdf_dir, framework_slug)
 
 def merge_e_signature_docs(input_dir, output_dir, framework_slug):
     supplier_id = input_dir.name
+
+    class PdfWithOffset(NamedTuple):
+        filename: str
+        position_offset: int = 0
+
     if framework_slug == "g-cloud-12":
         pdf_list = [
-            input_dir / f"{supplier_id}-framework-agreement-cover-page.pdf",
-            input_dir / "framework-agreement-toc.pdf",
-            input_dir / f"{supplier_id}-framework-agreement-appointment-page-1.pdf",
-            input_dir / f"{supplier_id}-framework-agreement-appointment-page-2.pdf",
-            input_dir / "framework-agreement-boilerplate.pdf",
+            PdfWithOffset(input_dir / f"{supplier_id}-framework-agreement-cover-page.pdf"),
+            PdfWithOffset(input_dir / "framework-agreement-toc.pdf"),
+            PdfWithOffset(input_dir / f"{supplier_id}-framework-agreement-appointment-page-1.pdf"),
+            PdfWithOffset(input_dir / f"{supplier_id}-framework-agreement-appointment-page-2.pdf"),
+            PdfWithOffset(input_dir / "framework-agreement-boilerplate.pdf"),
         ]
-
     elif framework_slug == "digital-outcomes-and-specialists-5":
         pdf_list = [
-            input_dir / "cover-page.pdf",
-            input_dir / f"{supplier_id}-framework-award-section-1.pdf",
-            input_dir / "boilerplate.pdf",
-            input_dir / f"{supplier_id}-framework-award-section-2.pdf"
+            PdfWithOffset(input_dir / "cover-page.pdf"),
+            PdfWithOffset(input_dir / f"{supplier_id}-framework-award-section-1.pdf"),
+            PdfWithOffset(input_dir / "boilerplate.pdf"),
+            PdfWithOffset(input_dir / f"{supplier_id}-framework-award-section-2.pdf", 5)
         ]
     else:
-        raise ValueError(f"Unsupported e-signatures framework {framework_slug}")
+        raise ValueError(f"Unsupported e-signature framework {framework_slug}")
 
-    assert all(pdf.exists() for pdf in pdf_list)
+    assert all(pdf.filename.exists() for pdf in pdf_list)
 
     pdf_file_merger = PdfFileMerger()
-    for index, filename in enumerate(pdf_list):
-        pdf_file_merger.merge(position=index, fileobj=str(filename.resolve()), import_bookmarks=False)
+    for index, PdfWithOffset in enumerate(pdf_list):
+        pdf_file_merger.merge(position=index + PdfWithOffset.position_offset,
+                              fileobj=str(PdfWithOffset.filename.resolve()),
+                              import_bookmarks=False)
     pdf_file_merger.write(f"{output_dir}/{supplier_id}-framework-agreement-signature-page.pdf")
