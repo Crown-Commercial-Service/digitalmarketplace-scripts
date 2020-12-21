@@ -31,7 +31,9 @@ def remove_username_from_email_address(ea):
     return '{}'.format(ea.split('@').pop()) if ea else None
 
 
-def _build_row(brief: dict, brief_responses: List[dict]) -> OrderedDict:
+def _build_row(
+    brief: dict, brief_responses: List[dict], include_buyer_user_details: bool = False
+) -> OrderedDict:
     winner = None
     applications_from_sme_suppliers = 0
     applications_from_large_suppliers = 0
@@ -45,7 +47,7 @@ def _build_row(brief: dict, brief_responses: List[dict]) -> OrderedDict:
         if brief_response['status'] == 'awarded':
             winner = brief_response
 
-    return OrderedDict(zip(DOS_OPPORTUNITY_HEADERS, [
+    row = OrderedDict(zip(DOS_OPPORTUNITY_HEADERS, [
         brief['id'],
         brief['title'],
         PUBLIC_BRIEF_URL.format(brief['id']),
@@ -69,6 +71,16 @@ def _build_row(brief: dict, brief_responses: List[dict]) -> OrderedDict:
         len(brief['clarificationQuestions'])
     ]))
 
+    if include_buyer_user_details:
+        buyer_user = brief["users"][0]
+        row.update([
+            ("Buyer user name", buyer_user["name"]),
+            ("Buyer email address", buyer_user["emailAddress"]),
+            ("Buyer phone number", buyer_user.get("phoneNumber", "")),
+        ])
+
+    return row
+
 
 def get_latest_dos_framework(client) -> str:
     frameworks = client.find_frameworks()['frameworks']
@@ -79,7 +91,7 @@ def get_latest_dos_framework(client) -> str:
     return 'digital-outcomes-and-specialists'
 
 
-def get_brief_data(client, logger) -> list:
+def get_brief_data(client, logger, include_buyer_user_details: bool = False) -> list:
     logger.info("Fetching closed briefs from API")
     briefs = client.find_briefs_iter(status="closed,awarded,unsuccessful,cancelled", with_users=True,
                                      with_clarification_questions=True)
@@ -87,7 +99,7 @@ def get_brief_data(client, logger) -> list:
     for brief in briefs:
         logger.info(f"Fetching brief responses for Brief ID {brief['id']}")
         brief_responses = client.find_brief_responses_iter(brief_id=brief['id'])
-        rows.append(_build_row(brief, brief_responses))
+        rows.append(_build_row(brief, brief_responses, include_buyer_user_details))
     return rows
 
 
@@ -104,18 +116,35 @@ def write_rows_to_csv(rows: List[Mapping[str, Any]], file_path: str, logger) -> 
             writer.writerow(row)
 
 
-def upload_file_to_s3(file_path, bucket, remote_key_name, download_name, dry_run, logger):
+def upload_file_to_s3(
+    file_path,
+    bucket,
+    remote_key_name: str,
+    download_name: str,
+    *,
+    public: bool = True,
+    dry_run: bool = False,
+    logger,
+):
     with open(file_path, 'br') as source_file:
-        logger.info("{}UPLOAD: {} to {}::{}".format(
+        acl = "public-read" if public else "private"
+
+        logger.info("{}UPLOAD: {} to {}::{} with acl {}".format(
             '[Dry-run]' if dry_run else '',
             file_path,
             bucket.bucket_name,
-            download_name
+            download_name,
+            acl
         ))
 
         if not dry_run:
             # Save file
-            bucket.save(remote_key_name, source_file, acl='public-read', download_filename=download_name)
+            bucket.save(
+                remote_key_name,
+                source_file,
+                acl=acl,
+                download_filename=download_name
+            )
 
 
 def export_dos_opportunities(
@@ -132,27 +161,44 @@ def export_dos_opportunities(
 
     latest_framework_slug = get_latest_dos_framework(client)
 
-    file_path = output_dir / DOWNLOAD_FILE_NAME
-    bucket_name = get_bucket_name(stage, "communications")
-    key_name = f"{latest_framework_slug}/communications/data/{DOWNLOAD_FILE_NAME}"
+    communications_bucket = S3(get_bucket_name(stage, "communications"))
+    reports_bucket = S3(get_bucket_name(stage, "reports"))
 
     logger.info("Exporting DOS opportunity data to CSV")
 
     # Get the data
-    rows = get_brief_data(client, logger)
+    rows = get_brief_data(client, logger, include_buyer_user_details=True)
 
-    # Construct CSV
-    write_rows_to_csv(rows, file_path, logger)
+    # Construct CSV for admins
+    write_rows_to_csv(rows, output_dir / "opportunity-data-for-admins.csv", logger)
+    # Construct public CSV (filter out buyer details)
+    write_rows_to_csv(
+        [
+            OrderedDict((k, v) for k, v in row.items() if k in DOS_OPPORTUNITY_HEADERS)
+            for row in rows
+        ],
+        output_dir / DOWNLOAD_FILE_NAME,
+        logger
+    )
 
-    # Grab bucket
-    bucket = S3(bucket_name)
-
-    # Upload to S3
+    # Upload admin CSV to reports bucket
     upload_file_to_s3(
-        file_path,
-        bucket,
-        key_name,
+        output_dir / "opportunity-data-for-admins.csv",
+        reports_bucket,
+        f"{latest_framework_slug}/reports/{DOWNLOAD_FILE_NAME}",
         DOWNLOAD_FILE_NAME,
+        public=False,
+        dry_run=dry_run,
+        logger=logger
+    )
+
+    # Upload public CSV to S3
+    upload_file_to_s3(
+        output_dir / DOWNLOAD_FILE_NAME,
+        communications_bucket,
+        f"{latest_framework_slug}/communications/data/{DOWNLOAD_FILE_NAME}",
+        DOWNLOAD_FILE_NAME,
+        public=True,
         dry_run=dry_run,
         logger=logger
     )

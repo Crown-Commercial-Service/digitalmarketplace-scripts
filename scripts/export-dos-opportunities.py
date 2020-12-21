@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 """Generate DOS opportunity data export CSV
 
-Loads data from the Brief and BriefResponse API models, filters for closed/awarded briefs and stores the output
-in the CSV.
+Loads data from the Brief and BriefResponse API models, filters for
+closed/awarded briefs and stores the output in the CSV.
+
+This script generates two CSVs, one with buyer user details and one without.
+
+The CSV without buyer user details is made publically available by uploading to
+the communications bucket, the CSV with buyer user details should be available
+to admins only so it is uploaded to the reports bucket.
 
 Usage:
     scripts/export-dos-opportunities.py [options] <stage>

@@ -1,4 +1,5 @@
 import builtins
+import csv
 from collections import OrderedDict
 from pathlib import Path
 
@@ -29,7 +30,11 @@ example_brief = {
     "contractLength": "6 months",
     "status": "awarded",
     "users": [
-        {"emailAddress": "shouldnt-be-visible@example.gov.uk"}
+        {
+            "name": "My Name",
+            "emailAddress": "private-email-address@example.gov.uk",
+            "phoneNumber": "07700 900461",
+        }
     ],
     "clarificationQuestions": [
         {
@@ -166,6 +171,26 @@ class TestGetBriefData:
             mock.call('Fetching brief responses for Brief ID 12345')
         ]
 
+    def test_get_brief_data_with_buyer_user_details(self):
+        client = mock.Mock(spec=DataAPIClient)
+        client.find_briefs_iter.return_value = [example_brief]
+        client.find_brief_responses_iter.return_value = [
+            example_winning_brief_response,
+            BriefResponseStub().response()
+        ]
+
+        logger = mock.Mock()
+
+        row = get_brief_data(client, logger, include_buyer_user_details=True)[0]
+
+        assert list(row.keys())[-3:] == [
+            "Buyer user name", "Buyer email address", "Buyer phone number"
+        ]
+
+        assert row["Buyer user name"] == "My Name"
+        assert row["Buyer email address"] == "private-email-address@example.gov.uk"
+        assert row["Buyer phone number"] == "07700 900461"
+
 
 class TestUploadFileToS3:
 
@@ -177,7 +202,12 @@ class TestUploadFileToS3:
 
         with mock.patch.object(builtins, 'open', mock.mock_open()) as mock_open:
             upload_file_to_s3(
-                "local/path", bucket, "remote/key/name", "opportunity-data.csv", dry_run, logger
+                "local/path",
+                bucket,
+                "remote/key/name",
+                "opportunity-data.csv",
+                dry_run=dry_run,
+                logger=logger
             )
 
         assert mock_open.called is True
@@ -185,9 +215,11 @@ class TestUploadFileToS3:
             mock.call("remote/key/name", "local/path", acl='public-read', download_filename="opportunity-data.csv")
         ])
         assert logger.info.call_args_list == ([
-            mock.call("[Dry-run]UPLOAD: local/path to mybucket::opportunity-data.csv")
+            mock.call(
+                "[Dry-run]UPLOAD: local/path to mybucket::opportunity-data.csv with acl public-read"
+            )
         ] if dry_run else [
-            mock.call("UPLOAD: local/path to mybucket::opportunity-data.csv")
+            mock.call("UPLOAD: local/path to mybucket::opportunity-data.csv with acl public-read")
         ])
 
 
@@ -206,6 +238,12 @@ class TestExportDOSOpportunities:
             ]
         }
 
+        data_api_client.find_briefs_iter.return_value = [example_brief]
+        data_api_client.find_brief_responses_iter.return_value = [
+            example_winning_brief_response,
+            BriefResponseStub().response()
+        ]
+
         return data_api_client
 
     @pytest.fixture
@@ -220,12 +258,6 @@ class TestExportDOSOpportunities:
     def test_it_uploads_brief_data_to_s3_as_a_csv(
         self, data_api_client, logger, s3, tmp_path
     ):
-        data_api_client.find_briefs_iter.return_value = [example_brief]
-        data_api_client.find_brief_responses_iter.return_value = [
-            example_winning_brief_response,
-            BriefResponseStub().response()
-        ]
-
         export_dos_opportunities(
             data_api_client,
             logger,
@@ -235,11 +267,75 @@ class TestExportDOSOpportunities:
         )
 
         assert (tmp_path / "opportunity-data.csv").exists()
-        assert s3().save.call_args_list == [mock.call(
+        assert mock.call(
             "digital-outcomes-and-specialists-3/communications/data/opportunity-data.csv",
             mock.ANY,  # CSV file
             acl="public-read",
             download_filename="opportunity-data.csv",
-        )]
-        assert Path(s3().save.call_args[0][1].name) \
+        ) in s3().save.call_args_list
+        assert Path(s3().save.call_args_list[1][0][1].name) \
             == (tmp_path / "opportunity-data.csv")
+
+    def test_public_csv_does_not_contain_buyer_user_details(
+        self, data_api_client, logger, s3, tmp_path
+    ):
+        export_dos_opportunities(
+            data_api_client,
+            logger,
+            stage="development",
+            output_dir=tmp_path,
+            dry_run=False,
+        )
+
+        public_csv = (tmp_path / "opportunity-data.csv").read_text()
+        assert "private-email-address@example.gov.uk" not in public_csv
+        assert "My Name" not in public_csv
+        assert "07700 900461" not in public_csv
+
+        header_row = public_csv.splitlines()[0].lower()
+        assert "user name" not in header_row
+        assert "email address" not in header_row
+        assert "phone number" not in header_row
+
+    @pytest.mark.parametrize("dry_run", (True, False))
+    def test_uploads_csv_with_buyer_user_details_to_reports_bucket(
+        self, data_api_client, logger, dry_run, s3, tmp_path
+    ):
+        export_dos_opportunities(
+            data_api_client,
+            logger,
+            stage="development",
+            output_dir=tmp_path,
+            dry_run=dry_run,
+        )
+
+        with open(tmp_path / "opportunity-data.csv", newline="") as f:
+            public_csv = csv.reader(f)
+            public_csv_rows = list(public_csv)
+
+        with open(tmp_path / "opportunity-data-for-admins.csv", newline="") as f:
+            admin_csv = csv.reader(f)
+            admin_csv_rows = list(admin_csv)
+
+        header_row = admin_csv_rows[0]
+        assert header_row[:-3] == public_csv_rows[0]
+        assert header_row[-3:] == [
+            "Buyer user name", "Buyer email address", "Buyer phone number"
+        ]
+
+        assert admin_csv_rows[1][:-3] == public_csv_rows[1]
+        assert admin_csv_rows[1][-3:] == [
+            "My Name", "private-email-address@example.gov.uk", "07700 900461"
+        ]
+
+        if dry_run is False:
+            assert mock.call(
+                "digital-outcomes-and-specialists-3/reports/opportunity-data.csv",
+                mock.ANY,  # CSV file
+                acl="private",
+                download_filename="opportunity-data.csv",
+            ) in s3().save.call_args_list
+            assert Path(s3().save.call_args_list[0][0][1].name) \
+                == (tmp_path / "opportunity-data-for-admins.csv")
+        else:
+            assert s3().save.called is False
