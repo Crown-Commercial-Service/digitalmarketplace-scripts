@@ -182,6 +182,8 @@ def render_pdf_for_each_html_page(html_pages, html_dir, pdf_dir, framework_slug)
                     '--enable-local-file-access',
                     '--footer-right',
                     page_numbers.get(index, ""),
+                    '--margin-top',
+                    '25mm',
                     '--margin-bottom',
                     '20mm',
                     '--margin-right',
