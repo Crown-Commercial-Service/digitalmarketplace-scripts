@@ -1,8 +1,10 @@
 import builtins
+from collections import OrderedDict
 from pathlib import Path
 
 import mock
 import pytest
+
 from dmapiclient import DataAPIClient
 from dmtestutils.api_model_stubs import BriefResponseStub, FrameworkStub
 
@@ -120,30 +122,36 @@ class TestGetBriefData:
 
         rows = get_brief_data(client, logger)
 
+        for row in rows:
+            assert isinstance(row, OrderedDict)
+
         assert rows == [
-            [
-                12345,
-                'My Brilliant Brief',
-                'https://www.digitalmarketplace.service.gov.uk/digital-outcomes-and-specialists/opportunities/12345',
-                'digital-outcomes-and-specialists-3',
-                'digital-specialists',
-                'technicalArchitect',
-                "HM Dept of Doing Stuff",
-                "example.gov.uk",
-                "London",
-                "2019-01-01",
-                "2 weeks",
-                "6 months",
-                2,
-                0,
-                2,
-                "awarded",
-                "Foo Inc",
-                "small",
-                "2345678",
-                "2019-06-02",
-                1
-            ]
+            OrderedDict((
+                ("ID", 12345),
+                ("Opportunity", "My Brilliant Brief"),
+                (
+                    "Link",
+                    "https://www.digitalmarketplace.service.gov.uk/digital-outcomes-and-specialists/opportunities/12345"
+                ),
+                ("Framework", "digital-outcomes-and-specialists-3"),
+                ("Category", "digital-specialists"),
+                ("Specialist", "technicalArchitect"),
+                ("Organisation Name", "HM Dept of Doing Stuff"),
+                ("Buyer Domain", "example.gov.uk"),
+                ("Location Of The Work", "London"),
+                ("Published At", "2019-01-01"),
+                ("Open For", "2 weeks"),
+                ("Expected Contract Length", "6 months"),
+                ("Applications from SMEs", 2),
+                ("Applications from Large Organisations", 0),
+                ("Total Organisations", 2),
+                ("Status", "awarded"),
+                ("Winning supplier", "Foo Inc"),
+                ("Size of supplier", "small"),
+                ("Contract amount", "2345678"),
+                ("Contract start date", "2019-06-02"),
+                ("Clarification questions", 1),
+            ))
         ]
 
         assert client.find_briefs_iter.call_args_list == [

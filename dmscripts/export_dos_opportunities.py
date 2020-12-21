@@ -1,6 +1,8 @@
 import csv
+from collections import OrderedDict
 from datetime import datetime
 from pathlib import Path
+from typing import Any, List, Mapping
 
 from dmutils.formats import DATE_FORMAT, DATETIME_FORMAT
 from dmutils.s3 import S3
@@ -29,7 +31,7 @@ def remove_username_from_email_address(ea):
     return '{}'.format(ea.split('@').pop()) if ea else None
 
 
-def _build_row(brief, brief_responses):
+def _build_row(brief: dict, brief_responses: List[dict]) -> OrderedDict:
     winner = None
     applications_from_sme_suppliers = 0
     applications_from_large_suppliers = 0
@@ -43,7 +45,7 @@ def _build_row(brief, brief_responses):
         if brief_response['status'] == 'awarded':
             winner = brief_response
 
-    return [
+    return OrderedDict(zip(DOS_OPPORTUNITY_HEADERS, [
         brief['id'],
         brief['title'],
         PUBLIC_BRIEF_URL.format(brief['id']),
@@ -65,10 +67,10 @@ def _build_row(brief, brief_responses):
         winner['awardDetails']['awardedContractValue'] if winner else '',
         winner['awardDetails']['awardedContractStartDate'] if winner else '',
         len(brief['clarificationQuestions'])
-    ]
+    ]))
 
 
-def get_latest_dos_framework(client):
+def get_latest_dos_framework(client) -> str:
     frameworks = client.find_frameworks()['frameworks']
     for framework in frameworks:
         # Should be maximum of 1 live DOS framework
@@ -77,7 +79,7 @@ def get_latest_dos_framework(client):
     return 'digital-outcomes-and-specialists'
 
 
-def get_brief_data(client, logger):
+def get_brief_data(client, logger) -> list:
     logger.info("Fetching closed briefs from API")
     briefs = client.find_briefs_iter(status="closed,awarded,unsuccessful,cancelled", with_users=True,
                                      with_clarification_questions=True)
@@ -89,11 +91,15 @@ def get_brief_data(client, logger):
     return rows
 
 
-def write_rows_to_csv(rows, file_path, logger):
+def write_rows_to_csv(rows: List[Mapping[str, Any]], file_path: str, logger) -> None:
     logger.info(f"Writing rows to {file_path}")
+
+    # assumes all rows have the same keys
+    fieldnames = list(rows[0].keys())
+
     with open(file_path, 'w') as csv_file:
-        writer = csv.writer(csv_file, delimiter=',', quotechar='"')
-        writer.writerow(DOS_OPPORTUNITY_HEADERS)
+        writer = csv.DictWriter(csv_file, fieldnames, delimiter=',', quotechar='"')
+        writer.writeheader()
         for row in rows:
             writer.writerow(row)
 
