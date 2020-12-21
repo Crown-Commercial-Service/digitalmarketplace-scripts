@@ -1,4 +1,6 @@
 import builtins
+from pathlib import Path
+
 import mock
 import pytest
 from dmapiclient import DataAPIClient
@@ -9,7 +11,8 @@ from dmscripts.export_dos_opportunities import (
     get_latest_dos_framework,
     upload_file_to_s3,
     format_datetime_string_as_date,
-    remove_username_from_email_address
+    remove_username_from_email_address,
+    export_dos_opportunities,
 )
 
 example_brief = {
@@ -178,3 +181,57 @@ class TestUploadFileToS3:
         ] if dry_run else [
             mock.call("UPLOAD: local/path to mybucket::opportunity-data.csv")
         ])
+
+
+class TestExportDOSOpportunities:
+    @pytest.fixture
+    def data_api_client(self):
+        data_api_client = mock.Mock(spec=DataAPIClient)
+
+        data_api_client.find_frameworks.return_value = {
+            "frameworks": [
+                FrameworkStub(
+                    status="live",
+                    slug="digital-outcomes-and-specialists-3",
+                    family="digital-outcomes-and-specialists"
+                ).response(),
+            ]
+        }
+
+        return data_api_client
+
+    @pytest.fixture
+    def logger(self):
+        return mock.Mock()
+
+    @pytest.fixture(autouse=True)
+    def s3(self):
+        with mock.patch("dmscripts.export_dos_opportunities.S3") as S3:
+            yield S3
+
+    def test_it_uploads_brief_data_to_s3_as_a_csv(
+        self, data_api_client, logger, s3, tmp_path
+    ):
+        data_api_client.find_briefs_iter.return_value = [example_brief]
+        data_api_client.find_brief_responses_iter.return_value = [
+            example_winning_brief_response,
+            BriefResponseStub().response()
+        ]
+
+        export_dos_opportunities(
+            data_api_client,
+            logger,
+            stage="development",
+            output_dir=tmp_path,
+            dry_run=False,
+        )
+
+        assert (tmp_path / "opportunity-data.csv").exists()
+        assert s3().save.call_args_list == [mock.call(
+            "digital-outcomes-and-specialists-3/communications/data/opportunity-data.csv",
+            mock.ANY,  # CSV file
+            acl="public-read",
+            download_filename="opportunity-data.csv",
+        )]
+        assert Path(s3().save.call_args[0][1].name) \
+            == (tmp_path / "opportunity-data.csv")

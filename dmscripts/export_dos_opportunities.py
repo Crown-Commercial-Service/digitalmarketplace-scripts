@@ -1,6 +1,11 @@
 import csv
 from datetime import datetime
+from pathlib import Path
+
 from dmutils.formats import DATE_FORMAT, DATETIME_FORMAT
+from dmutils.s3 import S3
+
+from dmscripts.helpers.s3_helpers import get_bucket_name
 
 # This URL is framework agnostic
 PUBLIC_BRIEF_URL = "https://www.digitalmarketplace.service.gov.uk/digital-outcomes-and-specialists/opportunities/{}"
@@ -12,6 +17,8 @@ DOS_OPPORTUNITY_HEADERS = [
     "Applications from Large Organisations", "Total Organisations", "Status", "Winning supplier",
     "Size of supplier", "Contract amount", "Contract start date", "Clarification questions"
 ]
+
+DOWNLOAD_FILE_NAME = "opportunity-data.csv"
 
 
 def format_datetime_string_as_date(dt):
@@ -103,3 +110,43 @@ def upload_file_to_s3(file_path, bucket, remote_key_name, download_name, dry_run
         if not dry_run:
             # Save file
             bucket.save(remote_key_name, source_file, acl='public-read', download_filename=download_name)
+
+
+def export_dos_opportunities(
+    client,
+    logger,
+    stage: str,
+    output_dir,
+    dry_run: bool = False
+):
+    output_dir = Path(output_dir)
+    if not output_dir.exists():
+        logger.info(f"Creating {output_dir} directory")
+        output_dir.mkdir(parents=True)
+
+    latest_framework_slug = get_latest_dos_framework(client)
+
+    file_path = output_dir / DOWNLOAD_FILE_NAME
+    bucket_name = get_bucket_name(stage, "communications")
+    key_name = f"{latest_framework_slug}/communications/data/{DOWNLOAD_FILE_NAME}"
+
+    logger.info("Exporting DOS opportunity data to CSV")
+
+    # Get the data
+    rows = get_brief_data(client, logger)
+
+    # Construct CSV
+    write_rows_to_csv(rows, file_path, logger)
+
+    # Grab bucket
+    bucket = S3(bucket_name)
+
+    # Upload to S3
+    upload_file_to_s3(
+        file_path,
+        bucket,
+        key_name,
+        DOWNLOAD_FILE_NAME,
+        dry_run=dry_run,
+        logger=logger
+    )
