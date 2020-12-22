@@ -5,7 +5,7 @@ import subprocess
 from pathlib import Path
 
 from datetime import datetime
-from typing import NamedTuple
+from typing import NamedTuple, Union
 
 from PyPDF2 import PdfFileMerger
 
@@ -216,7 +216,7 @@ def merge_e_signature_docs(input_dir, output_dir, framework_slug):
     supplier_id = input_dir.name
 
     class PdfWithOffset(NamedTuple):
-        filename: str
+        filename: Union[str, bytes, os.PathLike]
         position_offset: int = 0
 
     if framework_slug == "g-cloud-12":
