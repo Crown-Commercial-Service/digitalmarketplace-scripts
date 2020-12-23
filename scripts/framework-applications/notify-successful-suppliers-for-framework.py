@@ -38,6 +38,7 @@ from docopt import docopt
 from dmapiclient import DataAPIClient
 from dmutils.email.exceptions import EmailError, EmailTemplateError
 from dmutils.email.helpers import hash_string
+from dmutils.formats import nodaydateformat
 from dmscripts.helpers.email_helpers import scripts_notify_client
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers import logging_helpers
@@ -68,14 +69,14 @@ if __name__ == '__main__':
     )
     context_helper.populate_data()
     context_data = context_helper.get_users_personalisations()
+    framework = api_client.get_framework(FRAMEWORK_SLUG).get('frameworks')
 
     prefix = "[Dry Run] " if DRY_RUN else ""
 
-    # TODO: fetch and format these dates from the API if possible
     # Add in any framework-specific dates etc here
     extra_template_context = {
-        "intentionToAwardAt_dateformat": "12 September 2020",
-        "frameworkLiveAt_dateformat": "28 September 2020",
+        "intentionToAwardAt_dateformat": nodaydateformat(framework['intentionToAwardAtUTC']),
+        "frameworkLiveAt_dateformat": nodaydateformat(framework['frameworkLiveAtUTC']),
     }
 
     user_count = len(context_data)
