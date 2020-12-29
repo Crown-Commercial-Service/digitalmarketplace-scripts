@@ -216,10 +216,10 @@ class TestUploadFileToS3:
         ])
         assert logger.info.call_args_list == ([
             mock.call(
-                "[Dry-run]UPLOAD: local/path to mybucket::opportunity-data.csv with acl public-read"
+                "[Dry-run]UPLOAD: local/path to s3://mybucket/remote/key/name with acl public-read"
             )
         ] if dry_run else [
-            mock.call("UPLOAD: local/path to mybucket::opportunity-data.csv with acl public-read")
+            mock.call("UPLOAD: local/path to s3://mybucket/remote/key/name with acl public-read")
         ])
 
 
@@ -332,7 +332,7 @@ class TestExportDOSOpportunities:
             assert mock.call(
                 "digital-outcomes-and-specialists-3/reports/opportunity-data.csv",
                 mock.ANY,  # CSV file
-                acl="private",
+                acl="bucket-owner-full-control",
                 download_filename="opportunity-data.csv",
             ) in s3().save.call_args_list
             assert Path(s3().save.call_args_list[0][0][1].name) \

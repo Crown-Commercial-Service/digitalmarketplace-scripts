@@ -127,13 +127,13 @@ def upload_file_to_s3(
     logger,
 ):
     with open(file_path, 'br') as source_file:
-        acl = "public-read" if public else "private"
+        acl = "public-read" if public else "bucket-owner-full-control"
 
-        logger.info("{}UPLOAD: {} to {}::{} with acl {}".format(
+        logger.info("{}UPLOAD: {} to s3://{}/{} with acl {}".format(
             '[Dry-run]' if dry_run else '',
             file_path,
             bucket.bucket_name,
-            download_name,
+            remote_key_name,
             acl
         ))
 
