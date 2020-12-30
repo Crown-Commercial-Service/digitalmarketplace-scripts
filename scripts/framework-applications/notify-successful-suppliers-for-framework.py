@@ -11,7 +11,7 @@ If possible, provide the supplier IDs. This is much faster than scanning all sup
 Usage:
     scripts/framework-applications/notify-successful-suppliers-for-framework.py [options]
          [--supplier-id=<id> ... | --supplier-ids-from=<file>]
-         <stage> <framework> <notify_api_key> <notify_template_id>
+         <stage> <framework> <notify_api_key> <notify_template_id> <content_path>
 
 Example:
     scripts/framework-applications/notify-successful-suppliers-for-framework.py preview g-cloud-11 api-key template-id
@@ -21,6 +21,7 @@ Parameters:
     <framework>                 Slug of framework to run script against.
     <notify_api_key>            API key for GOV.UK Notify.
     <notify_template_id>        The ID of the Notify template
+    <content_path>              Path to digitalmarketplace-frameworks repository
 
 Options:
     --supplier-id=<id>          ID(s) of supplier(s) to email.
@@ -38,6 +39,7 @@ from docopt import docopt
 from dmapiclient import DataAPIClient
 from dmutils.email.exceptions import EmailError, EmailTemplateError
 from dmutils.email.helpers import hash_string
+from dmcontent.content_loader import ContentLoader
 from dmutils.formats import nodaydateformat
 from dmscripts.helpers.email_helpers import scripts_notify_client
 from dmscripts.helpers.auth_helpers import get_auth_token
@@ -59,8 +61,11 @@ if __name__ == '__main__':
     FRAMEWORK_SLUG = arguments['<framework>']
     GOVUK_NOTIFY_API_KEY = arguments['<notify_api_key>']
     GOVUK_NOTIFY_TEMPLATE_ID = arguments['<notify_template_id>']
+    CONTENT_PATH = arguments['<content_path>']
     DRY_RUN = arguments['--dry-run']
 
+    content_loader = ContentLoader(CONTENT_PATH)
+    content_loader.load_messages(FRAMEWORK_SLUG, ['e-signature'])
     mail_client = scripts_notify_client(GOVUK_NOTIFY_API_KEY, logger=logger)
     api_client = DataAPIClient(base_url=get_api_endpoint_from_stage(STAGE), auth_token=get_auth_token('api', STAGE))
 
@@ -75,8 +80,9 @@ if __name__ == '__main__':
 
     # Add in any framework-specific dates etc here
     extra_template_context = {
+        "contract_title": content_loader.get_message(FRAMEWORK_SLUG, 'e-signature', 'framework_contract_title'),
         "intentionToAwardAt_dateformat": nodaydateformat(framework['intentionToAwardAtUTC']),
-        "frameworkLiveAt_dateformat": nodaydateformat(framework['frameworkLiveAtUTC']),
+        "frameworkLiveAt_dateformat": nodaydateformat(framework['frameworkLiveAtUTC'])
     }
 
     user_count = len(context_data)
