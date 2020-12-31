@@ -1,4 +1,6 @@
 import getpass
+
+from dmutils.formats import nodaydateformat
 from itertools import chain
 
 from dmutils.s3 import S3ResponseError
@@ -84,7 +86,8 @@ def upload_counterpart_file(
                         "framework_slug": framework["slug"],
                         "framework_name": framework["name"],
                         "supplier_name": supplier_name,
-                        "contract_title": contract_title
+                        "contract_title": contract_title,
+                        "frameworkLiveAt_dateformat": nodaydateformat(framework['frameworkLiveAtUTC'])
                     }, allow_resend=True)
                     logger.debug(f"NOTIFY: sent email to supplier '{supplier_id}' user {hash_string(notify_email)}")
                 else:
