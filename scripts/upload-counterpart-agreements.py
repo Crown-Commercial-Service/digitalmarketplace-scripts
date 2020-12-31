@@ -78,8 +78,11 @@ if __name__ == '__main__':
     document_directory = arguments['<documents_directory>']
     content_path = arguments['<content_path>']
     content_loader = ContentLoader(content_path)
-    content_loader.load_messages(framework_slug, ['e-signature'])
-    contract_title = content_loader.get_message(framework_slug, 'e-signature', 'framework_contract_title')
+    if framework['isESignatureSupported']:
+        content_loader.load_messages(framework_slug, ['e-signature'])
+        contract_title = content_loader.get_message(framework_slug, 'e-signature', 'framework_contract_title')
+    else:
+        contract_title = 'Framework Agreement'
 
     dry_run = arguments['--dry-run']
     dm_notify_client = arguments.get("--notify-key") and scripts_notify_client(arguments["--notify-key"], logger=logger)

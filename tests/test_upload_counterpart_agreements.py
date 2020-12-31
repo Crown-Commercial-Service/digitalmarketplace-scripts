@@ -367,6 +367,7 @@ def test_fails_if_email_template_error(
             "framework_slug": "digital-outcomes-and-specialists-2",
             "framework_name": "Dos Two",
             "supplier_name": "The supplier who signed",
+            "contract_title": "Framework Agreement"
         }
 
         if notify_raise_email_error:
