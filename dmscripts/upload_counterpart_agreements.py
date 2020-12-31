@@ -18,6 +18,7 @@ def upload_counterpart_file(
     file_path,
     dry_run,
     data_api_client,
+    contract_title,
     dm_notify_client=None,
     notify_template_id=None,
     notify_fail_early=True,
@@ -83,6 +84,7 @@ def upload_counterpart_file(
                         "framework_slug": framework["slug"],
                         "framework_name": framework["name"],
                         "supplier_name": supplier_name,
+                        "contract_title": contract_title
                     }, allow_resend=True)
                     logger.debug(f"NOTIFY: sent email to supplier '{supplier_id}' user {hash_string(notify_email)}")
                 else:

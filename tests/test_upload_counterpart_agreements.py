@@ -40,6 +40,7 @@ def test_upload_counterpart_file_uploads_and_calls_api_if_not_dry_run(getuser, n
                 'pdfs/123456-file.pdf',
                 False,
                 data_api_client,
+                "Framework Agreement",
                 notify_fail_early=notify_fail_early,
             )
 
@@ -100,6 +101,7 @@ def test_upload_counterpart_file_does_not_perform_actions_if_dry_run(notify_fail
             'pdfs/123456-file.pdf',
             True,
             data_api_client,
+            "Framework Agreement",
             dm_notify_client=dm_notify_client,
             notify_template_id="dead-beef-baad-f00d",
             notify_fail_early=notify_fail_early,
@@ -218,6 +220,7 @@ def test_upload_counterpart_file_sends_correct_emails(
                 'pdfs/123456-file.pdf',
                 False,
                 data_api_client,
+                "Framework Agreement",
                 dm_notify_client=dm_notify_client,
                 notify_template_id="dead-beef-baad-f00d",
                 notify_fail_early=notify_fail_early,
@@ -231,6 +234,7 @@ def test_upload_counterpart_file_sends_correct_emails(
             "framework_slug": "digital-outcomes-and-specialists-2",
             "framework_name": "Dos Two",
             "supplier_name": "The supplier who signed",
+            "contract_title": "Framework Agreement"
         }
 
         if notify_raise_email_error and notify_fail_early:
@@ -349,6 +353,7 @@ def test_fails_if_email_template_error(
                 'pdfs/123456-file.pdf',
                 False,
                 data_api_client,
+                "Framework Agreement",
                 dm_notify_client=dm_notify_client,
                 notify_template_id="dead-beef-baad-f00d",
                 notify_fail_early=notify_fail_early,
@@ -362,6 +367,7 @@ def test_fails_if_email_template_error(
             "framework_slug": "digital-outcomes-and-specialists-2",
             "framework_name": "Dos Two",
             "supplier_name": "The supplier who signed",
+            "contract_title": "Framework Agreement"
         }
 
         if notify_raise_email_error:

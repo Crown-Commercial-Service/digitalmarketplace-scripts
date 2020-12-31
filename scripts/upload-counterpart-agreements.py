@@ -29,7 +29,7 @@ This will:
    * if <notify_key> and <notify_template_id> are provided, will send a notification email to all the supplier's active
      users (and their primaryContactEmail for that framework)
 
-Usage: scripts/upload-counterpart-agreements.py <stage> <documents_directory> <framework_slug> [options]
+Usage: scripts/upload-counterpart-agreements.py <stage> <documents_directory> <framework_slug> <content_path> [options]
 
 Options:
     --dry-run                                   # Don't actually do anything
@@ -48,6 +48,7 @@ from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.logging_helpers import logging
 from dmscripts.helpers.s3_helpers import get_bucket_name
 from dmutils.env_helpers import get_api_endpoint_from_stage
+from dmcontent.content_loader import ContentLoader
 
 from docopt import docopt
 from dmapiclient import DataAPIClient, APIError
@@ -72,8 +73,17 @@ if __name__ == '__main__':
 
     stage = arguments['<stage>']
     data_api_client = DataAPIClient(get_api_endpoint_from_stage(stage), get_auth_token('api', stage))
-    framework = data_api_client.get_framework(arguments['<framework_slug>'])["frameworks"]
+    framework_slug = arguments['<framework_slug>']
+    framework = data_api_client.get_framework(framework_slug)["frameworks"]
     document_directory = arguments['<documents_directory>']
+    content_path = arguments['<content_path>']
+    content_loader = ContentLoader(content_path)
+    if framework['isESignatureSupported']:
+        content_loader.load_messages(framework_slug, ['e-signature'])
+        contract_title = content_loader.get_message(framework_slug, 'e-signature', 'framework_contract_title')
+    else:
+        contract_title = 'Framework Agreement'
+
     dry_run = arguments['--dry-run']
     dm_notify_client = arguments.get("--notify-key") and scripts_notify_client(arguments["--notify-key"], logger=logger)
 
@@ -92,6 +102,7 @@ if __name__ == '__main__':
                 file_path,
                 dry_run,
                 data_api_client,
+                contract_title,
                 dm_notify_client=dm_notify_client,
                 notify_template_id=arguments.get("--notify-template-id"),
                 notify_fail_early=False,
