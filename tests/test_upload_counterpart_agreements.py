@@ -34,6 +34,7 @@ def test_upload_counterpart_file_uploads_and_calls_api_if_not_dry_run(getuser, n
             upload_counterpart_file(
                 bucket,
                 {
+                    "frameworkLiveAtUTC": '2019-07-02T11:00:00.603808Z',
                     "name": "Gee Cloud Eight",
                     "slug": "g-cloud-8",
                 },
@@ -95,6 +96,7 @@ def test_upload_counterpart_file_does_not_perform_actions_if_dry_run(notify_fail
         upload_counterpart_file(
             bucket,
             {
+                "frameworkLiveAtUTC": '2019-07-02T11:00:00.603808Z',
                 "name": "Dos Two",
                 "slug": "digital-outcomes-and-specialists-2",
             },
@@ -214,6 +216,7 @@ def test_upload_counterpart_file_sends_correct_emails(
             upload_counterpart_file(
                 bucket,
                 {
+                    "frameworkLiveAtUTC": '2019-07-02T11:00:00.603808Z',
                     "name": "Dos Two",
                     "slug": "digital-outcomes-and-specialists-2",
                 },
@@ -234,7 +237,8 @@ def test_upload_counterpart_file_sends_correct_emails(
             "framework_slug": "digital-outcomes-and-specialists-2",
             "framework_name": "Dos Two",
             "supplier_name": "The supplier who signed",
-            "contract_title": "Framework Agreement"
+            "contract_title": "Framework Agreement",
+            "frameworkLiveAt_dateformat": "2 July 2019"
         }
 
         if notify_raise_email_error and notify_fail_early:
@@ -347,6 +351,7 @@ def test_fails_if_email_template_error(
             upload_counterpart_file(
                 bucket,
                 {
+                    "frameworkLiveAtUTC": '2019-07-02T11:00:00.603808Z',
                     "name": "Dos Two",
                     "slug": "digital-outcomes-and-specialists-2",
                 },
@@ -367,7 +372,8 @@ def test_fails_if_email_template_error(
             "framework_slug": "digital-outcomes-and-specialists-2",
             "framework_name": "Dos Two",
             "supplier_name": "The supplier who signed",
-            "contract_title": "Framework Agreement"
+            "contract_title": "Framework Agreement",
+            "frameworkLiveAt_dateformat": '2 July 2019'
         }
 
         if notify_raise_email_error:
