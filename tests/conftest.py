@@ -6,7 +6,7 @@ import pytest
 from mock import Mock
 import requests_mock
 
-from dmtestutils.api_model_stubs import FrameworkStub
+from dmtestutils.api_model_stubs import FrameworkStub, LotStub
 
 
 FIXTURES_DIR = os.path.join(os.path.dirname(__file__), 'fixtures')
@@ -17,7 +17,10 @@ def mock_data_client():
     """Mock data client for use in tests. These can be overwritten in individual tests."""
     mock_data_client = Mock()
     mock_data_client.get_framework.return_value = FrameworkStub(
-        lots=[{"slug": "test_lot_slug_1"}, {"slug": "test_lot_slug_2"}],
+        lots=[
+            LotStub(slug="test_lot_slug_1").response(),
+            LotStub(slug="test_lot_slug_2").response(),
+        ],
     ).single_result_response()
 
     mock_data_client.find_draft_services_iter.return_value = {}
