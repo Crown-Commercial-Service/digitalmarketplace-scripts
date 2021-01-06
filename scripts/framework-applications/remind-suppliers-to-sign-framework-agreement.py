@@ -58,7 +58,7 @@ def get_supplier_ids_not_signed(api_client: DataAPIClient, framework_slug: str) 
 
 def get_email_addresses_for_supplier(api_client: DataAPIClient, supplier_id: int) -> List[str]:
     """Get the email addresses for each user belonging to `supplier_id`"""
-    supplier_users = api_client.find_users(supplier_id=supplier_id, personal_data_removed=False).get("users")
+    supplier_users = api_client.find_users_iter(supplier_id=supplier_id, personal_data_removed=False)
     return [user["emailAddress"] for user in supplier_users if user["active"]]
 
 
