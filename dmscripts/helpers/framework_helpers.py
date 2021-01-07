@@ -5,9 +5,7 @@ from functools import partial
 import logging
 import re
 
-from datetime import datetime
 from dmapiclient import DataAPIClient, HTTPError
-from dmutils.formats import DATETIME_FORMAT
 
 logger = logging.getLogger("framework_helpers")
 
@@ -49,13 +47,10 @@ def find_suppliers_with_details_and_draft_services(
 
 def framework_supports_e_signature(framework):
     """
-    This is a hacky way to determine if a framework supports e-signature,
-    which will be frameworks from G-Cloud-12 onwards
-    # TODO: Do more robust check
     :param framework: framework object
     :return: Boolean
     """
-    return datetime.strptime(framework['frameworkLiveAtUTC'], DATETIME_FORMAT) > datetime(2020, 9, 28)
+    return framework['isESignatureSupported']
 
 
 def find_suppliers_with_details_and_draft_service_counts(
