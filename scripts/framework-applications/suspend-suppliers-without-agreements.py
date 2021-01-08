@@ -7,38 +7,41 @@ supplier will be unable to sell their services. We should therefore temporarily 
 so that buyers won't see them in search results (G-Cloud) or the supplier cannot apply to an opportunity (DOS).
 Suppliers who have returned an incorrect agreement file ('on-hold') should not be suspended.
 
-This script carries out the same action that a CCS Category user could perform in the admin, but in bulk.
+This script suspends suppliers who have not signed their agreement and sends them a reminder email.
 In the past CCS has provided a list of supplier IDs that should be suspended, however this script can also
 suspend all suppliers who have not returned a framework agreement.
 
 Usage:
     scripts/framework-applications/suspend-suppliers-without-agreements.py
         [-v...] [options]
-        <stage> <framework> <output_dir>
+        <stage> <framework> <notify_api_key> <frameworks_path>
         [--supplier-id=<id>... | --supplier-ids-from=<file>]
     scripts/framework-applications/suspend-suppliers-without-agreements.py (-h | --help)
 
 Options:
     <stage>                     Environment to run script against.
     <framework>                 Slug of framework to generate agreements for.
-    <output_dir>                Output folder for list of email addresses to send notifications to.
+    <notify_api_key>            API key for GOV.UK Notify.
+    <frameworks_path>           Path to digitalmarketplace-frameworks repository
 
     --supplier-id=<id>          ID of supplier to generate agreement page for.
     --supplier-ids-from=<file>  Path to file containing supplier IDs, one per line.
 
     -h, --help                  Show this help message
 
-    -n, --dry-run               Run script without generating files.
+    -n, --dry-run               Run script without sending emails.
     -v, --verbose               Show debug log messages.
 
     If neither `--supplier-ids-from` or `--supplier-id` are provided then
     all suppliers without framework agreements will be suspended.
 """
-import csv
 import sys
-import pathlib
 
 from docopt import docopt
+from dmcontent import ContentLoader
+from dmapiclient import DataAPIClient
+from dmutils.env_helpers import get_api_endpoint_from_stage
+from dmutils.email.helpers import hash_string
 
 sys.path.insert(0, '.')
 
@@ -49,12 +52,19 @@ from dmscripts.helpers.logging_helpers import (
 )
 from dmscripts.helpers.framework_helpers import find_suppliers_without_agreements
 from dmscripts.helpers.supplier_data_helpers import get_supplier_ids_from_args
-
-from dmapiclient import DataAPIClient
-from dmutils.env_helpers import get_api_endpoint_from_stage
+from dmscripts.helpers.email_helpers import scripts_notify_client
 from dmscripts.suspend_suppliers_without_agreements import (
     suspend_supplier_services, get_all_email_addresses_for_supplier
 )
+
+NOTIFY_TEMPLATE_ID = "f4224b66-42cc-45c3-b55a-2cf5cb95792f"
+
+
+def get_framework_contract_title(frameworks_path: str, framework_slug: str) -> str:
+    """The contract title is different for G-Cloud and DOS. Look up the correct name with the content loader"""
+    content_loader = ContentLoader(frameworks_path)
+    content_loader.load_messages(framework_slug, ["e-signature"])
+    return str(content_loader.get_message(framework_slug, "e-signature", "framework_contract_title"))
 
 
 if __name__ == "__main__":
@@ -65,8 +75,10 @@ if __name__ == "__main__":
 
     dry_run = args["--dry-run"]
     verbose = args["--verbose"]
-    output_dir = pathlib.Path(args["<output_dir>"])
-    FILENAME = f'{framework_slug}-suspended-suppliers.csv'
+    NOTIFY_API_KEY = args["<notify_api_key>"]
+    FRAMEWORKS_PATH = args["<frameworks_path>"]
+
+    prefix = "[Dry run] " if dry_run else ""
 
     logger = configure_logger({
         "dmapiclient.base": logging.WARNING,
@@ -79,6 +91,8 @@ if __name__ == "__main__":
         get_auth_token("api", args["<stage>"]),
     )
 
+    notify_client = scripts_notify_client(NOTIFY_API_KEY, logger=logger)
+
     framework = client.get_framework(framework_slug)["frameworks"]
     # Check that the framework is in live or standstill
     if framework['status'] not in ['live', 'standstill']:
@@ -88,25 +102,30 @@ if __name__ == "__main__":
     supplier_ids = get_supplier_ids_from_args(args)
     suppliers = find_suppliers_without_agreements(client, framework_slug, supplier_ids)
 
-    with open(output_dir / FILENAME, 'w') as csvfile:
-        csv_headers = ['Supplier email', 'Supplier ID', "No. of services suspended"]
+    framework_name = framework["name"]
+    contract_title = get_framework_contract_title(FRAMEWORKS_PATH, framework_slug)
 
-        writer = csv.writer(csvfile, quoting=csv.QUOTE_MINIMAL)
-        writer.writerow(csv_headers)
+    for supplier in suppliers:
+        supplier_id = supplier["supplierId"]
+        framework_info = client.get_supplier_framework_info(supplier_id, framework_slug)
 
-        for supplier in suppliers:
-            supplier_id = supplier["supplierId"]
-            framework_info = client.get_supplier_framework_info(supplier_id, framework_slug)
-
+        logger.info(f"{prefix}Suspending services for supplier {supplier_id}")
+        if not dry_run:
             # Do the suspending
             suspended_service_count = suspend_supplier_services(
                 client, logger, framework_slug, supplier_id, framework_info, dry_run
             )
 
-            if suspended_service_count == 0:
-                # We should have logged why already
-                continue
-
-            # Compile a list of email addresses for the supplier (to be sent via Notify) and add to the CSV
-            for supplier_email in get_all_email_addresses_for_supplier(client, framework_info):
-                writer.writerow([supplier_email, supplier_id, suspended_service_count])
+        # Send the reminder email to all users for that supplier
+        for supplier_email in get_all_email_addresses_for_supplier(client, framework_info):
+            logger.info(f"{prefix}Sending email to supplier user: {hash_string(supplier_email)}")
+            if not dry_run:
+                notify_client.send_email(
+                    to_email_address=supplier_email,
+                    template_name_or_id=NOTIFY_TEMPLATE_ID,
+                    personalisation={
+                        "framework_name": framework_name,
+                        "framework_slug": framework_slug,
+                        "contract_title": contract_title
+                    }
+                )
