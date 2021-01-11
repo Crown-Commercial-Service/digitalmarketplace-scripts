@@ -116,6 +116,11 @@ if __name__ == "__main__":
                 client, logger, framework_slug, supplier_id, framework_info, dry_run
             )
 
+            if suspended_service_count > 0:
+                logger.info(f"{prefix}Suspended {suspended_service_count} services for supplier {supplier_id}")
+            else:
+                logger.warning(f"{prefix}Something went wrong - suspended 0 services for supplier {supplier_id}")
+
         # Send the reminder email to all users for that supplier
         for supplier_email in get_all_email_addresses_for_supplier(client, framework_info):
             logger.info(f"{prefix}Sending email to supplier user: {hash_string(supplier_email)}")
