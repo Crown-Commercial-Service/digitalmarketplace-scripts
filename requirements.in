@@ -4,10 +4,10 @@
 Flask==1.0.4
 itsdangerous==1.1.0
 
+digitalmarketplace-content-loader
 git+https://github.com/madzak/python-json-logger.git@v0.1.8#egg=python-json-logger==0.1.8
 git+https://github.com/alphagov/digitalmarketplace-utils.git@55.2.1#egg=digitalmarketplace-utils==55.2.1
 git+https://github.com/alphagov/digitalmarketplace-apiclient.git@21.10.0#egg=digitalmarketplace-apiclient==21.10.0
-git+https://github.com/alphagov/digitalmarketplace-content-loader.git@7.28.1#egg=digitalmarketplace-content-loader==7.28.1
 
 awscli~=1.18.137
 backoff==1.10.0
