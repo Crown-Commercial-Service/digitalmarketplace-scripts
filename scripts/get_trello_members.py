@@ -25,6 +25,8 @@ def get_organisations():
         "DMP 4": "5f11bf47fb7c2f529c42193a",  # pragma: allowlist secret
         "Digital Marketplace - up to May 2019": "56ab94d6239d393aafcc0dd7",  # pragma: allowlist secret
         "Digital Marketplace Missions": "5cd16b6993f4f0616b48c101",  # pragma: allowlist secret
+        "Digital Marketplace UR": "5cc18c22ae0b160c5229e07e",  # pragma: allowlist secret
+        "DMP EMPATHY LAB": "5e99bd017496273606e74187",  # pragma: allowlist secret
     }.values()
 
 
