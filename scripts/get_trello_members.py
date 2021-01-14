@@ -41,16 +41,7 @@ def get_organisation_boards(organisation_id):
     return [(board["id"], board["name"]) for board in json.loads(response.text)]
 
 
-boards = [
-    board
-    for organisation_id in get_organisations()
-    for board in get_organisation_boards(organisation_id)
-]
-
-print(f"Board count: {len(boards)}")
-
-members = {}
-for (board_id, board_name) in boards:
+def get_board_members(board_id):
     response = requests.request(
         "GET",
         f"{BASE_URL}/boards/{board_id}/memberships",
@@ -58,9 +49,22 @@ for (board_id, board_name) in boards:
         params={"member": "true", **QUERY},
     )
     response.raise_for_status()
+    return [person["member"]["username"] for person in json.loads(response.text)]
 
-    for person in json.loads(response.text):
-        members.setdefault(person["member"]["username"], []).append(board_name)
 
-print(members.keys())
-print(members)
+if __name__ == "__main__":
+    boards = [
+        board
+        for organisation_id in get_organisations()
+        for board in get_organisation_boards(organisation_id)
+    ]
+
+    print(f"Board count: {len(boards)}")
+
+    members = {}
+    for (board_id, board_name) in boards:
+        for member in get_board_members(board_id):
+            members.setdefault(member, []).append(board_name)
+
+    print(members.keys())
+    print(members)
