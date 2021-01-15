@@ -53,7 +53,8 @@ def get_supplier_ids_not_signed(api_client: DataAPIClient, framework_slug: str) 
     the framework agreement
     """
     return [supplier["supplierId"] for supplier in
-            api_client.find_framework_suppliers_iter(framework_slug, agreement_returned=False, with_declarations=False)]
+            api_client.find_framework_suppliers_iter(framework_slug, agreement_returned=False, with_declarations=False)
+            if supplier["onFramework"]]
 
 
 def get_email_addresses_for_supplier(api_client: DataAPIClient, supplier_id: int) -> List[str]:
