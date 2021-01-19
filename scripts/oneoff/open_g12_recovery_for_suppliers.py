@@ -52,8 +52,6 @@ if __name__ == "__main__":
         for supplier_user in get_email_addresses_for_supplier(api_client, supplier_id)
     ]
 
-    print(user_emails)
-
     user_count = len(user_emails)
     prefix = "[Dry Run] " if dry_run else ""
     for count, email in enumerate(user_emails, start=1):
