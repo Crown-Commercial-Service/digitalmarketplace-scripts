@@ -49,6 +49,9 @@ from dmutils.email.helpers import hash_string
 from dmutils.env_helpers import get_api_endpoint_from_stage
 
 
+logger = logging_helpers.configure_logger()
+
+
 def get_supplier_ids_signed(api_client: DataAPIClient, framework_slug: str) -> List[int]:
     """
     Get a list of supplier IDs who are on `framework_slug` and have signed the framework agreement
@@ -74,9 +77,14 @@ def get_previous_framework(framework: dict) -> dict:
     Raises ValueError if the previous framework does not exist or cannot be
     found.
     """
-    # not convinced this is the best way to do this
+    # TODO: Not convinced this is the best way to do this. Ideally we would use
+    # the following framework information, but that is in the frameworks repo
+    # and requires the content loader and some kind of reverse lookup that I
+    # don't have time to reason out. Instead we assume that the framework
+    # iteration immediately chronologically preceding the current iteration is
+    # the correct one. Currently this holds true (in production at least).
     framework_family = framework["family"]
-    frameworks_in_family = (fw for fw in api_client.find_frameworks()["frameworks"] if fw["family"] == framework_family)
+    frameworks_in_family = [fw for fw in api_client.find_frameworks()["frameworks"] if fw["family"] == framework_family]
     if not frameworks_in_family:
         raise ValueError(f"could not find any frameworks for family '{framework_family}'")
     if len(frameworks_in_family) < 2:
@@ -86,6 +94,7 @@ def get_previous_framework(framework: dict) -> dict:
     previous_framework = frameworks_in_family[-2]
 
     assert previous_framework["slug"] != framework["slug"]
+    logger.info(f"found previous framework '{previous_framework['slug']}' for '{framework['slug']}'")
 
     return previous_framework
 
@@ -99,7 +108,6 @@ if __name__ == "__main__":
     NOTIFY_TEMPLATE_ID = arguments["<notify_template_id>"]
     DRY_RUN = arguments["--dry-run"]
 
-    logger = logging_helpers.configure_logger()
     mail_client = scripts_notify_client(NOTIFY_API_KEY, logger=logger)
     api_client = DataAPIClient(
         base_url=get_api_endpoint_from_stage(STAGE),
