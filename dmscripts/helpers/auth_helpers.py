@@ -1,5 +1,7 @@
 import os
 import subprocess
+from typing import Optional, List
+
 import yaml
 
 DEV_ALIASES = ('dev', 'development', 'local')
@@ -12,6 +14,14 @@ def _decrypt_yaml_file_with_sops(credentials_repo_path, credentials_filename):
         "{}/{}".format(credentials_repo_path, credentials_filename)
     ])
     return yaml.safe_load(creds_output)
+
+
+def get_g12_suppliers(stage: str) -> Optional[List[int]]:
+    if stage.lower() in DEV_ALIASES:
+        return [577184]  # The ID of our test supplier.
+
+    credentials_repo = os.environ.get('DM_CREDENTIALS_REPO', '../digitalmarketplace-credentials')
+    return _decrypt_yaml_file_with_sops(credentials_repo, f'vars/{stage.lower()}.yaml').get("g12_recovery_supplier_ids")
 
 
 def get_auth_token(api, stage):

@@ -40,7 +40,7 @@ from dmcontent.content_loader import ContentLoader
 from dmscripts.helpers.email_helpers import scripts_notify_client
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers import logging_helpers
-from dmscripts.helpers.supplier_data_helpers import get_supplier_ids_from_args
+from dmscripts.helpers.supplier_data_helpers import get_supplier_ids_from_args, get_email_addresses_for_supplier
 from dmutils.email.helpers import hash_string
 from dmutils.env_helpers import get_api_endpoint_from_stage
 
@@ -55,12 +55,6 @@ def get_supplier_ids_not_signed(api_client: DataAPIClient, framework_slug: str) 
     return [supplier["supplierId"] for supplier in
             api_client.find_framework_suppliers_iter(framework_slug, agreement_returned=False, with_declarations=False)
             if supplier["onFramework"]]
-
-
-def get_email_addresses_for_supplier(api_client: DataAPIClient, supplier_id: int) -> List[str]:
-    """Get the email addresses for each user belonging to `supplier_id`"""
-    supplier_users = api_client.find_users_iter(supplier_id=supplier_id, personal_data_removed=False)
-    return [user["emailAddress"] for user in supplier_users if user["active"]]
 
 
 def get_framework_contract_title(content_path: str, framework_slug: str) -> str:
