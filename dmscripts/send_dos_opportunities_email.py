@@ -28,7 +28,12 @@ MAILCHIMP_LIST_IDS = {
         'digital-specialists': "29d06d5201",
         'digital-outcomes': "4360debc5a",
         'user-research-participants': "2538f8a0f1",
-    }
+    },
+    'digital-outcomes-and-specialists-5': {
+        'digital-specialists': "246fac2d9a",
+        'digital-outcomes': "eebeddcc2b",
+        'user-research-participants': "f497856d31",
+    },
 }
 
 LOT_NAMES = {
