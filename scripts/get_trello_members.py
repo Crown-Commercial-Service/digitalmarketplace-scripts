@@ -28,6 +28,7 @@ def get_organisations():
         "Digital Marketplace UR": "5cc18c22ae0b160c5229e07e",  # pragma: allowlist secret
         "DMP EMPATHY LAB": "5e99bd017496273606e74187",  # pragma: allowlist secret
         "Frameworks Team 2020+": "5e1c69feb5dff70d73402662",  # pragma: allowlist secret
+        "Digital Marketplace Archive": "5943d2afefe199de6a384c02",  # pragma: allowlist secret
     }.values()
 
 
