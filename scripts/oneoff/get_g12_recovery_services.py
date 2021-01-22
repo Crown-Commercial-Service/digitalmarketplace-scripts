@@ -21,12 +21,15 @@ from dmscripts.helpers.auth_helpers import get_auth_token
 def _normalise_service_name(name):
     """
     To be able to safely compare service names. The output is not meant to be human-readable.
+
+    Copied from `upload_draft_service_pdfs.py`
     """
     return (
         name.lower()
         .replace("-", "")
+        .replace("_", "")
+        .replace(":", "")
         .replace(" ", "")
-        .replace("/", ":")
         .replace(".csv", "")
     )
 
