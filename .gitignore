@@ -13,3 +13,6 @@ local.nix
 *.csv
 !/tests/fixtures/*.csv
 *.pdf
+*.odt
+*.ods
+*.odp
