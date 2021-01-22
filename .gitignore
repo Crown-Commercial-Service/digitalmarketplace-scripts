@@ -8,3 +8,8 @@ venv*
 
 # local environment customizations
 local.nix
+
+# Make it more difficult to accidentally commit PII
+*.csv
+!/tests/fixtures/*.csv
+*.pdf
