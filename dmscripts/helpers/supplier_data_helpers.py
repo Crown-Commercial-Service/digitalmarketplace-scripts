@@ -16,6 +16,7 @@ import backoff
 import requests
 
 from dmutils.dates import update_framework_with_formatted_dates
+from dmutils.email.helpers import hash_string
 from dmutils.formats import DISPLAY_DATE_FORMAT, DATETIME_FORMAT
 
 
@@ -394,3 +395,34 @@ def get_email_addresses_for_supplier(api_client: DataAPIClient, supplier_id: int
     """
     supplier_users = api_client.find_users_iter(supplier_id=supplier_id, personal_data_removed=False)
     return [user["emailAddress"] for user in supplier_users if user["active"]]
+
+
+def send_email_to_all_users_of_suppliers(
+        api_client,
+        mail_client,
+        supplier_ids,
+        notify_template,
+        logger,
+        *,
+        personalisation=None,
+        is_dry_run=False,
+):
+    email_addresses = [
+        supplier_user
+        for supplier_id in supplier_ids
+        for supplier_user in get_email_addresses_for_supplier(api_client, supplier_id)
+    ]
+
+    prefix = "[Dry Run] " if is_dry_run else ""
+    user_count = len(email_addresses)
+
+    for user_number, email in enumerate(email_addresses, start=1):
+        logger.info(
+            f"{prefix}Sending email to supplier user {user_number} of {user_count}: {hash_string(email)}"
+        )
+        if not is_dry_run:
+            mail_client.send_email(
+                to_email_address=email,
+                template_name_or_id=notify_template,
+                personalisation=personalisation,
+            )

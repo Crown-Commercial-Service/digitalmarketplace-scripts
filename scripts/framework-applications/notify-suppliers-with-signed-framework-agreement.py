@@ -35,7 +35,6 @@ Options:
 """
 import sys
 from typing import List
-from itertools import chain
 from docopt import docopt
 
 sys.path.insert(0, ".")
@@ -44,8 +43,7 @@ from dmapiclient import DataAPIClient
 from dmscripts.helpers.email_helpers import scripts_notify_client
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers import logging_helpers
-from dmscripts.helpers.supplier_data_helpers import get_supplier_ids_from_args
-from dmutils.email.helpers import hash_string
+from dmscripts.helpers.supplier_data_helpers import get_supplier_ids_from_args, send_email_to_all_users_of_suppliers
 from dmutils.env_helpers import get_api_endpoint_from_stage
 
 
@@ -121,22 +119,15 @@ if __name__ == "__main__":
     if supplier_ids is None:
         supplier_ids = get_supplier_ids_signed(api_client, FRAMEWORK_SLUG)
 
-    # Flatten list of lists
-    email_addresses = list(
-        chain.from_iterable(get_email_addresses_for_supplier(api_client, supplier_id) for supplier_id in supplier_ids)
+    send_email_to_all_users_of_suppliers(
+        api_client,
+        mail_client,
+        supplier_ids,
+        NOTIFY_TEMPLATE_ID,
+        logger,
+        personalisation={
+            "framework_name": framework["name"],
+            "previous_framework_name": previous_framework["name"],
+        },
+        is_dry_run=DRY_RUN
     )
-
-    prefix = "[Dry Run] " if DRY_RUN else ""
-    user_count = len(email_addresses)
-
-    for count, email in enumerate(email_addresses, start=1):
-        logger.info(f"{prefix}Sending email to supplier user {count} of {user_count}: {hash_string(email)}")
-        if not DRY_RUN:
-            mail_client.send_email(
-                to_email_address=email,
-                template_name_or_id=NOTIFY_TEMPLATE_ID,
-                personalisation={
-                    "framework_name": framework["name"],
-                    "previous_framework_name": previous_framework["name"],
-                },
-            )
