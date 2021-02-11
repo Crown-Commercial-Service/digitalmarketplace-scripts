@@ -8,8 +8,6 @@ argcomplete==1.11.1
     # via yq
 attrs==19.3.0
     # via jsonschema
-awscli==1.18.137
-    # via -r requirements.in
 backoff==1.10.0
     # via -r requirements.in
 blinker==1.4
@@ -18,7 +16,6 @@ boto3==1.14.34
     # via digitalmarketplace-utils
 botocore==1.17.60
     # via
-    #   awscli
     #   boto3
     #   s3transfer
 cachelib==0.1.1
@@ -31,8 +28,6 @@ chardet==3.0.4
     # via requests
 click==7.0
     # via flask
-colorama==0.4.3
-    # via awscli
 contextlib2==0.6.0.post1
     # via digitalmarketplace-utils
 cryptography==3.2.1
@@ -52,9 +47,7 @@ docopt==0.6.2
     #   -r requirements.in
     #   notifications-python-client
 docutils==0.15.2
-    # via
-    #   awscli
-    #   botocore
+    # via botocore
 flask-gzip==0.2
     # via digitalmarketplace-utils
 flask-login==0.5.0
@@ -120,8 +113,6 @@ odfpy==1.4.1
     # via digitalmarketplace-utils
 prometheus-client==0.2.0
     # via gds-metrics
-pyasn1==0.4.8
-    # via rsa
 pycparser==2.19
     # via cffi
 pyjwt==1.7.1
@@ -142,7 +133,6 @@ pytz==2019.3
     # via digitalmarketplace-utils
 pyyaml==5.3.1
     # via
-    #   awscli
     #   digitalmarketplace-content-loader
     #   yq
 redis==3.5.3
@@ -153,12 +143,8 @@ requests==2.23.0
     #   digitalmarketplace-utils
     #   mailchimp3
     #   notifications-python-client
-rsa==4.5
-    # via awscli
 s3transfer==0.3.3
-    # via
-    #   awscli
-    #   boto3
+    # via boto3
 six==1.14.0
     # via
     #   cryptography
