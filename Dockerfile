@@ -18,6 +18,13 @@ RUN wget --quiet -O /usr/local/bin/docopts.sh https://raw.githubusercontent.com/
     && echo 'd117d3290def71d6a7fdc5b67efddfc3a9299f146bb4f98f96e322222957d1ce /usr/local/bin/docopts.sh' | sha256sum -c - \
     && chmod 0755 /usr/local/bin/docopts.sh
 
+RUN pip install --no-cache-dir --upgrade pip==21.0.1
+
+ENV PATH "/root/.local/bin:$PATH"
+RUN pip install --no-cache-dir pipx \
+    && pipx install --pip-args="--no-cache-dir" awscli==1.19.5 \
+    && pip uninstall -y pipx
+
 ENV APP_DIR /app
 WORKDIR ${APP_DIR}
 
