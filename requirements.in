@@ -9,7 +9,6 @@ git+https://github.com/madzak/python-json-logger.git@v0.1.8#egg=python-json-logg
 git+https://github.com/alphagov/digitalmarketplace-utils.git@55.2.1#egg=digitalmarketplace-utils==55.2.1
 git+https://github.com/alphagov/digitalmarketplace-apiclient.git@21.10.0#egg=digitalmarketplace-apiclient==21.10.0
 
-awscli~=1.18.137
 backoff==1.10.0
 docopt==0.6.2
 jsonschema==3.2.0
