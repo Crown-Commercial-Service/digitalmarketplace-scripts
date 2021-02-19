@@ -9,16 +9,15 @@ Example
     scripts/oneoff/export_brief_responses.py preview digital-outcomes-and-specialists-4
 """
 
+from dmapiclient import DataAPIClient
+from docopt import docopt
+from dmutils.env_helpers import get_api_endpoint_from_stage
+from dmscripts.helpers.auth_helpers import get_auth_token
 import csv
 import sys
 from itertools import chain
 
 sys.path.insert(0, '.')
-
-from dmscripts.helpers.auth_helpers import get_auth_token
-from dmutils.env_helpers import get_api_endpoint_from_stage
-from docopt import docopt
-from dmapiclient import DataAPIClient
 
 
 if __name__ == '__main__':
@@ -33,17 +32,13 @@ if __name__ == '__main__':
     def get_iterator():
         # The default iterator does not include draft responses
         return chain(data_api_client.find_brief_responses_iter(framework=framework),
-                           data_api_client.find_brief_responses_iter(framework=framework, status='draft'))
-
+                     data_api_client.find_brief_responses_iter(framework=framework, status='draft'))
 
     with open(filename, 'w') as csvfile:
-        writer = csv.DictWriter(csvfile, fieldnames=['briefId', 'status', 'supplierId', 'createdAt', 'submittedAt' ])
+        fieldnames = ['briefId', 'status', 'supplierId', 'createdAt', 'submittedAt']
+        writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
         writer.writeheader()
-        for r in get_iterator():
-            writer.writerow({'briefId': r.get('briefId'),
-                            'status': r.get('status'),
-                            'supplierId': r.get('supplierId'),
-                            'createdAt': r.get('createdAt'),
-                            'submittedAt': r.get('submittedAt')})
+        for brief_response in get_iterator():
+            writer.writerow({field: brief_response.get(field) for field in fieldnames})
 
     print(f"Outputted {filename}")
