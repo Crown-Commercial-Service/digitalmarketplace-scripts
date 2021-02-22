@@ -8,17 +8,16 @@ Usage: scripts/export_brief_responses.py <stage> <framework>
 Example
     scripts/oneoff/export_brief_responses.py preview digital-outcomes-and-specialists-4
 """
-
 from dmapiclient import DataAPIClient
 from docopt import docopt
 from dmutils.env_helpers import get_api_endpoint_from_stage
-from dmscripts.helpers.auth_helpers import get_auth_token
-import csv
 import sys
+import csv
 from itertools import chain
 
 sys.path.insert(0, '.')
 
+from dmscripts.helpers.auth_helpers import get_auth_token
 
 if __name__ == '__main__':
     arguments = docopt(__doc__)
