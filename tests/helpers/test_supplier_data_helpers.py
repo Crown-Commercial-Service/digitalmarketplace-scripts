@@ -1,5 +1,4 @@
 import pytest
-import requests
 
 from docopt import docopt
 
@@ -7,7 +6,7 @@ from dmscripts.helpers.supplier_data_helpers import (
     country_code_to_name,
     get_supplier_ids_from_args,
     AppliedToFrameworkSupplierContextForNotify,
-    SupplierFrameworkData, unsuspend_suspended_supplier_services,
+    SupplierFrameworkData, unsuspend_suspended_supplier_services, RegisterKeyNotFound,
 )
 from dmscripts.data_retention_remove_supplier_declarations import SupplierFrameworkDeclarations
 from tests.assessment_helpers import BaseAssessmentTest
@@ -231,63 +230,31 @@ class TestCountryCodeToName:
         }
     }
 
-    def setup(self):
+    @staticmethod
+    def setup():
         country_code_to_name.cache_clear()
 
-    @pytest.mark.parametrize('full_code, expected_url, response, expected_name',
+    @pytest.mark.parametrize('full_code, expected_name',
                              (
-                                 ('country:GB', 'https://country.register.gov.uk/records/GB.json',
-                                  GB_COUNTRY_JSON, 'United Kingdom'),
-                                 ('territory:GG', 'https://territory.register.gov.uk/records/GG.json',
-                                  GG_TERRITORY_JSON, 'Guernsey'),
+                                 ('country:GB', 'United Kingdom'),
+                                 ('territory:GG', 'Guernsey'),
                              ))
-    def test_correct_url_requested_and_code_converted_to_name(self, rmock, full_code, expected_url, response,
-                                                              expected_name):
-        rmock.get(
-            expected_url,
-            json=response,
-            status_code=200
-        )
-
+    def test_code_converted_to_name(self, full_code, expected_name):
         country_name = country_code_to_name(full_code)
 
         assert country_name == expected_name
 
-    def test_404_raises(self, rmock):
-        rmock.get(
-            'https://country.register.gov.uk/records/GB.json',
-            status_code=404,
-        )
+    def test_non_existent_country_raises(self):
+        with pytest.raises(RegisterKeyNotFound):
+            country_code_to_name('country:WAKANDA')
 
-        with pytest.raises(requests.exceptions.RequestException):
-            country_code_to_name('country:GB')
-
-    def test_responses_are_cached(self, rmock):
-        rmock.get(
-            'https://country.register.gov.uk/records/GB.json',
-            json=self.GB_COUNTRY_JSON,
-            status_code=200
-        )
-
+    def test_responses_are_cached(self):
         country_code_to_name('country:GB')
         country_code_to_name('country:GB')
 
-        assert len(rmock.request_history) == 1
         assert country_code_to_name.cache_info().hits == 1
         assert country_code_to_name.cache_info().misses == 1
         assert country_code_to_name.cache_info().maxsize == 128
-
-    def test_retries_if_not_200(self, rmock):
-        rmock.get(
-            'https://country.register.gov.uk/records/GB.json',
-            [{'json': {}, 'status_code': 500},
-             {'json': self.GB_COUNTRY_JSON, 'status_code': 200}],
-        )
-
-        country_name = country_code_to_name('country:GB')
-
-        assert country_name == 'United Kingdom'
-        assert len(rmock.request_history) == 2
 
 
 class TestSupplierIDsHelpers:
