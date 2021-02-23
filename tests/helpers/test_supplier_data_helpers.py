@@ -230,6 +230,10 @@ class TestCountryCodeToName:
         }
     }
 
+    @staticmethod
+    def setup():
+        country_code_to_name.cache_clear()
+
     @pytest.mark.parametrize('full_code, expected_name',
                              (
                                  ('country:GB', 'United Kingdom'),
@@ -243,6 +247,14 @@ class TestCountryCodeToName:
     def test_non_existent_country_raises(self):
         with pytest.raises(RegisterKeyNotFound):
             country_code_to_name('country:WAKANDA')
+
+    def test_responses_are_cached(self):
+        country_code_to_name('country:GB')
+        country_code_to_name('country:GB')
+
+        assert country_code_to_name.cache_info().hits == 1
+        assert country_code_to_name.cache_info().misses == 1
+        assert country_code_to_name.cache_info().maxsize == 128
 
 
 class TestSupplierIDsHelpers:

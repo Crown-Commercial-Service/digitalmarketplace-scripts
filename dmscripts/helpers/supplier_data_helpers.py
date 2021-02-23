@@ -3,6 +3,7 @@
 import os
 from collections import OrderedDict
 from datetime import date, timedelta, datetime
+from functools import lru_cache
 from typing import List
 
 from dmapiclient import DataAPIClient
@@ -330,6 +331,7 @@ class RegisterKeyNotFound(Exception):
     pass
 
 
+@lru_cache()
 def country_code_to_name(country_code):
     register, code = country_code.split(':')
 
