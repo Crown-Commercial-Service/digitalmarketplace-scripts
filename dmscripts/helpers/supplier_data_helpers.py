@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """Helper classes for fetching supplier data given a client."""
+import os
 from collections import OrderedDict
 from datetime import date, timedelta, datetime
-from functools import lru_cache
 from typing import List
 
 from dmapiclient import DataAPIClient
@@ -11,9 +11,6 @@ from itertools import groupby
 from operator import itemgetter
 
 import json
-
-import backoff
-import requests
 
 from dmutils.dates import update_framework_with_formatted_dates
 from dmutils.formats import DISPLAY_DATE_FORMAT, DATETIME_FORMAT
@@ -329,17 +326,25 @@ def get_supplier_ids_from_args(args):
     return supplier_ids
 
 
-@lru_cache()
-@backoff.on_exception(backoff.expo, requests.exceptions.RequestException, max_tries=3)
+class RegisterKeyNotFound(Exception):
+    pass
+
+
 def country_code_to_name(country_code):
     register, code = country_code.split(':')
 
-    register_response = requests.get(f'https://{register}.register.gov.uk/records/{code}.json')
-    if register_response.status_code == 200:
-        record = json.loads(register_response.text)
-        return record[code]['item'][0]['name']
+    script_dir = os.path.dirname(__file__)
+    static_register_relative_path = f'static/{register}_register.json'
+    register_path = os.path.join(script_dir, static_register_relative_path)
+    with open(register_path, 'r', encoding='utf8') as register:
+        data = register.read()
+        register_dict = json.loads(data)
+        try:
+            record = register_dict[code]
+        except KeyError as e:
+            raise RegisterKeyNotFound(e)
 
-    raise requests.exceptions.RequestException(register_response)
+        return record['item'][0]['name']
 
 
 def unsuspend_suspended_supplier_services(record, suspending_user, client, logger, dry_run):
