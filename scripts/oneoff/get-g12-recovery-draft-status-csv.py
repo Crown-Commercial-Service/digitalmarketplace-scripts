@@ -40,6 +40,7 @@ if __name__ == "__main__":
 
     with open(filename, "w") as f:
         writer = csv.DictWriter(f, column_headers)
+        writer.writeheader()
         logging.info(f"Fetching G12 recovery draft IDs for {stage}")
 
         for draft_id in get_g12_recovery_draft_ids(stage):
