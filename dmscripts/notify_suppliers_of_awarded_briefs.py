@@ -55,20 +55,19 @@ def _build_and_send_emails(brief_responses, mail_client, stage, dry_run, templat
 
     # Now email everyone whose Brief got awarded
     for brief_response in brief_responses:
-        # Although we don't officially support it, in some cases users
-        # have multiple email addresses in their respondToEmailAddress field
         email_addresses = get_email_addresses(brief_response["respondToEmailAddress"])
 
+        # Users can enter multiple email addresses, but our input validation is very basic. So it's OK if some of the
+        # addresses are invalid, as long as there is at least one valid address.
         invalid_email_addresses = [a for a in email_addresses if not validate_email_address(a)]
         if invalid_email_addresses:
-            logger.error(
+            logger.warning(
                 "Invalid email address(es) for BriefResponse {brief_response_id} (Brief ID {brief_id})",
                 extra={
                     "brief_id": brief_response['brief']['id'],
                     "brief_response_id": brief_response['id'],
                 }
             )
-            failed_brief_responses.append(brief_response['id'])
 
         for invalid_email_address in invalid_email_addresses:
             email_addresses.remove(invalid_email_address)
