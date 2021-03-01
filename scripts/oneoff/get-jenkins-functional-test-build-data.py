@@ -13,13 +13,20 @@ Options:
     --filename=<file>           Optional. The output filename to use. Defaults to 'functional_test_report.csv'
 """
 
+import sys
 import os
 import csv
 import logging
 import requests
+from datetime import datetime
 from requests.auth import HTTPBasicAuth
 from docopt import docopt
+from dmapiclient import DataAPIClient
+from dmutils.env_helpers import get_api_endpoint_from_stage
 from typing import Dict, List, Any
+
+sys.path.insert(0, '.')
+from dmscripts.helpers.auth_helpers import get_auth_token
 
 Build = Dict[str, Any]
 
@@ -37,7 +44,7 @@ def get_job_build_data(job: str, auth: HTTPBasicAuth) -> List[Build]:
     return response.json()["builds"]
 
 
-def format_build(job: str, build: Build) -> Build:
+def format_build(job: str, build: Build, frameworks: List[dict]) -> Build:
     """
     Add the job name, stage and URL to the build dict and format the duration in seconds
     """
@@ -46,8 +53,37 @@ def format_build(job: str, build: Build) -> Build:
     build["stage"] = stage
     build["link"] = f"https://ci.marketplace.team/job/{job}/{build['id']}/"
     build["duration"] = build["duration"] / 1000
+    build["framework_state"] = get_framework_state(build["timestamp"], frameworks)
     del build["_class"]
     return build
+
+
+def get_framework_state(timestamp: int, frameworks: List[dict]) -> str:
+    """
+    Match a timestamp onto a framework state based on the opening and closing dates for each framework
+    in `framework_dates`. Only record open, pending and live states.
+    """
+    event_time = datetime.fromtimestamp(timestamp / 1000)
+    framework_states = []
+
+    for framework in frameworks:
+        if event_time > datetime.strptime(framework["frameworkExpiresAtUTC"], "%Y-%m-%dT%H:%M:%S.%fZ"):
+            # expired, don't record
+            pass
+
+        elif event_time > datetime.strptime(framework["frameworkLiveAtUTC"], "%Y-%m-%dT%H:%M:%S.%fZ"):
+            # This framework was still live
+            framework_states.append(f"{framework['name']}: live")
+
+        elif event_time > datetime.strptime(framework["applicationsCloseAtUTC"], "%Y-%m-%dT%H:%M:%S.%fZ"):
+            framework_states.append(f"{framework['name']}: pending")
+
+        else:
+            # We don't have anything in the API response that says when a framework opens, so if it exists
+            # and hasn't met any other conditions, assume it's open.
+            framework_states.append(f"{framework['name']}: open")
+
+    return " - ".join(framework_states)
 
 
 if __name__ == "__main__":
@@ -62,10 +98,14 @@ if __name__ == "__main__":
 
     auth = HTTPBasicAuth(API_USER, API_TOKEN)
 
+    # Use staging to get the framework dates because it'll be the same as production
+    api_client = DataAPIClient(get_api_endpoint_from_stage("staging"), get_auth_token("api", "staging"))
+    frameworks = api_client.find_frameworks()["frameworks"]
+
     build_data = []
     for job in FT_JOB_NAMES:
         for build in get_job_build_data(job, auth):
-            build_data.append(format_build(job, build))
+            build_data.append(format_build(job, build, frameworks))
 
     logging.info(f"Writing report to {OUTPUT_FILE}")
     headers = build_data[0].keys()
