@@ -102,7 +102,7 @@ def copy_draft_documents(
             "supplier %s: draft %s: dry run: skipped updating document URLs: %s",
             draft_service["supplierId"],
             draft_service['id'],
-            document_updates,
+            str(document_updates).replace("{", "{{").replace("}", "}}"),
         )
     else:
         client.update_service(service_id, document_updates, user='publish_draft_services.py')
