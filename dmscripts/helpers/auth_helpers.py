@@ -24,11 +24,6 @@ def get_g12_suppliers(stage: str) -> Optional[List[int]]:
     return _decrypt_yaml_file_with_sops(credentials_repo, f'vars/{stage.lower()}.yaml').get("g12_recovery_supplier_ids")
 
 
-def get_g12_recovery_draft_ids(stage: str) -> Optional[List[int]]:
-    credentials_repo = os.environ.get('DM_CREDENTIALS_REPO', '../digitalmarketplace-credentials')
-    return _decrypt_yaml_file_with_sops(credentials_repo, f'vars/{stage.lower()}.yaml').get("g12_recovery_draft_ids")
-
-
 def get_auth_token(api, stage):
     if stage.lower() in DEV_ALIASES:
         return 'myToken'
