@@ -66,6 +66,8 @@ if __name__ == "__main__":
     prefix = "[Dry Run] " if DRY_RUN else ""
     user_count = len(email_addresses)
 
+    logger.info(f"Sending emails to {len(supplier_ids)} suppliers...")
+
     for count, email in enumerate(email_addresses, start=1):
         logger.info(f"{prefix}Sending email to supplier user {count} of {user_count}: {hash_string(email)}")
         if not DRY_RUN:
