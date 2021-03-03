@@ -4,9 +4,7 @@ import os
 from collections import OrderedDict
 from datetime import date, timedelta, datetime
 from functools import lru_cache
-from typing import List
 
-from dmapiclient import DataAPIClient
 from dmapiclient.audit import AuditTypes
 from itertools import groupby
 from operator import itemgetter
@@ -392,12 +390,3 @@ def unsuspend_suspended_supplier_services(record, suspending_user, client, logge
             logger.info(f"[DRY RUN] Would unsuspend service {service_id} for supplier {supplier_id}")
         else:
             client.update_service_status(service_id, new_service_status, "Unsuspend services helper")
-
-
-def get_email_addresses_for_supplier(api_client: DataAPIClient, supplier_id: int) -> List[str]:
-    """
-    Get the email addresses for each user belonging to `supplier_id`. Use `SupplierFrameworkData.get_supplier_users`
-    instead if you need to get email addresses for a large number of suppliers.
-    """
-    supplier_users = api_client.find_users_iter(supplier_id=supplier_id, personal_data_removed=False)
-    return [user["emailAddress"] for user in supplier_users if user["active"]]
