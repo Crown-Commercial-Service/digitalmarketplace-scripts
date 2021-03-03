@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """
-Send an email to all suppliers submitted services as part of G12 recovery
+Send an email to all suppliers who submitted services as part of G12 recovery
 
 Before using this script you should check that it has all the template
 variables you need for your Notify template, and run it using `--dry-run` to
