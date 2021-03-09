@@ -12,3 +12,4 @@ max-line-length = 120
 per-file-ignores =
     scripts/** : E402
     scripts/get-model-data.py : E402, C901
+    tasks.py: F401
