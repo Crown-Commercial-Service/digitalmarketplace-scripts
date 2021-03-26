@@ -131,7 +131,7 @@ git+https://github.com/madzak/python-json-logger.git@v0.1.8#egg=python-json-logg
     #   digitalmarketplace-utils
 pytz==2019.3
     # via digitalmarketplace-utils
-pyyaml==5.3.1
+pyyaml==5.4
     # via
     #   digitalmarketplace-content-loader
     #   yq
