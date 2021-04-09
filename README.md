@@ -1,6 +1,5 @@
 # Digital Marketplace Scripts
 
-[![Coverage Status](https://coveralls.io/repos/alphagov/digitalmarketplace-scripts/badge.svg?branch=master&service=github)](https://coveralls.io/github/alphagov/digitalmarketplace-scripts?branch=master)
 ![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)
 
 Contains:
