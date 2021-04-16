@@ -4,13 +4,17 @@ import sys
 from urllib.parse import urljoin
 
 from dmapiclient import DataAPIClient
+from dmutils.env_helpers import (
+    get_api_endpoint_from_stage,
+    get_assets_endpoint_from_stage,
+)
 from dmutils.s3 import S3
 
 sys.path.insert(0, ".")
 
-from dmutils.env_helpers import get_api_endpoint_from_stage, get_assets_endpoint_from_stage
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.logging_helpers import configure_logger
+from dmscripts.helpers.updated_by_helpers import get_user
 from dmscripts.publish_draft_services import (
     _parse_document_url,
     _get_live_document_path,
@@ -27,7 +31,7 @@ if __name__ == "__main__":
     DOCUMENTS_BUCKET = S3("digitalmarketplace-documents-production-production")
 
     data = DataAPIClient(
-        get_api_endpoint_from_stage(STAGE), get_auth_token("api", STAGE)
+        get_api_endpoint_from_stage(STAGE), get_auth_token("api", STAGE), user=get_user(),
     )
 
     live_assets_endpoint = get_assets_endpoint_from_stage(STAGE)
@@ -65,4 +69,6 @@ if __name__ == "__main__":
                     if not str(e).startswith("Target key already exists in S3"):
                         raise e
 
-                data.update_service(service_id, {key: urljoin(live_assets_endpoint, live_document_path)})
+                data.update_service(
+                    service_id, {key: urljoin(live_assets_endpoint, live_document_path)}
+                )
