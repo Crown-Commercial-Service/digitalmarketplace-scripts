@@ -19,6 +19,7 @@ from dmscripts.helpers.auth_helpers import get_auth_token
 from dmutils.env_helpers import get_api_endpoint_from_stage
 from docopt import docopt
 from dmapiclient import DataAPIClient
+from dmscripts.helpers.framework_helpers import find_suppliers_on_framework
 
 
 if __name__ == '__main__':
@@ -40,7 +41,7 @@ if __name__ == '__main__':
 
     writer = csv.DictWriter(sys.stdout, fieldnames=fieldnames)
     writer.writeheader()
-    suppliers = data_api_client.find_suppliers_iter(framework='digital-outcomes-and-specialists')
+    suppliers = find_suppliers_on_framework(data_api_client, 'digital-outcomes-and-specialists-5')
     for supplier in suppliers:
-        supplier_id = supplier['id']
+        supplier_id = supplier['supplierId']
         writer.writerow(get_subcontracting_dict(supplier_id, declaration_fields))
