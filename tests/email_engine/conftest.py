@@ -12,7 +12,7 @@ def caplog(caplog):
         yield caplog
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def default_argument_parser_factory():
     """Patch email_engine's argument_parser_factory so that it will not require any arguments"""
 

@@ -55,13 +55,13 @@ class TestEmailEngine:
                 email_address="test1@example.com",
                 template_id="000-001",
                 personalisation={"name": "test1"},
-                reference="test_email_engine",
+                reference="test_email_engine-f558d11a",
             ),
             mock.call(
                 email_address="test2@example.com",
                 template_id="000-001",
                 personalisation={"name": "test2"},
-                reference="test_email_engine",
+                reference="test_email_engine-f558d11a",
             ),
         ]
 
@@ -138,5 +138,5 @@ class TestEmailEngine:
             "queue update: generator is exhausted, read 2 notifications into queue",
             "queue update: send notification {'email_address': 'test1@example.com', 'template_id': '000-001', 'personalisation': {'name': 'test1'}} response {}",
             "queue update: send notification {'email_address': 'test2@example.com', 'template_id': '000-001', 'personalisation': {'name': 'test2'}} response {}",
-            "sent 2 email notifications with reference test_email_engine_logfile",
+            "sent 2 email notifications with reference test_email_engine_logfile-a16feb2f",
         ]

@@ -36,29 +36,47 @@ class TestArgumentParser:
 
         assert args.notify_api_key is None
 
-    def test_reference_default_is_sys_argv_0(self, argument_parser_factory):
+    def test_reference_default_startswith_sys_argv_0(self, argument_parser_factory):
         with mock.patch("sys.argv", ["foobar"]):
-            args = argument_parser_factory().parse_args([])
+            args = argument_parser_factory().parse_args()
 
-        assert args.reference == "foobar"
+        assert args.reference.startswith("foobar")
+
+    def test_reference_default_suffix_changes_if_argv_changes(self, argument_parser_factory):
+        with mock.patch("sys.argv", ["foobar"]):
+            args = argument_parser_factory().parse_args()
+            assert args.reference == "foobar-6a2639d8"
+
+        with mock.patch("sys.argv", ["foobar", "-n", "--notify-api-key=0000"]):
+            args = argument_parser_factory().parse_args()
+            assert args.reference == "foobar-3c3adfeb"
+
+    def test_reference_default_suffix_does_not_depend_on_order_of_args(self, argument_parser_factory):
+        with mock.patch("sys.argv", ["foobar", "-n", "--notify-api-key=0000"]):
+            args1 = argument_parser_factory().parse_args()
+
+        with mock.patch("sys.argv", ["foobar", "--notify-api-key=0000", "-n"]):
+            args2 = argument_parser_factory().parse_args()
+
+        assert args1.reference == args2.reference
 
     def test_reference_default_removes_suffix_dot_py(self, argument_parser_factory):
         with mock.patch("sys.argv", ["foobar.py"]):
             args = argument_parser_factory().parse_args([])
 
-        assert args.reference == "foobar"
+        assert args.reference == "foobar-6a2639d8"
 
     def test_reference_default_removes_path_components(self, argument_parser_factory):
         with mock.patch("sys.argv", ["./scripts/foobar"]):
             args = argument_parser_factory().parse_args([])
 
-        assert args.reference == "foobar"
+        assert args.reference == "foobar-6a2639d8"
 
-    def test_reference_default_overridable_by_factory_arg(self, argument_parser_factory):
+    def test_reference_default_prefix_overridable_by_factory_arg(self, argument_parser_factory):
         with mock.patch("sys.argv", ["foo"]):
             args = argument_parser_factory(reference="bar").parse_args([])
 
-        assert args.reference == "bar"
+        assert args.reference == "bar-d5af0203"
 
     def test_reference_cli_argument_overrides_factory_arg(self, argument_parser_factory):
         with mock.patch("sys.argv", ["foo"]):
@@ -66,15 +84,15 @@ class TestArgumentParser:
                 ["--reference=baz"]
             )
 
-        assert args.reference == "baz"
+        assert args.reference == "baz-e4c8b7f6"
 
     def test_default_logfile_path_is_derived_from_reference(self, argument_parser_factory):
         with mock.patch("sys.argv", ["foo"]):
             args = argument_parser_factory().parse_args([])
 
-        assert args.logfile == Path("/tmp/foo.log")
+        assert args.logfile == Path("/tmp/foo-f55be76c.log")
 
         with mock.patch("sys.argv", ["foo"]):
             args = argument_parser_factory(reference="bar").parse_args([])
 
-        assert args.logfile == Path("/tmp/bar.log")
+        assert args.logfile == Path("/tmp/bar-d5af0203.log")

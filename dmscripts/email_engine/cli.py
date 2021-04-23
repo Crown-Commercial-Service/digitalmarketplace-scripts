@@ -20,6 +20,7 @@ Running this module will show the default command line arguments::
 """
 from pathlib import Path
 import argparse
+import hashlib
 import os
 import sys
 
@@ -28,10 +29,7 @@ __all__ = ["argument_parser_factory"]
 
 
 def argument_parser_factory(
-    *,
-    reference: str = None,
-    logfile: Path = None,
-    **kwargs
+    *, reference: str = None, logfile: Path = None, **kwargs
 ) -> argparse.ArgumentParser:
     """Create an ArgumentParser to read options for an email script
 
@@ -59,10 +57,15 @@ def argument_parser_factory(
         include a required flag to specify the template ID (default: false).
     """
 
+    # Generate the default reference from sys.argv. This does mean you will
+    # need to mock sys.argv when calling argument_parser_factory in tests.
+    if reference is None:
+        reference = Path(sys.argv[0]).stem
+
     p = _ArgumentParser(
         description=kwargs.get("description"),
         epilog=kwargs.get("epilog"),
-        formatter_class=argparse.RawDescriptionHelpFormatter
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
     p.add_argument(
@@ -101,7 +104,8 @@ def argument_parser_factory(
 
     p.add_argument(
         "--reference",
-        default=reference or Path(sys.argv[0]).stem,
+        default=reference,
+        type=append_hash_of_argv,
         help=(
             "Identifer to reference all the emails sent by this script (sent to Notify)."
             " Defaults to the name of the script."
@@ -125,6 +129,16 @@ def argument_parser_factory(
     )
 
     return p
+
+
+def append_hash_of_argv(reference: str) -> str:
+    # Add a hash of the command line arguments to the reference so running the
+    # same script with different arguments results in a different reference.
+    args = [reference] + sorted(sys.argv[1:])
+    arghash = hashlib.blake2b(
+        " ".join(args).encode(), digest_size=4
+    ).hexdigest()
+    return f"{reference}-{arghash}"
 
 
 # copied from https://stackoverflow.com/a/10551190
