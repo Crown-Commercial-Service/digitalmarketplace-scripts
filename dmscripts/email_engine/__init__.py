@@ -37,7 +37,11 @@ to; this can be supplied using the DM_ENVIRONMENT environment variable, or the
 --stage command line flag.
 
 Both the reference and the logfile path can be overridden at the command line,
-with the `--reference` and `--logfile` flags.
+with the `--reference` and `--logfile` flags. This could be useful for a server
+that runs email scripts unsupervised (i.e. Jenkins); the reference could be a
+job parameter that by default is the name of the job and the date, and the
+logfile could be located in a directory that is preserved between runs. Then
+re-running a job with the same parameters would resume the previous run.
 
 How to use as a script writer
 -----------------------------
