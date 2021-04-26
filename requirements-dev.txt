@@ -77,7 +77,7 @@ prompt-toolkit==3.0.3
     # via ipython
 ptyprocess==0.6.0
     # via pexpect
-py==1.8.1
+py==1.10.0
     # via pytest
 pycodestyle==2.5.0
     # via flake8
