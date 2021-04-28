@@ -76,7 +76,7 @@ class TestArgumentParser:
         with mock.patch("sys.argv", ["foo"]):
             args = argument_parser_factory(reference="bar").parse_args([])
 
-        assert args.reference == "bar-d5af0203"
+        assert args.reference == "bar"
 
     def test_reference_cli_argument_overrides_factory_arg(self, argument_parser_factory):
         with mock.patch("sys.argv", ["foo"]):
@@ -84,7 +84,7 @@ class TestArgumentParser:
                 ["--reference=baz"]
             )
 
-        assert args.reference == "baz-e4c8b7f6"
+        assert args.reference == "baz"
 
     def test_default_logfile_path_is_derived_from_reference(self, argument_parser_factory):
         with mock.patch("sys.argv", ["foo"]):
@@ -95,4 +95,4 @@ class TestArgumentParser:
         with mock.patch("sys.argv", ["foo"]):
             args = argument_parser_factory(reference="bar").parse_args([])
 
-        assert args.logfile == Path("/tmp/bar-d5af0203.log")
+        assert args.logfile == Path("/tmp/bar.log")

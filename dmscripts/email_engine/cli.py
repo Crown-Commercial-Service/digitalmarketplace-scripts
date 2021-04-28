@@ -39,7 +39,7 @@ def argument_parser_factory(
     can avoid duplication by not adding them to the function signature though.
 
     :param reference: default reference if none is supplied at command line,
-        if None the script name will be used
+        if None the script name will be used, plus a hash of the arguments
     :param logfile: default path to the logfile if none is supplied at command line,
         if None /tmp/<reference>.log will be used
 
@@ -61,6 +61,9 @@ def argument_parser_factory(
     # need to mock sys.argv when calling argument_parser_factory in tests.
     if reference is None:
         reference = Path(sys.argv[0]).stem
+        reference_is_default = True
+    else:
+        reference_is_default = False
 
     p = _ArgumentParser(
         description=kwargs.get("description"),
@@ -105,10 +108,10 @@ def argument_parser_factory(
     p.add_argument(
         "--reference",
         default=reference,
-        type=append_hash_of_argv,
+        type=append_hash_of_argv if reference_is_default else None,  # Only append hash if no reference specified
         help=(
             "Identifer to reference all the emails sent by this script (sent to Notify)."
-            " Defaults to the name of the script."
+            " Defaults to the name of the script, plus a hash of the arguments."
         ),
     )
 

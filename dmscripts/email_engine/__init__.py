@@ -23,9 +23,8 @@ default (see email_engine.cli) this is the name of the script. Alternatively,
 you can override the reference with a command line argument. The reference is
 also used as the name of the logfile by default.
 
-A hash of the command line arguments is always appended to the reference,
-whether provided on the command line or not. This means running the same script
-with the same arguments will always have the same hash, but the same script
+If no reference argument is specified, a hash of the command line arguments is appended to the default reference,
+This means running the same script with the same arguments will always have the same hash, but the same script
 with different arguments will have a slightly different reference.
 
 How to use as a script runner
