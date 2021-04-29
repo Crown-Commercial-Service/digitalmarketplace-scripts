@@ -57,13 +57,13 @@ def argument_parser_factory(
         include a required flag to specify the template ID (default: false).
     """
 
+    def has_custom_reference():
+        return any(arg.startswith('--reference') for arg in sys.argv)
+
     # Generate the default reference from sys.argv. This does mean you will
     # need to mock sys.argv when calling argument_parser_factory in tests.
     if reference is None:
         reference = Path(sys.argv[0]).stem
-        reference_is_default = True
-    else:
-        reference_is_default = False
 
     p = _ArgumentParser(
         description=kwargs.get("description"),
@@ -108,7 +108,7 @@ def argument_parser_factory(
     p.add_argument(
         "--reference",
         default=reference,
-        type=append_hash_of_argv if reference_is_default else None,  # Only append hash if no reference specified
+        type=append_hash_of_argv if not has_custom_reference() else None,  # Only append hash if no reference specified
         help=(
             "Identifer to reference all the emails sent by this script (sent to Notify)."
             " Defaults to the name of the script, plus a hash of the arguments."

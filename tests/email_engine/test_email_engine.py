@@ -1,6 +1,6 @@
 # this file needs a lot of long lines because we are testing examples of logfiles
 # flake8: noqa E501
-
+import sys
 from unittest import mock
 
 import pytest
@@ -39,12 +39,13 @@ class TestEmailEngine:
 
         notifications_generator = mock.Mock(wraps=notifications_generator)
 
-        email_engine(
-            notifications_generator,
-            argv=[],
-            reference="test_email_engine",
-            logfile=logfile,
-        )
+        with mock.patch.object(sys, 'argv', ['--reference=test_email_engine']):
+            email_engine(
+                notifications_generator,
+                argv=[],
+                reference="test_email_engine",
+                logfile=logfile,
+            )
 
         assert notifications_generator.called
         assert notifications_api_client.call_args == mock.call("test-api-key")
@@ -123,12 +124,13 @@ class TestEmailEngine:
             "test_api_key"
         ).send_email_notification.return_value = {}
 
-        email_engine(
-            notifications_generator,
-            argv=[],
-            reference="test_email_engine_logfile",
-            logfile=logfile,
-        )
+        with mock.patch.object(sys, 'argv', ['--reference=test_email_engine_logfile']):
+            email_engine(
+                notifications_generator,
+                argv=[],
+                reference="test_email_engine_logfile",
+                logfile=logfile,
+            )
 
         loglines = logfile.read_text().splitlines()
         assert loglines == [
