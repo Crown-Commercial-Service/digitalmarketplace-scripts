@@ -108,6 +108,8 @@ def argument_parser_factory(
     p.add_argument(
         "--reference",
         default=reference,
+        # TODO: figure out a way of determining this which also works when reference is specified directly
+        #  in email_engine args only
         type=append_hash_of_argv if not has_custom_reference() else None,  # Only append hash if no reference specified
         help=(
             "Identifer to reference all the emails sent by this script (sent to Notify)."
