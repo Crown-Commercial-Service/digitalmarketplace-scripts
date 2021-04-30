@@ -10,6 +10,8 @@ reading it back into memory in a human readable fashion.
 from ast import literal_eval
 from typing import Callable, Dict, Generator, Union
 
+from dmutils.email.helpers import hash_string
+
 
 class EmailNotification(dict):
     """A typed, hashable, serder-able, frozen dict subclass
@@ -60,6 +62,23 @@ class EmailNotification(dict):
     def from_str(cls, s: str) -> "EmailNotification":
         """Parse a dict literal representation of a notification"""
         return cls(**literal_eval(s))
+
+    @property
+    def sha256_hash(self) -> str:
+        # Calculate the SHA256 hash of the string representation. This is reproducible and allows us to generate a
+        # unique reference for an email that can be stored in our logs and checked to see an email's status
+        # The order of keys is important for the hash, so make it explicit
+        return (
+            hash_string(
+                str(
+                    dict(
+                        email_address=self["email_address"],
+                        template_id=self["template_id"],
+                        personalisation=self["personalisation"],
+                    )
+                )
+            )
+        )
 
 
 class NotificationResponse(dict):

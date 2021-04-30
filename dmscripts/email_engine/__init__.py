@@ -208,10 +208,9 @@ def email_engine(
         def send_email_notification(
             notification: EmailNotification,
         ) -> NotificationResponse:
-            # note that all notifications will have the same reference
             return notify_client.send_email_notification(
                 **notification,
-                reference=reference,
+                reference=f"{reference}-{notification.sha256_hash}",
             )
 
     try:
