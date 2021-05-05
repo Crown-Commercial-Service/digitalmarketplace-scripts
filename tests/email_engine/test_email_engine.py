@@ -56,13 +56,13 @@ class TestEmailEngine:
                 email_address="test1@example.com",
                 template_id="000-001",
                 personalisation={"name": "test1"},
-                reference="test_email_engine",
+                reference="test_email_engine-giOMmd3dhc52GqVUTRNFoXDGIfAeC5wLZFnPV9rM5L4=",
             ),
             mock.call(
                 email_address="test2@example.com",
                 template_id="000-001",
                 personalisation={"name": "test2"},
-                reference="test_email_engine",
+                reference="test_email_engine-bVPjXSd-Joerdai08PbodN0WxjLvWhRaOgiehCsIXew=",
             ),
         ]
         

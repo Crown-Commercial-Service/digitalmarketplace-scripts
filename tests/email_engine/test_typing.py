@@ -61,3 +61,20 @@ class TestEmailNotification:
         b = EmailNotification.from_str(str(a))
 
         assert a == b
+
+    def test_sha256_hash(self):
+        a = EmailNotification(
+            email_address="hello@example.com",
+            template_id="0000-0000",
+            personalisation={"name": "Hello"},
+        )
+
+        assert a.sha256_hash == "Zx8N_Nk8MWw6EGGpYcY5JLLc4dwSBvfQDXu3rhYQx2c="
+
+        b = EmailNotification(
+            email_address="hello@example.com",
+            template_id="0000-0000",
+            personalisation={"name": "Hello"},
+        )
+
+        assert a.sha256_hash == b.sha256_hash
