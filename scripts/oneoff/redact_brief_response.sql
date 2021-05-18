@@ -5,7 +5,7 @@ This is very dangerous - you should only run it after testing on non-production 
 IA.
 
 To apply this script, target the correct environment with `cf target -s <desired environment>`, then run
-`cf conduit digitalmarketplace_api_db -- psql -v id=<brief response ID> < ./scripts/oneoff/redact_brief_response.sql`
+`cf conduit digitalmarketplace_api_db -- psql --set=id=<brief response ID> < ./scripts/oneoff/redact_brief_response.sql`
 */
 
 UPDATE brief_responses
