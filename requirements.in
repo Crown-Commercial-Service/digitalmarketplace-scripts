@@ -2,7 +2,7 @@
 # with package version changes made in requirements.in
 
 Flask==1.0.4
-itsdangerous==1.1.0
+itsdangerous==2.0.1
 
 digitalmarketplace-apiclient
 digitalmarketplace-content-loader
