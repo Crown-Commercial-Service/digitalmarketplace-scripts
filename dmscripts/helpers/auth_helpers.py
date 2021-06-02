@@ -71,3 +71,12 @@ def get_jenkins_env_variable(jenkins_var_name):
         )
 
     return value
+
+
+def get_mailchimp_credentials(stage):
+    credentials_repo = os.environ.get('DM_CREDENTIALS_REPO', '../digitalmarketplace-credentials')
+    credentials = _decrypt_yaml_file_with_sops(credentials_repo, "vars/{}.yaml".format(stage))
+    return (
+        credentials['supplier_frontend']['mailchimp_username'],
+        credentials['supplier_frontend']['mailchimp_api_key']
+    )

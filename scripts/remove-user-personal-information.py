@@ -6,12 +6,12 @@ This script should be run in response to a user requesting that we delete their 
 data from both our database and mailchimp.
 
 Usage:
-    scripts/remove-user-personal-information.py <stage> <mailchimp_api_key> <mailchimp_username> <user_email> [options]
+    scripts/remove-user-personal-information.py <stage> <user_email> [options]
 
 Options:
-    --dry-run                                             List account that would have data stripped
+    --dry-run    List account that would have data stripped
     --verbose
-    -h, --help                                            Show this screen
+    -h, --help   Show this screen
 """
 import logging
 import sys
@@ -24,7 +24,7 @@ sys.path.insert(0, ".")
 from dmutils.email.dm_mailchimp import DMMailChimpClient
 from dmutils.env_helpers import get_api_endpoint_from_stage
 
-from dmscripts.helpers.auth_helpers import get_auth_token
+from dmscripts.helpers.auth_helpers import get_auth_token, get_mailchimp_credentials
 from dmscripts.helpers import logging_helpers
 from dmscripts.data_retention_remove_user_data import remove_user_data
 
@@ -42,9 +42,10 @@ if __name__ == "__main__":
         base_url=get_api_endpoint_from_stage(stage),
         auth_token=get_auth_token("api", stage),
     )
+    (username, api_key) = get_mailchimp_credentials(stage)
     dm_mailchimp_client = DMMailChimpClient(
-        arguments["<mailchimp_username>"],
-        arguments["<mailchimp_api_key>"],
+        username,
+        api_key,
         logger,
     )
 
