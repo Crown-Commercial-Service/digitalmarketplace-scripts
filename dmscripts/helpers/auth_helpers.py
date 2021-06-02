@@ -26,7 +26,7 @@ def get_auth_token(api, stage):
     if not auth_token:
         DM_CREDENTIALS_REPO = os.environ.get('DM_CREDENTIALS_REPO', '../digitalmarketplace-credentials')
         token_prefix = 'J' if subprocess.check_output(["whoami"]) == 'jenkins' else 'D'
-        creds_json = _decrypt_yaml_file_with_sops(DM_CREDENTIALS_REPO, "vars/{}.yaml".format(stage))
+        creds_json = _decrypt_yaml_file_with_sops(DM_CREDENTIALS_REPO, f"vars/{stage}.yaml")
         auth_tokens = creds_json[api]['auth_tokens']
         auth_token = next(token for token in auth_tokens if token.startswith(token_prefix))
 
@@ -71,3 +71,12 @@ def get_jenkins_env_variable(jenkins_var_name):
         )
 
     return value
+
+
+def get_mailchimp_credentials(stage):
+    credentials_repo = os.environ.get('DM_CREDENTIALS_REPO', '../digitalmarketplace-credentials')
+    credentials = _decrypt_yaml_file_with_sops(credentials_repo, f"vars/{stage}.yaml")
+    return (
+        credentials['supplier_frontend']['mailchimp_username'],
+        credentials['supplier_frontend']['mailchimp_api_key']
+    )
