@@ -36,9 +36,9 @@ defusedxml==0.6.0
     # via odfpy
 digitalmarketplace-apiclient==22.0.0
     # via -r requirements.in
-digitalmarketplace-content-loader==8.0.0
+digitalmarketplace-content-loader==8.1.1
     # via -r requirements.in
-digitalmarketplace-utils==58.1.0
+digitalmarketplace-utils==59.0.0
     # via
     #   -r requirements.in
     #   digitalmarketplace-content-loader
@@ -125,7 +125,7 @@ python-dateutil==2.8.1
     # via
     #   -r requirements.in
     #   botocore
-git+https://github.com/madzak/python-json-logger.git@v0.1.8#egg=python-json-logger==0.1.8
+python-json-logger==0.1.11
     # via
     #   -r requirements.in
     #   digitalmarketplace-utils
@@ -162,9 +162,7 @@ urllib3==1.25.10
     #   botocore
     #   requests
 werkzeug==1.0.0
-    # via
-    #   digitalmarketplace-utils
-    #   flask
+    # via flask
 workdays==1.4
     # via digitalmarketplace-utils
 wtforms==2.2.1
