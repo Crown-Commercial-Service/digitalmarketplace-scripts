@@ -1,6 +1,6 @@
 # Digital Marketplace Scripts
 
-![Python 3.6](https://img.shields.io/badge/python-3.6-blue.svg)
+![Python 3.9](https://img.shields.io/badge/python-3.9-blue.svg)
 
 Contains:
  - scripts used by Jenkins (either as scheduled tasks or one-off jobs)
