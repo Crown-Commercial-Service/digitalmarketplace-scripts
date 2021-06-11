@@ -12,9 +12,9 @@ backoff==1.10.0
     # via -r requirements.in
 blinker==1.4
     # via gds-metrics
-boto3==1.14.34
+boto3==1.17.91
     # via digitalmarketplace-utils
-botocore==1.17.60
+botocore==1.20.91
     # via
     #   boto3
     #   s3transfer
@@ -46,8 +46,6 @@ docopt==0.6.2
     # via
     #   -r requirements.in
     #   notifications-python-client
-docutils==0.15.2
-    # via botocore
 flask-gzip==0.2
     # via digitalmarketplace-utils
 flask-login==0.5.0
@@ -137,13 +135,14 @@ pyyaml==5.4
     #   yq
 redis==3.5.3
     # via digitalmarketplace-utils
-requests==2.23.0
+requests==2.25.1
     # via
+    #   -r requirements.in
     #   digitalmarketplace-apiclient
     #   digitalmarketplace-utils
     #   mailchimp3
     #   notifications-python-client
-s3transfer==0.3.3
+s3transfer==0.4.2
     # via boto3
 six==1.14.0
     # via
@@ -157,8 +156,9 @@ unicodecsv==0.14.1
     # via
     #   -r requirements.in
     #   digitalmarketplace-utils
-urllib3==1.25.10
+urllib3==1.26.5
     # via
+    #   -r requirements.in
     #   botocore
     #   requests
 werkzeug==1.0.0
