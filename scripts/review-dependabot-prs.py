@@ -5,43 +5,21 @@ Show a human all Dependabot PRs that look ready to be merged. If the human accep
 
 import json
 import subprocess
+import requests
+import yaml
+
 from distutils.spawn import find_executable
 
-# From https://github.com/alphagov/seal/blob/main/config/alphagov.yml
-DIGITAL_MARKETPLACE_REPOS = [
-    "digitalmarketplace-admin-frontend",
-    "digitalmarketplace-agreements",
-    "digitalmarketplace-antivirus-api",
-    "digitalmarketplace-api",
-    "digitalmarketplace-apiclient",
-    "digitalmarketplace-aws",
-    "digitalmarketplace-bad-words",
-    "digitalmarketplace-brief-responses-frontend",
-    "digitalmarketplace-briefs-frontend",
-    "digitalmarketplace-buyer-frontend",
-    "digitalmarketplace-content-loader",
-    "digitalmarketplace-credentials",
-    "digitalmarketplace-developer-tools",
-    "digitalmarketplace-docker-base",
-    "digitalmarketplace-frameworks",
-    "digitalmarketplace-frontend-toolkit",
-    "digitalmarketplace-functional-tests",
-    "digitalmarketplace-govuk-frontend",
-    "digitalmarketplace-jenkins",
-    "digitalmarketplace-logdia",
-    "digitalmarketplace-manual",
-    "digitalmarketplace-performance-testing",
-    "digitalmarketplace-router",
-    "digitalmarketplace-runner",
-    "digitalmarketplace-scripts",
-    "digitalmarketplace-search-api",
-    "digitalmarketplace-supplier-frontend",
-    "digitalmarketplace-test-utils",
-    "digitalmarketplace-user-frontend",
-    "digitalmarketplace-utils",
-    "digitalmarketplace-visual-regression",
-    "govuk-frontend-jinja",
-]
+
+
+
+def get_digital_marketplace_repos():
+    response = requests.get(
+        "https://raw.githubusercontent.com/alphagov/seal/main/config/alphagov.yml"
+    )
+    response.raise_for_status()
+
+    return yaml.safe_load(response.text)["digitalmarketplace"]["include_repos"]
 
 
 def open_url_in_browser(url):
@@ -85,7 +63,7 @@ def eligible_for_semiautomated_merge(pr):
 
 if __name__ == "__main__":
     github_repo_string = " ".join(
-        f"repo:alphagov/{repo}" for repo in DIGITAL_MARKETPLACE_REPOS
+        f"repo:alphagov/{repo}" for repo in get_digital_marketplace_repos()
     )
 
     output = subprocess.run(
