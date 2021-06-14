@@ -2,6 +2,7 @@
 
 import json
 import subprocess
+from distutils.spawn import find_executable
 
 # From https://github.com/alphagov/seal/blob/main/config/alphagov.yml
 DIGITAL_MARKETPLACE_REPOS = [
@@ -38,6 +39,17 @@ DIGITAL_MARKETPLACE_REPOS = [
     "digitalmarketplace-visual-regression",
     "govuk-frontend-jinja",
 ]
+
+
+def open_url_in_browser(url):
+    if find_executable("open"):
+        # MacOS
+        subprocess.run(["open", url])
+    elif find_executable("xdg-open"):
+        # Linux
+        subprocess.run(["xdg-open", url])
+    else:
+        raise Exception("Unable to find tool to open the URL with")
 
 
 def eligible_for_semiautomated_merge(pr):
@@ -100,6 +112,7 @@ if __name__ == "__main__":
             continue
 
         print(f"Approve and merge '{pr['title']}'?")
+        open_url_in_browser(pr["url"])
         approve = input("Enter 'y' to approve and merge ")
 
         if approve == "y":
