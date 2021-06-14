@@ -73,7 +73,7 @@ if __name__ == "__main__":
             "pr",
             "list",
             "--json",
-            "author,number,mergeable,reviews,state,title,url,body,statusCheckRollup",
+            "author,number,mergeable,reviews,state,title,url,statusCheckRollup,headRepository",
             "--search",
             f"label:dependencies state:open is:pr {github_repo_string}",
         ],
@@ -82,6 +82,7 @@ if __name__ == "__main__":
     )
 
     dependabot_prs = json.loads(output.stdout)
+    repos_merged_to = set()
 
     for pr in dependabot_prs:
         print(f"\n# {pr['title']}")
@@ -90,8 +91,10 @@ if __name__ == "__main__":
         if not eligible_for_semiautomated_merge(pr):
             print("Skipping")
             continue
-
-        subprocess.run(["xdg-open", pr["url"]])
+        repository = pr['headRepository']['name']
+        if repository in repos_merged_to:
+            print(f"Skipping: already merged a PR to {repository}")
+            continue
 
         print(f"Approve and merge '{pr['title']}'?")
         approve = input("Enter 'y' to approve and merge ")
@@ -100,5 +103,6 @@ if __name__ == "__main__":
             print("Approving and merging")
             subprocess.run(["gh", "pr", "review", "--approve", pr["url"]], check=True)
             subprocess.run(["gh", "pr", "merge", "--merge", pr["url"]], check=True)
+            repos_merged_to.add(repository)
         else:
             print("Skipping")
