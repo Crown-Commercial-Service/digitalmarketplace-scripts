@@ -68,8 +68,11 @@ def eligible_for_semiautomated_merge(pr):
     if not pr["statusCheckRollup"]:
         print(f'Wrong statusCheckRollup: {pr["statusCheckRollup"]}')
         return False
-    if any(
-        check["status"] != "COMPLETED" or check["conclusion"] != "SUCCESS"
+    if not all(
+        (
+            check["status"] == "COMPLETED" and check["conclusion"] == "SUCCESS"
+        )  # Github Actions
+        or check.get("state") == "SUCCESS"  # Snyk
         for check in pr["statusCheckRollup"]
     ):
         print("Wrong check status")
