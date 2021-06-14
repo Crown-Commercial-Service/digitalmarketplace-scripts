@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+"""
+Show a human all Dependabot PRs that look ready to be merged. If the human accepts, approve and merge the PRs.
+"""
 
 import json
 import subprocess
