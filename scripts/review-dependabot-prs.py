@@ -56,8 +56,11 @@ def eligible_for_semiautomated_merge(pr):
     if not pr["statusCheckRollup"]:
         print(f'Wrong statusCheckRollup: {pr["statusCheckRollup"]}')
         return False
-    if any(check["status"] != "COMPLETED" or check["conclusion"] != "SUCCESS" for check in pr["statusCheckRollup"]):
-        print('Wrong check status')
+    if any(
+        check["status"] != "COMPLETED" or check["conclusion"] != "SUCCESS"
+        for check in pr["statusCheckRollup"]
+    ):
+        print("Wrong check status")
         return False
     return True
 
@@ -86,12 +89,12 @@ if __name__ == "__main__":
 
     for pr in dependabot_prs:
         print(f"\n# {pr['title']}")
-        print(pr['url'])
+        print(pr["url"])
 
         if not eligible_for_semiautomated_merge(pr):
             print("Skipping")
             continue
-        repository = pr['headRepository']['name']
+        repository = pr["headRepository"]["name"]
         if repository in repos_merged_to:
             print(f"Skipping: already merged a PR to {repository}")
             continue
