@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 """
 Show a human all Dependabot PRs that look ready to be merged. If the human accepts, approve and merge the PRs.
+
+Requires GitHub's CLI tool: https://github.com/cli/cli
 """
 
 import json
