@@ -11,8 +11,6 @@ import yaml
 from distutils.spawn import find_executable
 
 
-
-
 def get_digital_marketplace_repos():
     response = requests.get(
         "https://raw.githubusercontent.com/alphagov/seal/main/config/alphagov.yml"
