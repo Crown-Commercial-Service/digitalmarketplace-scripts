@@ -100,6 +100,5 @@ if __name__ == "__main__":
             print("Approving and merging")
             subprocess.run(["gh", "pr", "review", "--approve", pr["url"]], check=True)
             subprocess.run(["gh", "pr", "merge", "--merge", pr["url"]], check=True)
-            print("Done")
         else:
             print("Skipping")
