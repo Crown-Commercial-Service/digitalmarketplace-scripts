@@ -85,6 +85,7 @@ if __name__ == "__main__":
 
     for pr in dependabot_prs:
         print(f"\n# {pr['title']}")
+        print(pr['url'])
 
         if not eligible_for_semiautomated_merge(pr):
             print("Skipping")
