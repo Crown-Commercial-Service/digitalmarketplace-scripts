@@ -84,13 +84,14 @@ if __name__ == "__main__":
     repos_merged_to = set()
 
     for pr in dependabot_prs:
-        print(f"\n# {pr['title']}")
+        repository = pr["headRepository"]["name"]
+
+        print(f"\n# {repository}: {pr['title']}")
         print(pr["url"])
 
         if not eligible_for_semiautomated_merge(pr):
             print("Skipping")
             continue
-        repository = pr["headRepository"]["name"]
         if repository in repos_merged_to:
             print(f"Skipping: already merged a PR to {repository}")
             continue
