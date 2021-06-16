@@ -76,7 +76,7 @@ if __name__ == "__main__":
             "--search",
             f"label:dependencies state:open is:pr {github_repo_string}",
         ],
-        capture_output=True,
+        stdout=subprocess.PIPE,
         check=True,
     )
 
