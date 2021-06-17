@@ -28,6 +28,7 @@ example_brief = {
     "location": "London",
     "publishedAt": "2019-01-01T00:00:00.123456Z",
     "contractLength": "6 months",
+    "employmentStatus": "Contracted out service: the off-payroll rules do not apply",
     "status": "awarded",
     "users": [
         {
@@ -156,6 +157,7 @@ class TestGetBriefData:
                 ("Contract amount", "2345678"),
                 ("Contract start date", "2019-06-02"),
                 ("Clarification questions", 1),
+                ("Employment status", "Contracted out service: the off-payroll rules do not apply"),
             ))
         ]
 
