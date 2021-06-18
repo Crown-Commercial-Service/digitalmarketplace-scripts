@@ -17,7 +17,7 @@ DOS_OPPORTUNITY_HEADERS = [
     "Organisation Name", "Buyer Domain", "Location Of The Work",
     "Published At", "Open For", "Expected Contract Length", "Applications from SMEs",
     "Applications from Large Organisations", "Total Organisations", "Status", "Winning supplier",
-    "Size of supplier", "Contract amount", "Contract start date", "Clarification questions"
+    "Size of supplier", "Contract amount", "Contract start date", "Clarification questions", "Employment status"
 ]
 
 DOWNLOAD_FILE_NAME = "opportunity-data.csv"
@@ -68,7 +68,8 @@ def _build_row(
         winner['supplierOrganisationSize'] if winner else '',
         winner['awardDetails']['awardedContractValue'] if winner else '',
         winner['awardDetails']['awardedContractStartDate'] if winner else '',
-        len(brief['clarificationQuestions'])
+        len(brief['clarificationQuestions']),
+        brief.get('employmentStatus', ''),
     ]))
 
     if include_buyer_user_details:
@@ -103,7 +104,7 @@ def get_brief_data(client, logger, include_buyer_user_details: bool = False) -> 
     return rows
 
 
-def write_rows_to_csv(rows: List[Mapping[str, Any]], file_path: str, logger) -> None:
+def write_rows_to_csv(rows: List[Mapping[str, Any]], file_path: Path, logger) -> None:
     logger.info(f"Writing rows to {file_path}")
 
     # assumes all rows have the same keys
