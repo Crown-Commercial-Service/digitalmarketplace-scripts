@@ -17,7 +17,7 @@ Example:
 
     Count approved service edits in October 2020
 
-    ./scripts/oneoff/export-approved-service-edits.py 2020-10 2020-11
+    ./scripts/export-approved-service-edits.py 2020-10 2020-11
 """
 
 
