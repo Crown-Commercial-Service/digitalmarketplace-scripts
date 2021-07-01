@@ -23,7 +23,7 @@ Example:
 
 import itertools
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Iterator, Optional
 
 from docopt import docopt
