@@ -17,13 +17,13 @@ Example:
 
     Count approved service edits in October 2020
 
-    ./scripts/oneoff/export-approved-service-edits.py 2020-10 2020-11
+    ./scripts/export-approved-service-edits.py 2020-10 2020-11
 """
 
 
 import itertools
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Iterator, Optional
 
 from docopt import docopt
@@ -46,7 +46,7 @@ def find_approved_service_edits(
     """Find service edits approved by users in a period"""
 
     audit_events = data_api_client.find_audit_events_iter(
-        acknowledged="true", latest_first=True, audit_type=AuditTypes.update_service
+        acknowledged="true", latest_first=True, audit_type=AuditTypes.update_service, sort_by="acknowledged_at"
     )
 
     # use datetimes to make our life easier
@@ -61,25 +61,9 @@ def find_approved_service_edits(
     if to_datetime:
         audit_events = filter(lambda e: e["acknowledgedAt"] < to_datetime, audit_events)
 
-    # Audit events can be acknowledged at any point after they are created, and
-    # because the server response is sorted by `createdAt` this means in theory
-    # we would need to search every page of the response to find all
-    # acknowledged in a time period. In practice service edits tend to get approved
-    # by admins in fairly regular blocks, so we just fudge it a bit.
-    # TODO: add an option to the api to return results sorted by `acknowledgedAt`
-
-    search_until: datetime = from_datetime - timedelta(
-        # anything more than 5 days takes a very long time
-        days=5
-    )
     audit_events = itertools.takewhile(
-        lambda e: e["acknowledgedAt"] > search_until, audit_events
+        lambda e: e["acknowledgedAt"] > from_datetime, audit_events
     )
-    audit_events = filter(lambda e: from_datetime < e["acknowledgedAt"], audit_events)
-
-    # sort by acknowledgedAt, this can take a while
-    audit_events = sorted(audit_events, key=lambda e: e["acknowledgedAt"])
-
     return audit_events
 
 
