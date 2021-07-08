@@ -1,6 +1,5 @@
 import random
 import string
-import os
 from dmapiclient import DataAPIClient
 
 from typing import Optional
@@ -17,7 +16,7 @@ USER_ROLES = [
 ]
 
 
-DEFAULT_PASSWORD = os.getenv("DM_DEFAULT_PASSWORD", default=None)
+DEFAULT_PASSWORD = "Password1234"
 
 
 def generate_email_address(username: Optional[int] = None) -> str:
