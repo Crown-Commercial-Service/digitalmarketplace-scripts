@@ -32,7 +32,7 @@ def random_string_of_length(n: int = 10) -> str:
     return ''.join(random.choice(string.ascii_letters) for _ in range(n))
 
 
-def generate_user(data: DataAPIClient, role: Optional[str] = None) -> dict:
+def generate_user(data: DataAPIClient, role: str) -> dict:
     """Generate a new user with randomised data and store it in the API"""
 
     if role not in USER_ROLES:
