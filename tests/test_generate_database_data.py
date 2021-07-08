@@ -2,8 +2,6 @@ import pytest
 import mock
 from dmscripts.generate_database_data import generate_user, USER_ROLES
 
-TEST_ROLES = USER_ROLES + ["not-a-role"]
-
 
 class TestGenerateUser:
 
@@ -18,12 +16,10 @@ class TestGenerateUser:
         buyer = generate_user(data=self.api_client, role="buyer")
         assert set(buyer.keys()) == {"name", "email_address", "password", "role"}
 
-    @pytest.mark.parametrize(
-        "role,expected_error", [(role, None if role in USER_ROLES else ValueError) for role in TEST_ROLES])
-    def test_generate_user_validates_roles(self, role, expected_error):
-        if expected_error is not None:
-            with pytest.raises(expected_error):
-                generate_user(self.api_client, role=role)
+    @pytest.mark.parametrize("role", [role for role in USER_ROLES])
+    def test_generate_user_allows_valid_roles(self, role):
+        generate_user(self.api_client, role=role)
 
-        else:
-            generate_user(self.api_client, role=role)
+    def test_generate_user_doesnt_allow_invalid_role(self):
+        with pytest.raises(ValueError):
+            generate_user(self.api_client, role="not-a-role")
