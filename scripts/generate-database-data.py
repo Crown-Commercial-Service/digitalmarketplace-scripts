@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Fill a PostgresSQL database with enough randomly generated data to run the DMp. Currently only creates a single buyer
-user account.
+Populate your local database with enough randomly generated data to run the DMp using the API. Currently only creates a
+single buyer user account.
 
 You must set the environment variable "DM_DEFAULT_PASSWORD" for this script to run.
 
