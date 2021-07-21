@@ -119,7 +119,7 @@ pypdf2==1.26.0
     # via -r requirements.in
 pyrsistent==0.15.7
     # via jsonschema
-python-dateutil==2.8.1
+python-dateutil==2.8.2
     # via
     #   -r requirements.in
     #   botocore
