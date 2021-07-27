@@ -81,6 +81,7 @@ if __name__ == "__main__":
     )
 
     dependabot_prs = json.loads(output.stdout)
+    dependabot_prs.sort(key=lambda pr: pr['title'])
     repos_merged_to = set()
 
     for pr in dependabot_prs:
