@@ -33,6 +33,14 @@ def open_url_in_browser(url):
         raise Exception("Unable to find tool to open the URL with")
 
 
+def is_check_successful(check):
+    return (
+        check["status"] == "COMPLETED"
+        and check["conclusion"] == "SUCCESS"  # Github Actions
+        or check.get("state") == "SUCCESS"  # Snyk
+    )
+
+
 def eligible_for_semiautomated_merge(pr):
     if pr["state"] != "OPEN":
         print(f'Wrong state: {pr["state"]}')
@@ -49,14 +57,11 @@ def eligible_for_semiautomated_merge(pr):
     if not pr["statusCheckRollup"]:
         print(f'Wrong statusCheckRollup: {pr["statusCheckRollup"]}')
         return False
-    if not all(
-        (
-            check["status"] == "COMPLETED" and check["conclusion"] == "SUCCESS"
-        )  # Github Actions
-        or check.get("state") == "SUCCESS"  # Snyk
-        for check in pr["statusCheckRollup"]
-    ):
-        print("Wrong check status")
+    unsuccessful_checks = [
+        check for check in pr["statusCheckRollup"] if not is_check_successful(check)
+    ]
+    if unsuccessful_checks:
+        print(f"Unsuccessful checks: {unsuccessful_checks}")
         return False
     return True
 
@@ -81,7 +86,7 @@ if __name__ == "__main__":
     )
 
     dependabot_prs = json.loads(output.stdout)
-    dependabot_prs.sort(key=lambda pr: pr['title'])
+    dependabot_prs.sort(key=lambda pr: pr["title"])
     repos_merged_to = set()
 
     for pr in dependabot_prs:
