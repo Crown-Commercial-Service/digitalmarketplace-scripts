@@ -38,7 +38,7 @@ def generate_user(data: DataAPIClient, role: str) -> dict:
         raise ValueError(f"role: {role} not a valid user role")
     user = {
         "name": random_string_of_length(10),
-        "email_address": generate_email_address(),
+        "emailAddress": generate_email_address(),
         "password": DEFAULT_PASSWORD,
         "role": role,
     }

@@ -14,7 +14,7 @@ class TestGenerateUser:
 
     def test_generate_user_has_correct_keys(self):
         buyer = generate_user(data=self.api_client, role="buyer")
-        assert buyer.keys() == {"name", "email_address", "password", "role"}
+        assert buyer.keys() == {"name", "emailAddress", "password", "role"}
 
     @pytest.mark.parametrize("role", [role for role in USER_ROLES])
     def test_generate_user_allows_valid_roles(self, role):
