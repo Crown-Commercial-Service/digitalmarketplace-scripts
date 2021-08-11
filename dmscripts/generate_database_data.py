@@ -38,10 +38,15 @@ def generate_user(data: DataAPIClient, role: str) -> dict:
         raise ValueError(f"role: {role} not a valid user role")
     user = {
         "name": random_string_of_length(10),
-        "email_address": generate_email_address(),
+        "emailAddress": generate_email_address(),
         "password": DEFAULT_PASSWORD,
         "role": role,
     }
 
     data.create_user(user=user)
     return user
+
+
+def create_buyer_email_domain_if_not_present(data: DataAPIClient, email_domain: str):
+    if email_domain not in data.get_buyer_email_domains_iter():
+        data.create_buyer_email_domain(email_domain)

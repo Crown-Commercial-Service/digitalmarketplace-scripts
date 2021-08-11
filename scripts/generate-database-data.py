@@ -12,7 +12,7 @@ from docopt import docopt
 from dmapiclient import DataAPIClient
 
 sys.path.insert(0, '.')
-from dmscripts.generate_database_data import generate_user
+from dmscripts.generate_database_data import generate_user, create_buyer_email_domain_if_not_present
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.updated_by_helpers import get_user
 from dmutils.env_helpers import get_api_endpoint_from_stage
@@ -30,5 +30,7 @@ if __name__ == "__main__":
         auth_token=api_token,
         user=user,
     )
+
+    create_buyer_email_domain_if_not_present(data, "user.marketplace.team")
 
     generate_user(data, "buyer")
