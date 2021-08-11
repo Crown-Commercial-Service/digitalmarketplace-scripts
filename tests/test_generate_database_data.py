@@ -3,7 +3,7 @@ import mock
 from dmscripts.generate_database_data import generate_user, USER_ROLES, create_buyer_email_domain_if_not_present
 
 
-class TestGenerateUser:
+class TestGenerateDataBase:
 
     def setup_method(self, method):
         self.api_client_patch = mock.patch("dmapiclient.DataAPIClient", autospec=True)
@@ -11,6 +11,9 @@ class TestGenerateUser:
 
     def teardown_method(self, method):
         self.api_client_patch.stop()
+
+
+class TestGenerateUser(TestGenerateDataBase):
 
     def test_generate_user_has_correct_keys(self):
         buyer = generate_user(data=self.api_client, role="buyer")
@@ -25,14 +28,7 @@ class TestGenerateUser:
             generate_user(self.api_client, role="not-a-role")
 
 
-class TestBuyerEmailDomain:
-
-    def setup_method(self, method):
-        self.api_client_patch = mock.patch("dmapiclient.DataAPIClient", autospec=True)
-        self.api_client = self.api_client_patch.start()
-
-    def teardown_method(self, method):
-        self.api_client_patch.stop()
+class TestBuyerEmailDomain(TestGenerateDataBase):
 
     def test_adds_domain(self):
         create_buyer_email_domain_if_not_present(data=self.api_client, email_domain="user.marketplace.team")
