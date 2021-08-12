@@ -15,6 +15,69 @@ USER_ROLES = [
     'supplier',
 ]
 
+G_CLOUD_FRAMEWORK = {
+    'allowDeclarationReuse': True,
+    'applicationsCloseAtUTC': '2021-07-13T13:36:08.114010Z',
+    'clarificationQuestionsOpen': False,
+    'clarificationsCloseAtUTC': '2021-07-12T12:58:37.583954Z',
+    'clarificationsPublishAtUTC': '2020-07-13T16:00:00.000000Z',
+    'countersignerName': 'A G-Cloud Countersigner',
+    'family': 'g-cloud',
+    'framework': 'g-cloud',
+    'frameworkAgreementDetails': {
+        'contractNoticeNumber': '2020/S 045-107620',
+        'countersignerName': 'A G-Cloud Countersigner',
+        'countersignerRole': 'Director - Technology',
+        'frameworkAgreementVersion': 'RM1557.12',
+        'frameworkExtensionLength': 'Up to 12 months, by CCS giving written notice to Suppliers',
+        'frameworkRefDate': '21-09-2020',
+        'frameworkURL': 'https://www.gov.uk/government/publications/g-cloud-12-framework-agreement',
+        'lotDescriptions': {
+            'cloud-hosting': 'Lot 1: Cloud hosting',
+            'cloud-software': 'Lot 2: Cloud software',
+            'cloud-support': 'Lot 3: Cloud support'
+        },
+        'lotOrder': ['cloud-hosting', 'cloud-software', 'cloud-support'],
+        'variations': {}
+    },
+    'frameworkAgreementVersion': 'RM1557.12',
+    'frameworkExpiresAtUTC': '2021-09-27T12:00:00.000000Z',
+    'frameworkLiveAtUTC': '2021-08-04T11:59:37.430818Z',
+    'hasDirectAward': True,
+    'hasFurtherCompetition': False,
+    'intentionToAwardAtUTC': '2020-09-01T12:00:00.000000Z',
+    'isESignatureSupported': True,
+    'lots': [
+        {
+            'allowsBrief': False,
+            'name': 'Cloud hosting',
+            'oneServiceLimit': False,
+            'slug': 'cloud-hosting',
+            'unitPlural': 'services',
+            'unitSingular': 'service'
+        },
+        {
+            'allowsBrief': False,
+            'name': 'Cloud software',
+            'oneServiceLimit': False,
+            'slug': 'cloud-software',
+            'unitPlural': 'services',
+            'unitSingular': 'service'
+        },
+        {
+            'allowsBrief': False,
+            'name': 'Cloud support',
+            'oneServiceLimit': False,
+            'slug': 'cloud-support',
+            'unitPlural': 'services',
+            'unitSingular': 'service'
+        }
+    ],
+    'status': 'live',
+    'name': 'G-Cloud 12',
+    'slug': 'g-cloud-12',
+    'variations': {}
+}
 
 DEFAULT_PASSWORD = "Password1234"
 
@@ -56,3 +119,30 @@ def set_all_frameworks_to_expired(data: DataAPIClient) -> None:
     for framework in data.find_frameworks().get("frameworks", []):
         if framework["status"] != "expired":
             data.update_framework(framework_slug=framework["slug"], data={"status": "expired"})
+
+
+def add_live_g_cloud_framework(data: DataAPIClient) -> None:
+    existing_frameworks = [f["slug"] for f in data.find_frameworks().get("frameworks", [])]
+    if G_CLOUD_FRAMEWORK["slug"] not in existing_frameworks:
+        data.create_framework(
+            slug=G_CLOUD_FRAMEWORK["slug"],
+            name=G_CLOUD_FRAMEWORK["name"],
+            framework_family_slug=G_CLOUD_FRAMEWORK["family"],
+            lots=[lot["slug"] for lot in G_CLOUD_FRAMEWORK["lots"]],
+            has_further_competition=False,
+            has_direct_award=True,
+            status="live"
+        )
+
+        data.update_framework(
+            framework_slug=G_CLOUD_FRAMEWORK["slug"],
+            data={
+                "allowDeclarationReuse": G_CLOUD_FRAMEWORK["allowDeclarationReuse"],
+                "applicationsCloseAtUTC": G_CLOUD_FRAMEWORK["applicationsCloseAtUTC"],
+                "intentionToAwardAtUTC": G_CLOUD_FRAMEWORK["intentionToAwardAtUTC"],
+                "clarificationsCloseAtUTC": G_CLOUD_FRAMEWORK["clarificationsCloseAtUTC"],
+                "clarificationsPublishAtUTC": G_CLOUD_FRAMEWORK["clarificationsPublishAtUTC"],
+                "frameworkLiveAtUTC": G_CLOUD_FRAMEWORK["frameworkLiveAtUTC"],
+                "frameworkExpiresAtUTC": G_CLOUD_FRAMEWORK["frameworkExpiresAtUTC"]
+            }
+        )
