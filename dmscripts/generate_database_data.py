@@ -48,7 +48,7 @@ def generate_user(data: DataAPIClient, role: str) -> dict:
 
 
 def create_buyer_email_domain_if_not_present(data: DataAPIClient, email_domain: str):
-    if email_domain not in data.get_buyer_email_domains_iter():
+    if email_domain not in {d["domainName"] for d in data.get_buyer_email_domains_iter()}:
         data.create_buyer_email_domain(email_domain)
 
 

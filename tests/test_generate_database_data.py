@@ -40,7 +40,7 @@ class TestBuyerEmailDomain(TestGenerateDataBase):
         self.api_client.create_buyer_email_domain.assert_called_with("user.marketplace.team")
 
     def test_doesnt_add_domain_twice(self):
-        self.api_client.get_buyer_email_domains_iter.return_value = ["user.marketplace.team"]
+        self.api_client.get_buyer_email_domains_iter.return_value = [{"domainName": "user.marketplace.team", "id": 1}]
         create_buyer_email_domain_if_not_present(data=self.api_client, email_domain="user.marketplace.team")
         assert not self.api_client.create_buyer_email_domain.called
 
