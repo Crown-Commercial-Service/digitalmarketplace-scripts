@@ -1,6 +1,11 @@
 import pytest
 import mock
-from dmscripts.generate_database_data import generate_user, USER_ROLES, create_buyer_email_domain_if_not_present
+from dmscripts.generate_database_data import (
+    create_buyer_email_domain_if_not_present,
+    generate_user,
+    set_all_frameworks_to_expired,
+    USER_ROLES,
+)
 
 
 class TestGenerateDataBase:
@@ -38,3 +43,26 @@ class TestBuyerEmailDomain(TestGenerateDataBase):
         self.api_client.get_buyer_email_domains_iter.return_value = ["user.marketplace.team"]
         create_buyer_email_domain_if_not_present(data=self.api_client, email_domain="user.marketplace.team")
         assert not self.api_client.create_buyer_email_domain.called
+
+
+class TestSetFrameworksToExpired(TestGenerateDataBase):
+
+    def test_set_all_frameworks_to_expired(self):
+        self.api_client.find_frameworks.return_value = {"frameworks": [
+            {
+                "slug": "g-cloud-6",
+                "status": "live"
+            },
+            {
+                "slug": "g-cloud-7",
+                "status": "live"
+            },
+            {
+                "slug": "g-cloud-5",
+                "status": "expired"
+            },
+        ]}
+        set_all_frameworks_to_expired(self.api_client)
+        assert self.api_client.update_framework.call_count == 2
+        self.api_client.update_framework.assert_any_call("g-cloud-6", {"status": "expired"})
+        self.api_client.update_framework.assert_any_call("g-cloud-7", {"status": "expired"})
