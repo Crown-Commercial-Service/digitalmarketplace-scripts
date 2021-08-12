@@ -54,19 +54,19 @@ docker run --entrypoint docker_for_mac_entrypoint.sh digitalmarketplace/scripts 
 Run the full test suite:
 
 ```
-make test
+invoke test
 ```
 
 To only run the Python tests:
 
 ```
-make test-unit
+invoke test-unit
 ```
 
 To run the `flake8` linter:
 
 ```
-make test-flake8
+invoke test-flake8
 ```
 
 ### Updating Python dependencies
@@ -77,7 +77,7 @@ we want to update the unpinned nested dependencies) `requirements.txt` should be
 regenerated with
 
 ```
-make freeze-requirements
+invoke freeze-requirements
 ```
 
 `requirements.txt` should be committed alongside `requirements.in` changes.
