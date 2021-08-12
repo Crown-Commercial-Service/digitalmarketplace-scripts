@@ -1,7 +1,9 @@
 import pytest
 import mock
 from dmscripts.generate_database_data import (
+    add_live_g_cloud_framework,
     create_buyer_email_domain_if_not_present,
+    G_CLOUD_FRAMEWORK,
     generate_user,
     set_all_frameworks_to_expired,
     USER_ROLES,
@@ -66,3 +68,42 @@ class TestSetFrameworksToExpired(TestGenerateDataBase):
         assert self.api_client.update_framework.call_count == 2
         self.api_client.update_framework.assert_any_call("g-cloud-6", {"status": "expired"})
         self.api_client.update_framework.assert_any_call("g-cloud-7", {"status": "expired"})
+
+
+class TestCreateGCloudFramework(TestGenerateDataBase):
+
+    def test_passed_valid_data(self):
+        add_live_g_cloud_framework(self.api_client)
+        self.api_client.create_framework.assert_called_with(
+            slug=G_CLOUD_FRAMEWORK["slug"],
+            name=G_CLOUD_FRAMEWORK["name"],
+            framework_family_slug=G_CLOUD_FRAMEWORK["family"],
+            lots=[lot["slug"] for lot in G_CLOUD_FRAMEWORK["lots"]],
+            has_further_competition=False,
+            has_direct_award=True,
+            status="live"
+        )
+
+        self.api_client.update_framework.assert_called_with(
+            framework_slug=G_CLOUD_FRAMEWORK["slug"],
+            data={
+                "allowDeclarationReuse": G_CLOUD_FRAMEWORK["allowDeclarationReuse"],
+                "applicationsCloseAtUTC": G_CLOUD_FRAMEWORK["applicationsCloseAtUTC"],
+                "intentionToAwardAtUTC": G_CLOUD_FRAMEWORK["intentionToAwardAtUTC"],
+                "clarificationsCloseAtUTC": G_CLOUD_FRAMEWORK["clarificationsCloseAtUTC"],
+                "clarificationsPublishAtUTC": G_CLOUD_FRAMEWORK["clarificationsPublishAtUTC"],
+                "frameworkLiveAtUTC": G_CLOUD_FRAMEWORK["frameworkLiveAtUTC"],
+                "frameworkExpiresAtUTC": G_CLOUD_FRAMEWORK["frameworkExpiresAtUTC"]
+            }
+        )
+
+    def test_doesnt_add_if_already_created(self):
+        self.api_client.find_frameworks.return_value = {
+            "frameworks": [
+                {
+                    "slug": G_CLOUD_FRAMEWORK["slug"]
+                }
+            ]
+        }
+        add_live_g_cloud_framework(self.api_client)
+        assert not self.api_client.create_framework.called

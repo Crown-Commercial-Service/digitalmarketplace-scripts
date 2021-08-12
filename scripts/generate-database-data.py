@@ -13,6 +13,7 @@ from dmapiclient import DataAPIClient
 
 sys.path.insert(0, '.')
 from dmscripts.generate_database_data import (
+    add_live_g_cloud_framework,
     create_buyer_email_domain_if_not_present,
     generate_user,
     set_all_frameworks_to_expired,
@@ -42,3 +43,5 @@ if __name__ == "__main__":
     create_buyer_email_domain_if_not_present(data, "user.marketplace.team")
 
     generate_user(data, "buyer")
+
+    add_live_g_cloud_framework(data)
