@@ -50,3 +50,9 @@ def generate_user(data: DataAPIClient, role: str) -> dict:
 def create_buyer_email_domain_if_not_present(data: DataAPIClient, email_domain: str):
     if email_domain not in data.get_buyer_email_domains_iter():
         data.create_buyer_email_domain(email_domain)
+
+
+def set_all_frameworks_to_expired(data: DataAPIClient) -> None:
+    for framework in data.find_frameworks().get("frameworks", []):
+        if framework["status"] != "expired":
+            data.update_framework(framework_slug=framework["slug"], data={"status": "expired"})

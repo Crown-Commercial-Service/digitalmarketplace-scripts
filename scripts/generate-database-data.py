@@ -12,7 +12,11 @@ from docopt import docopt
 from dmapiclient import DataAPIClient
 
 sys.path.insert(0, '.')
-from dmscripts.generate_database_data import generate_user, create_buyer_email_domain_if_not_present
+from dmscripts.generate_database_data import (
+    create_buyer_email_domain_if_not_present,
+    generate_user,
+    set_all_frameworks_to_expired,
+)
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.updated_by_helpers import get_user
 from dmutils.env_helpers import get_api_endpoint_from_stage
@@ -30,6 +34,10 @@ if __name__ == "__main__":
         auth_token=api_token,
         user=user,
     )
+
+    # Applying only the database migrations to an empty database creates several frameworks in various states. Set
+    # them all to expired before we start adding new data
+    set_all_frameworks_to_expired(data)
 
     create_buyer_email_domain_if_not_present(data, "user.marketplace.team")
 
