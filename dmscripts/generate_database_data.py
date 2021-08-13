@@ -73,7 +73,7 @@ G_CLOUD_FRAMEWORK = {
             'unitSingular': 'service'
         }
     ],
-    'status': 'live',
+    'status': '[STATUS]',
     'name': 'G-Cloud 12',
     'slug': 'g-cloud-12',
     'variations': {}
@@ -121,7 +121,17 @@ def set_all_frameworks_to_expired(data: DataAPIClient) -> None:
             data.update_framework(framework_slug=framework["slug"], data={"status": "expired"})
 
 
-def add_live_g_cloud_framework(data: DataAPIClient) -> None:
+def make_gcloud_12_live(data: DataAPIClient) -> None:
+    data.update_framework(
+        framework_slug=G_CLOUD_FRAMEWORK["slug"],
+        data={
+            "status": "live",
+            "clarificationQuestionsOpen": False
+        }
+    )
+
+
+def open_gcloud_12(data: DataAPIClient) -> None:
     existing_frameworks = [f["slug"] for f in data.find_frameworks().get("frameworks", [])]
     if G_CLOUD_FRAMEWORK["slug"] not in existing_frameworks:
         data.create_framework(
@@ -131,7 +141,7 @@ def add_live_g_cloud_framework(data: DataAPIClient) -> None:
             lots=[lot["slug"] for lot in G_CLOUD_FRAMEWORK["lots"]],
             has_further_competition=False,
             has_direct_award=True,
-            status="live"
+            status="open"
         )
 
         data.update_framework(
@@ -146,3 +156,21 @@ def add_live_g_cloud_framework(data: DataAPIClient) -> None:
                 "frameworkExpiresAtUTC": G_CLOUD_FRAMEWORK["frameworkExpiresAtUTC"]
             }
         )
+
+    # Regardless of whether the framework was already in the db, we want to make sure a couple of attributes
+    # are properly set
+    # Unfortunately I need to update `status` and `clarificationQuestionsOpen` in two different operations, otherwise
+    # I get this error message:
+    # dmapiclient.errors.HTTPError: Clarification questions are only permitted while the framework is open (status: 400)
+    data.update_framework(
+        framework_slug=G_CLOUD_FRAMEWORK["slug"],
+        data={
+            "status": "open"
+        }
+    )
+    data.update_framework(
+        framework_slug=G_CLOUD_FRAMEWORK["slug"],
+        data={
+            "clarificationQuestionsOpen": True
+        }
+    )

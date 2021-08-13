@@ -13,7 +13,8 @@ from dmapiclient import DataAPIClient
 
 sys.path.insert(0, '.')
 from dmscripts.generate_database_data import (
-    add_live_g_cloud_framework,
+    open_gcloud_12,
+    make_gcloud_12_live,
     create_buyer_email_domain_if_not_present,
     generate_user,
     set_all_frameworks_to_expired,
@@ -26,6 +27,8 @@ STAGE = 'development'
 
 if __name__ == "__main__":
     args = docopt(__doc__)
+
+    print("Generating test data...")
 
     user = get_user()
     api_token = get_auth_token('api', STAGE)
@@ -40,8 +43,12 @@ if __name__ == "__main__":
     # them all to expired before we start adding new data
     set_all_frameworks_to_expired(data)
 
+    open_gcloud_12(data)
+
     create_buyer_email_domain_if_not_present(data, "user.marketplace.team")
 
     generate_user(data, "buyer")
 
-    add_live_g_cloud_framework(data)
+    make_gcloud_12_live(data)
+
+    print("Generation has been completed.")
