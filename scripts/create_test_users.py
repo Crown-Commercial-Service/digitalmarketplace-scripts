@@ -8,15 +8,16 @@ from dmapiclient import DataAPIClient
 
 sys.path.insert(0, '.')
 from dmscripts.helpers.auth_helpers import get_auth_token
+from dmscripts.helpers.updated_by_helpers import get_user
 from dmutils.env_helpers import get_api_endpoint_from_stage
 
 NUMBER_OF_SUPPLIERS = 300
 FINAL_DUNS_NUMBER = 123456789
 
-PASSWORD = 'Password1234'
+PASSWORD = 'Password1234'  # pragma: allowlist secret
 
 stage = 'development'
-data_api_client = DataAPIClient(get_api_endpoint_from_stage(stage), get_auth_token('api', stage))
+data_api_client = DataAPIClient(get_api_endpoint_from_stage(stage), get_auth_token('api', stage), user=get_user())
 
 
 def ensure_supplier_exists(data_api_client, duns_number):
@@ -50,7 +51,6 @@ def ensure_supplier_exists(data_api_client, duns_number):
             'tradingStatus': 'limited company (LTD)',
             'vatNumber': '123456788'
         },
-        user='benjamin.gill'
     )
 
     return data_api_client.find_suppliers(duns_number=duns_number)['suppliers'][0]
