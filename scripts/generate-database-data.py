@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Populate your local database with enough randomly generated data to run the DMp using the API. Currently only creates a
-single buyer user account.
+N.B.: this is a work in progress with only few steps implemented.
+The aim is to populate your local database with enough randomly generated data to run the DMp using the API.
 
 Usage:
 ./scripts/generate-database-data.py
