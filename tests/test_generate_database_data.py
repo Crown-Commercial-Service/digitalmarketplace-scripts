@@ -71,7 +71,7 @@ class TestSetFrameworksToExpired(TestGenerateDataBase):
         self.api_client.update_framework.assert_any_call("g-cloud-7", {"status": "expired"})
 
 
-class TestOpenGcloud12(TestGenerateDataBase):
+class TestOpenGCloud12(TestGenerateDataBase):
 
     def test_passed_valid_data(self):
         open_gcloud_12(self.api_client)
