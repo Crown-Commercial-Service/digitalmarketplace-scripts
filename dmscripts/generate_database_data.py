@@ -73,7 +73,7 @@ G_CLOUD_FRAMEWORK = {
             'unitSingular': 'service'
         }
     ],
-    'status': '[STATUS]',
+    'status': 'live',
     'name': 'G-Cloud 12',
     'slug': 'g-cloud-12',
     'variations': {}
@@ -125,7 +125,7 @@ def make_gcloud_12_live(data: DataAPIClient) -> None:
     data.update_framework(
         framework_slug=G_CLOUD_FRAMEWORK["slug"],
         data={
-            "status": "live"
+            "status": G_CLOUD_FRAMEWORK["status"]
         }
     )
 
