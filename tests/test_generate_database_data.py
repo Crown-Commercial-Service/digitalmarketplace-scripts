@@ -110,7 +110,7 @@ class TestOpenGCloud12(TestGenerateDataBase):
         )
 
 
-class TestMakeGcloud12Live(TestGenerateDataBase):
+class TestMakeGCloud12Live(TestGenerateDataBase):
 
     def test_update_framework_is_called(self):
         make_gcloud_12_live(self.api_client)
