@@ -1,7 +1,8 @@
 import pytest
 import mock
 from dmscripts.generate_database_data import (
-    add_live_g_cloud_framework,
+    open_gcloud_12,
+    make_gcloud_12_live,
     create_buyer_email_domain_if_not_present,
     G_CLOUD_FRAMEWORK,
     generate_user,
@@ -70,10 +71,10 @@ class TestSetFrameworksToExpired(TestGenerateDataBase):
         self.api_client.update_framework.assert_any_call("g-cloud-7", {"status": "expired"})
 
 
-class TestCreateGCloudFramework(TestGenerateDataBase):
+class TestOpenGCloud12(TestGenerateDataBase):
 
     def test_passed_valid_data(self):
-        add_live_g_cloud_framework(self.api_client)
+        open_gcloud_12(self.api_client)
         self.api_client.create_framework.assert_called_with(
             slug=G_CLOUD_FRAMEWORK["slug"],
             name=G_CLOUD_FRAMEWORK["name"],
@@ -81,23 +82,16 @@ class TestCreateGCloudFramework(TestGenerateDataBase):
             lots=[lot["slug"] for lot in G_CLOUD_FRAMEWORK["lots"]],
             has_further_competition=False,
             has_direct_award=True,
-            status="live"
+            status="open"
         )
-
         self.api_client.update_framework.assert_called_with(
             framework_slug=G_CLOUD_FRAMEWORK["slug"],
             data={
-                "allowDeclarationReuse": G_CLOUD_FRAMEWORK["allowDeclarationReuse"],
-                "applicationsCloseAtUTC": G_CLOUD_FRAMEWORK["applicationsCloseAtUTC"],
-                "intentionToAwardAtUTC": G_CLOUD_FRAMEWORK["intentionToAwardAtUTC"],
-                "clarificationsCloseAtUTC": G_CLOUD_FRAMEWORK["clarificationsCloseAtUTC"],
-                "clarificationsPublishAtUTC": G_CLOUD_FRAMEWORK["clarificationsPublishAtUTC"],
-                "frameworkLiveAtUTC": G_CLOUD_FRAMEWORK["frameworkLiveAtUTC"],
-                "frameworkExpiresAtUTC": G_CLOUD_FRAMEWORK["frameworkExpiresAtUTC"]
+                "clarificationQuestionsOpen": True
             }
         )
 
-    def test_doesnt_add_if_already_created(self):
+    def test_doesnt_add_gcloud_if_already_present(self):
         self.api_client.find_frameworks.return_value = {
             "frameworks": [
                 {
@@ -105,5 +99,24 @@ class TestCreateGCloudFramework(TestGenerateDataBase):
                 }
             ]
         }
-        add_live_g_cloud_framework(self.api_client)
+        open_gcloud_12(self.api_client)
         assert not self.api_client.create_framework.called
+
+        self.api_client.update_framework.assert_called_with(
+            framework_slug=G_CLOUD_FRAMEWORK["slug"],
+            data={
+                "clarificationQuestionsOpen": True
+            }
+        )
+
+
+class TestMakeGCloud12Live(TestGenerateDataBase):
+
+    def test_update_framework_is_called(self):
+        make_gcloud_12_live(self.api_client)
+        self.api_client.update_framework.assert_called_with(
+            framework_slug=G_CLOUD_FRAMEWORK["slug"],
+            data={
+                "status": G_CLOUD_FRAMEWORK["status"]
+            }
+        )
