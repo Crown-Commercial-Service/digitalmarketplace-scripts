@@ -117,7 +117,6 @@ class TestMakeGCloud12Live(TestGenerateDataBase):
         self.api_client.update_framework.assert_called_with(
             framework_slug=G_CLOUD_FRAMEWORK["slug"],
             data={
-                "status": "live",
-                "clarificationQuestionsOpen": False
+                "status": "live"
             }
         )

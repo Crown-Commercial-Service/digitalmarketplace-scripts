@@ -125,8 +125,7 @@ def make_gcloud_12_live(data: DataAPIClient) -> None:
     data.update_framework(
         framework_slug=G_CLOUD_FRAMEWORK["slug"],
         data={
-            "status": "live",
-            "clarificationQuestionsOpen": False
+            "status": "live"
         }
     )
 
