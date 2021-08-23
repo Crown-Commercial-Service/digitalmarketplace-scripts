@@ -39,6 +39,16 @@ if __name__ == "__main__":
         user=user,
     )
 
+    # TODO complete the minimum set of data (see rest of this comment).
+    # This document shows the data needed to make functional tests pass:
+    # https://docs.google.com/document/d/1NE7owPrdUO3pW8Wri6sQu57LDsHH8CJd3kfMqXAd678
+    # If you can't access the document, the steps are:
+    # - add users: one for each type of admin, 2 buyers, 2 users per supplier
+    #            Nice to have: add also the test logins the team knows about so that people can login to test
+    # - add suppliers and services: 2 suppliers per lot, each supplier is on somewhere between 1 and all of the lots,
+    #            1 service per lot per supplier on DOS frameworks, 2 services per lot per supplier on G-Cloud frameworks
+    # - add opportunities: 1 closed per lot, 1 awarded per lot, 1 withdrawn per lot, 2 open per lot
+
     # Applying only the database migrations to an empty database creates several frameworks in various states. Set
     # them all to expired before we start adding new data
     set_all_frameworks_to_expired(data)
