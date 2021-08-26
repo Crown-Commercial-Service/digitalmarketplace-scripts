@@ -23,12 +23,17 @@ def get_repos_for_team(team_name):
     return {repo['name'] for repo in json.loads(output.stdout)}
 
 
-def get_all_repos():
-    return set().union(*[get_repos_for_team(team) for team in DIGITAL_MARKETPLACE_TEAMS])
-
-
 if __name__ == "__main__":
-    repos = get_all_repos()
+    admin_repos = get_repos_for_team("digitalmarketplace-admin")
 
-    print(repos)
-    print(len(repos))
+    print(admin_repos)
+    print(len(admin_repos))
+
+    non_admin_repos = get_repos_for_team("digitalmarketplace") - admin_repos
+
+    print(non_admin_repos)
+    print(len(non_admin_repos))
+
+    read_only_repos = get_repos_for_team("digitalmarketplace-readonly") - admin_repos - non_admin_repos
+    if read_only_repos:
+        raise Exception("There should be no repos accessible only to the read-only team")
