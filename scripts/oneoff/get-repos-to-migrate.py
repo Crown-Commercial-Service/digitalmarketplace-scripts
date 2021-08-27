@@ -23,32 +23,45 @@ def get_repos_for_team(team_name):
     return {repo['name'] for repo in json.loads(output.stdout)}
 
 
+def get_team_permissions_for_repo(repo_name):
+    output = subprocess.run(
+        [
+            "gh",
+            "api",
+            "--paginate",
+            f"/repos/alphagov/{repo_name}/teams",
+        ],
+        stdout=subprocess.PIPE,
+        check=True,
+    )
+
+    return {team['name']: team['permission'] for team in json.loads(output.stdout)}
+
+
 if __name__ == "__main__":
     admin_repos = get_repos_for_team("digitalmarketplace-admin")
 
     print(admin_repos)
     print(len(admin_repos))
 
-    # non_admin_repos = get_repos_for_team("digitalmarketplace") - admin_repos
-    #
-    # print(non_admin_repos)
-    # print(len(non_admin_repos))
+    non_admin_repos = get_repos_for_team("digitalmarketplace") - admin_repos
 
-    # read_only_repos = get_repos_for_team("digitalmarketplace-readonly") - admin_repos - non_admin_repos
-    # if read_only_repos:
-    #     raise Exception("There should be no repos accessible only to the read-only team")
+    print(non_admin_repos)
+    print(len(non_admin_repos))
+
+    read_only_repos = get_repos_for_team("digitalmarketplace-readonly") - admin_repos - non_admin_repos
+    if read_only_repos:
+        raise Exception("There should be no repos accessible only to the read-only team")
 
     for repo in admin_repos:
-        output = subprocess.run(
-            [
-                "gh",
-                "api",
-                "--paginate",
-                f"/repos/alphagov/{repo}/teams",
-            ],
-            stdout=subprocess.PIPE,
-            check=True,
-        )
-        external_teams = {team['name'] for team in json.loads(output.stdout)} - DIGITAL_MARKETPLACE_TEAMS
+        team_permissions = get_team_permissions_for_repo(repo)
+        if team_permissions.keys() - DIGITAL_MARKETPLACE_TEAMS:
+            print(f"{repo}: {team_permissions}")
 
-        print(f"{repo}: {external_teams}")
+    print()
+    print()
+
+    for repo in non_admin_repos:
+        team_permissions = get_team_permissions_for_repo(repo)
+        if team_permissions.keys() - DIGITAL_MARKETPLACE_TEAMS:
+            print(f"{repo}: {team_permissions}")
