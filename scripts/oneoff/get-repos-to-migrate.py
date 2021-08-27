@@ -42,17 +42,33 @@ def get_repos_for_team(team_name):
     return {repo['name'] for repo in json.loads(output.stdout)}
 
 
+def migrate_repo(repo_name, source_org, destination_org, new_team_id):
+    print([
+        "gh",
+        "api",
+        f"/repos/{source_org}/{repo_name}/transfer",
+        "--field",
+        f"new_owner={destination_org}",
+        "--field",
+        f"team_ids={new_team_id}",
+    ])
+
+
 if __name__ == "__main__":
     admin_repos = get_repos_for_team("digitalmarketplace-admin") - REPOS_NOT_TO_MIGRATE
 
-    print(admin_repos)
-    print(len(admin_repos))
-
     non_admin_repos = get_repos_for_team("digitalmarketplace") - admin_repos - REPOS_NOT_TO_MIGRATE
-
-    print(non_admin_repos)
-    print(len(non_admin_repos))
 
     read_only_repos = get_repos_for_team("digitalmarketplace-readonly") - admin_repos - non_admin_repos - REPOS_NOT_TO_MIGRATE
     if read_only_repos:
         raise Exception("There should be no repos accessible only to the read-only team")
+
+    for repo in admin_repos:
+        print(f"Migrate {repo}: https://github.com/alphagov/{repo}?")
+        input()
+        migrate_repo(repo, "alphagov", CCS_ORGANISATION, CCS_DIGITALMARKETPLACE_ADMIN_TEAM_ID)
+
+    for repo in non_admin_repos:
+        print(f"Migrate {repo}: https://github.com/alphagov/{repo}?")
+        input()
+        migrate_repo(repo, "alphagov", CCS_ORGANISATION, CCS_DIGITALMARKETPLACE_TEAM_ID)
