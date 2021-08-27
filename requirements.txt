@@ -38,7 +38,7 @@ digitalmarketplace-apiclient==22.2.0
     # via -r requirements.in
 digitalmarketplace-content-loader==8.2.2
     # via -r requirements.in
-digitalmarketplace-utils==59.1.0
+digitalmarketplace-utils==59.1.1
     # via
     #   -r requirements.in
     #   digitalmarketplace-content-loader
@@ -97,7 +97,7 @@ jsonschema==3.2.0
     # via -r requirements.in
 lorem==0.1.1
     # via -r requirements.in
-mailchimp3==3.0.14
+mailchimp3==3.0.15
     # via digitalmarketplace-utils
 markdown==2.6.11
     # via digitalmarketplace-content-loader
