@@ -7,6 +7,7 @@ Usage:
 """
 import json
 import subprocess
+import tempfile
 
 from docopt import docopt
 
@@ -56,21 +57,29 @@ def get_repos_for_team(team_name):
 def migrate_repo(
     repo_name, source_org, destination_org, new_team_id, do_migration=False
 ):
-    commands = [
-        "echo",
-        "gh",
-        "api",
-        f"/repos/{source_org}/{repo_name}/transfer",
-        "--field",
-        f"new_owner={destination_org}",
-        "--field",
-        f"team_ids={new_team_id}",
-    ]
+    with tempfile.NamedTemporaryFile(mode="w") as f:
+        f.write(
+            json.dumps(
+                {
+                    "new_owner": destination_org,
+                    "team_ids": [new_team_id],
+                }
+            )
+        )
+        f.flush()
 
-    if do_migration:
-        commands.pop(0)
+        commands = [
+            "echo",
+            "gh",
+            "api",
+            f"/repos/{source_org}/{repo_name}/transfer",
+            "--input",
+            f.name,
+        ]
+        if do_migration:
+            commands.pop(0)
 
-    subprocess.run(commands, check=True)
+        subprocess.run(commands, check=True)
 
 
 if __name__ == "__main__":
