@@ -10,8 +10,6 @@ import subprocess
 import requests
 import yaml
 
-from distutils.spawn import find_executable
-
 
 def get_digital_marketplace_repos():
     response = requests.get(
@@ -22,15 +20,17 @@ def get_digital_marketplace_repos():
     return yaml.safe_load(response.text)["digitalmarketplace"]["include_repos"]
 
 
-def open_url_in_browser(url):
-    if find_executable("open"):
-        # MacOS
-        subprocess.run(["open", url])
-    elif find_executable("xdg-open"):
-        # Linux
-        subprocess.run(["xdg-open", url])
-    else:
-        raise Exception("Unable to find tool to open the URL with")
+def open_pull_request_in_browser(pr_url):
+    subprocess.run(
+        [
+            "gh",
+            "pr",
+            "view",
+            "--web",
+            pr_url,
+        ],
+        check=True,
+    )
 
 
 def is_check_successful(check):
@@ -103,7 +103,7 @@ if __name__ == "__main__":
             continue
 
         print(f"Approve and merge '{pr['title']}'?")
-        open_url_in_browser(pr["url"])
+        open_pull_request_in_browser(pr["url"])
         approve = input("Enter 'y' to approve and merge ")
 
         if approve == "y":
