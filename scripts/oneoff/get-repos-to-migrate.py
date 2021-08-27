@@ -24,6 +24,8 @@ REPOS_NOT_TO_MIGRATE = {
     "fourth-wall",  # {'team-payments': 'push', 'digitalmarketplace-admin': 'admin', 'GovWifi': 'push'}
     "gds_metrics_python",  # {'digitalmarketplace': 'admin', 're-autom8': 'push'}
     "aws-auth",  # {'digitalmarketplace': 'admin', 'notify': 'push'}
+    # We need to do this manually so we can set up the necessary Github pages redirect
+    "digitalmarketplace-manual",
 }
 
 CCS_ORGANISATION = "Crown-Commercial-Service"
