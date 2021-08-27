@@ -22,6 +22,10 @@ REPOS_NOT_TO_MIGRATE = {
     "aws-auth",  # {'digitalmarketplace': 'admin', 'notify': 'push'}
 }
 
+CCS_ORGANISATION = "Crown-Commercial-Service"
+CCS_DIGITALMARKETPLACE_TEAM_ID = 5060051
+CCS_DIGITALMARKETPLACE_ADMIN_TEAM_ID = 5060056
+
 
 def get_repos_for_team(team_name):
     output = subprocess.run(
