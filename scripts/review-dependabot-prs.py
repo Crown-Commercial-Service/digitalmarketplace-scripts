@@ -68,7 +68,7 @@ def eligible_for_semiautomated_merge(pr):
 
 if __name__ == "__main__":
     github_repo_string = " ".join(
-        f"repo:alphagov/{repo}" for repo in get_digital_marketplace_repos()
+        f"repo:Crown-Commercial-Service/{repo}" for repo in get_digital_marketplace_repos()
     )
 
     output = subprocess.run(
