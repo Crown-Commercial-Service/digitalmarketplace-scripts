@@ -39,20 +39,11 @@ def get_date_framework_closed(stage, framework_slug):
     data_api_client = DataAPIClient(
         get_api_endpoint_from_stage(stage), get_auth_token("api", stage)
     )
-    previous_framework = data_api_client.get_framework(framework_slug)["frameworks"]
-    return isoparse(previous_framework["applicationsCloseAtUTC"])
+    framework = data_api_client.get_framework(framework_slug)["frameworks"]
+    return isoparse(framework["applicationsCloseAtUTC"])
 
 
-if __name__ == "__main__":
-    arguments = docopt(__doc__)
-
-    logger = logging_helpers.configure_logger(
-        {"dmapiclient": logging.INFO}
-        if arguments["--verbose"]
-        else {"dmapiclient": logging.WARN}
-    )
-
-    stage = arguments["<stage>"]
+def get_email_addresses_from_mailchimp(stage, previous_framework_slug):
     (username, api_key) = get_mailchimp_credentials(stage)
     dm_mailchimp_client = DMMailChimpClient(
         username,
@@ -61,11 +52,27 @@ if __name__ == "__main__":
     )
 
     audience_id = PRODUCTION_AUDIENCE_ID if stage == "production" else TEST_AUDIENCE_ID
-    email_addresses = dm_mailchimp_client.get_email_addresses_from_list(
+    return dm_mailchimp_client.get_email_addresses_from_list(
         audience_id,
         status="subscribed",
-        since_timestamp_opt=get_date_framework_closed(
-            stage, arguments["<previous_framework>"]
-        ),
+        # Exclude people who've already been contacted about previous frameworks. We assume that they would have applied
+        # to the previous framework if they were interested.
+        since_timestamp_opt=get_date_framework_closed(stage, previous_framework_slug),
     )
-    output_emails_as_csv(email_addresses)
+
+
+if __name__ == "__main__":
+    arguments = docopt(__doc__)
+
+    stage = arguments["<stage>"]
+    previous_framework = arguments["<previous_framework>"]
+    logger = logging_helpers.configure_logger(
+        {"dmapiclient": logging.INFO}
+        if arguments["--verbose"]
+        else {"dmapiclient": logging.WARN}
+    )
+
+    mailchimp_email_addresses = get_email_addresses_from_mailchimp(
+        stage, previous_framework
+    )
+    output_emails_as_csv(mailchimp_email_addresses)
