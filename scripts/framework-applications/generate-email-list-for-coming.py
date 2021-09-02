@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """
-Get all the emails from mailchimp for people who've asked to be notified about new framework iterations.
+Get the email addresses of everyone we will notify about a new framework coming. This is all suppliers on the previous
+framework, as well as everyone who's registered interest since the previous framework closed. Outputs to stdout.
 
 Usage:
-    /export-mailchimp-coming-emails.py <stage> <previous_framework> [--verbose]
+    /generate-email-list-for-coming.py <stage> <previous_framework> [--verbose]
 
 Parameters:
     <stage>               Stage to target
@@ -35,29 +36,23 @@ def output_emails_as_csv(email_addresses):
         writer.writerow([email_address])
 
 
-def get_date_framework_closed(stage, framework_slug):
-    data_api_client = DataAPIClient(
-        get_api_endpoint_from_stage(stage), get_auth_token("api", stage)
-    )
+def get_date_framework_closed(data_api_client, framework_slug):
     framework = data_api_client.get_framework(framework_slug)["frameworks"]
     return isoparse(framework["applicationsCloseAtUTC"])
 
 
-def get_email_addresses_from_mailchimp(stage, previous_framework_slug):
-    (username, api_key) = get_mailchimp_credentials(stage)
-    dm_mailchimp_client = DMMailChimpClient(
-        username,
-        api_key,
-        logger,
-    )
-
+def get_email_addresses_from_mailchimp(
+    data_api_client, dm_mailchimp_client, stage, previous_framework_slug
+):
     audience_id = PRODUCTION_AUDIENCE_ID if stage == "production" else TEST_AUDIENCE_ID
     return dm_mailchimp_client.get_email_addresses_from_list(
         audience_id,
         status="subscribed",
         # Exclude people who've already been contacted about previous frameworks. We assume that they would have applied
         # to the previous framework if they were interested.
-        since_timestamp_opt=get_date_framework_closed(stage, previous_framework_slug),
+        since_timestamp_opt=get_date_framework_closed(
+            data_api_client, previous_framework_slug
+        ),
     )
 
 
@@ -72,7 +67,26 @@ if __name__ == "__main__":
         else {"dmapiclient": logging.WARN}
     )
 
-    mailchimp_email_addresses = get_email_addresses_from_mailchimp(
-        stage, previous_framework
+    data_api_client = DataAPIClient(
+        get_api_endpoint_from_stage(stage), get_auth_token("api", stage)
     )
-    output_emails_as_csv(mailchimp_email_addresses)
+    (username, api_key) = get_mailchimp_credentials(stage)
+    dm_mailchimp_client = DMMailChimpClient(
+        username,
+        api_key,
+        logger,
+    )
+
+    registered_interest_email_addresses = set(
+        get_email_addresses_from_mailchimp(
+            data_api_client, dm_mailchimp_client, stage, previous_framework
+        )
+    )
+    existing_supplier_email_addresses = {
+        user["email address"]
+        for user in data_api_client.export_users_iter(previous_framework)
+    }
+
+    output_emails_as_csv(
+        registered_interest_email_addresses.union(existing_supplier_email_addresses)
+    )
