@@ -6,7 +6,7 @@ itsdangerous==2.0.1
 
 digitalmarketplace-apiclient
 digitalmarketplace-content-loader
-digitalmarketplace-utils
+digitalmarketplace-utils>=59.2.0
 
 backoff==1.11.1
 docopt==0.6.2
