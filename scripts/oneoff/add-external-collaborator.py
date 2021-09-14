@@ -39,7 +39,7 @@ if __name__ == "__main__":
                 "--silent",
                 "--method",
                 "PUT",
-                f"repos/alphagov/digitalmarketplace-credentials/collaborators/{username}",
+                f"repos/Crown-Commercial-Service/digitalmarketplace-credentials/collaborators/{username}",
             ],
             check=True,
         )

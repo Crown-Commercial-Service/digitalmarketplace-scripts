@@ -28,7 +28,7 @@ fi
 function create_maintenance_mode_branch()
 {
     rm -rf digitalmarketplace-aws
-    git clone "https://${GITHUB_ACCESS_TOKEN}@github.com/alphagov/digitalmarketplace-aws.git"
+    git clone "https://${GITHUB_ACCESS_TOKEN}@github.com/Crown-Commercial-Service/digitalmarketplace-aws.git"
     cd digitalmarketplace-aws
     git checkout -b "${GIT_MAINTENANCE_MODE_BRANCH_NAME}"
 }
@@ -40,9 +40,9 @@ function commit_and_create_github_pr()
     git commit -a -m "$1" -m "$2"
     git push origin "${GIT_MAINTENANCE_MODE_BRANCH_NAME}"
     post_data="{\"title\": \"$1\", \"body\": \"$2\", \"base\": \"master\", \"head\": \"${GIT_MAINTENANCE_MODE_BRANCH_NAME}\"}"
-    response_data=$(curl -XPOST -H "Accept: application/vnd.github.v3.full+json" -d "$post_data" "https://${GITHUB_ACCESS_TOKEN}@api.github.com/repos/alphagov/digitalmarketplace-aws/pulls")
-    echo "Created PR#$(echo "${response_data}" | jq -crM '.number') on alphagov/digitalmarketplace-aws."
-    echo "https://www.github.com/alphagov/digitalmarketplace-aws/pull/$(echo "${response_data}" | jq -crM '.number')"
+    response_data=$(curl -XPOST -H "Accept: application/vnd.github.v3.full+json" -d "$post_data" "https://${GITHUB_ACCESS_TOKEN}@api.github.com/repos/Crown-Commercial-Service/digitalmarketplace-aws/pulls")
+    echo "Created PR#$(echo "${response_data}" | jq -crM '.number') on Crown-Commercial-Service/digitalmarketplace-aws."
+    echo "https://www.github.com/Crown-Commercial-Service/digitalmarketplace-aws/pull/$(echo "${response_data}" | jq -crM '.number')"
 }
 
 function set_maintenance_mode()

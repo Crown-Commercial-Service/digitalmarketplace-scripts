@@ -18,7 +18,7 @@ from dmapiclient import DataAPIClient
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmutils.env_helpers import get_api_endpoint_from_stage
 
-# Dates taken from https://github.com/alphagov/digitalmarketplace-frameworks/blob
+# Dates taken from https://github.com/Crown-Commercial-Service/digitalmarketplace-frameworks/blob
 # /e1f8e5c4a1a98d817e1bc9ff90ace85c1a0762c6/frameworks/<framework>/messages/dates.yml
 FRAMEWORKS_AND_DATES = {
     'digital-outcomes-and-specialists': {
