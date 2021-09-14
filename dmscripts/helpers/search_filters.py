@@ -5,7 +5,7 @@ from dmcontent.content_loader import ContentManifest
 
 
 # the following functions were copied from the buyer frontend with minor alterations
-# https://github.com/alphagov/digitalmarketplace-buyer-frontend/blob/a83163/app/main/presenters/search_presenters.py
+# https://github.com/Crown-Commercial-Service/digitalmarketplace-buyer-frontend/blob/a83163/app/main/presenters/search_presenters.py
 def sections_for_lot(lot_slug: str, manifest: ContentManifest, all_lots: List[dict]):
     if lot_slug == 'all':
         for lot_slug in [x["slug"] for x in all_lots]:
@@ -17,7 +17,7 @@ def sections_for_lot(lot_slug: str, manifest: ContentManifest, all_lots: List[di
 
 
 # the below functions were copied from buyer frontend, with modifications
-# https://github.com/alphagov/digitalmarketplace-buyer-frontend/blob/a83163/app/main/helpers/search_helpers.py#L180
+# https://github.com/Crown-Commercial-Service/digitalmarketplace-buyer-frontend/blob/a83163/app/main/helpers/search_helpers.py#L180
 def get_filter_value_from_question_option(option):
     return option.get("value", option.get("label", ""))
 

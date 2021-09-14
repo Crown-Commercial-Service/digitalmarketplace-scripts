@@ -47,7 +47,7 @@ function get_jenkins_env_token_name() {
 
 function create_credentials_update_branch() {
   rm -rf digitalmarketplace-credentials
-  git clone "https://${GITHUB_ACCESS_TOKEN}@github.com/alphagov/digitalmarketplace-credentials.git"
+  git clone "https://${GITHUB_ACCESS_TOKEN}@github.com/Crown-Commercial-Service/digitalmarketplace-credentials.git"
   cd digitalmarketplace-credentials
   git checkout -b "${GIT_CREDS_UPDATE_BRANCH_NAME}"
 }
@@ -58,9 +58,9 @@ function commit_and_create_github_pr() {
   git commit -a -m "$1" -m "$2"
   git push -q origin "${GIT_CREDS_UPDATE_BRANCH_NAME}"
   post_data="{\"title\": \"$1\", \"body\": \"$2\", \"base\": \"master\", \"head\": \"${GIT_CREDS_UPDATE_BRANCH_NAME}\"}"
-  response_data=$(curl -XPOST -H "Accept: application/vnd.github.v3.full+json" -d "$post_data" "https://${GITHUB_ACCESS_TOKEN}@api.github.com/repos/alphagov/digitalmarketplace-credentials/pulls")
-  echo "Created PR#$(echo "${response_data}" | jq -crM '.number') on alphagov/digitalmarketplace-credentials."
-  echo "https://www.github.com/alphagov/digitalmarketplace-credentials/pull/$(echo "${response_data}" | jq -crM '.number')"
+  response_data=$(curl -XPOST -H "Accept: application/vnd.github.v3.full+json" -d "$post_data" "https://${GITHUB_ACCESS_TOKEN}@api.github.com/repos/Crown-Commercial-Service/digitalmarketplace-credentials/pulls")
+  echo "Created PR#$(echo "${response_data}" | jq -crM '.number') on Crown-Commercial-Service/digitalmarketplace-credentials."
+  echo "https://www.github.com/Crown-Commercial-Service/digitalmarketplace-credentials/pull/$(echo "${response_data}" | jq -crM '.number')"
 }
 
 function add_new_tokens() {

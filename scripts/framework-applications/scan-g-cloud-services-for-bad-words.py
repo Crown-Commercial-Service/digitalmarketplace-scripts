@@ -2,8 +2,9 @@
 
 """
 This script will check all free-text fields in submitted G-Cloud services for "bad words", as defined in
-the file at <bad_words_path> (typically block-list.txt in https://github.com/alphagov/digitalmarketplace-bad-words),
-and generate a CSV report of any bad word found.
+the file at <bad_words_path> (typically block-list.txt in
+https://github.com/Crown-Commercial-Service/digitalmarketplace-bad-words), and generate a CSV report of any bad word
+found.
 
 Use the --scan-drafts option to scan draft services (supplier must still have 'onFramework' set to True).
 

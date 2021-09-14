@@ -30,9 +30,9 @@ function commit_and_create_github_pr() {
   git commit -a -m "$1" -m "$2"
   git push -q origin "${GIT_README_UPDATE_BRANCH_NAME}"
   post_data="{\"title\": \"$1\", \"body\": \"$2\", \"base\": \"master\", \"head\": \"${GIT_README_UPDATE_BRANCH_NAME}\"}"
-  response_data=$(curl -XPOST -H "Accept: application/vnd.github.v3.full+json" -d "$post_data" "https://${GITHUB_ACCESS_TOKEN}@api.github.com/repos/alphagov/${REPO_NAME}/pulls")
-  echo "Created PR#$(echo "${response_data}" | jq -crM '.number') on alphagov/${REPO_NAME}."
-  echo "https://www.github.com/alphagov/${REPO_NAME}/pull/$(echo "${response_data}" | jq -crM '.number')"
+  response_data=$(curl -XPOST -H "Accept: application/vnd.github.v3.full+json" -d "$post_data" "https://${GITHUB_ACCESS_TOKEN}@api.github.com/repos/Crown-Commercial-Service/${REPO_NAME}/pulls")
+  echo "Created PR#$(echo "${response_data}" | jq -crM '.number') on Crown-Commercial-Service/${REPO_NAME}."
+  echo "https://www.github.com/Crown-Commercial-Service/${REPO_NAME}/pull/$(echo "${response_data}" | jq -crM '.number')"
 }
 
 function add_licence_info() {
