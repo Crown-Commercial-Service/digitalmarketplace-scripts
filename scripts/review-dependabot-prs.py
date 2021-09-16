@@ -7,17 +7,23 @@ Requires GitHub's CLI tool: https://github.com/cli/cli
 
 import json
 import subprocess
-import requests
-import yaml
+
+ORGANISATION = "Crown-Commercial-Service"
 
 
 def get_digital_marketplace_repos():
-    response = requests.get(
-        "https://raw.githubusercontent.com/alphagov/seal/main/config/alphagov.yml"
+    output = subprocess.run(
+        [
+            "gh",
+            "api",
+            "--paginate",
+            f"/orgs/{ORGANISATION}/teams/digitalmarketplace-admin/repos",  # team with access to all DMP repos
+        ],
+        stdout=subprocess.PIPE,
+        check=True,
     )
-    response.raise_for_status()
 
-    return yaml.safe_load(response.text)["digitalmarketplace"]["include_repos"]
+    return {repo["name"] for repo in json.loads(output.stdout)}
 
 
 def open_pull_request_in_browser(pr_url):
@@ -68,7 +74,7 @@ def eligible_for_semiautomated_merge(pr):
 
 if __name__ == "__main__":
     github_repo_string = " ".join(
-        f"repo:Crown-Commercial-Service/{repo}" for repo in get_digital_marketplace_repos()
+        f"repo:{ORGANISATION}/{repo}" for repo in get_digital_marketplace_repos()
     )
 
     output = subprocess.run(
