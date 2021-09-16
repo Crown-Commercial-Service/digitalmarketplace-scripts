@@ -23,7 +23,7 @@ def get_digital_marketplace_repos():
         check=True,
     )
 
-    return {repo["name"] for repo in json.loads(output.stdout)}
+    return {repo["name"] for repo in json.loads(output.stdout) if not repo["archived"]}
 
 
 def open_pull_request_in_browser(pr_url):
