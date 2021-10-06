@@ -1,14 +1,29 @@
 #!/usr/bin/env python
 """
-Show a human all Dependabot PRs that look ready to be merged. If the human accepts, approve and merge the PRs.
+Show a human bot PRs that look ready to be merged. If the human accepts, approve and merge the PRs.
 
 Requires GitHub's CLI tool: https://github.com/cli/cli
+
+Usage:
+    scripts/review-bot-prs.py (snyk | dependabot)
 """
 
 import json
 import subprocess
+from docopt import docopt
 
 ORGANISATION = "Crown-Commercial-Service"
+
+BOTS_CONFIG = {
+    'dependabot': {
+        'login': 'dependabot',
+        'label_str': 'label:dependencies'
+    },
+    'snyk': {
+        'login': 'snyk-bot',
+        'label_str': 'author:snyk-bot'
+    }
+}
 
 
 def get_digital_marketplace_repos():
@@ -54,7 +69,7 @@ def eligible_for_semiautomated_merge(pr):
     if pr["reviews"]:
         print(f'Wrong reviews: {pr["reviews"]}')
         return False
-    if pr["author"] != {"login": "dependabot"}:
+    if pr["author"] != {"login": BOTS_CONFIG[BOT]["login"]}:
         print(f'Wrong author: {pr["author"]}')
         return False
     if pr["mergeable"] != "MERGEABLE":
@@ -73,6 +88,10 @@ def eligible_for_semiautomated_merge(pr):
 
 
 if __name__ == "__main__":
+    arguments = docopt(__doc__)
+
+    BOT = 'snyk' if arguments['snyk'] else 'dependabot'
+
     github_repo_string = " ".join(
         f"repo:{ORGANISATION}/{repo}" for repo in get_digital_marketplace_repos()
     )
@@ -85,17 +104,17 @@ if __name__ == "__main__":
             "--json",
             "author,number,mergeable,reviews,state,title,url,statusCheckRollup,headRepository",
             "--search",
-            f"label:dependencies state:open is:pr {github_repo_string}",
+            f"{BOTS_CONFIG[BOT]['label_str']} state:open is:pr {github_repo_string}",
         ],
         stdout=subprocess.PIPE,
         check=True,
     )
 
-    dependabot_prs = json.loads(output.stdout)
-    dependabot_prs.sort(key=lambda pr: pr["title"])
+    bot_prs = json.loads(output.stdout)
+    bot_prs.sort(key=lambda pr: pr["title"])
     repos_merged_to = set()
 
-    for pr in dependabot_prs:
+    for pr in bot_prs:
         repository = pr["headRepository"]["name"]
 
         print(f"\n# {repository}: {pr['title']}")
