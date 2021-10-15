@@ -16,3 +16,5 @@ local.nix
 *.odt
 *.ods
 *.odp
+
+.idea/

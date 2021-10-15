@@ -34,11 +34,11 @@ cryptography==3.3.2
     # via digitalmarketplace-utils
 defusedxml==0.6.0
     # via odfpy
-digitalmarketplace-apiclient==22.2.0
+digitalmarketplace-apiclient==23.0.0
     # via -r requirements.in
-digitalmarketplace-content-loader==8.2.2
+digitalmarketplace-content-loader==9.0.0
     # via -r requirements.in
-digitalmarketplace-utils==59.2.0
+digitalmarketplace-utils==60.0.0
     # via
     #   -r requirements.in
     #   digitalmarketplace-content-loader
@@ -74,10 +74,6 @@ govuk-country-register==0.5.0
     # via digitalmarketplace-utils
 idna==2.9
     # via requests
-importlib-metadata==1.5.0
-    # via
-    #   argcomplete
-    #   jsonschema
 inflection==0.3.1
     # via digitalmarketplace-content-loader
 itsdangerous==2.0.1
@@ -171,8 +167,6 @@ xmltodict==0.12.0
     # via yq
 yq==2.12.2
     # via -r requirements.in
-zipp==3.0.0
-    # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

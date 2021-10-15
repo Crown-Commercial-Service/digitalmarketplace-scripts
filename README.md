@@ -1,5 +1,6 @@
 # Digital Marketplace Scripts
 
+![Python 3.8](https://img.shields.io/badge/python-3.8-blue.svg)
 ![Python 3.9](https://img.shields.io/badge/python-3.9-blue.svg)
 
 Contains:
