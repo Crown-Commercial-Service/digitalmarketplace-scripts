@@ -4,6 +4,8 @@
 #
 #    pip-compile requirements-dev.in
 #
+appnope==0.1.2
+    # via ipython
 attrs==19.3.0
     # via
     #   -c requirements.txt
@@ -28,7 +30,7 @@ decorator==4.4.1
     # via
     #   ipython
     #   traitlets
-digitalmarketplace-test-utils==2.8.2
+digitalmarketplace-test-utils==3.0.0
     # via -r requirements-dev.in
 entrypoints==0.3
     # via flake8
@@ -40,11 +42,6 @@ idna==2.9
     # via
     #   -c requirements.txt
     #   requests
-importlib-metadata==1.5.0
-    # via
-    #   -c requirements.txt
-    #   pluggy
-    #   pytest
 ipython-genutils==0.2.0
     # via
     #   -r requirements-dev.in
@@ -118,10 +115,6 @@ wcwidth==0.1.8
     # via
     #   prompt-toolkit
     #   pytest
-zipp==3.0.0
-    # via
-    #   -c requirements.txt
-    #   importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # pip
