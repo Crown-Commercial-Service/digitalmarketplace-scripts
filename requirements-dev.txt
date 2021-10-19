@@ -20,10 +20,6 @@ chardet==3.0.4
     # via
     #   -c requirements.txt
     #   requests
-click==7.0
-    # via
-    #   -c requirements.txt
-    #   pip-tools
 cram==0.7
     # via -r requirements-dev.in
 decorator==4.4.1
@@ -66,8 +62,6 @@ pexpect==4.8.0
     # via ipython
 pickleshare==0.7.5
     # via ipython
-pip-tools==5.5.0
-    # via -r requirements-dev.in
 pluggy==0.13.1
     # via pytest
 prompt-toolkit==3.0.3
@@ -117,5 +111,4 @@ wcwidth==0.1.8
     #   pytest
 
 # The following packages are considered to be unsafe in a requirements file:
-# pip
 # setuptools
