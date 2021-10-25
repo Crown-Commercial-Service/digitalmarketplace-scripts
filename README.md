@@ -85,7 +85,7 @@ invoke freeze-requirements
 
 ## Contributing
 
-This repository is maintained by the Digital Marketplace team at the [Government Digital Service](https://github.com/alphagov).
+This repository is maintained by the Digital Marketplace team at the [Crown Commercial Service](https://github.com/Crown-Commercial-Service).
 
 If you have a suggestion for improvement, please raise an issue on this repo.
 
