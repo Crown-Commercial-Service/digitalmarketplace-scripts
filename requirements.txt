@@ -46,14 +46,6 @@ docopt==0.6.2
     # via
     #   -r requirements.in
     #   notifications-python-client
-flask-gzip==0.2
-    # via digitalmarketplace-utils
-flask-login==0.5.0
-    # via digitalmarketplace-utils
-flask-session==0.3.2
-    # via digitalmarketplace-utils
-flask-wtf==0.14.3
-    # via digitalmarketplace-utils
 flask==1.0.4
     # via
     #   -r requirements.in
@@ -64,6 +56,14 @@ flask==1.0.4
     #   flask-session
     #   flask-wtf
     #   gds-metrics
+flask-gzip==0.2
+    # via digitalmarketplace-utils
+flask-login==0.5.0
+    # via digitalmarketplace-utils
+flask-session==0.3.2
+    # via digitalmarketplace-utils
+flask-wtf==0.14.3
+    # via digitalmarketplace-utils
 fleep==1.0.1
     # via digitalmarketplace-utils
 future==0.18.2
@@ -89,7 +89,7 @@ jmespath==0.9.5
     # via
     #   boto3
     #   botocore
-jsonschema==3.2.0
+jsonschema==4.1.2
     # via -r requirements.in
 lorem==0.1.1
     # via -r requirements.in
@@ -142,7 +142,6 @@ s3transfer==0.4.2
 six==1.14.0
     # via
     #   cryptography
-    #   jsonschema
     #   pyrsistent
     #   python-dateutil
 toml==0.10.2
