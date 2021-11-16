@@ -26,9 +26,12 @@ DEFAULT_PASSWORD = "Password1234"
 
 if __name__ == "__main__":
     arguments = docopt(__doc__)
+    stage = arguments['<stage>']
+    if stage == "production":
+        raise Exception("This script is not safe to run in production")
 
     data_api_client = DataAPIClient(
-        get_api_endpoint_from_stage(arguments['<stage>']), get_auth_token("api", arguments['<stage>']), user=get_user()
+        get_api_endpoint_from_stage(stage), get_auth_token("api", stage), user=get_user()
     )
     new_framework_slug = arguments['<new-framework>']
     copy_from_framework_slug = arguments['<copy-from-framework>']
