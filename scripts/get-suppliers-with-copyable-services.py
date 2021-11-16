@@ -21,6 +21,8 @@ from dmscripts.helpers.updated_by_helpers import get_user
 # We don't want to use _all_ the suppliers. There should be ~5000 eligible suppliers.
 SUPPLIER_LIMIT = 1000
 
+DEFAULT_PASSWORD = "Password1234"
+
 
 if __name__ == "__main__":
     arguments = docopt(__doc__)
@@ -32,6 +34,8 @@ if __name__ == "__main__":
     copy_from_framework_slug = arguments['<copy-from-framework>']
 
     suppliers_on_old_framework = data_api_client.find_framework_suppliers_iter(copy_from_framework_slug)
+
+    print("supplier_id,email_address,password")
 
     for count, supplier in enumerate(suppliers_on_old_framework):
         if count >= SUPPLIER_LIMIT:
@@ -50,4 +54,9 @@ if __name__ == "__main__":
             if not (e.status_code == 404 and "has not registered interest" in e.message):
                 raise
 
-        print(supplier_id)
+        try:
+            user = next(u for u in data_api_client.find_users_iter(supplier_id=supplier_id) if u['active'])
+        except StopIteration:
+            continue
+
+        print(f"{supplier_id},{user['emailAddress']},Password1234")
