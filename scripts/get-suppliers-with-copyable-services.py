@@ -5,11 +5,10 @@ Get up to 1000 suitable suppliers and then remove their data for the new framewo
 in tests.
 
 Usage:
-    scripts/get-suppliers-with-copyable-services.py <stage> <new-framework> <copy-from-framework> [options]
+    scripts/get-suppliers-with-copyable-services.py <stage> <new-framework> <copy-from-framework> <output_dir> [options]
 
 Options:
-    --limit=<limit>             Limit the number of suppliers to find (default is 1000)
-    --output-dir=<output_dir>   Directory to write to CSV file, if not given it will print to the console
+    --limit=LIMIT       Limit the number of suppliers to find [default: 1000]
 """
 import sys
 
@@ -17,37 +16,23 @@ from dmapiclient import DataAPIClient, HTTPError
 from dmutils.env_helpers import get_api_endpoint_from_stage
 from docopt import docopt
 import os
+import csv
 
 sys.path.insert(0, ".")
 
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.updated_by_helpers import get_user
 
-try:
-    import unicodecsv as csv
-except ImportError:
-    import csv
-
-# We don't want to use _all_ the suppliers. There should be ~5000 eligible suppliers.
-SUPPLIER_LIMIT = 1000
-
 DEFAULT_PASSWORD = "Password1234"
-
 
 if __name__ == "__main__":
     arguments = docopt(__doc__)
     stage = arguments['<stage>']
-    OUTPUT_DIR = arguments['--output-dir']
+    OUTPUT_DIR = arguments['<output_dir>']
+    SUPPLIER_LIMIT = int(arguments['--limit'])
 
     if stage == "production":
         raise Exception("This script is not safe to run in production")
-    if not OUTPUT_DIR:
-        raise Exception("You must specify an output directory for the file")
-
-    if arguments['--limit']:
-        supplier_limit = int(arguments['--limit'])
-    else:
-        supplier_limit = SUPPLIER_LIMIT
 
     data_api_client = DataAPIClient(
         get_api_endpoint_from_stage(stage), get_auth_token("api", stage), user=get_user()
@@ -66,14 +51,14 @@ if __name__ == "__main__":
         print("Creating {} directory".format(OUTPUT_DIR))
         os.makedirs(OUTPUT_DIR)
 
-    with open(os.path.join(OUTPUT_DIR, f"supplier-accounts-{new_framework_slug}.csv"), "wb") as file:
+    with open(os.path.join(OUTPUT_DIR, f"supplier-accounts-{new_framework_slug}.csv"), "w", newline='') as file:
         writer = csv.writer(file, delimiter=',')
         writer.writerow(["supplier_id", "email_address", "password"])
 
         count = 0
 
         for supplier in suppliers_on_old_framework:
-            if count >= supplier_limit:
+            if count >= SUPPLIER_LIMIT:
                 break
 
             supplier_id = supplier['supplierId']
@@ -96,7 +81,7 @@ if __name__ == "__main__":
 
             count += 1
 
-            print(f"Suppliers found: {count}/{supplier_limit}", end='\r')
+            print(f"Suppliers found: {count}/{SUPPLIER_LIMIT}", end='\r')
             writer.writerow([supplier_id, user['emailAddress'], "Password1234"])
 
-        print(f"Suppliers found: {supplier_limit}/{supplier_limit}")
+        print(f"Suppliers found: {count}/{SUPPLIER_LIMIT}")
