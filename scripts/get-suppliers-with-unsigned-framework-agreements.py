@@ -16,7 +16,6 @@ import sys
 from dmapiclient import DataAPIClient
 from dmutils.env_helpers import get_api_endpoint_from_stage
 from docopt import docopt
-from collections import Counter
 import os
 import csv
 
@@ -27,16 +26,6 @@ from dmscripts.helpers.updated_by_helpers import get_user
 
 
 DEFAULT_PASSWORD = "Password1234"
-
-
-def _assess_draft_services(framework_slug, supplier_id,):
-    # A supplier must have at least 1 submitted service
-    counter = Counter()
-
-    for draft_service in data_api_client.find_draft_services_by_framework_iter(framework_slug, supplier_id=supplier_id):
-        counter[draft_service["status"]] += 1
-
-    return counter
 
 
 if __name__ == "__main__":
@@ -79,9 +68,13 @@ if __name__ == "__main__":
                 continue
 
             # A supplier should have at least one valid service to pass their application
-            service_counter = _assess_draft_services(framework_slug, supplier_id)
+            service_counter = data_api_client.find_draft_services_by_framework(
+                framework_slug,
+                supplier_id=supplier_id,
+                status="submitted"
+            )["meta"]["total"]
 
-            if not service_counter["submitted"]:
+            if service_counter == 0:
                 continue
 
             # If all the above are satisfied then the supplier should be acceptable to use for performance testing
