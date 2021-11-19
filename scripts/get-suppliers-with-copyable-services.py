@@ -82,6 +82,6 @@ if __name__ == "__main__":
             count += 1
 
             print(f"Suppliers found: {count}/{SUPPLIER_LIMIT}", end='\r')
-            writer.writerow([supplier_id, user['emailAddress'], "Password1234"])
+            writer.writerow([supplier_id, user['emailAddress'], DEFAULT_PASSWORD])
 
         print(f"Suppliers found: {count}/{SUPPLIER_LIMIT}")
