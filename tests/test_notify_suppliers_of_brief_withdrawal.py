@@ -1,4 +1,5 @@
 import mock
+from dmutils.email.exceptions import EmailInvalidError
 from datetime import date
 
 from dmscripts import notify_suppliers_of_brief_withdrawal as tested_script
@@ -111,3 +112,16 @@ def test_single_call_when_brief_id_specified(data_api_client, notify_client):
 
     assert result is True
     data_api_client.find_brief_responses_iter.assert_called_once_with(brief_id=brief_id, status='submitted')
+
+
+@mock.patch('dmutils.email.DMNotifyClient', autospec=True)
+@mock.patch('dmapiclient.DataAPIClient', autospec=True)
+def test_raised_error_when_invalid_email_supplied(data_api_client, notify_client):
+    notify_client.send_email.side_effect = [EmailInvalidError(), None, None, None]
+    data_api_client.find_briefs_iter.return_value = WITHDRAWN_BRIEFS
+    data_api_client.find_brief_responses_iter.side_effect = (BRIEF_RESPONSES, [])
+    result = tested_script.main(
+        data_api_client, notify_client, 'notify_template_id', 'preview', mock.Mock(), date.today()
+    )
+
+    assert result is True
