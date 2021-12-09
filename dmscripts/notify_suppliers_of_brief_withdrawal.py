@@ -1,6 +1,7 @@
 from itertools import chain
 
 from dmutils.email.helpers import get_email_addresses, hash_string
+from dmutils.email.exceptions import EmailInvalidError
 
 from dmutils.env_helpers import get_web_url_from_stage
 
@@ -39,9 +40,12 @@ def main(data_api_client, mail_client, template_id, stage, logger, withdrawn_dat
         brief_email_context = create_context_for_brief(stage, brief)
         for email_address in email_addresses:
             if not dry_run:
-                mail_client.send_email(
-                    email_address, template_id, brief_email_context, allow_resend=False
-                )
+                try:
+                    mail_client.send_email(
+                        email_address, template_id, brief_email_context, allow_resend=False
+                    )
+                except EmailInvalidError as e:
+                    logger.warning("Ignoring invalid email address: %s", hash_string(email_address), e)
             logger.info(
                 "%sEMAIL: Withdrawal of Brief ID: %d to %s",
                 '[Dry-run]' if dry_run else '',
