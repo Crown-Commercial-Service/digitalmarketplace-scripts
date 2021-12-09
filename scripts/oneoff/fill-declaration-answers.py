@@ -98,7 +98,9 @@ G12_DECLARATION = {
     'distortedCompetition': False,
     'distortingCompetition': False,
     'dunsNumberCompanyRegistrationNumber': False,
-    'employersInsurance': 'No - your organisation does not have, and will not have in place, employer’s liability insurance of at least £5 million before the framework is awarded.',
+    'employersInsurance':
+        'No - your organisation does not have, and will not have in place, '
+        'employer’s liability insurance of at least £5 million before the framework is awarded.',
     'environmentalSocialLabourLaw': False,
     'environmentallyFriendly': True,
     'equalityAndDiversity': True,
@@ -119,7 +121,8 @@ G12_DECLARATION = {
     'readUnderstoodGuidance': False,
     'seriousMisrepresentation': False,
     'servicesDoNotInclude': False,
-    'servicesHaveOrSupportCloudHostingCloudSoftware': "My organisation isn't submitting cloud hosting (lot 1) or cloud software (lot 2) services",
+    'servicesHaveOrSupportCloudHostingCloudSoftware':
+        "My organisation isn't submitting cloud hosting (lot 1) or cloud software (lot 2) services",
     'servicesHaveOrSupportCloudSupport': 'Yes',
     'significantOrPersistentDeficiencies': False,
     'subcontracting': ['yourself without the use of third parties (subcontractors)'],
@@ -166,6 +169,8 @@ if __name__ == "__main__":
     arguments = docopt(__doc__)
 
     stage = arguments['<stage>']
+    if stage == "production":
+        raise Exception("This script edits suppliers so isn't safe for production")
 
     data_api_client = DataAPIClient(get_api_endpoint_from_stage(stage), get_auth_token('api', stage), user=get_user())
 
