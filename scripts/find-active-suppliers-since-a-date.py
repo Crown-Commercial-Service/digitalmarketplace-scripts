@@ -31,13 +31,13 @@ date_format = "%Y-%m-%d"
 usr_date = datetime.strptime(arguments['--date'], date_format) or datetime.now().strftime(date_format)
 
 with open('suppliers_registered_%s.txt' % datetime.now().strftime("%H:%M:%S"), 'w') as f:
-	sys.stdout = f
-	for d in data_api_client.find_users_iter(role='supplier'):
-		if d['active'] == True and datetime.strptime(d['createdAt'].split('T',1)[0], date_format) >= datetime.strptime(usr_date, date_format):
-			print(d)
-			counter += 1
- 
-	print("\nTotal Records Count:")
-	print(counter)
+    sys.stdout = f
+    for d in data_api_client.find_users_iter(role='supplier'):
+        if d['active'] == True and datetime.strptime(d['createdAt'].split('T',1)[0], date_format) >= datetime.strptime(usr_date, date_format):
+            print(d)
+            counter += 1
+
+    print("\nTotal Records Count:")
+    print(counter)
 
 sys.stdout = og_stdout
