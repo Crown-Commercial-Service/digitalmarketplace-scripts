@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 """
-For performance testing, we need suppliers who are able to copy services from the previous iteration of the framework.
-Get up to 1000 suitable suppliers and then remove their data for the new framework so they're in a clean state for use
-in tests.
+This script was needed to find all active registered suppliers, since a given date.
+
+The script parses a date, provided by the user (if not default date of today is provided).
+This date is then compared against the Suppliers list, where active is true.
+If the date is more recent than the date the user provided, the record is captured and outputted.
+A count is taken and also provided.
+
 Usage:
     scripts/find-active-suppliers-since-a-date.py <stage> [options]
 Options:
