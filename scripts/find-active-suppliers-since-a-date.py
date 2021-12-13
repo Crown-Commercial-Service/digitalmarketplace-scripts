@@ -21,7 +21,9 @@ from dmutils.env_helpers import get_api_endpoint_from_stage
 from docopt import docopt
 from datetime import datetime
 
-data_api_client = DataAPIClient(get_api_endpoint_from_stage(environ["STAGE"].lower()), get_auth_token("api", environ["STAGE"].lower()))
+data_api_client = DataAPIClient(
+	get_api_endpoint_from_stage(environ["STAGE"].lower()), get_auth_token("api", environ["STAGE"].lower())
+)
 
 og_stdout = sys.stdout
 counter = 0
@@ -33,7 +35,9 @@ usr_date = datetime.strptime(arguments['--date'], date_format) or datetime.now()
 with open('suppliers_registered_%s.txt' % datetime.now().strftime("%H:%M:%S"), 'w') as f:
     sys.stdout = f
     for d in data_api_client.find_users_iter(role='supplier'):
-        if d['active'] == True and datetime.strptime(d['createdAt'].split('T',1)[0], date_format) >= datetime.strptime(usr_date, date_format):
+        if d['active'] and datetime.strptime(
+            d['createdAt'].split('T', 1)[0], date_format
+        ) >= datetime.strptime(usr_date, date_format):
             print(d)
             counter += 1
 
