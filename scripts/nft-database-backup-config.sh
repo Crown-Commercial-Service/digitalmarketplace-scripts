@@ -1,5 +1,5 @@
 #!/bin/bash
-# This script will create a PR against the aws-nft repository, setting the NFT environemnt to use the new databse.
+# This script will create a PR against the aws repository, setting the NFT environemnt to use the new databse.
 #
 # Syntax: ./scripts/nft-database-backup-config-pr.sh [live|maintenance]
 
@@ -37,9 +37,9 @@ fi
 
 function create_database_backup_branch()
 {
-    rm -rf digitalmarketplace-aws-nft
-    git clone "https://${GITHUB_ACCESS_TOKEN}@github.com/brickendon/digitalmarketplace-aws-nft" --quiet
-    cd digitalmarketplace-aws-nft
+    rm -rf digitalmarketplace-aws
+    git clone "https://${GITHUB_ACCESS_TOKEN}@github.com/Brickendon-DMp1-5/digitalmarketplace-aws" --quiet
+    cd digitalmarketplace-aws
     git checkout -b "${GIT_MAINTENANCE_MODE_BRANCH_NAME}" --quiet
 }
 
@@ -50,8 +50,8 @@ function commit_and_create_github_pr()
     git commit -a -m "$1" -m "$2" --quiet
     git push origin "${GIT_MAINTENANCE_MODE_BRANCH_NAME}" --quiet &> /dev/null
     post_data="{\"title\": \"$1\", \"body\": \"$2\", \"base\": \"main\", \"head\": \"${GIT_MAINTENANCE_MODE_BRANCH_NAME}\"}"
-    response_data=$(curl -s -XPOST -H "Accept: application/vnd.github.v3.full+json" -d "$post_data" "https://${GITHUB_ACCESS_TOKEN}@api.github.com/repos/brickendon/digitalmarketplace-aws-nft/pulls")
-    echo "https://www.github.com/brickendon/digitalmarketplace-aws-nft/pull/$(echo "${response_data}" | jq -crM '.number')"
+    response_data=$(curl -s -XPOST -H "Accept: application/vnd.github.v3.full+json" -d "$post_data" "https://${GITHUB_ACCESS_TOKEN}@api.github.com/repos/Brickendon-DMp1-5/digitalmarketplace-aws/pulls")
+    echo "https://www.github.com/Brickendon-DMp1-5/digitalmarketplace-aws/pull/$(echo "${response_data}" | jq -crM '.number')"
 }
 
 function set_database()
