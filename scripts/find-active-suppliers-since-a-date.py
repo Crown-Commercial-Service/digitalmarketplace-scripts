@@ -22,7 +22,7 @@ from docopt import docopt
 from datetime import datetime
 
 data_api_client = DataAPIClient(
-	get_api_endpoint_from_stage(environ["STAGE"].lower()), get_auth_token("api", environ["STAGE"].lower())
+    get_api_endpoint_from_stage(environ["STAGE"].lower()), get_auth_token("api", environ["STAGE"].lower())
 )
 
 og_stdout = sys.stdout
