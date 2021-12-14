@@ -40,7 +40,6 @@ with open('suppliers_registered_%s.txt' % datetime.now().strftime("%H:%M:%S"), '
         ) >= datetime.strptime(usr_date, date_format):
             print(d)
             counter += 1
-
     print("\nTotal Records Count:")
     print(counter)
 
