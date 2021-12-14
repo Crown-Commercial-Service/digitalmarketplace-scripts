@@ -9,38 +9,49 @@ A count is taken and also provided.
 
 Usage:
     scripts/find-active-suppliers-since-a-date.py <stage> [options]
+
 Options:
     --date=YYYY-MM-DD       Limit the number of suppliers to find [default: <today's date>]
 """
 import sys
+import os
+import csv
 
-from os import environ
 from dmapiclient import DataAPIClient
-from dmscripts.helpers.auth_helpers import get_auth_token
 from dmutils.env_helpers import get_api_endpoint_from_stage
 from docopt import docopt
 from datetime import datetime
 
-data_api_client = DataAPIClient(
-    get_api_endpoint_from_stage(environ["STAGE"].lower()), get_auth_token("api", environ["STAGE"].lower())
-)
+sys.path.insert(0, ".")
 
-og_stdout = sys.stdout
-counter = 0
+from dmscripts.helpers.auth_helpers import get_auth_token
+from dmscripts.helpers.updated_by_helpers import get_user
 
-arguments = docopt(__doc__)
-date_format = "%Y-%m-%d"
-usr_date = datetime.strptime(arguments['--date'], date_format) or datetime.now().strftime(date_format)
+if __name__ == "__main__":
+    arguments = docopt(__doc__)
+    stage = arguments['<stage>']
+    user_date = arguments['--date']
 
-with open('suppliers_registered_%s.txt' % datetime.now().strftime("%H:%M:%S"), 'w') as f:
-    sys.stdout = f
-    for d in data_api_client.find_users_iter(role='supplier'):
-        if d['active'] and datetime.strptime(
-            d['createdAt'].split('T', 1)[0], date_format
-        ) >= datetime.strptime(usr_date, date_format):
-            print(d)
-            counter += 1
-    print("\nTotal Records Count:")
-    print(counter)
+    data_api_client = DataAPIClient(
+        get_api_endpoint_from_stage(stage), get_auth_token("api", stage), user=get_user()
+    )
 
-sys.stdout = og_stdout
+    counter = 0
+    date_format = "%Y-%m-%d"
+    formatted_date = datetime.strptime(user_date, date_format) or datetime.now().strftime(date_format)
+
+    with open(os.path.join(
+        'data',
+        'suppliers_registered_%s.csv' % datetime.now().strftime("%H:%M:%S")
+    ), 'w', newline='') as file:
+        writer = csv.writer(file, delimiter=',')
+        writer.writerow(["email_address", "name", "supplierName", "supplierID"])
+
+        for user in data_api_client.find_users_iter(role='supplier'):
+            if user['active'] and datetime.strptime(
+                user['createdAt'].split('T', 1)[0], date_format
+            ) >= formatted_date:
+                writer.writerow([user['emailAddress'], user['name'], user['supplier']['name'], user['supplier']['supplierId']])
+                counter += 1
+            print(f"Total Records Count:{counter}", end="\r")
+    print(f"Total Records Count:{counter}")
