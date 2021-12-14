@@ -51,7 +51,12 @@ if __name__ == "__main__":
             if user['active'] and datetime.strptime(
                 user['createdAt'].split('T', 1)[0], date_format
             ) >= formatted_date:
-                writer.writerow([user['emailAddress'], user['name'], user['supplier']['name'], user['supplier']['supplierId']])
+                writer.writerow([
+                    user['emailAddress'],
+                    user['name'],
+                    user['supplier']['name'],
+                    user['supplier']['supplierId']
+                ])
                 counter += 1
             print(f"Total Records Count:{counter}", end="\r")
     print(f"Total Records Count:{counter}")
