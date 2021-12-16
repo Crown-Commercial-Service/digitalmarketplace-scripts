@@ -4,8 +4,6 @@
 #
 #    pip-compile requirements-dev.in
 #
-appnope==0.1.2
-    # via ipython
 attrs==19.3.0
     # via
     #   -c requirements.txt
@@ -46,7 +44,7 @@ ipython-genutils==0.2.0
     #   traitlets
 jedi==0.16.0
     # via ipython
-lxml==4.6.3
+lxml==4.6.5
     # via -r requirements-dev.in
 mccabe==0.6.1
     # via flake8
