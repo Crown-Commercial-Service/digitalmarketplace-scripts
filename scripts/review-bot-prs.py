@@ -87,8 +87,18 @@ def eligible_for_semiautomated_merge(pr):
     return True
 
 
+def check_gh_installed():
+    try:
+        subprocess.run(["which", "gh"], check=True)
+    except subprocess.CalledProcessError as e:
+        print("You are missing the `gh` CLI tool. Install it from https://github.com/cli/cli#installation")
+        raise e
+
+
 if __name__ == "__main__":
     arguments = docopt(__doc__)
+
+    check_gh_installed()
 
     BOT = 'snyk' if arguments['snyk'] else 'dependabot'
 
