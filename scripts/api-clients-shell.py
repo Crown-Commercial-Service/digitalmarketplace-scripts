@@ -53,18 +53,15 @@ def DMEnvironmentPrompt(stage: str, read_only: bool = False):
         "nft": {
             "prompt": (Token.Generic, "nft"),
         },
-        "read_only": {
-            "prompt": (Token.Generic.Strong, "ro"),
-        },
-        "read_write": {
-            "prompt": (Token.Generic.Emph, "rw"),
+        "uat": {
+            "prompt": (Token.Generic, "uat"),
         },
     }
 
     _prompt = [
         formatting[stage]["prompt"],
         (Token, " "),
-        formatting["read_only" if read_only else "read_write"]["prompt"]
+        (Token.Generic.Strong, "ro") if read_only else (Token.Generic.Emph, "rw"),
     ]
 
     class DMPrompts(Prompts):
@@ -97,7 +94,7 @@ class ReadOnlyDataAPIClient:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('stage', default='development', help='The stage your clients should target',
-                        choices=['development', 'preview', 'staging', 'production', 'nft'], nargs='?')
+                        choices=['development', 'preview', 'staging', 'production', 'nft', 'uat'], nargs='?')
 
     parser.add_argument('--api-url', help='Override the implicit API URL', type=str)
     parser.add_argument('--api-token', help='Override for the API key (don\'t decrypt from dm-credentials)', type=str)
