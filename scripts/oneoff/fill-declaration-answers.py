@@ -146,11 +146,25 @@ G12_DECLARATION = {
 }
 
 
+def is_supplier_only_on_family(data_api_client, supplier_id, framework_family):
+    return all(
+        f['frameworkFamily'] == framework_family
+        for f in data_api_client.get_supplier_frameworks(supplier_id)['frameworkInterest']
+    )
+
+
+def find_suppliers_on_no_other_family(data_api_client, framework_slug):
+    return (
+        s for s in data_api_client.find_framework_suppliers_iter(framework_slug, statuses='countersigned')
+        if is_supplier_only_on_family(data_api_client, s['supplierId'], s['frameworkFamily'])
+    )
+
+
 def complete_supplier_declarations(data_api_client, framework_slug, model_declaration):
-    suppliers = (supplier for supplier in data_api_client.find_framework_suppliers_iter(framework_slug))
+    suppliers = find_suppliers_on_no_other_family(data_api_client, framework_slug)
 
     print(f"\n# Suppliers for {framework_slug}:")
-    for supplier in itertools.islice(suppliers, 40):
+    for supplier in itertools.islice(suppliers, 20):
         try:
             supplier_user = next(
                 user for user in data_api_client.find_users_iter(supplier_id=supplier['supplierId']) if user['active']
@@ -160,7 +174,7 @@ def complete_supplier_declarations(data_api_client, framework_slug, model_declar
 
         declaration = copy.deepcopy(model_declaration)
         declaration.update(supplier['declaration'])
-        data_api_client.update_supplier_declaration(supplier['supplierId'], 'g-cloud-12', declaration)
+        data_api_client.update_supplier_declaration(supplier['supplierId'], framework_slug, declaration)
 
         print(f"{supplier['supplierId']}: {supplier_user['emailAddress']}")
 
