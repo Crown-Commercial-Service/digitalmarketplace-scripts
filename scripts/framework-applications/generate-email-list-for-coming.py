@@ -1,20 +1,21 @@
 #!/usr/bin/env python3
 """
-Get the email addresses of everyone we will notify about a new framework coming. This is all suppliers on the previous
-framework, as well as everyone who's registered interest since the previous framework closed. Outputs to stdout.
+Get the email addresses of everyone we will notify about a new framework coming. Outputs to stdout. Includes:
+* all active users of all suppliers in the previous framework
+* all people who registered an interest since the given date
 
 Usage:
-    /generate-email-list-for-coming.py <stage> <previous_framework> [--verbose]
+    /generate-email-list-for-coming.py <stage> <notify_since_date> <previous_framework> [--verbose]
 
 Parameters:
     <stage>               Stage to target
-    <previous_framework>  The previous framework in this family
+    <previous_framework>  Previous framework in this family
+    <notify_since_date>   Include people who registered an interest since this date
 """
 import csv
 import logging
 import sys
 
-from dateutil.parser import isoparse
 from dmapiclient import DataAPIClient
 from dmutils.email.dm_mailchimp import DMMailChimpClient
 from dmutils.env_helpers import get_api_endpoint_from_stage
@@ -24,6 +25,7 @@ sys.path.insert(0, ".")
 
 from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.auth_helpers import get_mailchimp_credentials, get_auth_token
+from dmscripts.helpers.datetime_helpers import parse_datetime
 
 TEST_AUDIENCE_ID = "18fb1fa411"  # PREVIEW OPEN_FRAMEWORK_NOTIFICATION_MAILING_LIST
 PRODUCTION_AUDIENCE_ID = "7534b3e89a"  # Digital Marketplace - open for applications
@@ -36,23 +38,14 @@ def output_emails_as_csv(email_addresses):
         writer.writerow([email_address])
 
 
-def get_date_framework_closed(data_api_client, framework_slug):
-    framework = data_api_client.get_framework(framework_slug)["frameworks"]
-    return isoparse(framework["applicationsCloseAtUTC"])
-
-
-def get_email_addresses_from_mailchimp(
-    data_api_client, dm_mailchimp_client, stage, previous_framework_slug
-):
+def get_email_addresses_from_mailchimp(dm_mailchimp_client, stage, since_datetime):
     audience_id = PRODUCTION_AUDIENCE_ID if stage == "production" else TEST_AUDIENCE_ID
     return dm_mailchimp_client.get_email_addresses_from_list(
         audience_id,
         status="subscribed",
         # Exclude people who've already been contacted about previous frameworks. We assume that they would have applied
         # to the previous framework if they were interested.
-        since_timestamp_opt=get_date_framework_closed(
-            data_api_client, previous_framework_slug
-        ),
+        since_timestamp_opt=since_datetime,
     )
 
 
@@ -61,6 +54,7 @@ if __name__ == "__main__":
 
     stage = arguments["<stage>"]
     previous_framework = arguments["<previous_framework>"]
+    notify_since_date = parse_datetime(arguments["<notify_since_date>"])
     logger = logging_helpers.configure_logger(
         {"dmapiclient": logging.INFO}
         if arguments["--verbose"]
@@ -79,7 +73,7 @@ if __name__ == "__main__":
 
     registered_interest_email_addresses = set(
         get_email_addresses_from_mailchimp(
-            data_api_client, dm_mailchimp_client, stage, previous_framework
+            dm_mailchimp_client, stage, notify_since_date
         )
     )
     existing_supplier_email_addresses = {
