@@ -37,29 +37,13 @@ from dmutils.env_helpers import get_api_endpoint_from_stage
 def DMEnvironmentPrompt(stage: str, read_only: bool = False):
     """IPython prompt which shows the stage the API client is connected to"""
 
-    formatting = {
-        "development": {
-            "prompt": (Token.Generic, "local"),
-        },
-        "preview": {
-            "prompt": (Token.Generic, "preview"),
-        },
-        "staging": {
-            "prompt": (Token.Generic, "staging"),
-        },
-        "production": {
-            "prompt": (Token.Generic.Error, "production"),
-        },
-        "nft": {
-            "prompt": (Token.Generic, "nft"),
-        },
-        "uat": {
-            "prompt": (Token.Generic, "uat"),
-        },
+    prompt = {
+        "development": (Token.Generic, "local"),
+        "production": (Token.Generic.Error, "production"),
     }
 
     _prompt = [
-        formatting[stage]["prompt"],
+        prompt.get(stage, (Token.Generic, stage)),
         (Token, " "),
         (Token.Generic.Strong, "ro") if read_only else (Token.Generic.Emph, "rw"),
     ]
@@ -93,8 +77,11 @@ class ReadOnlyDataAPIClient:
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('stage', default='development', help='The stage your clients should target',
-                        choices=['development', 'preview', 'staging', 'production', 'nft', 'uat'], nargs='?')
+    parser.add_argument('stage', default='development', help='The stage your clients should target', nargs='?',
+                        choices=[
+                            'development', 'preview', 'staging', 'production',
+                            'nft', 'uat', 'test', 'pre-prod', 'integration',
+                        ])
 
     parser.add_argument('--api-url', help='Override the implicit API URL', type=str)
     parser.add_argument('--api-token', help='Override for the API key (don\'t decrypt from dm-credentials)', type=str)
