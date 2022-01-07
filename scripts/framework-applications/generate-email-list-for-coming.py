@@ -5,7 +5,7 @@ Get the email addresses of everyone we will notify about a new framework coming.
 * all people who registered an interest since the given date
 
 Usage:
-    /generate-email-list-for-coming.py <stage> <notify_since_date> <previous_framework> [--verbose]
+    /generate-email-list-for-coming.py <stage> <notify_since_date> <previous_framework>... [--verbose]
 
 Parameters:
     <stage>               Stage to target
@@ -53,7 +53,7 @@ if __name__ == "__main__":
     arguments = docopt(__doc__)
 
     stage = arguments["<stage>"]
-    previous_framework = arguments["<previous_framework>"]
+    previous_frameworks = arguments["<previous_framework>"]
     notify_since_date = parse_datetime(arguments["<notify_since_date>"])
     logger = logging_helpers.configure_logger(
         {"dmapiclient": logging.INFO}
@@ -78,6 +78,7 @@ if __name__ == "__main__":
     )
     existing_supplier_email_addresses = {
         user["email address"]
+        for previous_framework in previous_frameworks
         for user in data_api_client.export_users_iter(previous_framework)
     }
 
