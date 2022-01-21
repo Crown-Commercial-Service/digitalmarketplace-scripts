@@ -26,7 +26,7 @@ from dmutils.env_helpers import get_api_endpoint_from_stage
 
 from dmscripts.helpers.auth_helpers import get_auth_token, get_mailchimp_credentials
 from dmscripts.helpers import logging_helpers
-from dmscripts.data_retention_remove_user_data import remove_user_data
+from dmscripts.data_retention_remove_user_data import remove_user_data, remove_user_from_mailchimp
 
 if __name__ == "__main__":
     arguments = docopt(__doc__)
@@ -50,13 +50,20 @@ if __name__ == "__main__":
     )
 
     user = data_api_client.get_user(email_address=arguments["<user_email>"])
-    if not user:
-        raise Exception("User not found")
+    if user:
+        remove_user_data(
+            data_api_client=data_api_client,
+            logger=logger,
+            user=user["users"],
+            dry_run=arguments["--dry-run"],
+        )
+    else:
+        logger.info("User does not have an account on the Digital Marketplace")
+        user = {"users": {"emailAddress": arguments["<user_email>"], "id": "n/a"}}
 
-    remove_user_data(
-        data_api_client=data_api_client,
+    remove_user_from_mailchimp(
+        dm_mailchimp_client=dm_mailchimp_client,
         logger=logger,
         user=user["users"],
-        dm_mailchimp_client=dm_mailchimp_client,
-        dry_run=arguments["--dry-run"],
+        dry_run=arguments["--dry-run"]
     )
