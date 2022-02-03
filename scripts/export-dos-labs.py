@@ -50,7 +50,7 @@ def find_all_labs(client, map_impl=map):
 def write_labs_csv(services, filename, logger=None):
     writer = None
     bad_fields = ['links']
-    logger.info(f"Building CSV for User Research Studios")
+    logger.info("Building CSV for User Research Studios")
 
     with open(filename, "w+") as f:
         for service in services:

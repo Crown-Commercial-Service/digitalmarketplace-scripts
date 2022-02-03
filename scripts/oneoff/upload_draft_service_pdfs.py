@@ -137,7 +137,7 @@ def update_draft_service_with_document_paths(full_document_url, doc_type, draft_
         print(f"Draft ID {draft_id} updated.")
         draft = api_client.get_draft_service(draft_id)
         if draft['validationErrors']:
-            print(f"Validation errors:")
+            print("Validation errors:")
             print(draft['validationErrors'])
             return False
         else:
