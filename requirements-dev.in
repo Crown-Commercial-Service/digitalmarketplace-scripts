@@ -1,7 +1,7 @@
 -c requirements.txt
 
 cram
-flake8
+flake8>=3.8
 freezegun
 ipython
 ipython-genutils

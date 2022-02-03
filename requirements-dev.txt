@@ -4,6 +4,8 @@
 #
 #    pip-compile requirements-dev.in
 #
+appnope==0.1.2
+    # via ipython
 attrs==19.3.0
     # via
     #   -c requirements.txt
@@ -26,9 +28,7 @@ decorator==4.4.1
     #   traitlets
 digitalmarketplace-test-utils==3.0.0
     # via -r requirements-dev.in
-entrypoints==0.3
-    # via flake8
-flake8==3.7.9
+flake8==4.0.1
     # via -r requirements-dev.in
 freezegun==0.3.15
     # via -r requirements-dev.in
@@ -68,9 +68,9 @@ ptyprocess==0.6.0
     # via pexpect
 py==1.10.0
     # via pytest
-pycodestyle==2.5.0
+pycodestyle==2.8.0
     # via flake8
-pyflakes==2.1.1
+pyflakes==2.4.0
     # via flake8
 pygments==2.7.4
     # via ipython
