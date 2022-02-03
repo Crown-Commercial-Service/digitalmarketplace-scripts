@@ -27,7 +27,6 @@ def notify_users(email_api_key, stage, brief):
                 "{base_url}/buyers/frameworks/{framework_slug}/requirements/{lot_slug}/{brief_id}/responses".format(
                     base_url=get_web_url_from_stage(stage),
                     brief_id=brief["id"],
-                    brief_title=brief["title"],
                     lot_slug=brief["lotSlug"],
                     framework_slug=brief["frameworkSlug"],
                 )
