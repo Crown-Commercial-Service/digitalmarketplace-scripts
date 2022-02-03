@@ -306,7 +306,7 @@ def get_supplier_ids_from_file(supplier_id_file):
     if not supplier_id_file:
         return None
     with open(supplier_id_file, 'r') as f:
-        return list(map(int, [_f for _f in [l.strip() for l in f.readlines()] if _f]))
+        return list(map(int, [_f for _f in [line.strip() for line in f.readlines()] if _f]))
 
 
 def get_supplier_ids_from_args(args):
