@@ -57,7 +57,7 @@ def virus_scan_bucket(
                     message = f"Marked with result {result.get('newAvStatus', {}).get('avStatus.result')}"
                 else:
                     counters_to_increment.add("already_tagged")
-                    message = f"Unchanged: "
+                    message = "Unchanged: "
                     if result.get("existingAvStatus", {}).get("avStatus.result"):
                         message += f"already marked as {result['existingAvStatus']['avStatus.result']!r}"
                         if result.get("existingAvStatus", {}).get("avStatus.ts"):

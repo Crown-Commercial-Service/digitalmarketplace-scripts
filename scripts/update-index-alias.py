@@ -92,7 +92,7 @@ def _check_response_status(response, action):
         print("HTTPError {}: {}".format(e.args[0], action))
         sys.exit(1)
     except Exception as e:
-        print("Error {}: {}".format(e), action)
+        print("Error {}: {}".format(e, action))
         sys.exit(2)
 
     print("Success {}".format(action))

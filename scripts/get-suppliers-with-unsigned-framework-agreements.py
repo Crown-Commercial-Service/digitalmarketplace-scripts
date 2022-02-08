@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
     suppliers_frameworks = data_api_client.find_framework_suppliers_iter(framework_slug)
 
-    print(f"Building CSV with supplier accounts")
+    print("Building CSV with supplier accounts")
 
     if not os.path.exists(OUTPUT_DIR):
         print("Creating {} directory".format(OUTPUT_DIR))

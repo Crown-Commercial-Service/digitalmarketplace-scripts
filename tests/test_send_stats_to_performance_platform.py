@@ -159,42 +159,46 @@ def test_services_by_lot():
 def test_send_by_stage_stats_per_day_calls_send_data_with_correct_data(send_data):
     send_by_stage_stats(STATS_JSON, '2017-03-29T00:00:00+00:00', 'day', 'pp-bearer-token', 'gcloud', dry_run=False)
     expected_sent_data_items = [
-        {'count': 184,
-         '_timestamp': '2017-03-29T00:00:00+00:00',
-         'service': 'gcloud',
-         'dataType': 'applications-by-stage',
-         'period': 'day',
-         # Base 64 encoding of '2017-03-29T00:00:00+00:00-gcloud-day-applications-by-stage-interested'
-         '_id': 'MjAxNy0wMy0yOVQwMDowMDowMCswMDowMC1nY2xvdWQtZGF5LWFwcGxpY2F0aW9ucy1ieS1zdGFnZS1pbnRlcmVzdGVk',
-         'stage': 'interested'
+        {
+            'count': 184,
+            '_timestamp': '2017-03-29T00:00:00+00:00',
+            'service': 'gcloud',
+            'dataType': 'applications-by-stage',
+            'period': 'day',
+            # Base 64 encoding of '2017-03-29T00:00:00+00:00-gcloud-day-applications-by-stage-interested'
+            '_id': 'MjAxNy0wMy0yOVQwMDowMDowMCswMDowMC1nY2xvdWQtZGF5LWFwcGxpY2F0aW9ucy1ieS1zdGFnZS1pbnRlcmVzdGVk',
+            'stage': 'interested'
         },
-        {'count': 97,
-         '_timestamp': '2017-03-29T00:00:00+00:00',
-         'service': 'gcloud',
-         'dataType': 'applications-by-stage',
-         'period': 'day',
-         # Base 64 encoding of '2017-03-29T00:00:00+00:00-gcloud-day-applications-by-stage-made-declaration'
-         '_id': 'MjAxNy0wMy0yOVQwMDowMDowMCswMDowMC1nY2xvdWQtZGF5LWFwcGxpY2F0aW9ucy1ieS1zdGFnZS1tYWRlLWRlY2xhcmF0aW9u',  # noqa
-         'stage': 'made-declaration'
-         },
-        {'count': 79,
-         '_timestamp': '2017-03-29T00:00:00+00:00',
-         'service': 'gcloud',
-         'dataType': 'applications-by-stage',
-         'period': 'day',
-         # Base 64 encoding of '2017-03-29T00:00:00+00:00-gcloud-day-applications-by-stage-completed-services'
-         '_id': 'MjAxNy0wMy0yOVQwMDowMDowMCswMDowMC1nY2xvdWQtZGF5LWFwcGxpY2F0aW9ucy1ieS1zdGFnZS1jb21wbGV0ZWQtc2VydmljZXM=',  # noqa
-         'stage': 'completed-services'
-         },
-        {'count': 89,
-         '_timestamp': '2017-03-29T00:00:00+00:00',
-         'service': 'gcloud',
-         'dataType': 'applications-by-stage',
-         'period': 'day',
-         # Base 64 encoding of '2017-03-29T00:00:00+00:00-gcloud-day-applications-by-stage-eligible'
-         '_id': 'MjAxNy0wMy0yOVQwMDowMDowMCswMDowMC1nY2xvdWQtZGF5LWFwcGxpY2F0aW9ucy1ieS1zdGFnZS1lbGlnaWJsZQ==',
-         'stage': 'eligible'
-         }
+        {
+            'count': 97,
+            '_timestamp': '2017-03-29T00:00:00+00:00',
+            'service': 'gcloud',
+            'dataType': 'applications-by-stage',
+            'period': 'day',
+            # Base 64 encoding of '2017-03-29T00:00:00+00:00-gcloud-day-applications-by-stage-made-declaration'
+            '_id': 'MjAxNy0wMy0yOVQwMDowMDowMCswMDowMC1nY2xvdWQtZGF5LWFwcGxpY2F0aW9ucy1ieS1zdGFnZS1tYWRlLWRlY2xhcmF0aW9u',  # noqa
+            'stage': 'made-declaration'
+        },
+        {
+            'count': 79,
+            '_timestamp': '2017-03-29T00:00:00+00:00',
+            'service': 'gcloud',
+            'dataType': 'applications-by-stage',
+            'period': 'day',
+            # Base 64 encoding of '2017-03-29T00:00:00+00:00-gcloud-day-applications-by-stage-completed-services'
+            '_id': 'MjAxNy0wMy0yOVQwMDowMDowMCswMDowMC1nY2xvdWQtZGF5LWFwcGxpY2F0aW9ucy1ieS1zdGFnZS1jb21wbGV0ZWQtc2VydmljZXM=',  # noqa
+            'stage': 'completed-services'
+        },
+        {
+            'count': 89,
+            '_timestamp': '2017-03-29T00:00:00+00:00',
+            'service': 'gcloud',
+            'dataType': 'applications-by-stage',
+            'period': 'day',
+            # Base 64 encoding of '2017-03-29T00:00:00+00:00-gcloud-day-applications-by-stage-eligible'
+            '_id': 'MjAxNy0wMy0yOVQwMDowMDowMCswMDowMC1nY2xvdWQtZGF5LWFwcGxpY2F0aW9ucy1ieS1zdGFnZS1lbGlnaWJsZQ==',
+            'stage': 'eligible'
+        }
     ]
     # Python 2 and Python 3 can generate the data in varying order, so test items independent of order in the list
     sent_data = send_data.call_args[0][0]

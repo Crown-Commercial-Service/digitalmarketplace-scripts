@@ -111,12 +111,12 @@ if __name__ == "__main__":
     # create a temporary directory for the HTML files
     with tempfile.TemporaryDirectory() as html_dir:
         # create signature pages in HTML using Jinja templates from agreements repo
-        logger.debug(f"generating HTML signature pages")
+        logger.debug("generating HTML signature pages")
         render_html_for_successful_suppliers(
             suppliers, framework, agreements_dir, html_dir, dry_run)
 
         # convert HTML to PDF (this uses wkhtmltopdf under-the-hood)
-        logger.debug(f"generating PDF signature pages from HTML")
+        logger.debug("generating PDF signature pages from HTML")
         html_pages = os.listdir(html_dir)
         html_pages.remove("framework-agreement-signature-page.css")
         render_pdf_for_each_html_page(html_pages, html_dir, output_dir)
