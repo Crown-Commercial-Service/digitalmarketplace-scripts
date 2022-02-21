@@ -78,7 +78,7 @@ importlib-resources==5.4.0
     # via jsonschema
 inflection==0.3.1
     # via digitalmarketplace-content-loader
-itsdangerous==2.0.1
+itsdangerous==2.1.0
     # via
     #   -r requirements.in
     #   flask
