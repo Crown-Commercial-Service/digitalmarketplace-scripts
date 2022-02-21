@@ -166,7 +166,7 @@ xeger==0.3.5
     # via -r requirements.in
 xmltodict==0.12.0
     # via yq
-yq==2.13.0
+yq==2.14.0
     # via -r requirements.in
 zipp==3.6.0
     # via importlib-resources
