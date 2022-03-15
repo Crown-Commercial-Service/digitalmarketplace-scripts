@@ -48,36 +48,36 @@ def find_service_edits(
     return audit_events
 
 
-def diff_archived_services(a: dict, b: dict) -> str:
-    if "services" in a:
-        a = a["services"]
-    if "services" in b:
-        b = b["services"]
-    if not (a["frameworkFamily"] == b["frameworkFamily"] and a["lot"] == b["lot"]):
+def diff_archived_services(old: dict, new: dict) -> str:
+    if "services" in old:
+        old = old["services"]
+    if "services" in new:
+        new = new["services"]
+    if not (old["frameworkFamily"] == new["frameworkFamily"] and old["lot"] == new["lot"]):
         raise ValueError("archived services to compare must be from same framework family and lot")
 
-    assert a.keys() == b.keys()
+    assert old.keys() == new.keys()
 
-    def do_diff(a, b, key) -> str:
-        assert type(a) == type(b)
-        assert a != b
-        if isinstance(a, list):
+    def do_diff(old, new, key) -> str:
+        assert type(old) == type(new)
+        assert old != new
+        if isinstance(old, list):
             addnewlines = lambda l: list(map(lambda s: s + "\n", l))  # noqa: E731
-            return "".join(difflib.Differ().compare(addnewlines(a), addnewlines(b)))
-        elif isinstance(a, str):
+            return "".join(difflib.Differ().compare(addnewlines(old), addnewlines(new)))
+        elif isinstance(old, str):
             addnewline = lambda s: s + "\n" if not s.endswith("\n") else s  # noqa: E731
             return "".join(difflib.Differ().compare(
-                addnewline(a).splitlines(keepends=True),
-                addnewline(b).splitlines(keepends=True)
+                addnewline(old).splitlines(keepends=True),
+                addnewline(new).splitlines(keepends=True)
             ))
         else:
-            raise TypeError(f"cannot compare type '{type(a)}' at '{key}'")
+            raise TypeError(f"cannot compare type '{type(old)}' at '{key}'")
 
     changes = (
         "\n\n".join(
-            f"{k}:\n{do_diff(a[k], b[k], k)}"
-            for k in a
-            if a[k] != b[k]
+            f"{k}:\n{do_diff(old[k], new[k], k)}"
+            for k in old
+            if old[k] != new[k]
             and k not in ("links", "updatedAt")
         )
     )
@@ -91,7 +91,7 @@ def service_edit_diff(data_api_client, audit_event) -> str:
     new = data_api_client.get_archived_service(audit_event["data"]["newArchivedServiceId"])
     old = data_api_client.get_archived_service(audit_event["data"]["oldArchivedServiceId"])
 
-    return diff_archived_services(new, old)
+    return diff_archived_services(old, new)
 
 
 def write_service_edits_csv(f, audit_events, data_api_client, *, include_diffs=True):
