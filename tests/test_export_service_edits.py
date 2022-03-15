@@ -9,13 +9,13 @@ class TestArchivedServiceDiff:
         new_service = {"frameworkFamily": "foo", "lot": "bar"}
         old_service = {"frameworkFamily": "foo", "lot": "bar"}
 
-        assert diff_archived_services(new_service, old_service) == ""
+        assert diff_archived_services(old_service, new_service) == ""
 
     def test_diff_string_change(self):
         new_service = {"frameworkFamily": "foo", "lot": "bar", "key": "new value"}
         old_service = {"frameworkFamily": "foo", "lot": "bar", "key": "value"}
 
-        assert diff_archived_services(new_service, old_service) == """key:
+        assert diff_archived_services(old_service, new_service) == """key:
 - value
 + new value
 ? ++++
