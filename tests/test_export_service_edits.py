@@ -21,6 +21,16 @@ class TestArchivedServiceDiff:
 ? ++++
 """
 
+    def test_diff_list_change(self):
+        new_service = {"frameworkFamily": "foo", "lot": "bar", "key": ["new value"]}
+        old_service = {"frameworkFamily": "foo", "lot": "bar", "key": ["value"]}
+
+        assert diff_archived_services(old_service, new_service) == """key:
+- value
++ new value
+? ++++
+"""
+
 
 class TestServiceEditDiff:
     def test_diff(self):
