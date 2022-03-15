@@ -91,7 +91,7 @@ def service_edit_diff(data_api_client, audit_event) -> str:
     new = data_api_client.get_archived_service(audit_event["data"]["newArchivedServiceId"])
     old = data_api_client.get_archived_service(audit_event["data"]["oldArchivedServiceId"])
 
-    return diff_archived_services(new, old)
+    return diff_archived_services(old, new)
 
 
 def write_service_edits_csv(f, audit_events, data_api_client, *, include_diffs=True):
