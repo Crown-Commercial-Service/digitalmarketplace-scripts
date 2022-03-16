@@ -21,6 +21,50 @@ class TestArchivedServiceDiff:
 ? ++++
 """
 
+    def test_diff_list_change(self):
+        new_service = {"frameworkFamily": "foo", "lot": "bar", "key": ["new value"]}
+        old_service = {"frameworkFamily": "foo", "lot": "bar", "key": ["value"]}
+
+        assert diff_archived_services(old_service, new_service) == """key:
+- value
++ new value
+? ++++
+"""
+
+    def test_diff_new_string_key(self):
+        new_service = {"frameworkFamily": "foo", "lot": "bar", "key": "new value"}
+        old_service = {"frameworkFamily": "foo", "lot": "bar"}
+
+        assert diff_archived_services(old_service, new_service) == """key:
+- 
++ new value
+"""  # noqa: W291
+
+    def test_diff_new_list_key(self):
+        new_service = {"frameworkFamily": "foo", "lot": "bar", "key": ["new value"]}
+        old_service = {"frameworkFamily": "foo", "lot": "bar"}
+
+        assert diff_archived_services(old_service, new_service) == """key:
++ new value
+"""
+
+    def test_diff_old_string_key(self):
+        new_service = {"frameworkFamily": "foo", "lot": "bar"}
+        old_service = {"frameworkFamily": "foo", "lot": "bar", "key": "old value"}
+
+        assert diff_archived_services(old_service, new_service) == """key:
+- old value
++ 
+"""  # noqa: W291
+
+    def test_diff_old_list_key(self):
+        new_service = {"frameworkFamily": "foo", "lot": "bar"}
+        old_service = {"frameworkFamily": "foo", "lot": "bar", "key": ["old value"]}
+
+        assert diff_archived_services(old_service, new_service) == """key:
+- old value
+"""
+
 
 class TestServiceEditDiff:
     def test_diff(self):
