@@ -48,6 +48,23 @@ def find_service_edits(
     return audit_events
 
 
+def add_defaults_for_keys(old: dict, new: dict):
+    """
+    Users can add/remove answers to optional questions. Add defaults so we can diff them.
+    """
+    for new_key in new.keys() - old.keys():
+        if isinstance(new[new_key], list):
+            old[new_key] = []
+        else:
+            old[new_key] = ""
+
+    for old_key in old.keys() - new.keys():
+        if isinstance(old[old_key], list):
+            new[old_key] = []
+        else:
+            new[old_key] = ""
+
+
 def diff_archived_services(old: dict, new: dict) -> str:
     if "services" in old:
         old = old["services"]
@@ -56,7 +73,7 @@ def diff_archived_services(old: dict, new: dict) -> str:
     if not (old["frameworkFamily"] == new["frameworkFamily"] and old["lot"] == new["lot"]):
         raise ValueError("archived services to compare must be from same framework family and lot")
 
-    assert old.keys() == new.keys()
+    add_defaults_for_keys(old, new)
 
     def do_diff(old, new, key) -> str:
         assert type(old) == type(new)
