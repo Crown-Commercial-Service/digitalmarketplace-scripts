@@ -17,11 +17,10 @@ ORGANISATION = "Crown-Commercial-Service"
 BOTS_CONFIG = {
     'dependabot': {
         'login': 'dependabot',
-        'label_str': 'label:dependencies'
+        'search_fragment': 'label:dependencies'
     },
     'snyk': {
-        'login': 'snyk-bot',
-        'label_str': 'author:snyk-bot'
+        'search_fragment': 'snyk'
     }
 }
 
@@ -69,9 +68,10 @@ def eligible_for_semiautomated_merge(pr):
     if pr["reviews"]:
         print(f'Wrong reviews: {pr["reviews"]}')
         return False
-    if pr["author"] != {"login": BOTS_CONFIG[BOT]["login"]}:
-        print(f'Wrong author: {pr["author"]}')
-        return False
+    if expected_user := BOTS_CONFIG[BOT].get("login"):
+        if pr["author"] != {"login": expected_user}:
+            print(f'Wrong author: {pr["author"]}')
+            return False
     if pr["mergeable"] != "MERGEABLE":
         print(f'Wrong mergeable: {pr["mergeable"]}')
         return False
@@ -114,7 +114,7 @@ if __name__ == "__main__":
             "--json",
             "author,number,mergeable,reviews,state,title,url,statusCheckRollup,headRepository",
             "--search",
-            f"{BOTS_CONFIG[BOT]['label_str']} state:open is:pr {github_repo_string}",
+            f"{BOTS_CONFIG[BOT]['search_fragment']} state:open is:pr {github_repo_string}",
         ],
         stdout=subprocess.PIPE,
         check=True,
