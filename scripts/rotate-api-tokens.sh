@@ -23,7 +23,7 @@ if [ -z "${GITHUB_ACCESS_TOKEN}" ]; then
 fi
 
 if [[ "${STAGE}" != "PREVIEW" && "${STAGE}" != "STAGING" && "${STAGE}" != "PRODUCTION" ]]; then
-  echo "Syntax: ./scripts/rotate-api-tokens.sh [add-new|remove-old|add-new-callback|remove-old-callback] [preview|staging|production]"
+  echo "Syntax: ./scripts/rotate-api-tokens.sh [add-new|remove-old|add-new-callback|remove-old-callback|change-ft-account-passwords|sync-ft-account-passwords|create-new-aws-token] [preview|staging|production]"
   exit 2
 fi
 
@@ -211,6 +211,45 @@ function sync_ft_account_passwords() {
   echo "Done."
 }
 
+function create_new_aws_token() {
+  if [[ $STAGE == "PREVIEW" ]]
+  then
+    AWS_PROFILE_NAME="development-infrastructure"
+    credentials_files=(vars/preview.yaml)
+  else
+    AWS_PROFILE_NAME="production-infrastructure"
+    credentials_files=(vars/production.yaml vars/staging.yaml)
+  fi
+
+  inactive_token_id="$(AWS_PROFILE=$AWS_PROFILE_NAME aws iam list-access-keys --user-name paas-app | jq -r '.AccessKeyMetadata[] | select(.Status =="Inactive") | .AccessKeyId')"
+  if [[ -n "$inactive_token_id" ]]
+  then
+    echo "Deleting old inactive token: $inactive_token_id"
+    AWS_PROFILE=$AWS_PROFILE_NAME aws iam delete-access-key --user-name paas-app --access-key-id "$inactive_token_id"
+  fi
+
+  if [[ $(AWS_PROFILE=$AWS_PROFILE_NAME aws iam list-access-keys --user-name paas-app  | jq -r '.AccessKeyMetadata | length') != "1" ]]
+  then
+    echo "Unable to rotate multiple active access tokens"
+    exit 1
+  fi
+
+  new_token_pair="$(AWS_PROFILE=$AWS_PROFILE_NAME aws iam create-access-key --user-name paas-app)"
+  new_access_token_id="$(echo "$new_token_pair" | jq -r '.AccessKey.AccessKeyId')"
+  new_access_token_secret="$(echo "$new_token_pair" | jq -r '.AccessKey.SecretAccessKey')"
+
+  create_credentials_update_branch
+  for credential_file in "${credentials_files[@]}"
+  do
+    ./sops-wrapper --set "[\"aws_access_key_id\"] \"${new_access_token_id}\"" "${credential_file}"
+    ./sops-wrapper --set "[\"aws_secret_access_key\"] \"${new_access_token_secret}\"" "${credential_file}"
+  done
+
+  commit_and_create_github_pr "Rotate AWS access token for ${STAGE}" "## Summary\r\nSwitch to new AWS access token for ${STAGE}.\r\n\r\nOnce this is merged, re-release all apps in the affected environments. Follows the process in https://crown-commercial-service.github.io/digitalmarketplace-manual/2nd-line-runbook/rotate-keys.html#rotating-aws-access-keys."
+
+  echo "Done."
+}
+
 case ${COMMAND} in
   ADD-NEW) add_new_tokens;;
   REMOVE-OLD) remove_old_tokens;;
@@ -218,5 +257,6 @@ case ${COMMAND} in
   REMOVE-OLD-CALLBACK) remove_old_callback_token;;
   CHANGE-FT-ACCOUNT-PASSWORDS) change_ft_account_passwords;;
   SYNC-FT-ACCOUNT-PASSWORDS) sync_ft_account_passwords;;
-  *) echo "Syntax: ./scripts/rotate-api-tokens.sh [add-new|remove-old|add-new-callback|remove-old-callback|change-ft-account-passwords|sync-ft-account-passwords] [preview|staging|production]";;
+  CREATE-NEW-AWS-TOKEN) create_new_aws_token;;
+  *) echo "Syntax: ./scripts/rotate-api-tokens.sh [add-new|remove-old|add-new-callback|remove-old-callback|change-ft-account-passwords|sync-ft-account-passwords|create-new-aws-token] [preview|staging|production]";;
 esac
