@@ -8,7 +8,7 @@
 # If running locally through Docker, you will probably also need to mount your ~/.aws folder at `/root/.aws` for SOPS to be able to decrypt credentials. But be careful with this due to file permissions.
 # If running on Jenkins, AWS allows SOPS to decrypt credentials using its EC2 instance profile - even within Docker.
 #
-# Syntax: ./scripts/rotate-api-tokens.sh [add-new|remove-old|add-new-callback|remove-old-callback] [preview|staging|production]
+# Syntax: ./scripts/rotate-api-tokens.sh [add-new|remove-old|add-new-callback|remove-old-callback|change-ft-account-passwords|sync-ft-account-passwords|create-new-aws-token|deactivate-old-aws-token] [preview|staging|production]
 
 set -e
 
@@ -23,7 +23,7 @@ if [ -z "${GITHUB_ACCESS_TOKEN}" ]; then
 fi
 
 if [[ "${STAGE}" != "PREVIEW" && "${STAGE}" != "STAGING" && "${STAGE}" != "PRODUCTION" ]]; then
-  echo "Syntax: ./scripts/rotate-api-tokens.sh [add-new|remove-old|add-new-callback|remove-old-callback|change-ft-account-passwords|sync-ft-account-passwords|create-new-aws-token] [preview|staging|production]"
+  echo "Syntax: ./scripts/rotate-api-tokens.sh [add-new|remove-old|add-new-callback|remove-old-callback|change-ft-account-passwords|sync-ft-account-passwords|create-new-aws-token|deactivate-old-aws-token] [preview|staging|production]"
   exit 2
 fi
 
@@ -211,30 +211,38 @@ function sync_ft_account_passwords() {
   echo "Done."
 }
 
-function create_new_aws_token() {
+function get_aws_profile() {
   if [[ $STAGE == "PREVIEW" ]]
   then
-    AWS_PROFILE_NAME="development-infrastructure"
+    echo "development-infrastructure"
+  else
+    echo "production-infrastructure"
+  fi
+}
+
+function create_new_aws_token() {
+  aws_profile_name="$(get_aws_profile)"
+  if [[ $STAGE == "PREVIEW" ]]
+  then
     credentials_files=(vars/preview.yaml)
   else
-    AWS_PROFILE_NAME="production-infrastructure"
     credentials_files=(vars/production.yaml vars/staging.yaml)
   fi
 
-  inactive_token_id="$(AWS_PROFILE=$AWS_PROFILE_NAME aws iam list-access-keys --user-name paas-app | jq -r '.AccessKeyMetadata[] | select(.Status =="Inactive") | .AccessKeyId')"
+  inactive_token_id="$(AWS_PROFILE=$aws_profile_name aws iam list-access-keys --user-name paas-app | jq -r '.AccessKeyMetadata[] | select(.Status =="Inactive") | .AccessKeyId')"
   if [[ -n "$inactive_token_id" ]]
   then
     echo "Deleting old inactive token: $inactive_token_id"
-    AWS_PROFILE=$AWS_PROFILE_NAME aws iam delete-access-key --user-name paas-app --access-key-id "$inactive_token_id"
+    AWS_PROFILE=$aws_profile_name aws iam delete-access-key --user-name paas-app --access-key-id "$inactive_token_id"
   fi
 
-  if [[ $(AWS_PROFILE=$AWS_PROFILE_NAME aws iam list-access-keys --user-name paas-app  | jq -r '.AccessKeyMetadata | length') != "1" ]]
+  if [[ $(AWS_PROFILE=$aws_profile_name aws iam list-access-keys --user-name paas-app  | jq -r '.AccessKeyMetadata | length') != "1" ]]
   then
     echo "Unable to rotate multiple active access tokens"
     exit 1
   fi
 
-  new_token_pair="$(AWS_PROFILE=$AWS_PROFILE_NAME aws iam create-access-key --user-name paas-app)"
+  new_token_pair="$(AWS_PROFILE=$aws_profile_name aws iam create-access-key --user-name paas-app)"
   new_access_token_id="$(echo "$new_token_pair" | jq -r '.AccessKey.AccessKeyId')"
   new_access_token_secret="$(echo "$new_token_pair" | jq -r '.AccessKey.SecretAccessKey')"
 
@@ -250,6 +258,23 @@ function create_new_aws_token() {
   echo "Done."
 }
 
+function deactivate_old_aws_token() {
+  aws_profile_name="$(get_aws_profile)"
+  credentials_file="vars/${STAGE_LOWER}.yaml"
+
+  create_credentials_update_branch
+  live_access_key_id="$(./sops-wrapper -d "$credentials_file" | yq ".aws_access_key_id")"
+
+  unused_access_key_id="$(AWS_PROFILE=$aws_profile_name aws iam list-access-keys --user-name paas-app | jq -r ".AccessKeyMetadata[] | select(.Status == \"Active\") | select (.AccessKeyId != ${live_access_key_id}) | .AccessKeyId")"
+  if [[ -n "$unused_access_key_id" ]]
+  then
+    echo "Deactivating old access token: $unused_access_key_id"
+    AWS_PROFILE=$aws_profile_name aws iam update-access-key --user-name paas-app --access-key-id "$unused_access_key_id" --status Inactive
+  fi
+
+  echo "Done."
+}
+
 case ${COMMAND} in
   ADD-NEW) add_new_tokens;;
   REMOVE-OLD) remove_old_tokens;;
@@ -258,5 +283,6 @@ case ${COMMAND} in
   CHANGE-FT-ACCOUNT-PASSWORDS) change_ft_account_passwords;;
   SYNC-FT-ACCOUNT-PASSWORDS) sync_ft_account_passwords;;
   CREATE-NEW-AWS-TOKEN) create_new_aws_token;;
-  *) echo "Syntax: ./scripts/rotate-api-tokens.sh [add-new|remove-old|add-new-callback|remove-old-callback|change-ft-account-passwords|sync-ft-account-passwords|create-new-aws-token] [preview|staging|production]";;
+  DEACTIVATE-OLD-AWS-TOKEN) deactivate_old_aws_token;;
+  *) echo "Syntax: ./scripts/rotate-api-tokens.sh [add-new|remove-old|add-new-callback|remove-old-callback|change-ft-account-passwords|sync-ft-account-passwords|create-new-aws-token|deactivate-old-aws-token] [preview|staging|production]";;
 esac
