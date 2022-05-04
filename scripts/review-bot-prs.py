@@ -75,15 +75,13 @@ def eligible_for_semiautomated_merge(pr):
     if pr["mergeable"] != "MERGEABLE":
         print(f'Wrong mergeable: {pr["mergeable"]}')
         return False
-    if not pr["statusCheckRollup"]:
-        print(f'Wrong statusCheckRollup: {pr["statusCheckRollup"]}')
-        return False
-    unsuccessful_checks = [
-        check for check in pr["statusCheckRollup"] if not is_check_successful(check)
-    ]
-    if unsuccessful_checks:
-        print(f"Unsuccessful checks: {unsuccessful_checks}")
-        return False
+    if pr["statusCheckRollup"]:
+        unsuccessful_checks = [
+            check for check in pr["statusCheckRollup"] if not is_check_successful(check)
+        ]
+        if unsuccessful_checks:
+            print(f"Unsuccessful checks: {unsuccessful_checks}")
+            return False
     return True
 
 
