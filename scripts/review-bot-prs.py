@@ -95,6 +95,25 @@ def check_gh_installed():
         raise e
 
 
+def get_prs_for_repository(repo, search_string):
+    output = subprocess.run(
+        [
+            "gh",
+            "pr",
+            "list",
+            "--repo",
+            f"{ORGANISATION}/{repo}",
+            "--json",
+            "author,number,mergeable,reviews,state,title,url,statusCheckRollup,headRepository",
+            "--search",
+            search_string,
+        ],
+        stdout=subprocess.PIPE,
+        check=True,
+    )
+    return json.loads(output.stdout)
+
+
 if __name__ == "__main__":
     arguments = docopt(__doc__)
 
@@ -102,25 +121,11 @@ if __name__ == "__main__":
 
     BOT = 'snyk' if arguments['snyk'] else 'dependabot'
 
-    github_repo_string = " ".join(
-        f"repo:{ORGANISATION}/{repo}" for repo in get_digital_marketplace_repos()
-    )
-
-    output = subprocess.run(
-        [
-            "gh",
-            "pr",
-            "list",
-            "--json",
-            "author,number,mergeable,reviews,state,title,url,statusCheckRollup,headRepository",
-            "--search",
-            f"{BOTS_CONFIG[BOT]['search_fragment']} state:open is:pr {github_repo_string}",
-        ],
-        stdout=subprocess.PIPE,
-        check=True,
-    )
-
-    bot_prs = json.loads(output.stdout)
+    bot_prs = [
+        pr
+        for repo in get_digital_marketplace_repos()
+        for pr in get_prs_for_repository(repo, f"{BOTS_CONFIG[BOT]['search_fragment']} state:open is:pr")
+    ]
     bot_prs.sort(key=lambda pr: pr["title"])
     repos_merged_to = set()
 
