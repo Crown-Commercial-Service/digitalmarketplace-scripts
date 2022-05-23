@@ -147,7 +147,7 @@ if __name__ == "__main__":
         if approve == "y":
             print("Approving and merging")
             subprocess.run(["gh", "pr", "review", "--approve", pr["url"]], check=True)
-            subprocess.run(["gh", "pr", "merge", "--merge", pr["url"]], check=True)
+            subprocess.run(["gh", "pr", "merge", "--delete-branch", "--merge", pr["url"]], check=True)
             repos_merged_to.add(repository)
         else:
             print("Skipping")
