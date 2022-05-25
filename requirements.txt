@@ -111,7 +111,7 @@ prometheus-client==0.2.0
     # via gds-metrics
 pycparser==2.19
     # via cffi
-pyjwt==1.7.1
+pyjwt==2.4.0
     # via notifications-python-client
 pypdf2==1.27.12
     # via -r requirements.in
