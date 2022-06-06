@@ -109,7 +109,7 @@ pycparser==2.19
     # via cffi
 pyjwt==2.4.0
     # via notifications-python-client
-pypdf2==1.28.4
+pypdf2==2.0.0
     # via -r requirements.in
 pyrsistent==0.15.7
     # via jsonschema
@@ -144,6 +144,8 @@ six==1.14.0
     #   python-dateutil
 toml==0.10.2
     # via yq
+typing-extensions==4.2.0
+    # via pypdf2
 unicodecsv==0.14.1
     # via
     #   -r requirements.in
