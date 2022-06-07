@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-"""Produce a report of all approved service edits in a period and upload it to S3.
+"""Produce a report of all approved service edits in a period, upload it to S3, and send an email with the download link
+to category admins.
 
 Usage: export-approved-service-edits.py [-h] [options] <from> [<to>]
 
@@ -34,8 +35,9 @@ from dmutils.s3 import S3
 sys.path.insert(0, ".")
 
 from dmscripts.helpers import logging_helpers
-from dmscripts.helpers.auth_helpers import get_auth_token
+from dmscripts.helpers.auth_helpers import get_auth_token, get_jenkins_env_variable
 from dmscripts.helpers.datetime_helpers import ISO_FORMAT, parse_datetime
+from dmscripts.helpers.email_helpers import scripts_notify_client
 from dmscripts.helpers.s3_helpers import get_bucket_name
 from dmscripts.export_service_edits import write_service_edits_csv
 
@@ -43,6 +45,9 @@ from dmscripts.export_service_edits import write_service_edits_csv
 logger = logging_helpers.configure_logger({
     'dmapiclient.base': logging_helpers.logging.WARNING,
 })
+
+NOTIFY_TEMPLATE_ID = "fe4b0ac2-c25f-4b02-a72d-0d5b19819d74"  # A new approved service edit report is available
+REPORT_EMAIL = "digitalmarketplace-service-edit-reports@crowncommercial.gov.uk"
 
 
 def find_approved_service_edits(
@@ -87,6 +92,9 @@ if __name__ == "__main__":
         auth_token=get_auth_token("api", stage),
     )
 
+    notify_api_token = get_jenkins_env_variable("NOTIFY_API_TOKEN", require_jenkins_user=False)
+    notify_client = scripts_notify_client(notify_api_token, logger=logger)
+
     audit_events = find_approved_service_edits(
         data_api_client, from_datetime, to_datetime
     )
@@ -110,7 +118,7 @@ if __name__ == "__main__":
     )
 
     logger.info(f"Successfully uploaded report to: {bucket.bucket_name}/{s3_file_path}")
-    logger.info(
-        "Category admins can download the report from: "
-        f"{get_web_url_from_stage(stage)}/admin/services/updates/approved/{args['<from>']}"
-    )
+
+    admin_link = f"{get_web_url_from_stage(stage)}/admin/services/updates/approved/{args['<from>']}"
+    logger.info(f"Category admins can download the report from: {admin_link}")
+    notify_client.send_email(REPORT_EMAIL, NOTIFY_TEMPLATE_ID, personalisation={"report_url": admin_link})
