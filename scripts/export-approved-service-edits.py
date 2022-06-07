@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
-"""Get details about approved service edits in a period.
-
-Outputs a CSV.
+"""Produce a report of all approved service edits in a period and upload it to S3.
 
 Usage: export-approved-service-edits.py [-h] [options] <from> [<to>]
 
@@ -19,8 +17,7 @@ Example:
 
     ./scripts/export-approved-service-edits.py 2020-10 2020-11
 """
-
-
+import io
 import itertools
 import sys
 from datetime import datetime
@@ -31,13 +28,21 @@ from docopt import docopt
 from dmapiclient.data import DataAPIClient
 from dmapiclient.audit import AuditTypes
 from dmutils.email.helpers import validate_email_address
-from dmutils.env_helpers import get_api_endpoint_from_stage
+from dmutils.env_helpers import get_api_endpoint_from_stage, get_web_url_from_stage
+from dmutils.s3 import S3
 
 sys.path.insert(0, ".")
 
+from dmscripts.helpers import logging_helpers
 from dmscripts.helpers.auth_helpers import get_auth_token
 from dmscripts.helpers.datetime_helpers import ISO_FORMAT, parse_datetime
+from dmscripts.helpers.s3_helpers import get_bucket_name
 from dmscripts.export_service_edits import write_service_edits_csv
+
+
+logger = logging_helpers.configure_logger({
+    'dmapiclient.base': logging_helpers.logging.WARNING,
+})
 
 
 def find_approved_service_edits(
@@ -91,4 +96,21 @@ if __name__ == "__main__":
         lambda e: validate_email_address(e["acknowledgedBy"]), audit_events
     )
 
-    write_service_edits_csv(sys.stdout, audit_events, data_api_client)
+    report_csv = io.StringIO()
+    write_service_edits_csv(report_csv, audit_events, data_api_client)
+
+    bucket = S3(get_bucket_name(stage, "reports"))
+    s3_file_name = f"approved-service-edits-{args['<from>']}.csv"
+    s3_file_path = f"common/reports/{s3_file_name}"
+    bucket.save(
+        s3_file_path,
+        io.BytesIO(report_csv.getvalue().encode('utf-8')),
+        acl='bucket-owner-full-control',
+        download_filename=s3_file_name
+    )
+
+    logger.info(f"Successfully uploaded report to: {bucket.bucket_name}/{s3_file_path}")
+    logger.info(
+        "Category admins can download the report from: "
+        f"{get_web_url_from_stage(stage)}/admin/services/updates/approved/{args['<from>']}"
+    )
