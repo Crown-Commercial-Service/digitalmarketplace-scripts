@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 
-"""Get details about approved service edits in a period.
-
-Outputs a CSV.
+"""Produce a report of all approved service edits in a period, upload it to S3, and send an email with the download link
+to category admins.
 
 Usage: export-approved-service-edits.py [-h] [options] <from> [<to>]
 
@@ -19,8 +18,7 @@ Example:
 
     ./scripts/export-approved-service-edits.py 2020-10 2020-11
 """
-
-
+import io
 import itertools
 import sys
 from datetime import datetime
@@ -31,13 +29,25 @@ from docopt import docopt
 from dmapiclient.data import DataAPIClient
 from dmapiclient.audit import AuditTypes
 from dmutils.email.helpers import validate_email_address
-from dmutils.env_helpers import get_api_endpoint_from_stage
+from dmutils.env_helpers import get_api_endpoint_from_stage, get_web_url_from_stage
+from dmutils.s3 import S3
 
 sys.path.insert(0, ".")
 
-from dmscripts.helpers.auth_helpers import get_auth_token
+from dmscripts.helpers import logging_helpers
+from dmscripts.helpers.auth_helpers import get_auth_token, get_jenkins_env_variable
 from dmscripts.helpers.datetime_helpers import ISO_FORMAT, parse_datetime
+from dmscripts.helpers.email_helpers import scripts_notify_client
+from dmscripts.helpers.s3_helpers import get_bucket_name
 from dmscripts.export_service_edits import write_service_edits_csv
+
+
+logger = logging_helpers.configure_logger({
+    'dmapiclient.base': logging_helpers.logging.WARNING,
+})
+
+NOTIFY_TEMPLATE_ID = "fe4b0ac2-c25f-4b02-a72d-0d5b19819d74"  # A new approved service edit report is available
+REPORT_EMAIL = "digitalmarketplace-service-edit-reports@crowncommercial.gov.uk"
 
 
 def find_approved_service_edits(
@@ -82,6 +92,9 @@ if __name__ == "__main__":
         auth_token=get_auth_token("api", stage),
     )
 
+    notify_api_token = get_jenkins_env_variable("NOTIFY_API_TOKEN", require_jenkins_user=False)
+    notify_client = scripts_notify_client(notify_api_token, logger=logger)
+
     audit_events = find_approved_service_edits(
         data_api_client, from_datetime, to_datetime
     )
@@ -91,4 +104,21 @@ if __name__ == "__main__":
         lambda e: validate_email_address(e["acknowledgedBy"]), audit_events
     )
 
-    write_service_edits_csv(sys.stdout, audit_events, data_api_client)
+    report_csv = io.StringIO()
+    write_service_edits_csv(report_csv, audit_events, data_api_client)
+
+    bucket = S3(get_bucket_name(stage, "reports"))
+    s3_file_name = f"approved-service-edits-{args['<from>']}.csv"
+    s3_file_path = f"common/reports/{s3_file_name}"
+    bucket.save(
+        s3_file_path,
+        io.BytesIO(report_csv.getvalue().encode('utf-8')),
+        acl='bucket-owner-full-control',
+        download_filename=s3_file_name
+    )
+
+    logger.info(f"Successfully uploaded report to: {bucket.bucket_name}/{s3_file_path}")
+
+    admin_link = f"{get_web_url_from_stage(stage)}/admin/services/updates/approved/{args['<from>']}"
+    logger.info(f"Category admins can download the report from: {admin_link}")
+    notify_client.send_email(REPORT_EMAIL, NOTIFY_TEMPLATE_ID, personalisation={"report_url": admin_link})

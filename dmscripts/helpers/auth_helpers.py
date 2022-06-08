@@ -59,15 +59,14 @@ def get_jenkins_env_variable_from_credentials(env_var_dot_path, require_jenkins_
     return _get_nested_value(creds_json, env_var_dot_path.split('.'))
 
 
-def get_jenkins_env_variable(jenkins_var_name):
+def get_jenkins_env_variable(jenkins_var_name, require_jenkins_user=True):
     # Check the local env first, otherwise decrypt from credentials
     value = os.environ.get(jenkins_var_name)
 
     if not value:
-        # Only allow Jenkins users to decrypt from credentials for now
         value = get_jenkins_env_variable_from_credentials(
             "jenkins_env_variables.{}".format(jenkins_var_name),
-            require_jenkins_user=True
+            require_jenkins_user=require_jenkins_user
         )
 
     return value
