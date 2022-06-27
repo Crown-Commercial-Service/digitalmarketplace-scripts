@@ -29,6 +29,7 @@ example_brief = {
     "publishedAt": "2019-01-01T00:00:00.123456Z",
     "contractLength": "6 months",
     "employmentStatus": "Contracted out service: the off-payroll rules do not apply",
+    "budgetRange": "£1",
     "status": "awarded",
     "users": [
         {
@@ -148,6 +149,7 @@ class TestGetBriefData:
                 ("Published At", "2019-01-01"),
                 ("Open For", "2 weeks"),
                 ("Expected Contract Length", "6 months"),
+                ("Budget range", "£1"),
                 ("Applications from SMEs", 2),
                 ("Applications from Large Organisations", 0),
                 ("Total Organisations", 2),

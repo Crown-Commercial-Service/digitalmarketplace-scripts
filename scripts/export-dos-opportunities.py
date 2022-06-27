@@ -6,7 +6,7 @@ closed/awarded briefs and stores the output in the CSV.
 
 This script generates two CSVs, one with buyer user details and one without.
 
-The CSV without buyer user details is made publically available by uploading to
+The CSV without buyer user details is made publicly available by uploading to
 the communications bucket, the CSV with buyer user details should be available
 to admins only so it is uploaded to the reports bucket.
 
