@@ -15,9 +15,9 @@ PUBLIC_BRIEF_URL = "https://www.digitalmarketplace.service.gov.uk/digital-outcom
 DOS_OPPORTUNITY_HEADERS = [
     "ID", "Opportunity", "Link", "Framework", "Category", "Specialist",
     "Organisation Name", "Buyer Domain", "Location Of The Work",
-    "Published At", "Open For", "Expected Contract Length", "Applications from SMEs",
+    "Published At", "Open For", "Expected Contract Length", "Budget range", "Applications from SMEs",
     "Applications from Large Organisations", "Total Organisations", "Status", "Winning supplier",
-    "Size of supplier", "Contract amount", "Contract start date", "Clarification questions", "Employment status"
+    "Size of supplier", "Contract amount", "Contract start date", "Clarification questions", "Employment status",
 ]
 
 DOWNLOAD_FILE_NAME = "opportunity-data.csv"
@@ -60,6 +60,7 @@ def _build_row(
         format_datetime_string_as_date(brief['publishedAt']),
         brief.get('requirementsLength', '2 weeks'),  # only briefs on the specialists lot include 'requirementsLength'
         brief.get('contractLength', ''),
+        brief.get('budgetRange', ''),
         applications_from_sme_suppliers,
         applications_from_large_suppliers,
         applications_from_sme_suppliers + applications_from_large_suppliers,
