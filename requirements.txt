@@ -109,7 +109,7 @@ pycparser==2.19
     # via cffi
 pyjwt==2.4.0
     # via notifications-python-client
-pypdf2==2.8.0
+pypdf2==2.10.7
     # via -r requirements.in
 pyrsistent==0.15.7
     # via jsonschema
