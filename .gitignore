@@ -2,6 +2,7 @@
 __pycache__
 output/
 venv*
+data
 
 # cram (functional test) files
 *.err
@@ -18,3 +19,5 @@ local.nix
 *.odp
 
 .idea/
+
+*.DS_Store
