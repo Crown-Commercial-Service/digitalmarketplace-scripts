@@ -160,7 +160,7 @@ werkzeug==1.0.0
     # via flask
 workdays==1.4
     # via digitalmarketplace-utils
-wtforms==2.2.1
+wtforms==2.3.0
     # via flask-wtf
 xeger==0.3.5
     # via -r requirements.in
