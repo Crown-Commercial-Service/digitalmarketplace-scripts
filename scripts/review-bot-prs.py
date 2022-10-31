@@ -54,11 +54,13 @@ def open_pull_request_in_browser(pr_url):
 
 
 def is_check_successful(check):
-    return (
-        check["status"] == "COMPLETED"
-        and check["conclusion"] == "SUCCESS"  # Github Actions
-        or check.get("state") == "SUCCESS"  # Snyk
-    )
+    if "status" in check:
+        return (
+            check["status"] == "COMPLETED"
+            and check["conclusion"] == "SUCCESS"  # Github Actions
+        )
+    else:
+        return check.get("state") == "SUCCESS"  # Snyk
 
 
 def eligible_for_semiautomated_merge(pr):
