@@ -89,7 +89,7 @@ jmespath==0.9.5
     # via
     #   boto3
     #   botocore
-jsonschema==4.16.0
+jsonschema==4.17.0
     # via -r requirements.in
 lorem==0.1.1
     # via -r requirements.in
@@ -98,7 +98,9 @@ mailchimp3==3.0.17
 markdown==2.6.11
     # via digitalmarketplace-content-loader
 markupsafe==1.1.1
-    # via jinja2
+    # via
+    #   jinja2
+    #   wtforms
 notifications-python-client==6.3.0
     # via digitalmarketplace-utils
 odfpy==1.4.1
