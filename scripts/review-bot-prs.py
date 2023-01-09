@@ -16,7 +16,7 @@ ORGANISATION = "Crown-Commercial-Service"
 
 BOTS_CONFIG = {
     'dependabot': {
-        'login': 'dependabot',
+        'login': 'app/dependabot',
         'search_fragment': 'label:dependencies'
     },
     'snyk': {
@@ -71,7 +71,7 @@ def eligible_for_semiautomated_merge(pr):
         print(f'Wrong reviews: {pr["reviews"]}')
         return False
     if expected_user := BOTS_CONFIG[BOT].get("login"):
-        if pr["author"] != {"login": expected_user}:
+        if pr["author"] != {"login": expected_user, 'is_bot': True}:
             print(f'Wrong author: {pr["author"]}')
             return False
     if pr["mergeable"] != "MERGEABLE":
