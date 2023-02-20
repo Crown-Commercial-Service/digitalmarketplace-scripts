@@ -14,7 +14,7 @@ jsonschema==4.17.3
 lorem==0.1.1
 pypdf2==3.0.1
 python-dateutil==2.8.2
-python-json-logger==2.0.4
+python-json-logger==2.0.6
 unicodecsv==0.14.1
 xeger==0.3.5
 yq==3.1.0
