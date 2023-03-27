@@ -6,6 +6,8 @@
 #
 argcomplete==1.11.1
     # via yq
+async-timeout==4.0.2
+    # via redis
 attrs==19.3.0
     # via jsonschema
 backoff==2.2.1
@@ -131,7 +133,7 @@ pyyaml==5.4
     # via
     #   digitalmarketplace-content-loader
     #   yq
-redis==3.5.3
+redis==4.5.3
     # via digitalmarketplace-utils
 requests==2.25.1
     # via
