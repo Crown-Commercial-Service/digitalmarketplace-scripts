@@ -133,7 +133,7 @@ pyyaml==5.4
     #   yq
 redis==3.5.3
     # via digitalmarketplace-utils
-requests==2.25.1
+requests==2.31.0
     # via
     #   digitalmarketplace-apiclient
     #   digitalmarketplace-utils
