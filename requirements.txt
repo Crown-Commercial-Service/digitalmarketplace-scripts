@@ -6,8 +6,10 @@
 #
 argcomplete==1.11.1
     # via yq
-attrs==19.3.0
-    # via jsonschema
+attrs==23.1.0
+    # via
+    #   jsonschema
+    #   referencing
 backoff==2.2.1
     # via -r requirements.in
 blinker==1.4
@@ -73,7 +75,9 @@ govuk-country-register==0.5.0
 idna==2.9
     # via requests
 importlib-resources==5.4.0
-    # via jsonschema
+    # via
+    #   jsonschema
+    #   jsonschema-specifications
 inflection==0.3.1
     # via digitalmarketplace-content-loader
 itsdangerous==2.0.1
@@ -89,8 +93,10 @@ jmespath==0.9.5
     # via
     #   boto3
     #   botocore
-jsonschema==4.17.3
+jsonschema==4.18.4
     # via -r requirements.in
+jsonschema-specifications==2023.7.1
+    # via jsonschema
 lorem==0.1.1
     # via -r requirements.in
 mailchimp3==3.0.17
@@ -115,8 +121,6 @@ pyjwt==2.4.0
     # via notifications-python-client
 pypdf2==2.12.1
     # via -r requirements.in
-pyrsistent==0.15.7
-    # via jsonschema
 python-dateutil==2.8.2
     # via
     #   -r requirements.in
@@ -133,18 +137,24 @@ pyyaml==5.4
     #   yq
 redis==3.5.3
     # via digitalmarketplace-utils
+referencing==0.30.0
+    # via
+    #   jsonschema
+    #   jsonschema-specifications
 requests==2.25.1
     # via
     #   digitalmarketplace-apiclient
     #   digitalmarketplace-utils
     #   mailchimp3
     #   notifications-python-client
+rpds-py==0.9.2
+    # via
+    #   jsonschema
+    #   referencing
 s3transfer==0.4.2
     # via boto3
 six==1.14.0
-    # via
-    #   pyrsistent
-    #   python-dateutil
+    # via python-dateutil
 tomlkit==0.11.7
     # via yq
 typing-extensions==4.2.0
