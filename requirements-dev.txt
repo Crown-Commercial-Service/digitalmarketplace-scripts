@@ -12,7 +12,7 @@ attrs==19.3.0
     #   pytest
 backcall==0.1.0
     # via ipython
-certifi==2019.11.28
+certifi==2023.7.22
     # via
     #   -c requirements.txt
     #   requests
