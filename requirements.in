@@ -10,7 +10,7 @@ digitalmarketplace-utils>=60.5.0
 
 backoff==2.2.1
 docopt==0.6.2
-jsonschema==4.17.3
+jsonschema==4.19.0
 lorem==0.1.1
 pypdf2==2.12.1
 python-dateutil==2.8.2
