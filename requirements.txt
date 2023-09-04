@@ -163,7 +163,7 @@ workdays==1.4
     # via digitalmarketplace-utils
 wtforms==2.3.0
     # via flask-wtf
-xeger==0.3.5
+xeger==0.4.0
     # via -r requirements.in
 xmltodict==0.12.0
     # via yq
