@@ -16,5 +16,5 @@ pypdf2==2.12.1
 python-dateutil==2.8.2
 python-json-logger==2.0.7
 unicodecsv==0.14.1
-xeger==0.3.5
+xeger==0.4.0
 yq==3.2.2
