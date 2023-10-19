@@ -153,7 +153,7 @@ unicodecsv==0.14.1
     # via
     #   -r requirements.in
     #   digitalmarketplace-utils
-urllib3==1.26.5
+urllib3==1.26.18
     # via
     #   botocore
     #   requests
