@@ -4,6 +4,11 @@ import yaml
 
 DEV_ALIASES = ('dev', 'development', 'local')
 
+STAGE_TO_FILE = {
+    'pre': 'preview',
+    'stg': 'staging'
+}
+
 
 def _decrypt_yaml_file_with_sops(credentials_repo_path, credentials_filename):
     creds_output = subprocess.check_output([
@@ -26,7 +31,10 @@ def get_auth_token(api, stage):
     if not auth_token:
         DM_CREDENTIALS_REPO = os.environ.get('DM_CREDENTIALS_REPO', '../digitalmarketplace-credentials')
         token_prefix = 'J' if subprocess.check_output(["whoami"]) == 'jenkins' else 'D'
-        creds_json = _decrypt_yaml_file_with_sops(DM_CREDENTIALS_REPO, f"vars/{stage}.yaml")
+        creds_json = _decrypt_yaml_file_with_sops(
+            DM_CREDENTIALS_REPO,
+            f"vars/{STAGE_TO_FILE[stage] if stage in STAGE_TO_FILE else stage}.yaml",
+        )
         auth_tokens = creds_json[api]['auth_tokens']
         auth_token = next(token for token in auth_tokens if token.startswith(token_prefix))
 
