@@ -70,7 +70,7 @@ gds-metrics==0.2.0
     # via digitalmarketplace-utils
 govuk-country-register==0.5.0
     # via digitalmarketplace-utils
-idna==2.9
+idna==3.7
     # via requests
 importlib-resources==5.4.0
     # via jsonschema
