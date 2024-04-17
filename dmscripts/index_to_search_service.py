@@ -121,6 +121,9 @@ def do_index(doc_type, search_api_url, search_api_access_token, data_api_url, da
     logger.info("Search API URL: {search_api_url}", extra={'search_api_url': search_api_url})
     logger.info("Data API URL: {data_api_url}", extra={'data_api_url': data_api_url})
 
+    print(f"{search_api_url=}")
+    print(f"{data_api_url=}")
+
     if serial:
         mapper = map
     else:
