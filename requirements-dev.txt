@@ -72,7 +72,7 @@ pycodestyle==2.8.0
     # via flake8
 pyflakes==2.4.0
     # via flake8
-pygments==2.7.4
+pygments==2.15.0
     # via ipython
 pyparsing==2.4.6
     # via packaging
