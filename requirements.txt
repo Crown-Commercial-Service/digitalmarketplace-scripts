@@ -20,7 +20,7 @@ botocore==1.20.91
     #   s3transfer
 cachelib==0.1.1
     # via flask-session
-certifi==2019.11.28
+certifi==2023.7.22
     # via requests
 cffi==1.14.0
     # via cryptography
@@ -30,7 +30,7 @@ click==7.0
     # via flask
 contextlib2==0.6.0.post1
     # via digitalmarketplace-utils
-cryptography==39.0.1
+cryptography==42.0.8
     # via digitalmarketplace-utils
 defusedxml==0.6.0
     # via odfpy
@@ -46,7 +46,7 @@ docopt==0.6.2
     # via
     #   -r requirements.in
     #   notifications-python-client
-flask==1.1.2
+flask==2.2.5
     # via
     #   -r requirements.in
     #   digitalmarketplace-content-loader
@@ -70,7 +70,7 @@ gds-metrics==0.2.0
     # via digitalmarketplace-utils
 govuk-country-register==0.5.0
     # via digitalmarketplace-utils
-idna==2.9
+idna==3.7
     # via requests
 importlib-resources==5.4.0
     # via jsonschema
@@ -81,7 +81,7 @@ itsdangerous==2.0.1
     #   -r requirements.in
     #   flask
     #   flask-wtf
-jinja2==2.11.3
+jinja2==3.1.4
     # via
     #   digitalmarketplace-content-loader
     #   flask
@@ -133,7 +133,7 @@ pyyaml==5.4
     #   yq
 redis==3.5.3
     # via digitalmarketplace-utils
-requests==2.25.1
+requests==2.32.2
     # via
     #   digitalmarketplace-apiclient
     #   digitalmarketplace-utils
@@ -153,11 +153,11 @@ unicodecsv==0.14.1
     # via
     #   -r requirements.in
     #   digitalmarketplace-utils
-urllib3==1.26.5
+urllib3==1.26.19
     # via
     #   botocore
     #   requests
-werkzeug==1.0.0
+werkzeug==3.0.3
     # via flask
 workdays==1.4
     # via digitalmarketplace-utils
@@ -169,5 +169,5 @@ xmltodict==0.12.0
     # via yq
 yq==3.2.2
     # via -r requirements.in
-zipp==3.6.0
+zipp==3.19.1
     # via importlib-resources
