@@ -1,4 +1,4 @@
-FROM python:3.9-slim
+FROM python:3.13.0b4-slim
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends gcc g++ make git libffi-dev libssl-dev libc6-dev wget curl socat jq
