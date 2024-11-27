@@ -97,9 +97,10 @@ mailchimp3==3.0.17
     # via digitalmarketplace-utils
 markdown==2.6.11
     # via digitalmarketplace-content-loader
-markupsafe==1.1.1
+markupsafe==2.1.2
     # via
     #   jinja2
+    #   werkzeug
     #   wtforms
 notifications-python-client==6.3.0
     # via digitalmarketplace-utils
@@ -157,7 +158,7 @@ urllib3==1.26.5
     # via
     #   botocore
     #   requests
-werkzeug==1.0.0
+werkzeug==2.2.3
     # via flask
 workdays==1.4
     # via digitalmarketplace-utils
